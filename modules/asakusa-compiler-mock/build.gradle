@@ -1,4 +1,4 @@
-description 'Asakusa DSL Compiler Core Libraries'
+description 'Asakusa DSL Compiler testing mocks'
 
 apply plugin: 'java'
 apply plugin: 'maven'
@@ -7,5 +7,5 @@ apply plugin: 'eclipse'
 dependencies {
     compile project(':asakusa-compiler-model')
     compile project(':asakusa-compiler-api')
-    compile "com.asakusafw:ashigel-compiler:${asakusafwVersion}"
+    compile "com.asakusafw:asakusa-runtime:${asakusafwVersion}"
 }

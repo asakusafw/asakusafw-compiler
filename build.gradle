@@ -3,6 +3,7 @@ description 'Asakusa Framework Compiler Project'
 allprojects {
     group 'com.asakusafw.lang.compiler'
     version '0.1-SNAPSHOT'
+    ext.asakusafwVersion = '0.7.2-hadoop1'
 }
 
 subprojects {
@@ -47,6 +48,16 @@ subprojects {
         }
     }
     plugins.withId('eclipse') {
+        project.eclipse.classpath {
+            file {
+                whenMerged { classpath ->
+                    classpath.entries.findAll { it.path.contains('org.eclipse.jdt.launching.JRE_CONTAINER') }.each {
+                        it.path = "org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-${project.sourceCompatibility}"
+                    }
+                    classpath.entries.unique()
+                }
+            }
+        }
         tasks.eclipseProject << {
             File file = project.file('.settings/org.eclipse.core.resources.prefs')
             Properties properties = new Properties()
