@@ -1,0 +1,13 @@
+description 'Asakusa DSL Compiler Core Libraries'
+
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'eclipse'
+
+ext.asakusafwVersion = '0.7.2-hadoop1'
+
+dependencies {
+    compile project(':asakusa-compiler-model')
+    compile project(':asakusa-compiler-api')
+    compile "com.asakusafw:ashigel-compiler:${asakusafwVersion}"
+}

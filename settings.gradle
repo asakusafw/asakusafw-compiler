@@ -1,0 +1,9 @@
+include 'asakusa-compiler-model'
+include 'asakusa-compiler-api'
+include 'asakusa-compiler-core'
+include 'asakusa-compiler-cli'
+
+rootProject.children.each { project ->
+    project.projectDir = new File(settingsDir, "modules/${project.name}")
+    assert project.projectDir.isDirectory()
+}
