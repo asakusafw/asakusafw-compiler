@@ -5,6 +5,7 @@ import java.io.OutputStream;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,12 +13,11 @@ import java.util.Map;
 import com.asakusafw.lang.compiler.api.JobflowBuilder;
 import com.asakusafw.lang.compiler.api.reference.CommandTaskReference;
 import com.asakusafw.lang.compiler.api.reference.CommandToken;
-import com.asakusafw.lang.compiler.api.reference.ExternalPortReference;
+import com.asakusafw.lang.compiler.api.reference.ExternalInputReference;
+import com.asakusafw.lang.compiler.api.reference.ExternalOutputReference;
 import com.asakusafw.lang.compiler.api.reference.TaskReference;
 import com.asakusafw.lang.compiler.model.Location;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
-import com.asakusafw.lang.compiler.model.graph.ExternalInput;
-import com.asakusafw.lang.compiler.model.graph.ExternalOutput;
 
 /**
  * An abstract implementation of {@link JobflowBuilder}.
@@ -30,9 +30,9 @@ public abstract class AbstractJobflowBuilderContext implements JobflowBuilder.Co
 
     private final TaskReferenceContainer finalizeTasks = new TaskReferenceContainer("finalize");
 
-    private final Map<ExternalInput, ExternalPortReference<ExternalInput>> externalInputs = new LinkedHashMap<>();
+    private final Map<String, ExternalInputReference> externalInputs = new LinkedHashMap<>();
 
-    private final Map<ExternalOutput, ExternalPortReference<ExternalOutput>> externalOutputs = new LinkedHashMap<>();
+    private final Map<String, ExternalOutputReference> externalOutputs = new LinkedHashMap<>();
 
     /**
      * Returns tasks which are executes in the main phase.
@@ -51,18 +51,19 @@ public abstract class AbstractJobflowBuilderContext implements JobflowBuilder.Co
     }
 
     /**
-     * Returns the external inputs which {@link #addExternalInput(ExternalInput) added} to this context.
+     * Returns the external inputs which {@link #addExternalInput(String, ClassDescription) added} to this context.
      * @return the added external inputs
      */
-    public List<ExternalPortReference<ExternalInput>> getExternalInputs() {
+    public List<ExternalInputReference> getExternalInputs() {
         return new ArrayList<>(externalInputs.values());
     }
 
     /**
-     * Returns the external outputs which {@link #addExternalOutput(ExternalOutput) added} to this context.
+     * Returns the external outputs which {@link #addExternalOutput(String, ClassDescription, Collection) added}
+     * to this context.
      * @return the added external outputs
      */
-    public List<ExternalPortReference<ExternalOutput>> getExternalOutputs() {
+    public List<ExternalOutputReference> getExternalOutputs() {
         return new ArrayList<>(externalOutputs.values());
     }
 
@@ -73,43 +74,59 @@ public abstract class AbstractJobflowBuilderContext implements JobflowBuilder.Co
     }
 
     @Override
-    public final ExternalPortReference<ExternalInput> addExternalInput(ExternalInput port) {
-        if (port.isExternal() == false) {
-            throw new IllegalArgumentException(MessageFormat.format(
-                    "input must be external: {0}", //$NON-NLS-1$
-                    port));
+    public final ExternalInputReference addExternalInput(
+            String name,
+            ClassDescription descriptionClass) {
+        if (externalInputs.containsKey(name)) {
+            throw new IllegalStateException(MessageFormat.format(
+                    "external input is already declared in this jobflow: \"{0}\" ({1})",
+                    name,
+                    descriptionClass.getName()));
         }
-        if (externalInputs.containsKey(port)) {
-            throw new IllegalStateException();
-        }
-        ExternalPortReference<ExternalInput> result = createExternalInput(port);
-        externalInputs.put(port, result);
+        ExternalInputReference result = createExternalInput(name, descriptionClass);
+        externalInputs.put(name, result);
         return result;
     }
 
     @Override
-    public final ExternalPortReference<ExternalOutput> addExternalOutput(ExternalOutput port) {
-        if (externalInputs.containsKey(port)) {
-            throw new IllegalStateException();
+    public final ExternalOutputReference addExternalOutput(
+            String name,
+            ClassDescription descriptionClass,
+            Collection<String> internalOutputPaths) {
+        if (externalOutputs.containsKey(name)) {
+            throw new IllegalStateException(MessageFormat.format(
+                    "external output is already declared in this jobflow: \"{0}\" ({1})",
+                    name,
+                    descriptionClass.getName()));
         }
-        ExternalPortReference<ExternalOutput> result = createExternalOutput(port);
-        externalOutputs.put(port, result);
+        ExternalOutputReference result = createExternalOutput(name, descriptionClass, internalOutputPaths);
+        externalOutputs.put(name, result);
         return result;
     }
 
     /**
-     * Creates an {@link ExternalPortReference} for the external input.
-     * @param port the target port
-     * @return the created reference
+     * Creates a new {@link ExternalInputReference}.
+     * @param name the input name
+     * @param descriptionClass the description class
+     * @return the created instance
+     * @see #addExternalInput(String, ClassDescription)
      */
-    protected abstract ExternalPortReference<ExternalInput> createExternalInput(ExternalInput port);
+    protected abstract ExternalInputReference createExternalInput(
+            String name,
+            ClassDescription descriptionClass);
 
     /**
-     * Creates an {@link ExternalPortReference} for the external output.
-     * @param port the target port
-     * @return the created reference
+     * Creates a new {@link ExternalOutputReference}.
+     * @param name the input name
+     * @param descriptionClass the description class
+         * @param internalOutputPaths the output paths which will be internally generated in this jobflow
+     * @return the created instance
+     * @see #addExternalOutput(String, ClassDescription, Collection)
      */
-    protected abstract ExternalPortReference<ExternalOutput> createExternalOutput(ExternalOutput port);
+    protected abstract ExternalOutputReference createExternalOutput(
+            String name,
+            ClassDescription descriptionClass,
+            Collection<String> internalOutputPaths);
 
     @Override
     public final TaskReference addTask(

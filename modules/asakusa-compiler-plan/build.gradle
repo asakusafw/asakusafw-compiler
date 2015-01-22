@@ -1,4 +1,4 @@
-description 'Asakusa DSL Plaggable Compiler API'
+description 'Asakusa DSL Compiler execution planning utilities'
 
 apply plugin: 'java'
 apply plugin: 'maven'

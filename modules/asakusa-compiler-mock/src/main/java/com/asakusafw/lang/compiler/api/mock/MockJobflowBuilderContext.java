@@ -5,17 +5,19 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.text.MessageFormat;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import com.asakusafw.lang.compiler.api.CompilerOptions;
 import com.asakusafw.lang.compiler.api.DataModelLoader;
 import com.asakusafw.lang.compiler.api.basic.AbstractJobflowBuilderContext;
-import com.asakusafw.lang.compiler.api.reference.ExternalPortReference;
+import com.asakusafw.lang.compiler.api.reference.ExternalInputReference;
+import com.asakusafw.lang.compiler.api.reference.ExternalOutputReference;
 import com.asakusafw.lang.compiler.model.Location;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.graph.ExternalInput;
-import com.asakusafw.lang.compiler.model.graph.ExternalOutput;
 
 /**
  * Mock implementation of {@link com.asakusafw.lang.compiler.api.JobflowBuilder.Context}.
@@ -23,18 +25,11 @@ import com.asakusafw.lang.compiler.model.graph.ExternalOutput;
 public class MockJobflowBuilderContext extends AbstractJobflowBuilderContext {
 
     /**
-     * Returns a path prefix of {@link #addExternalInput(ExternalInput) external inputs}.
+     * Returns the base path of {@link #addExternalInput(String, ClassDescription) external inputs}.
      * The actual path will be follow its {@link ExternalInput#getName() name} after this prefix,
      * and it is relative from {@link CompilerOptions#getRuntimeWorkingDirectory()}.
      */
-    public static final String PREFIX_EXTERNAL_INPUT = "extenal/input/"; //$NON-NLS-1$
-
-    /**
-     * Returns a path prefix of {@link #addExternalOutput(ExternalOutput) external inputs}.
-     * The actual path will be follow its {@link ExternalOutput#getName() name} after this prefix,
-     * and it is relative from {@link CompilerOptions#getRuntimeWorkingDirectory()}.
-     */
-    public static final String PREFIX_EXTERNAL_OUTPUT = "extenal/output/"; //$NON-NLS-1$
+    public static final String EXTERNAL_INPUT_BASE = "extenal/input/"; //$NON-NLS-1$
 
     private final CompilerOptions options;
 
@@ -122,13 +117,19 @@ public class MockJobflowBuilderContext extends AbstractJobflowBuilderContext {
     }
 
     @Override
-    protected ExternalPortReference<ExternalInput> createExternalInput(ExternalInput port) {
-        return new ExternalPortReference<ExternalInput>(port, path(PREFIX_EXTERNAL_INPUT + port.getName()));
+    protected ExternalInputReference createExternalInput(String name, ClassDescription descriptionClass) {
+        return new ExternalInputReference(
+                name,
+                descriptionClass,
+                Collections.singleton(path(EXTERNAL_INPUT_BASE + name)));
     }
 
     @Override
-    protected ExternalPortReference<ExternalOutput> createExternalOutput(ExternalOutput port) {
-        return new ExternalPortReference<ExternalOutput>(port, path(PREFIX_EXTERNAL_OUTPUT + port.getName()));
+    protected ExternalOutputReference createExternalOutput(
+            String name,
+            ClassDescription descriptionClass,
+            Collection<String> internalOutputPaths) {
+        return new ExternalOutputReference(name, descriptionClass, internalOutputPaths);
     }
 
     private String path(String relative) {

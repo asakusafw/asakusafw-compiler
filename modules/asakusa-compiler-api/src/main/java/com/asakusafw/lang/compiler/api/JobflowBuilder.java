@@ -2,15 +2,15 @@ package com.asakusafw.lang.compiler.api;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Collection;
 import java.util.List;
 
 import com.asakusafw.lang.compiler.api.reference.CommandToken;
-import com.asakusafw.lang.compiler.api.reference.ExternalPortReference;
+import com.asakusafw.lang.compiler.api.reference.ExternalInputReference;
+import com.asakusafw.lang.compiler.api.reference.ExternalOutputReference;
 import com.asakusafw.lang.compiler.api.reference.TaskReference;
 import com.asakusafw.lang.compiler.model.Location;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
-import com.asakusafw.lang.compiler.model.graph.ExternalInput;
-import com.asakusafw.lang.compiler.model.graph.ExternalOutput;
 import com.asakusafw.lang.compiler.model.graph.Jobflow;
 
 /**
@@ -72,19 +72,27 @@ public interface JobflowBuilder {
          * Adds an external input operator in this application.
          * If some sub-application independently processes the target external input,
          * you should not use this method.
-         * @param port the target input
+         * @param name the input name (each input must be unique in the jobflow)
+         * @param descriptionClass the description class for this external input
          * @return the resolved symbol
          */
-        ExternalPortReference<ExternalInput> addExternalInput(ExternalInput port);
+        ExternalInputReference addExternalInput(
+                String name,
+                ClassDescription descriptionClass);
 
         /**
          * Adds an external output operator in this application.
          * If some sub-application independently processes the target external output,
          * you <em>MUST NOT</em> use this method.
-         * @param port the target output
+         * @param name the output name (each output must be unique in the jobflow)
+         * @param descriptionClass the description class for this external output
+         * @param internalOutputPaths the output paths which will be internally generated in this jobflow
          * @return the resolved symbol
          */
-        ExternalPortReference<ExternalOutput> addExternalOutput(ExternalOutput port);
+        ExternalOutputReference addExternalOutput(
+                String name,
+                ClassDescription descriptionClass,
+                Collection<String> internalOutputPaths);
 
         /**
          * Adds a sub-application to execute in this application.

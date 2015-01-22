@@ -196,6 +196,13 @@ public abstract class Operator {
          * @see ExternalOutput
          */
         OUTPUT,
+
+        /**
+         * Pseudo operators for information.
+         * This will be used only in planning, and must not appear in DSLs.
+         * @see MarkerOperator
+         */
+        MARKER,
     }
 
     /**
@@ -213,6 +220,14 @@ public abstract class Operator {
          */
         protected AbstractBuilder(TOperator owner) {
             this.owner = owner;
+        }
+
+        /**
+         * Returns the building operator.
+         * @return the building operator
+         */
+        protected TOperator getOwner() {
+            return owner;
         }
 
         /**
