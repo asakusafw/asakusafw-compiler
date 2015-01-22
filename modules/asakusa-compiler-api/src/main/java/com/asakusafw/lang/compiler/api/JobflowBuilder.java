@@ -101,7 +101,7 @@ public interface JobflowBuilder {
                 TaskReference... blockers);
 
         /**
-         * Adds a sub-application to execute in finalizer.
+         * Adds a sub-application to execute in finalize phase.
          * @param profileName the profile name where the command is running on
          * @param command command path (relative from {@code ASAKUSA_HOME})
          * @param arguments command arguments
@@ -113,5 +113,13 @@ public interface JobflowBuilder {
                 Location command,
                 List<? extends CommandToken> arguments,
                 TaskReference... blockers);
+
+        /**
+         * Returns an extension service.
+         * @param extension the extension type
+         * @param <T> the extension type
+         * @return the extension service, or {@code null} if it is not found
+         */
+        <T> T getExtension(Class<T> extension);
     }
 }

@@ -14,12 +14,6 @@ public interface TaskReference extends Reference {
     TaskKind getTaskKind();
 
     /**
-     * Returns the execution phase of this task.
-     * @return the execution phase
-     */
-    ExecutionPhase getExecutionPhase();
-
-    /**
      * Returns tasks which must be executed before this task.
      * @return the blocker tasks
      */
@@ -41,21 +35,5 @@ public interface TaskReference extends Reference {
          * @see CommandTaskReference
          */
         COMMAND,
-    }
-
-    /**
-     * Represents a execution phase of {@link TaskReference}.
-     */
-    public static enum ExecutionPhase {
-
-        /**
-         * Run task in the application main phase.
-         */
-        MAIN,
-
-        /**
-         * Run task in the application finalizer.
-         */
-        FINALIZER,
     }
 }

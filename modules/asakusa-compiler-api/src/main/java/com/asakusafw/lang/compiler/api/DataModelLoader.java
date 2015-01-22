@@ -26,7 +26,8 @@ public interface DataModelLoader {
     /**
      * Returns a {@link DataModelReference} corresponded to the target type.
      * @param type the data model type
-     * @return the
+     * @return the data model
+     * @throws DiagnosticException if failed to load the target data model
      */
     DataModelReference load(TypeDescription type);
 }

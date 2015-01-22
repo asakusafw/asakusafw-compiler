@@ -20,5 +20,22 @@ package com.asakusafw.lang.compiler.api;
  */
 public class CompilerOptions {
 
-    // FIXME impl
+    private final String runtimeWorkingDirectory;
+
+    /**
+     * Creates a new instance.
+     * @param runtimeWorkingDirectory the runtime working directory
+     */
+    public CompilerOptions(String runtimeWorkingDirectory) {
+        this.runtimeWorkingDirectory = runtimeWorkingDirectory;
+    }
+
+    /**
+     * Returns the path of runtime working directory.
+     * This may relative path, or may include variables (<code>${...}</code>).
+     * @return the runtime working directory path (trailing {@code '/'} is removed)
+     */
+    public String getRuntimeWorkingDirectory() {
+        return runtimeWorkingDirectory;
+    }
 }

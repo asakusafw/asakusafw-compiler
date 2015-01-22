@@ -108,11 +108,22 @@ public class PropertyNameTest {
      * manipulates name.
      */
     @Test
-    public void manipulate() {
+    public void add() {
         PropertyName name = new PropertyName(words("hello"));
         PropertyName edit = name.addFirst("get").addLast("option");
         assertThat(edit, is(not(name)));
         assertThat(edit.getWords(), is(words("get,hello,option")));
+    }
+
+    /**
+     * manipulates name.
+     */
+    @Test
+    public void remove() {
+        PropertyName name = new PropertyName(words("get,hello,option"));
+        PropertyName edit = name.removeFirst().removeLast();
+        assertThat(edit, is(not(name)));
+        assertThat(edit.getWords(), is(words("hello")));
     }
 
     private List<String> words(String sequence) {

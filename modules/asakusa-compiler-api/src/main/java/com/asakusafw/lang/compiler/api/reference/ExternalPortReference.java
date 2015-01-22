@@ -43,7 +43,7 @@ public class ExternalPortReference<T extends ExternalPort> implements Reference 
     @Override
     public String toString() {
         return MessageFormat.format(
-                "ExternalPort(path={0}, port={1})",
+                "ExternalPort(path={0}, port={1})", //$NON-NLS-1$
                 getPath(),
                 getPort());
     }

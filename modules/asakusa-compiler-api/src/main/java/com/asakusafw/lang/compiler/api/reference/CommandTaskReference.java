@@ -12,8 +12,6 @@ import com.asakusafw.lang.compiler.model.Location;
  */
 public class CommandTaskReference implements TaskReference {
 
-    private final ExecutionPhase executionPhase;
-
     private final int serialNumber;
 
     private final String profileName;
@@ -26,7 +24,6 @@ public class CommandTaskReference implements TaskReference {
 
     /**
      * Creates a new instance.
-     * @param executionPhase the execution phase of this task
      * @param serialNumber the serial number of this task (unique in the same execution phase)
      * @param profileName the profile name where the command is running
      * @param command the command path (relative from {@code ASAKUSA_HOME})
@@ -34,13 +31,11 @@ public class CommandTaskReference implements TaskReference {
      * @param blockerTasks the blocker tasks
      */
     public CommandTaskReference(
-            ExecutionPhase executionPhase,
             int serialNumber,
             String profileName,
             Location command,
             List<? extends CommandToken> arguments,
             List<? extends TaskReference> blockerTasks) {
-        this.executionPhase = executionPhase;
         this.serialNumber = serialNumber;
         this.profileName = profileName;
         this.command = command;
@@ -51,11 +46,6 @@ public class CommandTaskReference implements TaskReference {
     @Override
     public TaskKind getTaskKind() {
         return TaskKind.COMMAND;
-    }
-
-    @Override
-    public ExecutionPhase getExecutionPhase() {
-        return executionPhase;
     }
 
     /**

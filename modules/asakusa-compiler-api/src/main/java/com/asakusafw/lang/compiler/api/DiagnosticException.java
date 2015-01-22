@@ -6,12 +6,22 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import com.asakusafw.lang.compiler.api.basic.BasicDiagnostic;
+
 /**
  * Represents an exception with {@link Diagnostic}s.
+ * The compiler may throw this exception from anywhere.
  */
-public class DiagnosticException extends Exception {
+public class DiagnosticException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
+
+    private static final Diagnostic.Level[] SEARCH_ORDER = new Diagnostic.Level[] {
+        Diagnostic.Level.ERROR,
+        Diagnostic.Level.WARN,
+    };
+
+    private static final Diagnostic[] EMPTY = new Diagnostic[0];
 
     private final Diagnostic[] diagnostics;
 
@@ -19,7 +29,7 @@ public class DiagnosticException extends Exception {
      * Creates a new instance for serializer.
      */
     protected DiagnosticException() {
-        this.diagnostics = null;
+        this.diagnostics = EMPTY;
     }
 
     /**
@@ -28,7 +38,7 @@ public class DiagnosticException extends Exception {
      * @param message the message
      */
     public DiagnosticException(Diagnostic.Level severity, String message) {
-        this(new SimpleDiagnostic(severity, message, null));
+        this(new BasicDiagnostic(severity, message, null));
     }
 
     /**
@@ -38,7 +48,7 @@ public class DiagnosticException extends Exception {
      * @param cause the original cause
      */
     public DiagnosticException(Diagnostic.Level severity, String message, Exception cause) {
-        this(new SimpleDiagnostic(severity, message, cause));
+        this(new BasicDiagnostic(severity, message, cause));
     }
 
     /**
@@ -90,7 +100,7 @@ public class DiagnosticException extends Exception {
     }
 
     private static Diagnostic first(Collection<? extends Diagnostic> diagnostics) {
-        for (Diagnostic.Level level : new Diagnostic.Level[] { Diagnostic.Level.ERROR, Diagnostic.Level.WARN, }) {
+        for (Diagnostic.Level level : SEARCH_ORDER) {
             for (Diagnostic diagnostic : diagnostics) {
                 if (diagnostic.getLevel() == level) {
                     return diagnostic;
@@ -98,68 +108,5 @@ public class DiagnosticException extends Exception {
             }
         }
         return null;
-    }
-
-    /**
-     * A simple implementation of {@link Diagnostic}.
-     */
-    public static final class SimpleDiagnostic implements Diagnostic {
-
-        private static final long serialVersionUID = 2675222764030731891L;
-
-        private Level level;
-
-        private String message;
-
-        private Exception cause;
-
-        /**
-         * Creates a new instance for serializer.
-         */
-        protected SimpleDiagnostic() {
-            return;
-        }
-
-        /**
-         * Creates a new instance.
-         * @param level the severity
-         * @param message the diagnostic message
-         */
-        public SimpleDiagnostic(Level level, String message) {
-            this.level = level;
-            this.message = message;
-        }
-
-        /**
-         * Creates a new instance.
-         * @param level the severity
-         * @param message the diagnostic message
-         * @param cause the causal exception
-         */
-        public SimpleDiagnostic(Level level, String message, Exception cause) {
-            this.level = level;
-            this.message = message;
-            this.cause = cause;
-        }
-
-        @Override
-        public Level getLevel() {
-            return level;
-        }
-
-        @Override
-        public String getMessage() {
-            return message;
-        }
-
-        @Override
-        public Exception getException() {
-            return cause;
-        }
-
-        @Override
-        public String toString() {
-            return String.format("[%s] %s", getLevel(), getMessage()); //$NON-NLS-1$
-        }
     }
 }

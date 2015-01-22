@@ -12,8 +12,6 @@ import com.asakusafw.lang.compiler.model.description.ClassDescription;
  */
 public class HadoopTaskReference implements TaskReference {
 
-    private final ExecutionPhase executionPhase;
-
     private final int serialNumber;
 
     private final ClassDescription mainClass;
@@ -22,17 +20,14 @@ public class HadoopTaskReference implements TaskReference {
 
     /**
      * Creates a new instance.
-     * @param executionPhase the execution phase of this task
      * @param serialNumber the serial number of this task (unique in the same execution phase)
      * @param mainClass the main class
      * @param blockerTasks the blocker tasks
      */
     public HadoopTaskReference(
-            ExecutionPhase executionPhase,
             int serialNumber,
             ClassDescription mainClass,
             List<? extends TaskReference> blockerTasks) {
-        this.executionPhase = executionPhase;
         this.serialNumber = serialNumber;
         this.mainClass = mainClass;
         this.blockerTasks = Collections.unmodifiableList(new ArrayList<>(blockerTasks));
@@ -41,11 +36,6 @@ public class HadoopTaskReference implements TaskReference {
     @Override
     public TaskKind getTaskKind() {
         return TaskKind.HADOOP;
-    }
-
-    @Override
-    public ExecutionPhase getExecutionPhase() {
-        return executionPhase;
     }
 
     /**

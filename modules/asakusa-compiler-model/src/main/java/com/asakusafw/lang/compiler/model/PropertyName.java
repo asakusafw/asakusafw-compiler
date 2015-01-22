@@ -91,10 +91,10 @@ public class PropertyName {
     }
 
     /**
-     * Returns a property name which has the specified word on the first.
+     * Returns a property name which the specified is inserted into head of this name.
      * The method does not modifies this object.
      * @param word the first word
-     * @return the
+     * @return the modified name
      */
     public PropertyName addFirst(String word) {
         List<String> results = new ArrayList<>();
@@ -104,16 +104,40 @@ public class PropertyName {
     }
 
     /**
-     * Returns a property name which has the specified word on the last.
+     * Returns a property name which the specified is inserted into tail of this name.
      * The method does not modifies this object.
      * @param word the last word
-     * @return the
+     * @return the modified name
      */
     public PropertyName addLast(String word) {
         List<String> results = new ArrayList<>();
         results.addAll(words);
         results.add(word);
         return new PropertyName(results);
+    }
+
+    /**
+     * Returns a property name which the first word is removed from this.
+     * The method does not modifies this object.
+     * @return the modified name
+     */
+    public PropertyName removeFirst() {
+        if (words.isEmpty()) {
+            throw new IllegalStateException();
+        }
+        return new PropertyName(words.subList(1, words.size()));
+    }
+
+    /**
+     * Returns a property name which the first word is removed from this.
+     * The method does not modifies this object.
+     * @return the modified name
+     */
+    public PropertyName removeLast() {
+        if (words.isEmpty()) {
+            throw new IllegalStateException();
+        }
+        return new PropertyName(words.subList(0, words.size() - 1));
     }
 
     /**
