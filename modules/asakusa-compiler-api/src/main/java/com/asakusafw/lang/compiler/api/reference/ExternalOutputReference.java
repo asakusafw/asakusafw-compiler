@@ -11,7 +11,7 @@ import com.asakusafw.lang.compiler.model.description.ClassDescription;
 /**
  * A symbol of individual external outputs.
  */
-public class ExternalOutputReference {
+public class ExternalOutputReference implements ExternalPortReference {
 
     private final String name;
 
@@ -35,6 +35,7 @@ public class ExternalOutputReference {
      * Returns the original output name.
      * @return the original output name
      */
+    @Override
     public String getName() {
         return name;
     }
@@ -43,15 +44,19 @@ public class ExternalOutputReference {
      * Returns the exporter description class.
      * @return the exporter description class
      */
+    @Override
     public ClassDescription getDescriptionClass() {
         return descriptionClass;
     }
 
     /**
-     * The actual output paths for tasks.
-     * The paths may include wildcard characters
+     * The actual output paths from tasks.
+     * The framework will export them after executing tasks in the jobflow.
+     * The paths may include wildcard characters.
+     *
      * @return the paths
      */
+    @Override
     public Set<String> getPaths() {
         return paths;
     }

@@ -1,50 +1,30 @@
 package com.asakusafw.lang.compiler.api.reference;
 
-import java.text.MessageFormat;
+import java.util.Set;
 
-import com.asakusafw.lang.compiler.model.graph.ExternalPort;
+import com.asakusafw.lang.compiler.model.description.ClassDescription;
 
 /**
- * A symbol of external ports.
- * @param <T> the original I/O port type
+ * An abstract interface for a symbol of external input or output.
  */
-public class ExternalPortReference<T extends ExternalPort> implements Reference {
-
-    private final T port;
-
-    private final String path;
+public interface ExternalPortReference {
 
     /**
-     * Creates a new instance.
-     * @param port the original port
-     * @param path the resolved path
+     * Returns the original port name.
+     * @return the original port name
      */
-    public ExternalPortReference(T port, String path) {
-        this.port = port;
-        this.path = path;
-    }
+    String getName();
 
     /**
-     * Returns the original I/O port.
-     * @return the original I/O port
+     * Returns the importer/exporter description class.
+     * @return the importer/exporter description class
      */
-    public T getPort() {
-        return port;
-    }
+    ClassDescription getDescriptionClass();
 
     /**
-     * Returns the resolved path (may includes wildcard).
-     * @return the resolved path
+     * The internal paths for the target port.
+     * The paths may include wildcard characters.
+     * @return the paths
      */
-    public String getPath() {
-        return path;
-    }
-
-    @Override
-    public String toString() {
-        return MessageFormat.format(
-                "ExternalPort(path={0}, port={1})", //$NON-NLS-1$
-                getPath(),
-                getPort());
-    }
+    Set<String> getPaths();
 }

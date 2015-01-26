@@ -11,7 +11,7 @@ import com.asakusafw.lang.compiler.model.description.ClassDescription;
 /**
  * A symbol of individual external inputs.
  */
-public class ExternalInputReference {
+public class ExternalInputReference implements ExternalPortReference {
 
     private final String name;
 
@@ -35,6 +35,7 @@ public class ExternalInputReference {
      * Returns the original input name.
      * @return the original input name
      */
+    @Override
     public String getName() {
         return name;
     }
@@ -43,15 +44,18 @@ public class ExternalInputReference {
      * Returns the importer description class.
      * @return the importer description class
      */
+    @Override
     public ClassDescription getDescriptionClass() {
         return descriptionClass;
     }
 
     /**
      * The actual input paths for tasks.
-     * The paths may include wildcard characters
+     * The framework will import and put data on the paths before executing tasks in the jobflow.
+     * The paths may include wildcard characters.
      * @return the paths
      */
+    @Override
     public Set<String> getPaths() {
         return paths;
     }
