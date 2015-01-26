@@ -127,5 +127,13 @@ public final class ExternalInput extends ExternalPort {
         protected Builder getSelf() {
             return this;
         }
+
+        @Override
+        public ExternalInput build() {
+            if (getOwner().getInputs().size() > 1 || getOwner().getOutputs().size() != 1) {
+                throw new IllegalStateException();
+            }
+            return super.build();
+        }
     }
 }

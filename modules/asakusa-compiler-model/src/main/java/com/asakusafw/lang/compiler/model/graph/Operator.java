@@ -12,6 +12,7 @@ import com.asakusafw.lang.compiler.model.description.ValueDescription;
 
 /**
  * Represents an operator vertex.
+ * @see Operators
  */
 public abstract class Operator {
 

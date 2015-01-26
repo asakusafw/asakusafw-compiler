@@ -6,11 +6,18 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import com.asakusafw.lang.compiler.model.description.TypeDescription;
+
 /**
  * Represents a marker operator.
  * @see OperatorAttribute
  */
 public final class MarkerOperator extends Operator {
+
+    /**
+     * The port name.
+     */
+    public static final String PORT_NAME = "port"; //$NON-NLS-1$
 
     final Map<Class<?>, Object> attributes = new HashMap<>();
 
@@ -34,16 +41,40 @@ public final class MarkerOperator extends Operator {
     }
 
     /**
-     * Creates a new operator builder.
+     * Creates a new marker operator builder.
+     * Marker operators always have a single input, a single output, and no arguments.
+     * Then clients can only edit their {@link #getAttribute(Class) attributes}.
+     * @param dataType the data type
      * @return the builder
      */
-    public static Builder builder() {
-        return new Builder(new MarkerOperator());
+    public static Builder builder(TypeDescription dataType) {
+        return new Builder(new InternalBuilder(new MarkerOperator())
+                .input(PORT_NAME, dataType)
+                .output(PORT_NAME, dataType)
+                .build());
     }
 
     @Override
     public OperatorKind getOperatorKind() {
         return OperatorKind.MARKER;
+    }
+
+    /**
+     * Returns the a single operator input of this.
+     * @return the operator input
+     */
+    public OperatorInput getInput() {
+        assert getInputs().size() == 1;
+        return getInputs().get(0);
+    }
+
+    /**
+     * Returns the a single operator output of this.
+     * @return the operator output
+     */
+    public OperatorOutput getOutput() {
+        assert getOutputs().size() == 1;
+        return getOutputs().get(0);
     }
 
     /**
@@ -71,23 +102,41 @@ public final class MarkerOperator extends Operator {
 
     @Override
     public String toString() {
+        if (attributes.size() == 1) {
+            Set<Class<?>> types = getAttributeTypes();
+            assert types.size() == 1;
+            Class<?> a = types.iterator().next();
+            return MessageFormat.format(
+                    "MarkerOperator({0}={1})", //$NON-NLS-1$
+                    a.getSimpleName(),
+                    attributes.get(a));
+        }
         return MessageFormat.format(
                 "MarkerOperator({0}attributes)", //$NON-NLS-1$
                 attributes.size());
     }
 
-    /**
-     * A builder for {@link MarkerOperator}.
-     */
-    public static final class Builder extends AbstractBuilder<MarkerOperator, Builder> {
+    private static final class InternalBuilder extends AbstractBuilder<MarkerOperator, InternalBuilder> {
 
-        Builder(MarkerOperator owner) {
+        InternalBuilder(MarkerOperator owner) {
             super(owner);
         }
 
         @Override
-        protected Builder getSelf() {
+        protected InternalBuilder getSelf() {
             return this;
+        }
+    }
+
+    /**
+     * A builder for {@link MarkerOperator}.
+     */
+    public static final class Builder {
+
+        private final MarkerOperator owner;
+
+        Builder(MarkerOperator owner) {
+            this.owner = owner;
         }
 
         /**
@@ -101,13 +150,20 @@ public final class MarkerOperator extends Operator {
          * @return this
          */
         public <T> Builder attribute(Class<T> attributeType, T attributeValue) {
-            MarkerOperator owner = getOwner();
             if (attributeValue == null) {
                 owner.attributes.remove(attributeType);
             } else {
                 owner.attributes.put(attributeType, attributeValue);
             }
             return this;
+        }
+
+        /**
+         * Returns the built operator.
+         * @return the built operator
+         */
+        public MarkerOperator build() {
+            return owner;
         }
     }
 }
