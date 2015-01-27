@@ -23,9 +23,9 @@ import com.asakusafw.lang.compiler.model.description.ValueDescription.ValueKind;
 import com.asakusafw.lang.compiler.model.graph.ExternalInput;
 import com.asakusafw.lang.compiler.model.graph.ExternalOutput;
 import com.asakusafw.lang.compiler.model.graph.FlowOperator;
+import com.asakusafw.lang.compiler.model.graph.MarkerOperator;
 import com.asakusafw.lang.compiler.model.graph.Operator;
 import com.asakusafw.lang.compiler.model.graph.Operator.OperatorKind;
-import com.asakusafw.lang.compiler.model.graph.MarkerOperator;
 import com.asakusafw.lang.compiler.model.graph.OperatorArgument;
 import com.asakusafw.lang.compiler.model.graph.OperatorGraph;
 import com.asakusafw.lang.compiler.model.graph.OperatorInput;
@@ -144,6 +144,21 @@ public final class MockOperators {
     public MockOperators marker(String id) {
         MarkerOperator operator = MarkerOperator.builder(TYPE)
                 .attribute(String.class, id)
+                .build();
+        return bless(id, operator);
+    }
+
+    /**
+     * Adds {@link MarkerOperator}.
+     * @param id the operator ID
+     * @param constant the enum constant attribute
+     * @param <T> the attribute type
+     * @return this
+     */
+    public <T extends Enum<T>> MockOperators marker(String id, T constant) {
+        MarkerOperator operator = MarkerOperator.builder(TYPE)
+                .attribute(String.class, id)
+                .attribute(constant.getDeclaringClass(), constant)
                 .build();
         return bless(id, operator);
     }

@@ -57,6 +57,28 @@ public class OperatorGraphTest {
     }
 
     /**
+     * simple case.
+     */
+    @Test
+    public void contain() {
+        MockOperators operators = new MockOperators()
+                .operator("a")
+                .operator("b").connect("a.*", "b.*");
+
+        OperatorGraph graph = new OperatorGraph(operators.all());
+        assertThat(graph.contains(operators.get("a")), is(true));
+        assertThat(graph.contains(operators.get("b")), is(true));
+
+        graph.remove(operators.get("b"));
+        assertThat(graph.contains(operators.get("a")), is(true));
+        assertThat(graph.contains(operators.get("b")), is(false));
+
+        graph.rebuild();
+        assertThat(graph.contains(operators.get("a")), is(true));
+        assertThat(graph.contains(operators.get("b")), is(true));
+    }
+
+    /**
      * copy.
      */
     @Test

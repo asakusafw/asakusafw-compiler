@@ -149,6 +149,21 @@ public final class MockOperators {
     }
 
     /**
+     * Adds {@link MarkerOperator}.
+     * @param id the operator ID
+     * @param constant the enum constant attribute
+     * @param <T> the attribute type
+     * @return this
+     */
+    public <T extends Enum<T>> MockOperators marker(String id, T constant) {
+        MarkerOperator operator = MarkerOperator.builder(TYPE)
+                .attribute(String.class, id)
+                .attribute(constant.getDeclaringClass(), constant)
+                .build();
+        return bless(id, operator);
+    }
+
+    /**
      * Registers an operator.
      * @param id the operator ID
      * @param operator the target operator

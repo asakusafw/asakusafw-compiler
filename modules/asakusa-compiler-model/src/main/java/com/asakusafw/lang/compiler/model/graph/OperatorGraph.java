@@ -57,6 +57,17 @@ public class OperatorGraph {
     }
 
     /**
+     * Returns whether this graph explicitly contains the target operator.
+     * If the operator is reachable from other operators in this graph,
+     * the {@link #rebuild()} may restore the removed operator.
+     * @param operator the target operator
+     * @return {@code true} if this contains the target operator, otherwise {@code false}
+     */
+    public boolean contains(Operator operator) {
+        return operators.contains(operator);
+    }
+
+    /**
      * Removes all operators in this graph.
      * @return this
      */

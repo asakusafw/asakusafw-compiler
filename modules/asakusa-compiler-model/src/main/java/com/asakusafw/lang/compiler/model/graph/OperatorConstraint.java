@@ -6,6 +6,11 @@ package com.asakusafw.lang.compiler.model.graph;
 public enum OperatorConstraint {
 
     /**
+     * the operator may produce non-empty datasets even if the operator inputs are empty.
+     */
+    GENERATOR,
+
+    /**
      * the operator must affect at most once per data record.
      */
     AT_MOST_ONCE,
