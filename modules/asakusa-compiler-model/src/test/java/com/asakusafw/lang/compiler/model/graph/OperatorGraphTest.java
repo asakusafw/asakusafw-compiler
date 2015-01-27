@@ -57,7 +57,7 @@ public class OperatorGraphTest {
     }
 
     /**
-     * simple case.
+     * members.
      */
     @Test
     public void contain() {

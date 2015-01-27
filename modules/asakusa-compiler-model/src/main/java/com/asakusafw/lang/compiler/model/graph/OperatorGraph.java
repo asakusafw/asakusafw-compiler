@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -157,30 +156,7 @@ public class OperatorGraph {
      * @return the all operators
      */
     public static Set<Operator> getAllOperators(Collection<? extends Operator> operators) {
-        Set<Operator> saw = new HashSet<>(operators);
-        LinkedList<Operator> work = new LinkedList<>(operators);
-        while (work.isEmpty() == false) {
-            Operator operator = work.removeFirst();
-            for (OperatorPort port : operator.getInputs()) {
-                for (OperatorPort opposite : port.getOpposites()) {
-                    Operator owner = opposite.getOwner();
-                    if (saw.contains(owner) == false) {
-                        work.add(owner);
-                        saw.add(owner);
-                    }
-                }
-            }
-            for (OperatorPort port : operator.getOutputs()) {
-                for (OperatorPort opposite : port.getOpposites()) {
-                    Operator owner = opposite.getOwner();
-                    if (saw.contains(owner) == false) {
-                        work.add(operator);
-                        saw.add(owner);
-                    }
-                }
-            }
-        }
-        return saw;
+        return Operators.getTransitiveConnected(operators);
     }
 
     /**

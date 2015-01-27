@@ -3,10 +3,10 @@ package com.asakusafw.lang.compiler.planning;
 import com.asakusafw.lang.compiler.model.description.TypeDescription;
 import com.asakusafw.lang.compiler.model.graph.MarkerOperator;
 import com.asakusafw.lang.compiler.model.graph.Operator;
-import com.asakusafw.lang.compiler.model.graph.Operators;
 import com.asakusafw.lang.compiler.model.graph.Operator.OperatorKind;
 import com.asakusafw.lang.compiler.model.graph.OperatorInput;
 import com.asakusafw.lang.compiler.model.graph.OperatorOutput;
+import com.asakusafw.lang.compiler.model.graph.Operators;
 
 /**
  * Utilities for {@link PlanMarker}.

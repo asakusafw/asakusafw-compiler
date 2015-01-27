@@ -16,6 +16,32 @@ public final class Operators {
     }
 
     /**
+     * Returns the input ports of each operator.
+     * @param operators the target operators
+     * @return the input ports
+     */
+    public static Set<OperatorInput> getInputs(Collection<? extends Operator> operators) {
+        Set<OperatorInput> results = new HashSet<>();
+        for (Operator operator : operators) {
+            results.addAll(operator.getInputs());
+        }
+        return results;
+    }
+
+    /**
+     * Returns the output ports of each operator.
+     * @param operators the target operators
+     * @return the output ports
+     */
+    public static Set<OperatorOutput> getOutputs(Collection<? extends Operator> operators) {
+        Set<OperatorOutput> results = new HashSet<>();
+        for (Operator operator : operators) {
+            results.addAll(operator.getOutputs());
+        }
+        return results;
+    }
+
+    /**
      * Returns the successors of the operator.
      * @param operator the operator
      * @return the successors
@@ -49,6 +75,89 @@ public final class Operators {
      */
     public static Set<Operator> getPredecessors(Collection<OperatorInput> ports) {
         return getOpposites(ports);
+    }
+
+    /**
+     * Returns the all transitive successors from the operator outputs.
+     * @param ports the output ports
+     * @return the transitive successors
+     */
+    public static Set<Operator> getTransitiveSuccessors(Collection<OperatorOutput> ports) {
+        Set<Operator> results = new HashSet<>();
+        LinkedList<Operator> work = new LinkedList<>(getSuccessors(ports));
+        while (work.isEmpty() == false) {
+            Operator operator = work.removeFirst();
+            if (results.contains(operator)) {
+                continue;
+            }
+            results.add(operator);
+            for (OperatorPort port : operator.getOutputs()) {
+                for (OperatorPort opposite : port.getOpposites()) {
+                    if (results.contains(opposite.getOwner()) == false) {
+                        work.addLast(opposite.getOwner());
+                    }
+                }
+            }
+        }
+        return results;
+    }
+
+    /**
+     * Returns the all transitive predecessors from the operator inputs.
+     * @param ports the input ports
+     * @return the transitive predecessors
+     */
+    public static Set<Operator> getTransitivePredecessors(Collection<OperatorInput> ports) {
+        Set<Operator> results = new HashSet<>();
+        LinkedList<Operator> work = new LinkedList<>(getPredecessors(ports));
+        while (work.isEmpty() == false) {
+            Operator operator = work.removeFirst();
+            if (results.contains(operator)) {
+                continue;
+            }
+            results.add(operator);
+            for (OperatorPort port : operator.getInputs()) {
+                for (OperatorPort opposite : port.getOpposites()) {
+                    if (results.contains(opposite.getOwner()) == false) {
+                        work.addLast(opposite.getOwner());
+                    }
+                }
+            }
+        }
+        return results;
+    }
+
+    /**
+     * Returns the all transitive connected operators (includes the specified operators).
+     * @param operators the base operators
+     * @return the transitive connected operators
+     */
+    public static Set<Operator> getTransitiveConnected(Collection<? extends Operator> operators) {
+        Set<Operator> results = new HashSet<>(operators);
+        LinkedList<Operator> work = new LinkedList<>(operators);
+        while (work.isEmpty() == false) {
+            Operator current = work.removeFirst();
+            for (OperatorPort port : current.getInputs()) {
+                for (OperatorPort opposite : port.getOpposites()) {
+                    Operator neighbor = opposite.getOwner();
+                    if (results.contains(neighbor) == false) {
+                        results.add(neighbor);
+                        work.add(neighbor);
+                    }
+                }
+            }
+            for (OperatorPort port : current.getOutputs()) {
+                for (OperatorPort opposite : port.getOpposites()) {
+                    Operator neighbor = opposite.getOwner();
+                    if (results.contains(neighbor) == false) {
+                        results.add(neighbor);
+                        work.add(neighbor);
+                    }
+                }
+            }
+        }
+
+        return results;
     }
 
     /**

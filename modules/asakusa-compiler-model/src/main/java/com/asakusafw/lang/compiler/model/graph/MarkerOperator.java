@@ -102,18 +102,23 @@ public final class MarkerOperator extends Operator {
 
     @Override
     public String toString() {
-        if (attributes.size() == 1) {
+        if (attributes.isEmpty()) {
+            return "MarkerOperator()"; //$NON-NLS-1$
+        } else {
             Set<Class<?>> types = getAttributeTypes();
-            assert types.size() == 1;
             Class<?> a = types.iterator().next();
-            return MessageFormat.format(
-                    "MarkerOperator({0}={1})", //$NON-NLS-1$
-                    a.getSimpleName(),
-                    attributes.get(a));
+            if (attributes.size() == 1) {
+                return MessageFormat.format(
+                        "MarkerOperator({0}={1})", //$NON-NLS-1$
+                        a.getSimpleName(),
+                        attributes.get(a));
+            } else {
+                return MessageFormat.format(
+                        "MarkerOperator({0}={1}, ...)", //$NON-NLS-1$
+                        a.getSimpleName(),
+                        attributes.get(a));
+            }
         }
-        return MessageFormat.format(
-                "MarkerOperator({0}attributes)", //$NON-NLS-1$
-                attributes.size());
     }
 
     private static final class InternalBuilder extends AbstractBuilder<MarkerOperator, InternalBuilder> {

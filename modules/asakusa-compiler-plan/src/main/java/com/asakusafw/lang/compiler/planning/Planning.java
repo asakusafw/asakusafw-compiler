@@ -26,10 +26,13 @@ import com.asakusafw.lang.compiler.model.graph.Operators;
  */
 public final class Planning {
 
-    private static final Operators.Predicate<Object> NEVER = new Operators.Predicate<Object>() {
+    /**
+     * A predicate only accepts plan markers.
+     */
+    public static final Operators.Predicate<Operator> PLAN_MARKERS = new Operators.Predicate<Operator>() {
         @Override
-        public boolean apply(Object argument) {
-            return false;
+        public boolean apply(Operator argument) {
+            return PlanMarkers.get(argument) != null;
         }
     };
 
@@ -236,8 +239,7 @@ public final class Planning {
                 edges.addAll(operator.getOutputs());
             }
         }
-        // all transitive successors
-        results.addAll(Operators.collectUntilNearestReachableSuccessors(edges, NEVER, true));
+        results.addAll(Operators.getTransitiveSuccessors(edges));
         return results;
     }
 
@@ -250,8 +252,7 @@ public final class Planning {
                 edges.addAll(operator.getInputs());
             }
         }
-        // all transitive predecessors
-        results.addAll(Operators.collectUntilNearestReachablePredecessors(edges, NEVER, true));
+        results.addAll(Operators.getTransitivePredecessors(edges));
         return results;
     }
 

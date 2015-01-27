@@ -305,7 +305,7 @@ public final class MockOperators {
     }
 
     /**
-     * Returns set of operator.
+     * Returns set of operators.
      * @param ids operator IDs
      * @return operator set
      */
@@ -313,6 +313,21 @@ public final class MockOperators {
         Set<Operator> results = new HashSet<>();
         for (String id : ids) {
             results.add(get(id));
+        }
+        return results;
+    }
+
+    /**
+     * Returns set of marker operators.
+     * @param ids operator IDs
+     * @return marker operator set
+     */
+    public Set<MarkerOperator> getMarkers(String... ids) {
+        Set<MarkerOperator> results = new HashSet<>();
+        for (String id : ids) {
+            Operator operator = get(id);
+            assertThat(operator, is(instanceOf(MarkerOperator.class)));
+            results.add((MarkerOperator) operator);
         }
         return results;
     }

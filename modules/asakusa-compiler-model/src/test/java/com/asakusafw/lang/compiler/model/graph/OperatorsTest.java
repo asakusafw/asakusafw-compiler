@@ -4,6 +4,8 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.junit.Test;
 
@@ -20,6 +22,42 @@ public class OperatorsTest {
             return argument.getOperatorKind() == OperatorKind.MARKER;
         }
     };
+
+    /**
+     * inputs.
+     */
+    @Test
+    public void getInputs() {
+        MockOperators mock = new MockOperators()
+            .operator("a", "i0,i1", "o0,o1")
+            .operator("b", "i0,i1", "o0,o1");
+        Set<OperatorInput> expected = new HashSet<>();
+        expected.add(mock.getInput("a.i0"));
+        expected.add(mock.getInput("a.i1"));
+        expected.add(mock.getInput("b.i0"));
+        expected.add(mock.getInput("b.i1"));
+        assertThat(
+                Operators.getInputs(mock.getAsSet("a", "b")),
+                is(expected));
+    }
+
+    /**
+     * outputs.
+     */
+    @Test
+    public void getOutputs() {
+        MockOperators mock = new MockOperators()
+            .operator("a", "i0,i1", "o0,o1")
+            .operator("b", "i0,i1", "o0,o1");
+        Set<OperatorOutput> expected = new HashSet<>();
+        expected.add(mock.getOutput("a.o0"));
+        expected.add(mock.getOutput("a.o1"));
+        expected.add(mock.getOutput("b.o0"));
+        expected.add(mock.getOutput("b.o1"));
+        assertThat(
+                Operators.getOutputs(mock.getAsSet("a", "b")),
+                is(expected));
+    }
 
     /**
      * succ.
@@ -57,6 +95,66 @@ public class OperatorsTest {
             .connect("e.out", "b.in");
 
         assertThat(Operators.getPredecessors(mock.get("a")), is(mock.getAsSet("b", "c", "d")));
+    }
+
+    /**
+     * succ*.
+     */
+    @Test
+    public void getTransitiveSuccessors() {
+        MockOperators mock = new MockOperators()
+            .operator("a0")
+            .operator("a1")
+            .operator("b0").connect("a0.*", "b0.*").connect("a1.*", "b0.*")
+            .operator("b1")
+            .operator("c0").connect("b0.*", "c0.*").connect("b1.*", "c0.*")
+            .operator("d0").connect("c0.*", "d0.*")
+            .operator("d1").connect("c0.*", "d1.*")
+            .operator("e0").connect("d0.*", "e0.*")
+            .operator("e1").connect("d0.*", "e1.*").connect("d1.*", "e1.*");
+        assertThat(
+                Operators.getTransitiveSuccessors(mock.get("a0").getOutputs()),
+                is(mock.getAsSet("b0", "c0", "d0", "d1", "e0", "e1")));
+    }
+
+    /**
+     * pred*.
+     */
+    @Test
+    public void getTransitivePredecessors() {
+        MockOperators mock = new MockOperators()
+            .operator("a0")
+            .operator("a1")
+            .operator("b0").connect("b0.*", "a0.*").connect("b0.*", "a1.*")
+            .operator("b1")
+            .operator("c0").connect("c0.*", "b0.*").connect("c0.*", "b1.*")
+            .operator("d0").connect("d0.*", "c0.*")
+            .operator("d1").connect("d1.*", "c0.*")
+            .operator("e0").connect("e0.*", "d0.*")
+            .operator("e1").connect("e1.*", "d0.*").connect("e1.*", "d1.*");
+        assertThat(
+                Operators.getTransitivePredecessors(mock.get("a0").getInputs()),
+                is(mock.getAsSet("b0", "c0", "d0", "d1", "e0", "e1")));
+    }
+
+    /**
+     * all.
+     */
+    @Test
+    public void getTransitiveConnected() {
+        MockOperators mock = new MockOperators()
+            .operator("a0")
+            .operator("a1")
+            .operator("b0").connect("a0.*", "b0.*").connect("a1.*", "b0.*")
+            .operator("b1")
+            .operator("c0").connect("b0.*", "c0.*").connect("b1.*", "c0.*")
+            .operator("d0").connect("c0.*", "d0.*")
+            .operator("d1").connect("c0.*", "d1.*")
+            .operator("e0").connect("d0.*", "e0.*")
+            .operator("e1").connect("d0.*", "e1.*").connect("d1.*", "e1.*");
+        assertThat(
+                Operators.getTransitiveConnected(mock.getAsSet("a0")),
+                is(mock.all()));
     }
 
     /**
@@ -411,7 +509,5 @@ public class OperatorsTest {
             .assertConnected("a.*", "d.*", false)
             .assertConnected("b.*", "c.*", false)
             .assertConnected("b.*", "d.*", false);
-
-
     }
 }
