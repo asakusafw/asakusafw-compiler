@@ -48,17 +48,9 @@ public class BasicPlan extends AbstractAttributeContainer implements Plan {
      * <li> each output operator must be backward reachable to at least one input operator </li>
      * </ol>
      *
-     * Here, we introduce the term {@code body operators} which are transitive connected to
-     * any sub-plan inputs or outputs (excludes inputs or outputs themselves).
-     * And then the body operators must satisfy following preconditions:
-     * <ol>
-     * <li> each body operator must not be a plan marker </li>
-     * <li> each body operator must be backward reachable to at least one input operator </li>
-     * <li> each body operator must be forward reachable to at least one output operator </li>
-     * </ol>
-     *
      * The created sub-plan will have following properties:
      * <ol>
+     * <li> the sub-plan satisfies {@link SubPlan the common invariants of sub-plan} </li>
      * <li> each input operator becomes as its {@link SubPlan#getInputs() sub-plan input} </li>
      * <li> each output operator becomes as its {@link SubPlan#getOutputs() sub-plan output} </li>
      * <li> {@link SubPlan#getOwner()} returns this {@link BasicPlan} </li>

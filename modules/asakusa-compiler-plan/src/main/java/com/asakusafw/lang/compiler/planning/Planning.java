@@ -42,6 +42,7 @@ public final class Planning {
 
     /**
      * Normalizes the operator graph.
+     * <p>
      * This includes following operations:
      * <ol>
      * <li> flatten operators (unnest {@link FlowOperator}s, and remove non-external inputs/outputs) </li>
@@ -52,7 +53,10 @@ public final class Planning {
      * <li> add {@link PlanMarker#BEGIN BEGIN} markers to input ports without any opposites </li>
      * <li> add {@link PlanMarker#END END} markers to output ports without any opposites </li>
      * </ol>
+     * </p>
+     * <p>
      * This will directly modify the specified operator graph.
+     * </p>
      * @param graph the target operator graph
      * @see OperatorGraph#copy()
      */
@@ -161,13 +165,13 @@ public final class Planning {
                 continue;
             }
             for (OperatorInput port : operator.getInputs()) {
-                if (port.getOpposites().isEmpty()) {
+                if (port.hasOpposites() == false) {
                     MarkerOperator marker = PlanMarkers.insert(PlanMarker.BEGIN, port);
                     graph.add(marker);
                 }
             }
             for (OperatorOutput port : operator.getOutputs()) {
-                if (port.getOpposites().isEmpty()) {
+                if (port.hasOpposites() == false) {
                     MarkerOperator marker = PlanMarkers.insert(PlanMarker.END, port);
                     graph.add(marker);
                 }
@@ -177,6 +181,7 @@ public final class Planning {
 
     /**
      * Removes dead-flows in the operator graph.
+     * <p>
      * This requires following preconditions:
      * <ol>
      * <li> each {@code BEGIN} plan marker must NOT have any predecessors </li>
@@ -184,6 +189,8 @@ public final class Planning {
      * <li> each input port of operator except {@code BEGIN} plan marker has at least one opposites </li>
      * <li> each output port of operator except {@code END} plan marker has at least one opposites </li>
      * </ol>
+     * </p>
+     * <p>
      * This ensures that the operator graph satisfies following properties:
      * <ol>
      * <li> all preconditions </li>
@@ -198,7 +205,11 @@ public final class Planning {
      *     except {@code END} plan markers or an operator with at-least-once constraint
      * </li>
      * </ol>
+     * </p>
+     * <p>
      * This will directly modify the specified operator graph.
+     * </p>
+     *
      * @param graph the target operator graph
      * @see OperatorConstraint#AT_LEAST_ONCE
      * @see OperatorConstraint#GENERATOR
@@ -257,7 +268,8 @@ public final class Planning {
     }
 
     /**
-     * Simplifies {@code BEGIN} or {@code END} plan markers.
+     * Simplifies {@code BEGIN} and {@code END} plan markers.
+     * <p>
      * This requires following preconditions:
      * <ol>
      * <li> each {@code BEGIN} plan marker must NOT have any predecessors </li>
@@ -265,6 +277,8 @@ public final class Planning {
      * <li> each operator except {@code BEGIN} plan marker must have at least one predecessors </li>
      * <li> each operator except {@code END} plan marker must have at least one successors </li>
      * </ol>
+     * </p>
+     * <p>
      * This ensures that the operator graph satisfies following properties:
      * <ol>
      * <li> all preconditions </li>
@@ -273,7 +287,10 @@ public final class Planning {
      * <li> each operator which has {@code BEGIN} plan marker in its predecessor, it has no other predecessors </li>
      * <li> each operator which has {@code END} plan marker in its successors, it has no other successors </li>
      * </ol>
+     * </p>
+     * <p>
      * This will directly modify the specified operator graph.
+     * </p>
      * @param graph the target operator graph
      * @see PlanMarker#BEGIN
      * @see PlanMarker#END
@@ -347,8 +364,100 @@ public final class Planning {
     }
 
     private static void removeIfOrphan(Operator operator, OperatorGraph graph) {
-        if (Operators.getPredecessors(operator).isEmpty() && Operators.getSuccessors(operator).isEmpty()) {
+        if (Operators.hasPredecessors(operator) == false && Operators.hasSuccessors(operator) == false) {
             graph.remove(operator);
         }
+    }
+
+    /**
+     * Organizes a primitive plan for the operator graph from including plan markers.
+     * <p>
+     * Roughly, a primitive plan consists of a lot of <em>primitive</em> sub-plans,
+     * that have minimal inputs, outputs, and operators.
+     * So primitive plans are generally not efficient, clients should re-organize them.
+     * </p>
+     * <p>
+     * First, we introduce a several terms:
+     * <dl>
+     * <dt> <em>gathering operator</em> </dt>
+     * <dd>
+     *   each operator, which predecessors contain a {@code GATHER} plan marker,
+     *   is a <em>gathering operator</em>.
+     * </dd>
+     * <dt> <em>non-broadcasting operator</em> </dt>
+     * <dd>
+     *   each plan marker is just <em>non-broadcasting operator</em>.
+     * </dd>
+     * <dd>
+     *   each operator, which nearest forward reachable plan markers contain other than {@code BROADCAST},
+     *   is a <em>non-broadcasting operator</em>.
+     * </dd>
+     * <dt> <em>broadcast consumer</em> </dt>
+     * <dd>
+     *   each operator, which is nearest forward reachable <em>non-broadcasting operator</em>
+     *   from {@code BROADCAST} plan markers, is a <em>broadcast consumer</em>.
+     * </dd>
+     * </dl>
+     * </p>
+     * <p>
+     * The specified operator graph must satisfy following preconditions:
+     * <ol>
+     * <li> each operator except {@code BEGIN} plan marker must have at least one predecessors </li>
+     * <li> each operator except {@code END} plan marker must have at least one successors </li>
+     * <li> each {@code GATHER} plan marker must have just one successor </li>
+     * <li> each plan marker must not be a <em>broadcast consumer</em> </li>
+     * </ol>
+     * </p>
+     * <p>
+     * The created plan will work as equivalent to the original operator graph,
+     * and each sub-plan will have the following properties:
+     * <ol>
+     * <li>
+     *   each sub-plan has minimal inputs within the following constraints:
+     *   <ol>
+     *   <li>
+     *     each sub-plan must have at least one input other than {@code BROADCAST} plan markers
+     *   </li>
+     *   <li>
+     *     if a sub-plan has a <em>gathering operator</em>,
+     *     the sub-plan inputs must contain the all forward reachable plan markers from it
+     *   </li>
+     *   <li>
+     *     if a sub-plan has a <em>broadcasting consumer</em>,
+     *     the sub-plan inputs must contain the related all {@code BROADCAST} plan markers
+     *   </li>
+     *   </ol>
+     * </li>
+     * <li>
+     *   each sub-plan just has one output
+     * </li>
+     * <li>
+     *   each sub-plan has minimal operators within the following constraints:
+     *   <ol>
+     *   <li> each operator except sub-plan input must be reachable to at least one inputs of the sub-plan </li>
+     *   <li> each operator except sub-plan output must be reachable to at least one outputs of the sub-plan </li>
+     *   <li> each operator except sub-plan input and output must be not a plan marker </li>
+     *   </ol>
+     * </li>
+     * </ol>
+     * </p>
+     * <p>
+     * To keep the original semantics, the plan will have the following properties:
+     * <ol>
+     * <li>
+     *   each sub-plan consists of all combinations of possible inputs and output pairs
+     * </li>
+     * <li>
+     *   each sub-plan has the unique inputs and output pairs
+     * </li>
+     * </ol>
+     * </p>
+     * @param graph the target operator graph
+     * @return the organized primitive plan
+     * @see #normalize(OperatorGraph)
+     * @see #simplifyTerminators(OperatorGraph)
+     */
+    public static PlanDetail createPrimitivePlan(OperatorGraph graph) {
+        return PrimitivePlanner.plan(graph.getOperators());
     }
 }

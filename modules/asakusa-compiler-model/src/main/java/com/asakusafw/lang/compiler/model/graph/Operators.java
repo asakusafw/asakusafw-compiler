@@ -42,6 +42,52 @@ public final class Operators {
     }
 
     /**
+     * Returns whether the operator has at least one predecessor or not.
+     * @param operator the target operator
+     * @return {@code true} if the operator has any predecessors, otherwise {@code false}
+     */
+    public static boolean hasPredecessors(Operator operator) {
+        return hasPredecessors(operator.getInputs());
+    }
+
+    /**
+     * Returns whether the operator has at least one successor or not.
+     * @param operator the target operator
+     * @return {@code true} if the operator has any successors, otherwise {@code false}
+     */
+    public static boolean hasSuccessors(Operator operator) {
+        return hasSuccessors(operator.getOutputs());
+    }
+
+    /**
+     * Returns whether any output port has at least one successor or not.
+     * @param ports the target output ports
+     * @return {@code true} if any output port has one or more successors, otherwise {@code false}
+     */
+    public static boolean hasSuccessors(Collection<OperatorOutput> ports) {
+        return hasOpposites(ports);
+    }
+
+    /**
+     * Returns whether any input port has at least one predecessor or not.
+     * @param ports the target input ports
+     * @return {@code true} if any input port has one or more predecessors, otherwise {@code false}
+     */
+    public static boolean hasPredecessors(Collection<OperatorInput> ports) {
+        return hasOpposites(ports);
+    }
+
+
+    private static boolean hasOpposites(Collection<? extends OperatorPort> ports) {
+        for (OperatorPort port : ports) {
+            if (port.hasOpposites()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Returns the successors of the operator.
      * @param operator the operator
      * @return the successors

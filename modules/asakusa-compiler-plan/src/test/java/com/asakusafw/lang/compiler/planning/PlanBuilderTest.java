@@ -3,10 +3,7 @@ package com.asakusafw.lang.compiler.planning;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 
 import org.junit.Test;
 
@@ -15,7 +12,7 @@ import com.asakusafw.lang.compiler.model.graph.Operator;
 /**
  * Test for {@link PlanBuilder}.
  */
-public class PlanBuilderTest {
+public class PlanBuilderTest extends PlanningTestRoot {
 
     /**
      * simple case.
@@ -438,34 +435,5 @@ public class PlanBuilderTest {
         PlanBuilder.from(mock.all())
             .add(mock.getAsSet("begin"), mock.getAsSet("end", "invalid"))
             .build();
-    }
-
-    private SubPlan ownerOf(PlanDetail detail, Operator source) {
-        Operator copy = copyOf(detail, source);
-        SubPlan owner = detail.getOwner(copy);
-        assertThat(copy.toString(), owner, is(notNullValue()));
-        return owner;
-    }
-
-    private Operator copyOf(PlanDetail detail, Operator source) {
-        Set<Operator> copies = detail.getCopies(source);
-        assertThat(copies, hasSize(1));
-        return copies.iterator().next();
-    }
-
-    private Operator copyOf(PlanDetail detail, SubPlan owner, Operator source) {
-        Operator copy = detail.getCopy(source, owner);
-        assertThat(copy, is(notNullValue()));
-        return copy;
-    }
-
-    private Set<Operator> toSources(PlanDetail detail, Collection<? extends Operator> operators) {
-        Set<Operator> results = new HashSet<>();
-        for (Operator operator : operators) {
-            Operator source = detail.getSource(operator);
-            assertThat(operator.toString(), source, is(notNullValue()));
-            results.add(source);
-        }
-        return results;
     }
 }

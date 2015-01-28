@@ -100,6 +100,11 @@ public class OperatorOutput implements OperatorPort {
     }
 
     @Override
+    public boolean hasOpposites() {
+        return opposites.isEmpty() == false;
+    }
+
+    @Override
     public Collection<OperatorInput> getOpposites() {
         return Collections.unmodifiableList(new ArrayList<>(opposites));
     }

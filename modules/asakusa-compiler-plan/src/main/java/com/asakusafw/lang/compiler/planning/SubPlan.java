@@ -7,7 +7,51 @@ import com.asakusafw.lang.compiler.model.graph.Operator;
 
 /**
  * Represents a logical execution unit of {@link Plan}.
- * TODO invariants
+ * <p>
+ * Terminology:
+ * <dl>
+ * <dt> <em>member operator</em> </dt>
+ * <dd>
+ *   each operator which is in the sub-plan.
+ * <dd>
+ * <dt> <em>input operator</em> </dt>
+ * <dd>
+ *   each operator which comprises an input of the sub-plan.
+ * <dd>
+ * <dt> <em>output operator</em> </dt>
+ * <dd>
+ *   each operator which comprises an output of the sub-plan.
+ * <dd>
+ * <dt> <em>body operator</em> </dt>
+ * <dd>
+ *   each member operator other than <em>input operator</em> and <em>output operator</em>.
+ * <dd>
+ * </dl>
+ * </p>
+ * <p>
+ * Each {@link SubPlan} object must satisfy following invariants:
+ * <ol>
+ * <li> the sub-plan must have at least one input </li>
+ * <li> the sub-plan must have at least one output </li>
+ * <li> each sub-plan input must have a unique <em>input operator</em> </li>
+ * <li> each sub-plan output must have a unique <em>output operator</em> </li>
+ * <li> each <em>input operator</em> must be also a <em>member operator</em> </li>
+ * <li> each <em>output operator</em> must be also a <em>member operator</em> </li>
+ * <li> each <em>input operator</em> must not have any predecessors </li>
+ * <li> each <em>output operator</em> must not have any successors </li>
+ * <li>
+ *   each <em>input operator</em> and <em>body operator</em> must be
+ *   forward reachable to any <em>output operators</em>
+ * </li>
+ * <li>
+ *   each <em>output operator</em> and <em>body operator</em> must be
+ *   backward reachable to any <em>input operators</em>
+ * </li>
+ * <li>
+ *   any successor and predecessor of each <em>member operator</em> must be also a <em>member operator</em>
+ * </li>
+ * </ol>
+ * </p>
  */
 public interface SubPlan extends AttributeContainer {
 

@@ -18,6 +18,16 @@ subprojects {
         tasks.withType(JavaCompile) {
             options.encoding = 'UTF-8'
         }
+        tasks.withType(Javadoc) {
+            failOnError = false
+            options.locale = 'en_US'
+            options.encoding = 'UTF-8'
+            if (options instanceof org.gradle.external.javadoc.StandardJavadocDocletOptions) {
+                options.docEncoding = 'UTF-8'
+                options.footer = "Asakusa Framework Compiler Projects"
+                options.showFromProtected()
+            }
+        }
         dependencies {
             testCompile 'junit:junit:4.11'
             testCompile 'org.hamcrest:hamcrest-library:1.3'

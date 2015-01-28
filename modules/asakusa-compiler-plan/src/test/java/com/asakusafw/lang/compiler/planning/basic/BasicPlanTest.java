@@ -3,6 +3,7 @@ package com.asakusafw.lang.compiler.planning.basic;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.asakusafw.lang.compiler.planning.MockOperators;
@@ -208,6 +209,7 @@ public class BasicPlanTest {
     /**
      * body contains a plan marker.
      */
+    @Ignore("retracted: it is too strict")
     @Test(expected = RuntimeException.class)
     public void invalid_body_plan_marker() {
         MockOperators mock = new MockOperators()

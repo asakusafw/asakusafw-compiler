@@ -75,6 +75,8 @@ public class OperatorsTest {
             .connect("a.o2", "d.in")
             .connect("b.out", "e.in");
 
+        assertThat(Operators.hasSuccessors(mock.get("a")), is(true));
+        assertThat(Operators.hasSuccessors(mock.get("e")), is(false));
         assertThat(Operators.getSuccessors(mock.get("a")), is(mock.getAsSet("b", "c", "d")));
     }
 
@@ -94,6 +96,8 @@ public class OperatorsTest {
             .connect("d.out", "a.i2")
             .connect("e.out", "b.in");
 
+        assertThat(Operators.hasPredecessors(mock.get("a")), is(true));
+        assertThat(Operators.hasPredecessors(mock.get("e")), is(false));
         assertThat(Operators.getPredecessors(mock.get("a")), is(mock.getAsSet("b", "c", "d")));
     }
 

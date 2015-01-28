@@ -63,12 +63,12 @@ public final class BasicSubPlan extends AbstractAttributeContainer implements Su
                         "sub-plan input must be a plan marker: {0}",
                         operator));
             }
-            if (Operators.getPredecessors(operator).isEmpty() == false) {
+            if (Operators.hasPredecessors(operator)) {
                 throw new IllegalArgumentException(MessageFormat.format(
                         "sub-plan input must not have any predecessors: {0}",
                         operator));
             }
-            if (Operators.getSuccessors(operator).isEmpty()) {
+            if (Operators.hasSuccessors(operator) == false) {
                 throw new IllegalArgumentException(MessageFormat.format(
                         "sub-plan input must have at least one successor: {0}",
                         operator));
@@ -87,12 +87,12 @@ public final class BasicSubPlan extends AbstractAttributeContainer implements Su
                         "sub-plan output must be a plan marker: {0}",
                         operator));
             }
-            if (Operators.getSuccessors(operator).isEmpty() == false) {
+            if (Operators.hasSuccessors(operator)) {
                 throw new IllegalArgumentException(MessageFormat.format(
                         "sub-plan output must not have any successors: {0}",
                         operator));
             }
-            if (Operators.getPredecessors(operator).isEmpty()) {
+            if (Operators.hasPredecessors(operator) == false) {
                 throw new IllegalArgumentException(MessageFormat.format(
                         "sub-plan output must have at least one predecessor: {0}",
                         operator));
@@ -110,6 +110,7 @@ public final class BasicSubPlan extends AbstractAttributeContainer implements Su
     }
 
     private void validate() {
+        /* NOTE: it is too strict
         for (Operator operator : operators) {
             if (PlanMarkers.get(operator) != null) {
                 if (inputs.containsKey(operator) == false && outputs.containsKey(operator) == false) {
@@ -119,6 +120,7 @@ public final class BasicSubPlan extends AbstractAttributeContainer implements Su
                 }
             }
         }
+        */
         Set<Operator> effectives = computeEffectiveOperators();
         if (operators.equals(effectives) == false) {
             assert operators.equals(Operators.getTransitiveConnected(operators));

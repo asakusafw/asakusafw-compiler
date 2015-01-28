@@ -36,12 +36,13 @@ public final class PlanBuilder {
      * @param operators the source operators
      * @return the created instance
      */
-    public static PlanBuilder from(Set<? extends Operator> operators) {
+    public static PlanBuilder from(Collection<? extends Operator> operators) {
         return new PlanBuilder(Operators.getTransitiveConnected(operators));
     }
 
     /**
      * Adds a sub-plan with specified inputs and outputs.
+     * The specified inputs and outputs must satisfy following preconditions:
      * <ol>
      * <li> inputs and outputs are neither empty </li>
      * <li> inputs and outputs are disjoint </li>
@@ -57,12 +58,10 @@ public final class PlanBuilder {
      *
      * This organizes a sub-plan with following properties:
      * <ol>
+     * <li> the sub-plan satisfies {@link SubPlan the common invariants of sub-plan} </li>
      * <li> all operators (include inputs and outputs) are copied from the original sources </li>
-     * <li> each operator connection is limited in the sub-plan </li>
      * <li> each input of sub-plan is copied from the original input operator </li>
      * <li> each output of sub-plan is copied from the original output operator </li>
-     * <li> each operator is reachable from at least one input </li>
-     * <li> each operator is reachable to at least one output </li>
      * <li>
      *      if some outputs are in the other sub-plan's inputs,
      *      the organizing sub-plan will become a predecessor of the target sub-plans
@@ -153,7 +152,7 @@ public final class PlanBuilder {
     }
 
     private void validateReachable(Set<MarkerOperator> inputs, Set<MarkerOperator> outputs) {
-        Set<Operator> saw = new LinkedHashSet<Operator>();
+        Set<Operator> saw = new LinkedHashSet<>();
         for (MarkerOperator operator : inputs) {
             Set<Operator> reachables = Operators.findNearestReachableSuccessors(
                     operator.getOutputs(), Planning.PLAN_MARKERS);
@@ -201,11 +200,11 @@ public final class PlanBuilder {
         range.addAll(Operators.collectUntilNearestReachableSuccessors(
                 Operators.getOutputs(in),
                 Planning.PLAN_MARKERS,
-                true));
+                false));
         range.retainAll(Operators.collectUntilNearestReachablePredecessors(
                 Operators.getInputs(out),
                 Planning.PLAN_MARKERS,
-                true));
+                false));
         range.addAll(in);
         range.addAll(out);
         return range;

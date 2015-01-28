@@ -35,7 +35,7 @@ public class PlanDetail {
     private final Map<Operator, Map<SubPlan, Operator>> sourceMap;
 
     // copy -> (source, sub-plan)
-    private final Map<Operator, Mapping> operatorMap;
+    private final Map<Operator, Mapping> copyMap;
 
     /**
      * Creates a new instance.
@@ -45,19 +45,19 @@ public class PlanDetail {
     public PlanDetail(Plan plan, Map<? extends Operator, ? extends Operator> mapping) {
         this.plan = plan;
         this.sourceMap = new HashMap<>();
-        this.operatorMap = new HashMap<>();
+        this.copyMap = new HashMap<>();
         for (SubPlan sub : plan.getElements()) {
             for (Operator copy : sub.getOperators()) {
                 Operator source = mapping.get(copy);
-                if (operatorMap.containsKey(copy)) {
-                    Mapping conflict = operatorMap.get(copy);
+                if (copyMap.containsKey(copy)) {
+                    Mapping conflict = copyMap.get(copy);
                     throw new IllegalArgumentException(MessageFormat.format(
                             "operator \"{0}\" must be unique: {1} <=> {2}",
                             copy,
                             conflict.owner,
                             sub));
                 }
-                operatorMap.put(copy, new Mapping(source, sub));
+                copyMap.put(copy, new Mapping(source, sub));
                 if (source != null) {
                     addSourceMap(source, sub, copy);
                 }
@@ -87,6 +87,22 @@ public class PlanDetail {
      */
     public Plan getPlan() {
         return plan;
+    }
+
+    /**
+     * Returns the all source operators.
+     * @return the all source operators
+     */
+    public Set<Operator> getSources() {
+        return Collections.unmodifiableSet(sourceMap.keySet());
+    }
+
+    /**
+     * Returns the all copies from source operators.
+     * @return the all copies from source operators
+     */
+    public Set<Operator> getCopies() {
+        return Collections.unmodifiableSet(copyMap.keySet());
     }
 
     /**
@@ -125,7 +141,7 @@ public class PlanDetail {
      * @see #getCopies(Operator)
      */
     public Operator getSource(Operator copy) {
-        Mapping mapping = operatorMap.get(copy);
+        Mapping mapping = copyMap.get(copy);
         if (mapping == null) {
             return null;
         }
@@ -140,7 +156,7 @@ public class PlanDetail {
      * @see #getCopies(Operator)
      */
     public SubPlan getOwner(Operator copy) {
-        Mapping mapping = operatorMap.get(copy);
+        Mapping mapping = copyMap.get(copy);
         if (mapping == null) {
             if (sourceMap.containsKey(copy)) {
                 throw new IllegalArgumentException(MessageFormat.format(

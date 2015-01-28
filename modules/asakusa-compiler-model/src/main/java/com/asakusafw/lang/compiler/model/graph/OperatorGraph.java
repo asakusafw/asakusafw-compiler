@@ -195,7 +195,7 @@ public class OperatorGraph {
         for (Map.Entry<OperatorInput, OperatorInput> entry : inputs.entrySet()) {
             OperatorInput from = entry.getKey();
             OperatorInput to = entry.getValue();
-            assert to.getOpposites().isEmpty();
+            assert to.hasOpposites() == false;
             for (OperatorOutput upstream : from.getOpposites()) {
                 if (outputs.containsKey(upstream)) {
                     OperatorOutput mapped = outputs.get(upstream);

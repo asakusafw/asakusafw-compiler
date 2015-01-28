@@ -34,6 +34,12 @@ public interface OperatorPort extends OperatorProperty {
     void disconnectAll();
 
     /**
+     * Returns whether this port has at least one opposite or not.
+     * @return {@code true} if this port has any opposites
+     */
+    boolean hasOpposites();
+
+    /**
      * Returns the opposite ports.
      * @return the opposite ports
      */

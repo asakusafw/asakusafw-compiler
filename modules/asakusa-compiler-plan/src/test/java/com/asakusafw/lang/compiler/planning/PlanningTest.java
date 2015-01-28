@@ -4,14 +4,8 @@ import static com.asakusafw.lang.compiler.model.graph.Operators.*;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.hamcrest.FeatureMatcher;
-import org.hamcrest.Matcher;
 import org.junit.Test;
 
 import com.asakusafw.lang.compiler.model.graph.Operator;
@@ -25,7 +19,7 @@ import com.asakusafw.lang.compiler.model.graph.Operators;
  * Test for {@link Planning}.
  * TODO next phase
  */
-public class PlanningTest {
+public class PlanningTest extends PlanningTestRoot {
 
     /**
      * normalize - insert begin/end markers.
@@ -143,7 +137,7 @@ public class PlanningTest {
         Planning.normalize(g);
         Planning.removeDeadFlow(g);
         validateDeadFlowElimination(g);
-        assertThat(g, hasOperators("in", "a", "out"));
+        assertThat(g, hasOperatorGraph("in", "a", "out"));
     }
 
     /**
@@ -161,7 +155,7 @@ public class PlanningTest {
         Planning.normalize(g);
         Planning.removeDeadFlow(g);
         validateDeadFlowElimination(g);
-        assertThat(g, hasOperators("in", "a", "out"));
+        assertThat(g, hasOperatorGraph("in", "a", "out"));
     }
 
     /**
@@ -179,7 +173,7 @@ public class PlanningTest {
         Planning.normalize(g);
         Planning.removeDeadFlow(g);
         validateDeadFlowElimination(g);
-        assertThat(g, hasOperators("in", "a", "out"));
+        assertThat(g, hasOperatorGraph("in", "a", "out"));
     }
 
     /**
@@ -233,9 +227,26 @@ public class PlanningTest {
         validateSimplifyTerminators(g);
     }
 
-    @SafeVarargs
-    private static <T> Set<T> set(T... values) {
-        return new LinkedHashSet<>(Arrays.asList(values));
+    /**
+     * primitive plan - simple case.
+     */
+    @Test
+    public void primitive_plan_simple() {
+        MockOperators mock = new MockOperators()
+            .input("in")
+            .operator("a").connect("in.*", "a.*")
+            .output("out").connect("a.*", "out.*");
+        OperatorGraph g = mock.toGraph();
+        Planning.normalize(g);
+
+        PlanDetail detail = Planning.createPrimitivePlan(g);
+        Plan plan = detail.getPlan();
+        assertThat(plan.getElements(), hasSize(1));
+
+        SubPlan s = ownerOf(detail, mock.get("a"));
+        assertThat(s.getInputs(), hasSize(1));
+        assertThat(s.getOutputs(), hasSize(1));
+        assertThat(s.getOperators(), hasSize(5));
     }
 
     private void validateDeadFlowElimination(OperatorGraph g) {
@@ -283,7 +294,6 @@ public class PlanningTest {
         }
     }
 
-
     private void validateSimplifyTerminators(OperatorGraph g) {
         g.rebuild();
         for (Operator operator : g.getOperators()) {
@@ -323,56 +333,5 @@ public class PlanningTest {
                 assertThat(succs, hasSize(1));
             }
         }
-    }
-
-    private Matcher<OperatorGraph> hasOperators(String... ids) {
-        return new FeatureMatcher<OperatorGraph, Set<String>>(equalTo(set(ids)), "has operators", "operators") {
-            @Override
-            protected Set<String> featureValueOf(OperatorGraph actual) {
-                MockOperators mock = new MockOperators(actual.getOperators());
-                Set<String> results = new HashSet<>();
-                for (Operator operator : mock.all()) {
-                    results.add(mock.id(operator));
-                }
-                return results;
-            }
-        };
-    }
-
-    private static Matcher<Operator> hasConstraint(OperatorConstraint constraint) {
-        return new FeatureMatcher<Operator, Set<OperatorConstraint>>(hasItem(constraint), "has constraint", "constraint") {
-            @Override
-            protected Set<OperatorConstraint> featureValueOf(Operator actual) {
-                return actual.getConstraints();
-            }
-        };
-    }
-
-    private static Matcher<Operator> hasMarker(PlanMarker marker) {
-        return new FeatureMatcher<Operator, PlanMarker>(equalTo(marker), "has marker", "marker") {
-            @Override
-            protected PlanMarker featureValueOf(Operator actual) {
-                return PlanMarkers.get(actual);
-            }
-        };
-    }
-
-    private static Operators.Predicate<Operator> only(final OperatorConstraint constraint) {
-        return new Operators.Predicate<Operator>() {
-            @Override
-            public boolean apply(Operator argument) {
-                return argument.getConstraints().contains(constraint);
-            }
-        };
-    }
-
-    private static Set<Operator> only(PlanMarker marker, Collection<? extends Operator> operators) {
-        Set<Operator> results = new LinkedHashSet<>();
-        for (Operator operator : operators) {
-            if (PlanMarkers.get(operator) == marker) {
-                results.add(operator);
-            }
-        }
-        return results;
     }
 }
