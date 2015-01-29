@@ -38,7 +38,7 @@ public class PlanMarkersTest {
             .operator("b", "in", "out")
             .connect("a.out", "b.in")
             .bless("m", PlanMarkers.insert(PlanMarker.BEGIN, operators.getInput("a.in")))
-            .assertConnected("m.*", "a.in");
+            .assertConnected("m", "a.in");
     }
 
     /**
@@ -52,8 +52,8 @@ public class PlanMarkersTest {
             .operator("b", "in", "out")
             .connect("a.out", "b.in")
             .bless("m", PlanMarkers.insert(PlanMarker.BEGIN, operators.getInput("b.in")))
-            .assertConnected("m.*", "b.in")
-            .assertConnected("a.out", "m.*")
+            .assertConnected("m", "b.in")
+            .assertConnected("a.out", "m")
             .assertConnected("a.out", "b.in", false);
     }
 
@@ -68,7 +68,7 @@ public class PlanMarkersTest {
             .operator("b", "in", "out")
             .connect("a.out", "b.in")
             .bless("m", PlanMarkers.insert(PlanMarker.END, operators.getOutput("b.out")))
-            .assertConnected("b.out", "m.*");
+            .assertConnected("b.out", "m");
     }
 
     /**
@@ -82,8 +82,8 @@ public class PlanMarkersTest {
             .operator("b", "in", "out")
             .connect("a.out", "b.in")
             .bless("m", PlanMarkers.insert(PlanMarker.END, operators.getOutput("a.out")))
-            .assertConnected("a.out", "m.*")
-            .assertConnected("m.*", "b.in")
+            .assertConnected("a.out", "m")
+            .assertConnected("m", "b.in")
             .assertConnected("a.out", "b.in", false);
     }
 
@@ -104,11 +104,11 @@ public class PlanMarkersTest {
             .connect("a1.out", "b1.in")
             .bless("m", PlanMarkers.insert(
                     PlanMarker.CHECKPOINT, operators.getOutput("a0.out"), operators.getInput("b0.in")))
-            .assertConnected("a0.out", "m.*")
-            .assertConnected("m.*", "b0.in")
-            .assertConnected("a1.out", "m.*", false)
-            .assertConnected("m.*", "b1.in", false)
-            .assertConnected("a1.out", "m.*", false)
+            .assertConnected("a0.out", "m")
+            .assertConnected("m", "b0.in")
+            .assertConnected("a1.out", "m", false)
+            .assertConnected("m", "b1.in", false)
+            .assertConnected("a1.out", "m", false)
             .assertConnected("a0.out", "b0.in", false)
             .assertConnected("a1.out", "b0.in")
             .assertConnected("a0.out", "b1.in")

@@ -32,6 +32,8 @@ public class CoreOperatorTest {
         assertThat(operator.findOutput("out").getDataType(), is((Object) typeOf(Integer.class)));
         assertThat(operator.findOutput("out").getOwner(), is(sameInstance((Object) operator)));
         assertThat(operator.findArgument("type").getValue(), is(valueOf(Integer.class)));
+
+        assertThat(operator.getOriginalSerialNumber(), is(operator.getSerialNumber()));
     }
 
     /**
@@ -53,5 +55,8 @@ public class CoreOperatorTest {
         assertThat(copy.findOutput("out").getDataType(), is((Object) typeOf(Integer.class)));
         assertThat(copy.findOutput("out").getOwner(), is(sameInstance((Object) copy)));
         assertThat(copy.findArgument("type").getValue(), is(valueOf(Integer.class)));
+
+        assertThat(copy.getSerialNumber(), is(not(operator.getSerialNumber())));
+        assertThat(copy.getOriginalSerialNumber(), is(operator.getOriginalSerialNumber()));
     }
 }

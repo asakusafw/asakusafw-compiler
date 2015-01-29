@@ -32,7 +32,7 @@ public class PlanDetail {
     private final Plan plan;
 
     // source -> copy*
-    private final Map<Operator, Map<SubPlan, Operator>> sourceMap;
+    private final Map<Operator, Occurrence> sourceMap;
 
     // copy -> (source, sub-plan)
     private final Map<Operator, Mapping> copyMap;
@@ -66,19 +66,12 @@ public class PlanDetail {
     }
 
     private void addSourceMap(Operator source, SubPlan sub, Operator copy) {
-        Map<SubPlan, Operator> copies = sourceMap.get(source);
-        if (copies == null) {
-            sourceMap.put(source, Collections.singletonMap(sub, copy));
-        } else if (copies.size() == 1) {
-            Map<SubPlan, Operator> newCopies = new HashMap<>();
-            newCopies.putAll(copies);
-            assert newCopies.containsKey(sub) == false : sub;
-            newCopies.put(sub, copy);
-            sourceMap.put(source, newCopies);
-        } else {
-            assert copies.containsKey(sub) == false : sub;
-            copies.put(sub, copy);
+        Occurrence occurrence = sourceMap.get(source);
+        if (occurrence == null) {
+            occurrence = new Occurrence();
+            sourceMap.put(source, occurrence);
         }
+        occurrence.add(sub, copy);
     }
 
     /**
@@ -112,11 +105,11 @@ public class PlanDetail {
      * @see #getSource(Operator)
      */
     public Set<Operator> getCopies(Operator source) {
-        Map<SubPlan, Operator> copies = sourceMap.get(source);
-        if (copies == null) {
+        Occurrence occurrence = sourceMap.get(source);
+        if (occurrence == null) {
             return Collections.emptySet();
         }
-        return new HashSet<>(copies.values());
+        return occurrence.getCopies();
     }
 
     /**
@@ -126,12 +119,12 @@ public class PlanDetail {
      * @return the copy of operator, or {@code null} if there is no such an operator
      * @see #getSource(Operator)
      */
-    public Operator getCopy(Operator source, SubPlan owner) {
-        Map<SubPlan, Operator> copies = sourceMap.get(source);
-        if (copies == null) {
-            return null;
+    public Set<Operator> getCopies(Operator source, SubPlan owner) {
+        Occurrence occurrence = sourceMap.get(source);
+        if (occurrence == null) {
+            return Collections.emptySet();
         }
-        return copies.get(owner);
+        return occurrence.getCopies(owner);
     }
 
     /**
@@ -174,9 +167,46 @@ public class PlanDetail {
 
         final SubPlan owner;
 
-        Mapping(Operator source, SubPlan appearance) {
+        Mapping(Operator source, SubPlan owner) {
             this.source = source;
-            this.owner = appearance;
+            this.owner = owner;
+        }
+    }
+
+    private static final class Occurrence {
+
+        private final Map<SubPlan, Set<Operator>> ownerAndCopies = new HashMap<>(1);
+
+        Occurrence() {
+            return;
+        }
+
+        void add(SubPlan owner, Operator copy) {
+            Set<Operator> copies = ownerAndCopies.get(owner);
+            if (copies == null) {
+                copies = new HashSet<>(1);
+                ownerAndCopies.put(owner, copies);
+            }
+            copies.add(copy);
+        }
+
+        Set<Operator> getCopies() {
+            if (ownerAndCopies.isEmpty()) {
+                return Collections.emptySet();
+            }
+            Set<Operator> results = new HashSet<>();
+            for (Set<Operator> copies : ownerAndCopies.values()) {
+                results.addAll(copies);
+            }
+            return Collections.unmodifiableSet(results);
+        }
+
+        Set<Operator> getCopies(SubPlan owner) {
+            Set<Operator> copies = ownerAndCopies.get(owner);
+            if (copies == null) {
+                return Collections.emptySet();
+            }
+            return Collections.unmodifiableSet(copies);
         }
     }
 }

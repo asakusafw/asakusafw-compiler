@@ -1,4 +1,4 @@
-package com.asakusafw.lang.compiler.planning;
+package com.asakusafw.lang.compiler.planning.basic;
 
 import static com.asakusafw.lang.compiler.planning.PlanMarker.*;
 import static org.hamcrest.Matchers.*;
@@ -9,6 +9,14 @@ import java.util.Set;
 import org.junit.Test;
 
 import com.asakusafw.lang.compiler.model.graph.OperatorGraph;
+import com.asakusafw.lang.compiler.planning.MockOperators;
+import com.asakusafw.lang.compiler.planning.Plan;
+import com.asakusafw.lang.compiler.planning.PlanDetail;
+import com.asakusafw.lang.compiler.planning.PlanMarker;
+import com.asakusafw.lang.compiler.planning.PlanMarkers;
+import com.asakusafw.lang.compiler.planning.Planning;
+import com.asakusafw.lang.compiler.planning.PlanningTestRoot;
+import com.asakusafw.lang.compiler.planning.SubPlan;
 
 /**
  * Test for {@link PrimitivePlanner}.
@@ -22,8 +30,8 @@ public class PrimitivePlannerTest extends PlanningTestRoot {
     public void simple() {
         MockOperators mock = new MockOperators()
             .input("in")
-            .operator("a").connect("in.*", "a.*")
-            .output("out").connect("a.*", "out.*");
+            .operator("a").connect("in", "a")
+            .output("out").connect("a", "out");
 
         PlanDetail detail = plan(mock);
         Plan plan = detail.getPlan();
@@ -42,12 +50,12 @@ public class PrimitivePlannerTest extends PlanningTestRoot {
     public void straight() {
         MockOperators mock = new MockOperators()
             .input("in")
-            .operator("o0").connect("in.*", "o0.*")
-            .marker("c0", CHECKPOINT).connect("o0.*", "c0.*")
-            .operator("o1").connect("c0.*", "o1.*")
-            .marker("c1", CHECKPOINT).connect("o1.*", "c1.*")
-            .operator("o2").connect("c1.*", "o2.*")
-            .output("out").connect("o2.*", "out.*");
+            .operator("o0").connect("in", "o0")
+            .marker("c0", CHECKPOINT).connect("o0", "c0")
+            .operator("o1").connect("c0", "o1")
+            .marker("c1", CHECKPOINT).connect("o1", "c1")
+            .operator("o2").connect("c1", "o2")
+            .output("out").connect("o2", "out");
 
         PlanDetail detail = plan(mock);
         Plan plan = detail.getPlan();
@@ -87,9 +95,9 @@ public class PrimitivePlannerTest extends PlanningTestRoot {
         MockOperators mock = new MockOperators()
             .marker("b0", BEGIN)
             .marker("b1", BEGIN)
-            .operator("o0").connect("b0.*", "o0.*")
-            .operator("o1").connect("b1.*", "o1.*")
-            .marker("e0", END).connect("o0.*", "e0.*").connect("o1.*", "e0.*");
+            .operator("o0").connect("b0", "o0")
+            .operator("o1").connect("b1", "o1")
+            .marker("e0", END).connect("o0", "e0").connect("o1", "e0");
 
         PlanDetail detail = plan(mock);
         Plan plan = detail.getPlan();
@@ -118,10 +126,10 @@ public class PrimitivePlannerTest extends PlanningTestRoot {
     public void minimal_outputs() {
         MockOperators mock = new MockOperators()
             .marker("b0", BEGIN)
-            .operator("o0").connect("b0.*", "o0.*")
-            .operator("o1").connect("b0.*", "o1.*")
-            .marker("e0", END).connect("o0.*", "e0.*")
-            .marker("e1", END).connect("o1.*", "e1.*");
+            .operator("o0").connect("b0", "o0")
+            .operator("o1").connect("b0", "o1")
+            .marker("e0", END).connect("o0", "e0")
+            .marker("e1", END).connect("o1", "e1");
 
         PlanDetail detail = plan(mock);
         Plan plan = detail.getPlan();
@@ -151,12 +159,12 @@ public class PrimitivePlannerTest extends PlanningTestRoot {
         MockOperators mock = new MockOperators()
             .marker("b0", BEGIN)
             .marker("b1", BEGIN)
-            .operator("o0").connect("b0.*", "o0.*")
-            .operator("o1").connect("b1.*", "o1.*")
-            .operator("o2").connect("o0.*", "o2.*").connect("o1.*", "o2.*")
-            .operator("o3").connect("o0.*", "o3.*").connect("o1.*", "o3.*")
-            .marker("e0", END).connect("o2.*", "e0.*")
-            .marker("e1", END).connect("o3.*", "e1.*");
+            .operator("o0").connect("b0", "o0")
+            .operator("o1").connect("b1", "o1")
+            .operator("o2").connect("o0", "o2").connect("o1", "o2")
+            .operator("o3").connect("o0", "o3").connect("o1", "o3")
+            .marker("e0", END).connect("o2", "e0")
+            .marker("e1", END).connect("o3", "e1");
 
         PlanDetail detail = plan(mock);
         Plan plan = detail.getPlan();
@@ -200,10 +208,10 @@ public class PrimitivePlannerTest extends PlanningTestRoot {
         MockOperators mock = new MockOperators()
             .marker("b0", BEGIN)
             .marker("b1", BEGIN)
-            .marker("c0", GATHER).connect("b0.*", "c0.*")
-            .marker("c1", GATHER).connect("b1.*", "c1.*")
-            .operator("o0").connect("c0.*", "o0.*").connect("c1.*", "o0.*")
-            .marker("e0", END).connect("o0.*", "e0.*");
+            .marker("c0", GATHER).connect("b0", "c0")
+            .marker("c1", GATHER).connect("b1", "c1")
+            .operator("o0").connect("c0", "o0").connect("c1", "o0")
+            .marker("e0", END).connect("o0", "e0");
 
         PlanDetail detail = plan(mock);
         Plan plan = detail.getPlan();
@@ -228,10 +236,10 @@ public class PrimitivePlannerTest extends PlanningTestRoot {
         MockOperators mock = new MockOperators()
             .marker("b0", BEGIN)
             .marker("b1", BEGIN)
-            .marker("c0", CHECKPOINT).connect("b0.*", "c0.*")
-            .marker("c1", BROADCAST).connect("b1.*", "c1.*")
-            .operator("o0").connect("c0.*", "o0.*").connect("c1.*", "o0.*")
-            .marker("e0", END).connect("o0.*", "e0.*");
+            .marker("c0", CHECKPOINT).connect("b0", "c0")
+            .marker("c1", BROADCAST).connect("b1", "c1")
+            .operator("o0").connect("c0", "o0").connect("c1", "o0")
+            .marker("e0", END).connect("o0", "e0");
 
         PlanDetail detail = plan(mock);
         Plan plan = detail.getPlan();
@@ -257,11 +265,11 @@ public class PrimitivePlannerTest extends PlanningTestRoot {
             .marker("b0", BEGIN)
             .marker("b1", BEGIN)
             .marker("b2", BEGIN)
-            .marker("c0", GATHER).connect("b0.*", "c0.*")
-            .marker("c1", GATHER).connect("b1.*", "c1.*")
-            .marker("c2", BROADCAST).connect("b2.*", "c2.*")
-            .operator("o0").connect("c0.*", "o0.*").connect("c1.*", "o0.*").connect("c2.*", "o0.*")
-            .marker("e0", END).connect("o0.*", "e0.*");
+            .marker("c0", GATHER).connect("b0", "c0")
+            .marker("c1", GATHER).connect("b1", "c1")
+            .marker("c2", BROADCAST).connect("b2", "c2")
+            .operator("o0").connect("c0", "o0").connect("c1", "o0").connect("c2", "o0")
+            .marker("e0", END).connect("o0", "e0");
 
         PlanDetail detail = plan(mock);
         Plan plan = detail.getPlan();
@@ -286,7 +294,7 @@ public class PrimitivePlannerTest extends PlanningTestRoot {
     public void invalid_no_predecessors() {
         MockOperators mock = new MockOperators()
             .operator("o0")
-            .marker("e0", END).connect("o0.*", "e0.*");
+            .marker("e0", END).connect("o0", "e0");
         Planning.createPrimitivePlan(mock.toGraph());
     }
 
@@ -297,7 +305,7 @@ public class PrimitivePlannerTest extends PlanningTestRoot {
     public void invalid_no_successors() {
         MockOperators mock = new MockOperators()
             .marker("b0", BEGIN)
-            .operator("o0").connect("b0.*", "o0.*");
+            .operator("o0").connect("b0", "o0");
         Planning.createPrimitivePlan(mock.toGraph());
     }
 
@@ -308,10 +316,27 @@ public class PrimitivePlannerTest extends PlanningTestRoot {
     public void invalid_gather_w_many_successors() {
         MockOperators mock = new MockOperators()
             .marker("b0", BEGIN)
-            .marker("b1", GATHER).connect("b0.*", "b1.*")
-            .operator("o0").connect("b1.*", "o0.*")
-            .operator("o1").connect("b1.*", "o1.*")
-            .marker("e0", END).connect("o0.*", "e0.*").connect("o1.*", "e0.*");
+            .marker("b1", GATHER).connect("b0", "b1")
+            .operator("o0").connect("b1", "o0")
+            .operator("o1").connect("b1", "o1")
+            .marker("e0", END).connect("o0", "e0").connect("o1", "e0");
+        Planning.createPrimitivePlan(mock.toGraph());
+    }
+
+    /**
+     * invalid nearest forward reachable plan markers of gathering operator.
+     */
+    @Test(expected = RuntimeException.class)
+    public void invalid_gathering_operator() {
+        MockOperators mock = new MockOperators()
+            .marker("b0", BEGIN)
+            .marker("b1", BEGIN)
+            .marker("b2", BEGIN)
+            .marker("c0", GATHER).connect("b0", "c0")
+            .marker("c1", CHECKPOINT).connect("b1", "c1")
+            .marker("c2", BROADCAST).connect("b2", "c2")
+            .operator("o0").connect("c0", "o0").connect("c1", "o0").connect("c2", "o0")
+            .marker("e0", END).connect("o0", "e0");
         Planning.createPrimitivePlan(mock.toGraph());
     }
 
@@ -322,10 +347,10 @@ public class PrimitivePlannerTest extends PlanningTestRoot {
     public void invalid_broadcast_wo_consumer() {
         MockOperators mock = new MockOperators()
             .marker("b0", BEGIN)
-            .marker("c0", CHECKPOINT).connect("b0.*", "c0.*")
-            .marker("c1", BROADCAST).connect("b0.*", "c1.*")
-            .operator("o0").connect("c0.*", "o0.*").connect("c1.*", "o0.*")
-            .marker("e0", END).connect("o0.*", "e0.*").connect("c1.*", "e0.*");
+            .marker("c0", CHECKPOINT).connect("b0", "c0")
+            .marker("c1", BROADCAST).connect("b0", "c1")
+            .operator("o0").connect("c0", "o0").connect("c1", "o0")
+            .marker("e0", END).connect("o0", "e0").connect("c1", "e0");
         Planning.createPrimitivePlan(mock.toGraph());
     }
 

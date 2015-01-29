@@ -172,6 +172,7 @@ public class OperatorGraph {
         Map<OperatorOutput, OperatorOutput> outputs = new HashMap<>();
         for (Operator operator : operators) {
             Operator copy = operator.copy();
+            assert operator.getOriginalSerialNumber() == copy.getOriginalSerialNumber();
             map.put(operator, copy);
             List<? extends OperatorProperty> from = operator.getProperties();
             List<? extends OperatorProperty> to = copy.getProperties();

@@ -17,7 +17,6 @@ import com.asakusafw.lang.compiler.model.graph.Operators;
 
 /**
  * Test for {@link Planning}.
- * TODO next phase
  */
 public class PlanningTest extends PlanningTestRoot {
 
@@ -28,8 +27,8 @@ public class PlanningTest extends PlanningTestRoot {
     public void normalize_markers() {
         MockOperators mock = new MockOperators()
             .input("in")
-            .operator("a", "i0,i1", "o0,o1").connect("in.*", "a.i0")
-            .output("out").connect("a.o0", "out.*");
+            .operator("a", "i0,i1", "o0,o1").connect("in", "a.i0")
+            .output("out").connect("a.o0", "out");
         OperatorGraph g = mock.toGraph();
         Planning.normalize(g);
         assertThat(g.getOperators(), hasSize(7));
@@ -61,13 +60,13 @@ public class PlanningTest extends PlanningTestRoot {
             .input("in2")
             .flow("f", new MockOperators()
                 .input("fin")
-                .operator("a").connect("fin.*", "a.*")
-                .operator("b").connect("fin.*", "b.*")
-                .output("fout").connect("a.*", "fout.*").connect("b.*", "fout.*")
+                .operator("a").connect("fin", "a")
+                .operator("b").connect("fin", "b")
+                .output("fout").connect("a", "fout").connect("b", "fout")
                 .toGraph())
-            .connect("in1.*", "f.*").connect("in2.*", "f.*")
-            .output("out1").connect("f.*", "out1.*")
-            .output("out2").connect("f.*", "out2.*");
+            .connect("in1", "f").connect("in2", "f")
+            .output("out1").connect("f", "out1")
+            .output("out2").connect("f", "out2");
         OperatorGraph g = mock.toGraph();
         Planning.normalize(g);
         assertThat(g.getOperators(), hasSize(10));
@@ -75,14 +74,14 @@ public class PlanningTest extends PlanningTestRoot {
         assertThat(only(PlanMarker.END, g.getOperators()), hasSize(2));
 
         mock = new MockOperators(g.rebuild().getOperators());
-        mock.assertConnected("in1.*", "a.*")
-            .assertConnected("in1.*", "b.*")
-            .assertConnected("in2.*", "a.*")
-            .assertConnected("in2.*", "b.*")
-            .assertConnected("a.*", "out1.*")
-            .assertConnected("a.*", "out2.*")
-            .assertConnected("b.*", "out1.*")
-            .assertConnected("b.*", "out2.*");
+        mock.assertConnected("in1", "a")
+            .assertConnected("in1", "b")
+            .assertConnected("in2", "a")
+            .assertConnected("in2", "b")
+            .assertConnected("a", "out1")
+            .assertConnected("a", "out2")
+            .assertConnected("b", "out1")
+            .assertConnected("b", "out2");
     }
 
     /**
@@ -97,16 +96,16 @@ public class PlanningTest extends PlanningTestRoot {
                 .input("fin")
                 .flow("g", new MockOperators()
                         .input("gin")
-                        .operator("a").connect("gin.*", "a.*")
-                        .operator("b").connect("gin.*", "b.*")
-                        .output("gout").connect("a.*", "gout.*").connect("b.*", "gout.*")
+                        .operator("a").connect("gin", "a")
+                        .operator("b").connect("gin", "b")
+                        .output("gout").connect("a", "gout").connect("b", "gout")
                         .toGraph())
-                .connect("fin.*", "g.*")
-                .output("fout").connect("g.*", "fout.*")
+                .connect("fin", "g")
+                .output("fout").connect("g", "fout")
                 .toGraph())
-            .connect("in1.*", "f.*").connect("in2.*", "f.*")
-            .output("out1").connect("f.*", "out1.*")
-            .output("out2").connect("f.*", "out2.*");
+            .connect("in1", "f").connect("in2", "f")
+            .output("out1").connect("f", "out1")
+            .output("out2").connect("f", "out2");
         OperatorGraph g = mock.toGraph();
         Planning.normalize(g);
         assertThat(g.getOperators(), hasSize(10));
@@ -114,14 +113,14 @@ public class PlanningTest extends PlanningTestRoot {
         assertThat(only(PlanMarker.END, g.getOperators()), hasSize(2));
 
         mock = new MockOperators(g.rebuild().getOperators());
-        mock.assertConnected("in1.*", "a.*")
-            .assertConnected("in1.*", "b.*")
-            .assertConnected("in2.*", "a.*")
-            .assertConnected("in2.*", "b.*")
-            .assertConnected("a.*", "out1.*")
-            .assertConnected("a.*", "out2.*")
-            .assertConnected("b.*", "out1.*")
-            .assertConnected("b.*", "out2.*");
+        mock.assertConnected("in1", "a")
+            .assertConnected("in1", "b")
+            .assertConnected("in2", "a")
+            .assertConnected("in2", "b")
+            .assertConnected("a", "out1")
+            .assertConnected("a", "out2")
+            .assertConnected("b", "out1")
+            .assertConnected("b", "out2");
     }
 
     /**
@@ -131,8 +130,8 @@ public class PlanningTest extends PlanningTestRoot {
     public void removeDeadFlow_simple() {
         MockOperators mock = new MockOperators()
             .input("in")
-            .operator("a").connect("in.*", "a.*")
-            .output("out").connect("a.*", "out.*");
+            .operator("a").connect("in", "a")
+            .output("out").connect("a", "out");
         OperatorGraph g = mock.toGraph();
         Planning.normalize(g);
         Planning.removeDeadFlow(g);
@@ -147,10 +146,10 @@ public class PlanningTest extends PlanningTestRoot {
     public void removeDeadFlow_redundant_upstreams() {
         MockOperators mock = new MockOperators()
             .input("in")
-            .operator("a").connect("in.*", "a.*")
-            .output("out").connect("a.*", "out.*")
-            .operator("d").connect("d.*", "a.*")
-            .operator("dung").connect("dung.*", "d.*");
+            .operator("a").connect("in", "a")
+            .output("out").connect("a", "out")
+            .operator("d").connect("d", "a")
+            .operator("dung").connect("dung", "d");
         OperatorGraph g = mock.toGraph();
         Planning.normalize(g);
         Planning.removeDeadFlow(g);
@@ -165,10 +164,10 @@ public class PlanningTest extends PlanningTestRoot {
     public void removeDeadFlow_redundant_downstreams() {
         MockOperators mock = new MockOperators()
             .input("in")
-            .operator("a").connect("in.*", "a.*")
-            .output("out").connect("a.*", "out.*")
-            .operator("d").connect("a.*", "d.*")
-            .operator("dung").connect("d.*", "dung.*");
+            .operator("a").connect("in", "a")
+            .output("out").connect("a", "out")
+            .operator("d").connect("a", "d")
+            .operator("dung").connect("d", "dung");
         OperatorGraph g = mock.toGraph();
         Planning.normalize(g);
         Planning.removeDeadFlow(g);
@@ -183,8 +182,8 @@ public class PlanningTest extends PlanningTestRoot {
     public void simplifyTerminators_simple() {
         MockOperators mock = new MockOperators()
             .input("in")
-            .operator("a").connect("in.*", "a.*")
-            .output("out").connect("a.*", "out.*");
+            .operator("a").connect("in", "a")
+            .output("out").connect("a", "out");
         OperatorGraph g = mock.toGraph();
         Planning.normalize(g);
         Planning.simplifyTerminators(g);
@@ -198,8 +197,8 @@ public class PlanningTest extends PlanningTestRoot {
     public void simplifyTerminators_reduce_redundant_terminators() {
         MockOperators mock = new MockOperators()
             .input("in")
-            .operator("a", "in,open", "out,open").connect("in.*", "a.in")
-            .output("out").connect("a.out", "out.*");
+            .operator("a", "in,open", "out,open").connect("in", "a.in")
+            .output("out").connect("a.out", "out");
         OperatorGraph g = mock.toGraph();
         Planning.normalize(g);
         Planning.simplifyTerminators(g);
@@ -213,15 +212,15 @@ public class PlanningTest extends PlanningTestRoot {
     public void simplifyTerminators_reduce_duplicate_terminators() {
         MockOperators mock = new MockOperators()
             .input("in")
-            .operator("a").connect("in.*", "a.*")
-            .output("out").connect("a.*", "out.*");
+            .operator("a").connect("in", "a")
+            .output("out").connect("a", "out");
         OperatorGraph g = mock.toGraph();
         Planning.normalize(g);
         mock = new MockOperators(g.rebuild().getOperators())
             .marker("dup_begin", PlanMarker.BEGIN)
             .marker("dup_end", PlanMarker.END)
-            .connect("dup_begin.*", "in.*")
-            .connect("out.*", "dup_end.*");
+            .connect("dup_begin", "in")
+            .connect("out", "dup_end");
 
         Planning.simplifyTerminators(g);
         validateSimplifyTerminators(g);
@@ -234,8 +233,8 @@ public class PlanningTest extends PlanningTestRoot {
     public void primitive_plan_simple() {
         MockOperators mock = new MockOperators()
             .input("in")
-            .operator("a").connect("in.*", "a.*")
-            .output("out").connect("a.*", "out.*");
+            .operator("a").connect("in", "a")
+            .output("out").connect("a", "out");
         OperatorGraph g = mock.toGraph();
         Planning.normalize(g);
 
@@ -247,6 +246,34 @@ public class PlanningTest extends PlanningTestRoot {
         assertThat(s.getInputs(), hasSize(1));
         assertThat(s.getOutputs(), hasSize(1));
         assertThat(s.getOperators(), hasSize(5));
+    }
+
+    /**
+     * assemble plan - simple case.
+     */
+    @Test
+    public void assemble_plan_simple() {
+        MockOperators mock = new MockOperators()
+            .marker("b0", PlanMarker.BEGIN)
+            .marker("b1", PlanMarker.BEGIN)
+            .operator("o0").connect("b0", "o0")
+            .operator("o1").connect("b1", "o1")
+            .marker("e0", PlanMarker.END).connect("o0", "e0")
+            .marker("e1", PlanMarker.END).connect("o1", "e1");
+
+        PlanDetail origin = PlanBuilder.from(mock.all())
+            .add(mock.getAsSet("b0"), mock.getAsSet("e0"))
+            .add(mock.getAsSet("b1"), mock.getAsSet("e1"))
+            .build();
+        assertThat(origin.getPlan().getElements(), hasSize(2));
+
+        PlanDetail detail = Planning.startAssemblePlan(origin)
+            .add(origin.getPlan().getElements())
+            .build();
+        assertThat(detail.getPlan().getElements(), hasSize(1));
+
+        SubPlan s0 = ownerOf(detail, mock.get("o0"));
+        assertThat(s0.getOperators(), hasOperators("b0", "b1", "o0", "o1", "e0", "e1"));
     }
 
     private void validateDeadFlowElimination(OperatorGraph g) {

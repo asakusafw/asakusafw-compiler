@@ -126,6 +126,15 @@ public class OperatorInput implements OperatorPort {
         return opposites.isEmpty() == false;
     }
 
+    /**
+     * Returns whether this and the target port has the same opposites.
+     * @param other the target port
+     * @return {@code true} if the both has the same opposites, otherwise {@code false}
+     */
+    public boolean hasSameOpposites(OperatorInput other) {
+        return opposites.equals(other.opposites);
+    }
+
     @Override
     public Collection<OperatorOutput> getOpposites() {
         return Collections.unmodifiableList(new ArrayList<>(opposites));

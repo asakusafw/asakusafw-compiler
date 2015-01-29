@@ -9,27 +9,29 @@ import com.asakusafw.lang.compiler.model.graph.Operator;
  * Represents a logical execution unit of {@link Plan}.
  * <p>
  * Terminology:
+ * </p>
  * <dl>
  * <dt> <em>member operator</em> </dt>
  * <dd>
  *   each operator which is in the sub-plan.
- * <dd>
+ * </dd>
  * <dt> <em>input operator</em> </dt>
  * <dd>
  *   each operator which comprises an input of the sub-plan.
- * <dd>
+ * </dd>
  * <dt> <em>output operator</em> </dt>
  * <dd>
  *   each operator which comprises an output of the sub-plan.
- * <dd>
+ * </dd>
  * <dt> <em>body operator</em> </dt>
  * <dd>
  *   each member operator other than <em>input operator</em> and <em>output operator</em>.
- * <dd>
+ * </dd>
  * </dl>
- * </p>
+ *
  * <p>
  * Each {@link SubPlan} object must satisfy following invariants:
+ * </p>
  * <ol>
  * <li> the sub-plan must have at least one input </li>
  * <li> the sub-plan must have at least one output </li>
@@ -51,7 +53,6 @@ import com.asakusafw.lang.compiler.model.graph.Operator;
  *   any successor and predecessor of each <em>member operator</em> must be also a <em>member operator</em>
  * </li>
  * </ol>
- * </p>
  */
 public interface SubPlan extends AttributeContainer {
 
@@ -124,6 +125,13 @@ public interface SubPlan extends AttributeContainer {
     public interface Input extends Port {
 
         /**
+         * Returns whether this is connected to the specified opposite or not.
+         * @param opposite the opposite port
+         * @return {@code true} if their are connected, otherwise {@code false}
+         */
+        boolean isConnected(Output opposite);
+
+        /**
          * Returns the upstream inputs.
          */
         @Override
@@ -134,6 +142,13 @@ public interface SubPlan extends AttributeContainer {
      * Represents an input port of {@link SubPlan}.
      */
     public interface Output extends Port {
+
+        /**
+         * Returns whether this is connected to the specified opposite or not.
+         * @param opposite the opposite port
+         * @return {@code true} if their are connected, otherwise {@code false}
+         */
+        boolean isConnected(Input opposite);
 
         /**
          * Returns the downstream inputs.

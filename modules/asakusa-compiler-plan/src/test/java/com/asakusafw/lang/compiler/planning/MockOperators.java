@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -27,6 +28,7 @@ import com.asakusafw.lang.compiler.model.graph.MarkerOperator;
 import com.asakusafw.lang.compiler.model.graph.Operator;
 import com.asakusafw.lang.compiler.model.graph.Operator.OperatorKind;
 import com.asakusafw.lang.compiler.model.graph.OperatorArgument;
+import com.asakusafw.lang.compiler.model.graph.OperatorConstraint;
 import com.asakusafw.lang.compiler.model.graph.OperatorGraph;
 import com.asakusafw.lang.compiler.model.graph.OperatorInput;
 import com.asakusafw.lang.compiler.model.graph.OperatorOutput;
@@ -38,6 +40,8 @@ import com.asakusafw.lang.compiler.model.graph.UserOperator;
 public final class MockOperators {
 
     private static final TypeDescription TYPE = Descriptions.typeOf(String.class);
+
+    private static final OperatorConstraint[] EMPTY_CONSTRAINTS = new OperatorConstraint[0];
 
     private static final AnnotationDescription ANNOTATION = new AnnotationDescription(
             classOf(Deprecated.class),
@@ -93,7 +97,17 @@ public final class MockOperators {
      * @return this
      */
     public MockOperators operator(String id) {
-        return operator(id, "in", "out");
+        return operator(id, "in", "out", EMPTY_CONSTRAINTS);
+    }
+
+    /**
+     * Adds {@link Operator} with a single input and output.
+     * @param id the operator ID
+     * @param constraints operator constraints
+     * @return this
+     */
+    public MockOperators operator(String id, OperatorConstraint... constraints) {
+        return operator(id, "in", "out", constraints);
     }
 
     /**
@@ -101,9 +115,10 @@ public final class MockOperators {
      * @param id the operator ID
      * @param inputNames comma separated input names
      * @param outputNames comma separated output names
+     * @param constraints operator constraints
      * @return this
      */
-    public MockOperators operator(String id, String inputNames, String outputNames) {
+    public MockOperators operator(String id, String inputNames, String outputNames, OperatorConstraint... constraints) {
         UserOperator.Builder builder = UserOperator.builder(
                 ANNOTATION,
                 new MethodDescription(
@@ -115,6 +130,7 @@ public final class MockOperators {
         for (String name : outputNames.split(",")) {
             builder.output(name, TYPE);
         }
+        builder.constraint(constraints);
         builder.argument(KEY_ARGUMENT, valueOf(id));
         return bless(id, builder.build());
     }
@@ -253,6 +269,9 @@ public final class MockOperators {
 
     private String[] pair(String pair) {
         int index = pair.indexOf('.');
+        if (index < 0) {
+            return new String[] { pair, "*" };
+        }
         assertThat(index, is(greaterThan(0)));
         return new String[] { pair.substring(0, index), pair.substring(index + 1) };
     }
@@ -310,7 +329,7 @@ public final class MockOperators {
      * @return operator set
      */
     public Set<Operator> getAsSet(String... ids) {
-        Set<Operator> results = new HashSet<>();
+        Set<Operator> results = new LinkedHashSet<>();
         for (String id : ids) {
             results.add(get(id));
         }

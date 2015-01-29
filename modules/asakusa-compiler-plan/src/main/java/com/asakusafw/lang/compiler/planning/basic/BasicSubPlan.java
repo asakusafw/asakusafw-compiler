@@ -16,7 +16,6 @@
 package com.asakusafw.lang.compiler.planning.basic;
 
 import java.text.MessageFormat;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -75,7 +74,7 @@ public final class BasicSubPlan extends AbstractAttributeContainer implements Su
             }
             results.put(operator, new BasicInput(operator));
         }
-        return Collections.unmodifiableMap(results);
+        return results;
     }
 
     private Map<MarkerOperator, BasicOutput> buildOutputs(Set<? extends MarkerOperator> markers) {
@@ -99,7 +98,7 @@ public final class BasicSubPlan extends AbstractAttributeContainer implements Su
             }
             results.put(operator, new BasicOutput(operator));
         }
-        return Collections.unmodifiableMap(results);
+        return results;
     }
 
     private static Set<Operator> collectOperators(Set<? extends Operator> inputs, Set<? extends Operator> outputs) {
@@ -188,6 +187,23 @@ public final class BasicSubPlan extends AbstractAttributeContainer implements Su
         return outputs.get(operator);
     }
 
+    /**
+     * Removes an operator from this sub-plan.
+     * @param operator the operator
+     */
+    public void removeOperator(Operator operator) {
+        if (operators.contains(operator)) {
+            operator.disconnectAll();
+            operators.remove(operator);
+            if (inputs.containsKey(operator)) {
+                inputs.remove(operator).disconnectAll();
+            }
+            if (outputs.containsKey(operator)) {
+                outputs.remove(operator).disconnectAll();
+            }
+        }
+    }
+
     @Override
     public String toString() {
         return String.format(
@@ -249,12 +265,31 @@ public final class BasicSubPlan extends AbstractAttributeContainer implements Su
             opposite.disconnect0(getSelf());
         }
 
+        /**
+         * Disconnects from the all opposite ports.
+         */
+        public void disconnectAll() {
+            for (TOpposite opposite : opposites) {
+                opposite.disconnect0(getSelf());
+            }
+            opposites.clear();
+        }
+
         void connect0(TOpposite opposite) {
             opposites.add(opposite);
         }
 
         void disconnect0(TOpposite opposite) {
             opposites.remove(opposite);
+        }
+
+        /**
+         * Returns whether this is connected to the specified opposite or not.
+         * @param opposite the opposite port
+         * @return {@code true} if their are connected, otherwise {@code false}
+         */
+        protected boolean isConnected(Port opposite) {
+            return opposites.contains(opposite);
         }
 
         @Override
@@ -282,6 +317,11 @@ public final class BasicSubPlan extends AbstractAttributeContainer implements Su
         }
 
         @Override
+        public boolean isConnected(Output opposite) {
+            return isConnected((Port) opposite);
+        }
+
+        @Override
         public String toString() {
             return MessageFormat.format(
                     "Input({0})@{1}", //$NON-NLS-1$
@@ -306,6 +346,11 @@ public final class BasicSubPlan extends AbstractAttributeContainer implements Su
         @Override
         BasicOutput getSelf() {
             return this;
+        }
+
+        @Override
+        public boolean isConnected(Input opposite) {
+            return isConnected((Port) opposite);
         }
 
         @Override

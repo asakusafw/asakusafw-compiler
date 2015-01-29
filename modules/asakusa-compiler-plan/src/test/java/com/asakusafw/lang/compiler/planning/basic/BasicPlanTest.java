@@ -21,8 +21,8 @@ public class BasicPlanTest {
     public void simple() {
         MockOperators mock = new MockOperators()
             .marker("begin", PlanMarker.BEGIN)
-            .operator("a").connect("begin.*", "a.*")
-            .marker("end", PlanMarker.END).connect("a.*", "end.*")
+            .operator("a").connect("begin", "a")
+            .marker("end", PlanMarker.END).connect("a", "end")
             .operator("orphan");
 
         BasicPlan plan = new BasicPlan();
@@ -54,17 +54,17 @@ public class BasicPlanTest {
     public void connect() {
         MockOperators mock = new MockOperators()
             .marker("begin0", PlanMarker.BEGIN)
-            .operator("a0").connect("begin0.*", "a0.*")
-            .marker("end0", PlanMarker.END).connect("a0.*", "end0.*")
+            .operator("a0").connect("begin0", "a0")
+            .marker("end0", PlanMarker.END).connect("a0", "end0")
             .marker("begin1", PlanMarker.BEGIN)
-            .operator("a1").connect("begin1.*", "a1.*")
-            .marker("end1", PlanMarker.END).connect("a1.*", "end1.*")
+            .operator("a1").connect("begin1", "a1")
+            .marker("end1", PlanMarker.END).connect("a1", "end1")
             .marker("begin2", PlanMarker.BEGIN)
-            .operator("a2").connect("begin2.*", "a2.*")
-            .marker("end2", PlanMarker.END).connect("a2.*", "end2.*")
+            .operator("a2").connect("begin2", "a2")
+            .marker("end2", PlanMarker.END).connect("a2", "end2")
             .marker("begin3", PlanMarker.BEGIN)
-            .operator("a3").connect("begin3.*", "a3.*")
-            .marker("end3", PlanMarker.END).connect("a3.*", "end3.*");
+            .operator("a3").connect("begin3", "a3")
+            .marker("end3", PlanMarker.END).connect("a3", "end3");
 
         BasicPlan plan = new BasicPlan();
         BasicSubPlan s0 = plan.addElement(mock.getMarkers("begin0"), mock.getMarkers("end0"));
@@ -125,8 +125,8 @@ public class BasicPlanTest {
     public void invalid_input_not_plan_marker() {
         MockOperators mock = new MockOperators()
             .marker("begin")
-            .operator("a").connect("begin.*", "a.*")
-            .marker("end", PlanMarker.END).connect("a.*", "end.*");
+            .operator("a").connect("begin", "a")
+            .marker("end", PlanMarker.END).connect("a", "end");
 
         BasicPlan plan = new BasicPlan();
         plan.addElement(mock.getMarkers("begin"), mock.getMarkers("end"));
@@ -139,9 +139,9 @@ public class BasicPlanTest {
     public void invalid_input_w_preds() {
         MockOperators mock = new MockOperators()
             .operator("invalid")
-            .marker("begin", PlanMarker.BEGIN).connect("invalid.*", "begin.*")
-            .operator("a").connect("begin.*", "a.*")
-            .marker("end", PlanMarker.END).connect("a.*", "end.*");
+            .marker("begin", PlanMarker.BEGIN).connect("invalid", "begin")
+            .operator("a").connect("begin", "a")
+            .marker("end", PlanMarker.END).connect("a", "end");
 
         BasicPlan plan = new BasicPlan();
         plan.addElement(mock.getMarkers("begin"), mock.getMarkers("end"));
@@ -155,8 +155,8 @@ public class BasicPlanTest {
         MockOperators mock = new MockOperators()
             .marker("begin", PlanMarker.BEGIN)
             .marker("orphan", PlanMarker.BEGIN)
-            .operator("a").connect("begin.*", "a.*")
-            .marker("end", PlanMarker.END).connect("a.*", "end.*");
+            .operator("a").connect("begin", "a")
+            .marker("end", PlanMarker.END).connect("a", "end");
 
         BasicPlan plan = new BasicPlan();
         plan.addElement(mock.getMarkers("begin", "orphan"), mock.getMarkers("end"));
@@ -169,8 +169,8 @@ public class BasicPlanTest {
     public void invalid_output_not_plan_marker() {
         MockOperators mock = new MockOperators()
             .marker("begin", PlanMarker.BEGIN)
-            .operator("a").connect("begin.*", "a.*")
-            .marker("end").connect("a.*", "end.*");
+            .operator("a").connect("begin", "a")
+            .marker("end").connect("a", "end");
 
         BasicPlan plan = new BasicPlan();
         plan.addElement(mock.getMarkers("begin"), mock.getMarkers("end"));
@@ -183,9 +183,9 @@ public class BasicPlanTest {
     public void invalid_output_w_succs() {
         MockOperators mock = new MockOperators()
             .marker("begin", PlanMarker.BEGIN)
-            .operator("a").connect("begin.*", "a.*")
-            .marker("end", PlanMarker.END).connect("a.*", "end.*")
-            .operator("invalid").connect("end.*", "invalid.*");
+            .operator("a").connect("begin", "a")
+            .marker("end", PlanMarker.END).connect("a", "end")
+            .operator("invalid").connect("end", "invalid");
 
         BasicPlan plan = new BasicPlan();
         plan.addElement(mock.getMarkers("begin"), mock.getMarkers("end"));
@@ -198,8 +198,8 @@ public class BasicPlanTest {
     public void invalid_output_orphaned() {
         MockOperators mock = new MockOperators()
             .marker("begin", PlanMarker.BEGIN)
-            .operator("a").connect("begin.*", "a.*")
-            .marker("end", PlanMarker.END).connect("a.*", "end.*")
+            .operator("a").connect("begin", "a")
+            .marker("end", PlanMarker.END).connect("a", "end")
             .marker("orphan", PlanMarker.END);
 
         BasicPlan plan = new BasicPlan();
@@ -214,9 +214,9 @@ public class BasicPlanTest {
     public void invalid_body_plan_marker() {
         MockOperators mock = new MockOperators()
             .marker("begin", PlanMarker.BEGIN)
-            .operator("a").connect("begin.*", "a.*")
-            .marker("invalid", PlanMarker.CHECKPOINT).connect("a.*", "invalid.*")
-            .marker("end", PlanMarker.END).connect("invalid.*", "end.*");
+            .operator("a").connect("begin", "a")
+            .marker("invalid", PlanMarker.CHECKPOINT).connect("a", "invalid")
+            .marker("end", PlanMarker.END).connect("invalid", "end");
 
         BasicPlan plan = new BasicPlan();
         plan.addElement(mock.getMarkers("begin"), mock.getMarkers("end"));
@@ -230,8 +230,8 @@ public class BasicPlanTest {
         MockOperators mock = new MockOperators()
             .marker("begin", PlanMarker.BEGIN)
             .operator("orphan")
-            .operator("a").connect("begin.*", "a.*").connect("orphan.*", "a.*")
-            .marker("end", PlanMarker.END).connect("a.*", "end.*");
+            .operator("a").connect("begin", "a").connect("orphan", "a")
+            .marker("end", PlanMarker.END).connect("a", "end");
 
         BasicPlan plan = new BasicPlan();
         plan.addElement(mock.getMarkers("begin"), mock.getMarkers("end"));
@@ -244,9 +244,9 @@ public class BasicPlanTest {
     public void invalid_body_orpahned_downstream() {
         MockOperators mock = new MockOperators()
             .marker("begin", PlanMarker.BEGIN)
-            .operator("a").connect("begin.*", "a.*")
-            .operator("orphan").connect("a.*", "orphan.*")
-            .marker("end", PlanMarker.END).connect("a.*", "end.*");
+            .operator("a").connect("begin", "a")
+            .operator("orphan").connect("a", "orphan")
+            .marker("end", PlanMarker.END).connect("a", "end");
 
         BasicPlan plan = new BasicPlan();
         plan.addElement(mock.getMarkers("begin"), mock.getMarkers("end"));

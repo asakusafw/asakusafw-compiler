@@ -25,7 +25,7 @@ public final class PlanBuilder {
     private final Set<Operator> sourceOperators;
 
     // copy -> source
-    private final Map<Operator, Operator> toSource = new HashMap<>();
+    private final Map<Operator, Operator> copyToSource = new HashMap<>();
 
     private PlanBuilder(Set<Operator> operators) {
         this.sourceOperators = operators;
@@ -101,8 +101,8 @@ public final class PlanBuilder {
         for (Map.Entry<Operator, Operator> entry : sourceToCopy.entrySet()) {
             Operator source = entry.getKey();
             Operator copy = entry.getValue();
-            assert toSource.containsKey(copy) == false : copy;
-            toSource.put(copy, source);
+            assert copyToSource.containsKey(copy) == false : copy;
+            copyToSource.put(copy, source);
         }
         return this;
     }
@@ -215,17 +215,24 @@ public final class PlanBuilder {
      * @return the detail of execution plan.
      */
     public PlanDetail build() {
-        connectSubPlans();
-        PlanDetail detail = new PlanDetail(plan, toSource);
+        connect();
+        PlanDetail detail = new PlanDetail(plan, copyToSource);
         return detail;
     }
 
-    private void connectSubPlans() {
+    /**
+     * Connects each sub-plans using source operators information.
+     * If both a sub-plan's output and another sub-plans input have the same source operator,
+     * then the former sub-plan becomes a predecessor of the latter.
+     */
+    private void connect() {
         Map<MarkerOperator, Set<BasicSubPlan.BasicOutput>> sourceToOutputs = new HashMap<>();
         for (BasicSubPlan sub : plan.getElements()) {
             for (BasicSubPlan.BasicOutput output : sub.getOutputs()) {
-                Operator source = toSource.get(output.getOperator());
-                assert source != null;
+                Operator source = copyToSource.get(output.getOperator());
+                if (source == null) {
+                    continue;
+                }
                 assert PlanMarkers.get(source) != null : source;
                 Set<BasicSubPlan.BasicOutput> outputs = sourceToOutputs.get(source);
                 if (outputs == null) {
@@ -237,8 +244,10 @@ public final class PlanBuilder {
         }
         for (BasicSubPlan sub : plan.getElements()) {
             for (BasicSubPlan.BasicInput input : sub.getInputs()) {
-                Operator source = toSource.get(input.getOperator());
-                assert source != null;
+                Operator source = copyToSource.get(input.getOperator());
+                if (source == null) {
+                    continue;
+                }
                 sourceToOutputs.get(source);
                 Set<BasicSubPlan.BasicOutput> outputs = sourceToOutputs.get(source);
                 if (outputs != null) {

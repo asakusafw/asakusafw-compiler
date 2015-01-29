@@ -103,6 +103,14 @@ public class OperatorOutput implements OperatorPort {
     public boolean hasOpposites() {
         return opposites.isEmpty() == false;
     }
+    /**
+     * Returns whether this and the target port has the same opposites.
+     * @param other the target port
+     * @return {@code true} if the both has the same opposites, otherwise {@code false}
+     */
+    public boolean hasSameOpposites(OperatorOutput other) {
+        return opposites.equals(other.opposites);
+    }
 
     @Override
     public Collection<OperatorInput> getOpposites() {

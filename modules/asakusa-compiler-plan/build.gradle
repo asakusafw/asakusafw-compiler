@@ -6,4 +6,5 @@ apply plugin: 'eclipse'
 
 dependencies {
     compile project(':asakusa-compiler-model')
+    compile "com.asakusafw:simple-graph:${asakusafwVersion}"
 }

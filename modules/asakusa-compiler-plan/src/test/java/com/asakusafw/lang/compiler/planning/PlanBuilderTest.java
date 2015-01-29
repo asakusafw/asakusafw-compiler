@@ -21,8 +21,8 @@ public class PlanBuilderTest extends PlanningTestRoot {
     public void simple() {
         MockOperators mock = new MockOperators()
             .marker("begin", PlanMarker.BEGIN)
-            .operator("a").connect("begin.*", "a.*")
-            .marker("end", PlanMarker.END).connect("a.*", "end.*");
+            .operator("a").connect("begin", "a")
+            .marker("end", PlanMarker.END).connect("a", "end");
 
         PlanDetail detail = PlanBuilder.from(mock.all())
             .add(mock.getAsSet("begin"), mock.getAsSet("end"))
@@ -44,10 +44,10 @@ public class PlanBuilderTest extends PlanningTestRoot {
     public void multiple() {
         MockOperators mock = new MockOperators()
             .marker("begin", PlanMarker.BEGIN)
-            .operator("a").connect("begin.*", "a.*")
-            .marker("cp", PlanMarker.CHECKPOINT).connect("a.*", "cp.*")
-            .operator("b").connect("cp.*", "b.*")
-            .marker("end", PlanMarker.END).connect("b.*", "end.*");
+            .operator("a").connect("begin", "a")
+            .marker("cp", PlanMarker.CHECKPOINT).connect("a", "cp")
+            .operator("b").connect("cp", "b")
+            .marker("end", PlanMarker.END).connect("b", "end");
 
         PlanDetail detail = PlanBuilder.from(mock.all())
             .add(mock.getAsSet("begin"), mock.getAsSet("cp"))
@@ -87,16 +87,16 @@ public class PlanBuilderTest extends PlanningTestRoot {
             .marker("cp2", PlanMarker.CHECKPOINT)
             .marker("cp3", PlanMarker.CHECKPOINT)
             .marker("end", PlanMarker.END)
-            .connect("begin.*", "o0.*")
-            .connect("o0.*", "cp0.*")
-            .connect("o0.*", "cp1.*")
-            .connect("cp0.*", "o1.*")
-            .connect("cp1.*", "o2.*")
-            .connect("o1.*", "cp2.*")
-            .connect("o2.*", "cp3.*")
-            .connect("cp2.*", "o3.*")
-            .connect("cp3.*", "o3.*")
-            .connect("o3.*", "end.*");
+            .connect("begin", "o0")
+            .connect("o0", "cp0")
+            .connect("o0", "cp1")
+            .connect("cp0", "o1")
+            .connect("cp1", "o2")
+            .connect("o1", "cp2")
+            .connect("o2", "cp3")
+            .connect("cp2", "o3")
+            .connect("cp3", "o3")
+            .connect("o3", "end");
 
         PlanDetail detail = PlanBuilder.from(mock.all())
             .add(mock.getAsSet("begin"), mock.getAsSet("cp0", "cp1"))
@@ -151,15 +151,15 @@ public class PlanBuilderTest extends PlanningTestRoot {
             .marker("cp1", PlanMarker.CHECKPOINT)
             .marker("cp2", PlanMarker.CHECKPOINT)
             .marker("end", PlanMarker.END)
-            .connect("begin.*", "o0.*")
-            .connect("o0.*", "cp0.*")
-            .connect("cp0.*", "o1.*")
-            .connect("cp0.*", "o2.*")
-            .connect("o1.*", "cp1.*")
-            .connect("o2.*", "cp2.*")
-            .connect("cp1.*", "o3.*")
-            .connect("cp2.*", "o3.*")
-            .connect("o3.*", "end.*");
+            .connect("begin", "o0")
+            .connect("o0", "cp0")
+            .connect("cp0", "o1")
+            .connect("cp0", "o2")
+            .connect("o1", "cp1")
+            .connect("o2", "cp2")
+            .connect("cp1", "o3")
+            .connect("cp2", "o3")
+            .connect("o3", "end");
 
         PlanDetail detail = PlanBuilder.from(mock.all())
             .add(mock.getAsSet("begin"), mock.getAsSet("cp0"))
@@ -212,15 +212,15 @@ public class PlanBuilderTest extends PlanningTestRoot {
             .marker("cp1", PlanMarker.CHECKPOINT)
             .marker("cp2", PlanMarker.CHECKPOINT)
             .marker("end", PlanMarker.END)
-            .connect("begin.*", "o0.*")
-            .connect("o0.*", "cp0.*")
-            .connect("o0.*", "cp1.*")
-            .connect("cp0.*", "o1.*")
-            .connect("cp1.*", "o2.*")
-            .connect("o1.*", "cp2.*")
-            .connect("o2.*", "cp2.*")
-            .connect("cp2.*", "o3.*")
-            .connect("o3.*", "end.*");
+            .connect("begin", "o0")
+            .connect("o0", "cp0")
+            .connect("o0", "cp1")
+            .connect("cp0", "o1")
+            .connect("cp1", "o2")
+            .connect("o1", "cp2")
+            .connect("o2", "cp2")
+            .connect("cp2", "o3")
+            .connect("o3", "end");
 
         PlanDetail detail = PlanBuilder.from(mock.all())
             .add(mock.getAsSet("begin"), mock.getAsSet("cp0", "cp1"))
@@ -265,8 +265,8 @@ public class PlanBuilderTest extends PlanningTestRoot {
     public void invalid_empty_input() {
         MockOperators mock = new MockOperators()
             .marker("begin", PlanMarker.BEGIN)
-            .operator("a").connect("begin.*", "a.*")
-            .marker("end", PlanMarker.END).connect("a.*", "end.*");
+            .operator("a").connect("begin", "a")
+            .marker("end", PlanMarker.END).connect("a", "end");
 
         PlanBuilder.from(mock.all())
             .add(Collections.<Operator>emptySet(), mock.getAsSet("end"))
@@ -280,8 +280,8 @@ public class PlanBuilderTest extends PlanningTestRoot {
     public void invalid_empty_output() {
         MockOperators mock = new MockOperators()
             .marker("begin", PlanMarker.BEGIN)
-            .operator("a").connect("begin.*", "a.*")
-            .marker("end", PlanMarker.END).connect("a.*", "end.*");
+            .operator("a").connect("begin", "a")
+            .marker("end", PlanMarker.END).connect("a", "end");
 
         PlanBuilder.from(mock.all())
             .add(mock.getAsSet("begin"), Collections.<Operator>emptySet())
@@ -295,8 +295,8 @@ public class PlanBuilderTest extends PlanningTestRoot {
     public void invalid_common_io() {
         MockOperators mock = new MockOperators()
             .marker("begin", PlanMarker.BEGIN)
-            .operator("a").connect("begin.*", "a.*")
-            .marker("end", PlanMarker.END).connect("a.*", "end.*");
+            .operator("a").connect("begin", "a")
+            .marker("end", PlanMarker.END).connect("a", "end");
 
         PlanBuilder.from(mock.all())
             .add(mock.getAsSet("begin", "end"), mock.getAsSet("end", "begin"))
@@ -310,8 +310,8 @@ public class PlanBuilderTest extends PlanningTestRoot {
     public void invalid_input_not_plan_marker() {
         MockOperators mock = new MockOperators()
             .marker("begin", PlanMarker.BEGIN)
-            .operator("a").connect("begin.*", "a.*")
-            .marker("end", PlanMarker.END).connect("a.*", "end.*");
+            .operator("a").connect("begin", "a")
+            .marker("end", PlanMarker.END).connect("a", "end");
 
         PlanBuilder.from(mock.all())
             .add(mock.getAsSet("begin", "a"), mock.getAsSet("end"))
@@ -325,13 +325,13 @@ public class PlanBuilderTest extends PlanningTestRoot {
     public void invalid_input_not_source() {
         MockOperators mock = new MockOperators()
             .marker("begin", PlanMarker.BEGIN)
-            .operator("a").connect("begin.*", "a.*")
-            .marker("end", PlanMarker.END).connect("a.*", "end.*");
+            .operator("a").connect("begin", "a")
+            .marker("end", PlanMarker.END).connect("a", "end");
 
         MockOperators other = new MockOperators()
             .marker("begin", PlanMarker.BEGIN)
-            .operator("a").connect("begin.*", "a.*")
-            .marker("end", PlanMarker.END).connect("a.*", "end.*");
+            .operator("a").connect("begin", "a")
+            .marker("end", PlanMarker.END).connect("a", "end");
 
         PlanBuilder.from(mock.all())
             .add(other.getAsSet("begin"), mock.getAsSet("end"))
@@ -345,8 +345,8 @@ public class PlanBuilderTest extends PlanningTestRoot {
     public void invalid_input_orphaned() {
         MockOperators mock = new MockOperators()
             .marker("begin", PlanMarker.BEGIN)
-            .operator("a").connect("begin.*", "a.*")
-            .marker("end", PlanMarker.END).connect("a.*", "end.*")
+            .operator("a").connect("begin", "a")
+            .marker("end", PlanMarker.END).connect("a", "end")
             .marker("orphan", PlanMarker.CHECKPOINT);
 
         PlanBuilder.from(mock.all())
@@ -361,9 +361,9 @@ public class PlanBuilderTest extends PlanningTestRoot {
     public void invalid_input_reach_input() {
         MockOperators mock = new MockOperators()
             .marker("begin", PlanMarker.BEGIN)
-            .operator("a").connect("begin.*", "a.*")
-            .marker("end", PlanMarker.END).connect("a.*", "end.*")
-            .marker("invalid", PlanMarker.CHECKPOINT).connect("invalid.*", "begin.*").connect("invalid.*", "a.*");
+            .operator("a").connect("begin", "a")
+            .marker("end", PlanMarker.END).connect("a", "end")
+            .marker("invalid", PlanMarker.CHECKPOINT).connect("invalid", "begin").connect("invalid", "a");
 
         PlanBuilder.from(mock.all())
             .add(mock.getAsSet("begin", "invalid"), mock.getAsSet("end"))
@@ -377,8 +377,8 @@ public class PlanBuilderTest extends PlanningTestRoot {
     public void invalid_output_not_plan_marker() {
         MockOperators mock = new MockOperators()
             .marker("begin", PlanMarker.BEGIN)
-            .operator("a").connect("begin.*", "a.*")
-            .marker("end", PlanMarker.END).connect("a.*", "end.*");
+            .operator("a").connect("begin", "a")
+            .marker("end", PlanMarker.END).connect("a", "end");
 
         PlanBuilder.from(mock.all())
             .add(mock.getAsSet("begin"), mock.getAsSet("end", "a"))
@@ -392,13 +392,13 @@ public class PlanBuilderTest extends PlanningTestRoot {
     public void invalid_output_not_source() {
         MockOperators mock = new MockOperators()
             .marker("begin", PlanMarker.BEGIN)
-            .operator("a").connect("begin.*", "a.*")
-            .marker("end", PlanMarker.END).connect("a.*", "end.*");
+            .operator("a").connect("begin", "a")
+            .marker("end", PlanMarker.END).connect("a", "end");
 
         MockOperators other = new MockOperators()
             .marker("begin", PlanMarker.BEGIN)
-            .operator("a").connect("begin.*", "a.*")
-            .marker("end", PlanMarker.END).connect("a.*", "end.*");
+            .operator("a").connect("begin", "a")
+            .marker("end", PlanMarker.END).connect("a", "end");
 
         PlanBuilder.from(mock.all())
             .add(mock.getAsSet("begin"), other.getAsSet("end"))
@@ -412,8 +412,8 @@ public class PlanBuilderTest extends PlanningTestRoot {
     public void invalid_output_orphaned() {
         MockOperators mock = new MockOperators()
             .marker("begin", PlanMarker.BEGIN)
-            .operator("a").connect("begin.*", "a.*")
-            .marker("end", PlanMarker.END).connect("a.*", "end.*")
+            .operator("a").connect("begin", "a")
+            .marker("end", PlanMarker.END).connect("a", "end")
             .marker("orphan", PlanMarker.CHECKPOINT);
 
         PlanBuilder.from(mock.all())
@@ -428,9 +428,9 @@ public class PlanBuilderTest extends PlanningTestRoot {
     public void invalid_output_reach_output() {
         MockOperators mock = new MockOperators()
             .marker("begin", PlanMarker.BEGIN)
-            .operator("a").connect("begin.*", "a.*")
-            .marker("end", PlanMarker.END).connect("a.*", "end.*")
-            .marker("invalid", PlanMarker.CHECKPOINT).connect("end.*", "invalid.*").connect("a.*", "invalid.*");
+            .operator("a").connect("begin", "a")
+            .marker("end", PlanMarker.END).connect("a", "end")
+            .marker("invalid", PlanMarker.CHECKPOINT).connect("end", "invalid").connect("a", "invalid");
 
         PlanBuilder.from(mock.all())
             .add(mock.getAsSet("begin"), mock.getAsSet("end", "invalid"))

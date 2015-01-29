@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 
 import com.asakusafw.lang.compiler.model.description.TypeDescription;
 import com.asakusafw.lang.compiler.model.description.ValueDescription;
@@ -16,15 +17,48 @@ import com.asakusafw.lang.compiler.model.description.ValueDescription;
  */
 public abstract class Operator {
 
+    private static final AtomicLong COUNTER = new AtomicLong();
+
+    private final long serialNumber = COUNTER.getAndIncrement();
+
+    private long originalSerialNumber = serialNumber;
+
     final List<OperatorProperty> properties = new ArrayList<>();
 
     final Set<OperatorConstraint> constraints = EnumSet.noneOf(OperatorConstraint.class);
+
+    /**
+     * Creates a new instance.
+     */
+    protected Operator() {
+        return;
+    }
 
     /**
      * Returns the operator kind.
      * @return the operator kind
      */
     public abstract OperatorKind getOperatorKind();
+
+    /**
+     * Returns the serial number of this operator.
+     * @return the serial number
+     */
+    public long getSerialNumber() {
+        return serialNumber;
+    }
+
+    /**
+     * Returns the original serial number of this operator.
+     * If this operator is a {@link #copy() copy} of an other operator,
+     * the original serial number is as same as the other operator's one.
+     * Otherwise, if this operator is original (not a copy), the original serial number is
+     * as same to the {@link #getSerialNumber() normal serial number}.
+     * @return the originalSerialNumber
+     */
+    public long getOriginalSerialNumber() {
+        return originalSerialNumber;
+    }
 
     /**
      * Returns a copy of this operator.
@@ -41,6 +75,7 @@ public abstract class Operator {
      * @return the target operator
      */
     protected final <T extends Operator> T copyAttributesTo(T copy) {
+        ((Operator) copy).originalSerialNumber = originalSerialNumber;
         for (OperatorProperty property : properties) {
             switch (property.getPropertyKind()) {
             case INPUT: {

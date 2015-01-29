@@ -18,6 +18,9 @@ import com.asakusafw.lang.compiler.model.graph.OperatorInput;
 import com.asakusafw.lang.compiler.model.graph.OperatorOutput;
 import com.asakusafw.lang.compiler.model.graph.OperatorPort;
 import com.asakusafw.lang.compiler.model.graph.Operators;
+import com.asakusafw.lang.compiler.planning.basic.PrimitivePlanner;
+import com.asakusafw.utils.graph.Graph;
+import com.asakusafw.utils.graph.Graphs;
 
 /**
  * Utilities for execution planning.
@@ -44,16 +47,16 @@ public final class Planning {
      * Normalizes the operator graph.
      * <p>
      * This includes following operations:
+     * </p>
      * <ol>
      * <li> flatten operators (unnest {@link FlowOperator}s, and remove non-external inputs/outputs) </li>
-     * <li> add a virtual input port for {@link ExternalInput}s </li>
-     * <li> add a virtual output port for {@link ExternalOutput}s </li>
+     * <li> add a pseudo input port for {@link ExternalInput}s </li>
+     * <li> add a pseudo output port for {@link ExternalOutput}s </li>
      * <li> add {@link OperatorConstraint#GENERATOR generator constraint} to {@link ExternalInput}s </li>
      * <li> add {@link OperatorConstraint#AT_LEAST_ONCE at-least-once constraint} to {@link ExternalOutput}s </li>
      * <li> add {@link PlanMarker#BEGIN BEGIN} markers to input ports without any opposites </li>
      * <li> add {@link PlanMarker#END END} markers to output ports without any opposites </li>
      * </ol>
-     * </p>
      * <p>
      * This will directly modify the specified operator graph.
      * </p>
@@ -66,7 +69,7 @@ public final class Planning {
         insertTerminatorsForPorts(graph);
     }
 
-    static void flatten(OperatorGraph graph) {
+    private static void flatten(OperatorGraph graph) {
         graph.rebuild();
         for (Operator operator : graph.getOperators()) {
             if (operator.getOperatorKind() == OperatorKind.FLOW) {
@@ -183,15 +186,16 @@ public final class Planning {
      * Removes dead-flows in the operator graph.
      * <p>
      * This requires following preconditions:
+     * </p>
      * <ol>
      * <li> each {@code BEGIN} plan marker must NOT have any predecessors </li>
      * <li> each {@code END} plan marker must NOT have any successors </li>
      * <li> each input port of operator except {@code BEGIN} plan marker has at least one opposites </li>
      * <li> each output port of operator except {@code END} plan marker has at least one opposites </li>
      * </ol>
-     * </p>
      * <p>
      * This ensures that the operator graph satisfies following properties:
+     * </p>
      * <ol>
      * <li> all preconditions </li>
      * <li>
@@ -205,7 +209,6 @@ public final class Planning {
      *     except {@code END} plan markers or an operator with at-least-once constraint
      * </li>
      * </ol>
-     * </p>
      * <p>
      * This will directly modify the specified operator graph.
      * </p>
@@ -271,15 +274,16 @@ public final class Planning {
      * Simplifies {@code BEGIN} and {@code END} plan markers.
      * <p>
      * This requires following preconditions:
+     * </p>
      * <ol>
      * <li> each {@code BEGIN} plan marker must NOT have any predecessors </li>
      * <li> each {@code END} plan marker must NOT have any successors </li>
      * <li> each operator except {@code BEGIN} plan marker must have at least one predecessors </li>
      * <li> each operator except {@code END} plan marker must have at least one successors </li>
      * </ol>
-     * </p>
      * <p>
      * This ensures that the operator graph satisfies following properties:
+     * </p>
      * <ol>
      * <li> all preconditions </li>
      * <li> each operator has up to one {@code BEGIN} plan marker in the predecessors </li>
@@ -287,7 +291,6 @@ public final class Planning {
      * <li> each operator which has {@code BEGIN} plan marker in its predecessor, it has no other predecessors </li>
      * <li> each operator which has {@code END} plan marker in its successors, it has no other successors </li>
      * </ol>
-     * </p>
      * <p>
      * This will directly modify the specified operator graph.
      * </p>
@@ -376,8 +379,10 @@ public final class Planning {
      * that have minimal inputs, outputs, and operators.
      * So primitive plans are generally not efficient, clients should re-organize them.
      * </p>
+     *
      * <p>
      * First, we introduce a several terms:
+     * </p>
      * <dl>
      * <dt> <em>gathering operator</em> </dt>
      * <dd>
@@ -398,19 +403,27 @@ public final class Planning {
      *   from {@code BROADCAST} plan markers, is a <em>broadcast consumer</em>.
      * </dd>
      * </dl>
-     * </p>
+     *
      * <p>
      * The specified operator graph must satisfy following preconditions:
+     * </p>
      * <ol>
      * <li> each operator except {@code BEGIN} plan marker must have at least one predecessors </li>
      * <li> each operator except {@code END} plan marker must have at least one successors </li>
      * <li> each {@code GATHER} plan marker must have just one successor </li>
-     * <li> each plan marker must not be a <em>broadcast consumer</em> </li>
+     * <li>
+     *   each nearest forward plan marker of <em>gathering operator</em>,
+     *   must be either a {@code GATHER} or {@code BROADCAST} plan marker
+     * </li>
+     * <li>
+     *   each plan marker must not be a <em>broadcast consumer</em>
+     * </li>
      * </ol>
-     * </p>
+     *
      * <p>
      * The created plan will work as equivalent to the original operator graph,
      * and each sub-plan will have the following properties:
+     * </p>
      * <ol>
      * <li>
      *   each sub-plan has minimal inputs within the following constraints:
@@ -440,9 +453,10 @@ public final class Planning {
      *   </ol>
      * </li>
      * </ol>
-     * </p>
+     *
      * <p>
      * To keep the original semantics, the plan will have the following properties:
+     * </p>
      * <ol>
      * <li>
      *   each sub-plan consists of all combinations of possible inputs and output pairs
@@ -451,13 +465,58 @@ public final class Planning {
      *   each sub-plan has the unique inputs and output pairs
      * </li>
      * </ol>
-     * </p>
      * @param graph the target operator graph
      * @return the organized primitive plan
      * @see #normalize(OperatorGraph)
      * @see #simplifyTerminators(OperatorGraph)
+     * @see #startAssemblePlan(PlanDetail)
      */
     public static PlanDetail createPrimitivePlan(OperatorGraph graph) {
         return PrimitivePlanner.plan(graph.getOperators());
+    }
+
+    /**
+     * Creates a new plan assembler for the target plan.
+     * @param detail detail of assemble target plan.
+     * @return a new empty assembler for the target plan
+     */
+    public static PlanAssembler startAssemblePlan(PlanDetail detail) {
+        return new PlanAssembler(detail);
+    }
+
+    /**
+     * Returns a sub-plan dependency graph for the specified plan.
+     * @param plan the target plan
+     * @return a sub-plan dependency graph ({@code sub-plan -> its predecessors})
+     */
+    public static Graph<SubPlan> toDependencyGraph(Plan plan) {
+        Graph<SubPlan> results = Graphs.newInstance();
+        for (SubPlan element : plan.getElements()) {
+            results.addNode(element);
+            for (SubPlan.Input downstream : element.getInputs()) {
+                for (SubPlan.Output upstream : downstream.getOpposites()) {
+                    results.addEdge(element, upstream.getOwner());
+                }
+            }
+        }
+        return results;
+    }
+
+    /**
+     * Returns an operator dependency graph for the specified sub-plan.
+     * @param subPlan the target sub-plan
+     * @return a sub-plan dependency graph ({@code operator -> its predecessors})
+     */
+    public static Graph<Operator> toDependencyGraph(SubPlan subPlan) {
+        Graph<Operator> results = Graphs.newInstance();
+        for (Operator element : subPlan.getOperators()) {
+            results.addNode(element);
+            for (OperatorInput downstream : element.getInputs()) {
+                for (OperatorOutput upstream : downstream.getOpposites()) {
+                    results.addEdge(element, upstream.getOwner());
+                }
+            }
+        }
+        return results;
     }
 }

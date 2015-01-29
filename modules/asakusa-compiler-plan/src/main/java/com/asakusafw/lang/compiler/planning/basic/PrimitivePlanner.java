@@ -1,19 +1,26 @@
-package com.asakusafw.lang.compiler.planning;
+package com.asakusafw.lang.compiler.planning.basic;
 
 import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 import com.asakusafw.lang.compiler.model.graph.MarkerOperator;
 import com.asakusafw.lang.compiler.model.graph.Operator;
-import com.asakusafw.lang.compiler.model.graph.OperatorOutput;
 import com.asakusafw.lang.compiler.model.graph.Operators;
+import com.asakusafw.lang.compiler.planning.PlanBuilder;
+import com.asakusafw.lang.compiler.planning.PlanDetail;
+import com.asakusafw.lang.compiler.planning.PlanMarker;
+import com.asakusafw.lang.compiler.planning.PlanMarkers;
+import com.asakusafw.lang.compiler.planning.Planning;
 
-final class PrimitivePlanner {
+/**
+ * Generates a primitive plan.
+ * @see Planning#createPrimitivePlan(com.asakusafw.lang.compiler.model.graph.OperatorGraph)
+ */
+public final class PrimitivePlanner {
 
     private final Set<Operator> operators;
 
@@ -25,7 +32,7 @@ final class PrimitivePlanner {
     }
 
     /**
-     * Returns plan markers.
+     * Returns all plan markers in the operator.
      * Validates successors and predecessors of each operator.
      * @param operators the source operators
      * @return the plan markers
@@ -118,12 +125,12 @@ final class PrimitivePlanner {
             }
             if (kind == PlanMarker.GATHER) {
                 // GATHER: first, collects neighbors
-                Set<MarkerOperator> gatherGroup = collectGatherGroup(marker);
-                assert gatherGroup.contains(marker);
+                Set<MarkerOperator> gatheringInputGroup = collectGatheringInputGroup(marker);
+                assert gatheringInputGroup.contains(marker);
                 // adds a group as sub-plan inputs,
-                // and then each member cannot become sub-plan input individually
-                results.add(gatherGroup);
-                excepts.addAll(gatherGroup);
+                // and remove individual plan markers from input candidates
+                results.add(gatheringInputGroup);
+                excepts.addAll(gatheringInputGroup);
                 continue;
             }
         }
@@ -136,7 +143,7 @@ final class PrimitivePlanner {
         return results;
     }
 
-    private Set<MarkerOperator> collectGatherGroup(MarkerOperator gather) {
+    private Set<MarkerOperator> collectGatheringInputGroup(MarkerOperator gather) {
         assert PlanMarkers.get(gather) == PlanMarker.GATHER;
         Set<Operator> successors = Operators.getSuccessors(gather);
         // we already know that plan marker except END has >= 1 successors
@@ -146,78 +153,42 @@ final class PrimitivePlanner {
                     "GATHER plan marker must have just one successor: {0}",
                     gather));
         }
-        // detects gathering group
+        // detects gathering input group
         Operator gathering = successors.iterator().next();
         Set<Operator> gatherGroupCandidates = Operators.findNearestReachablePredecessors(
                 gathering.getInputs(),
                 Planning.PLAN_MARKERS);
         assert gatherGroupCandidates.contains(gather);
-
-        // for safety, we remove BROADCAST markers from gathering group
         Set<MarkerOperator> results = new HashSet<>();
         for (Operator operator : gatherGroupCandidates) {
             PlanMarker kind = PlanMarkers.get(operator);
             assert kind != null : operator;
-            if (kind != PlanMarker.BROADCAST) {
-                results.add((MarkerOperator) operator);
+            if (kind == PlanMarker.BROADCAST) {
+                // BROADCAST can not become sub-plan inputs directly
+                continue;
             }
+            if (kind != PlanMarker.GATHER) {
+                throw new IllegalArgumentException(MessageFormat.format(
+                        "gathering operator requires inputs only GATHER or BROADCAST plan markers: {1} -> {0}",
+                        gathering,
+                        operator));
+            }
+            results.add((MarkerOperator) operator);
         }
         return results;
     }
 
     private Map<Operator, Set<MarkerOperator>> collectBroadcastConsumers() {
-        Set<Operator> nonBroadcastOperators = collectNonBroadcastOperators();
-        Operators.Predicate<Operator> isNonBroadcast = new IsMember(nonBroadcastOperators);
-        Map<Operator, Set<MarkerOperator>> results = new HashMap<>();
-        for (MarkerOperator marker : planMarkers) {
-            PlanMarker kind = PlanMarkers.get(marker);
-            assert kind != null : marker;
-            if (kind != PlanMarker.BROADCAST) {
-                continue;
-            }
-            // search for nearest non-broadcast operators from each BROADCAST plan marker:
-            // it will consumes this broadcast data directly
-            Set<Operator> consumers = Operators.findNearestReachableSuccessors(
-                    marker.getOutputs(), isNonBroadcast);
-            for (Operator consumer : consumers) {
-                if (PlanMarkers.get(consumer) != null) {
-                    throw new IllegalArgumentException(MessageFormat.format(
-                            "plan marker must not be a broadcast consumer: {0} -> {1}",
-                            marker,
-                            consumer));
-                }
-
-                Set<MarkerOperator> targets = results.get(consumer);
-                if (targets == null) {
-                    targets = new HashSet<>();
-                    results.put(consumer, targets);
-                }
-                targets.add(marker);
+        Map<Operator, Set<MarkerOperator>> results = Util.computeBroadcastConsumers(planMarkers, planMarkers);
+        for (Map.Entry<Operator, Set<MarkerOperator>> entry : results.entrySet()) {
+            Operator consumer = entry.getKey();
+            if (planMarkers.contains(consumer)) {
+                throw new IllegalArgumentException(MessageFormat.format(
+                        "plan marker must not be a broadcast consumer: {0} -> {1}",
+                        entry.getValue(),
+                        consumer));
             }
         }
-        return results;
-    }
-
-    private Set<Operator> collectNonBroadcastOperators() {
-        Set<OperatorOutput> nonBroadcastOutputs = new HashSet<>();
-        for (MarkerOperator marker : planMarkers) {
-            PlanMarker kind = PlanMarkers.get(marker);
-            assert kind != null : marker;
-            if (kind == PlanMarker.BROADCAST) {
-                continue;
-            }
-            nonBroadcastOutputs.addAll(marker.getOutputs());
-        }
-        // non-broadcast operator is:
-        Set<Operator> results = new HashSet<>();
-        // - each plan marker
-        results.addAll(planMarkers);
-        // - each operator which nearest forward reachable plan markers contain other than BROADCAST
-        results.addAll(Operators.collectUntilNearestReachableSuccessors(
-                nonBroadcastOutputs,
-                Planning.PLAN_MARKERS,
-                false));
-
         return results;
     }
 
@@ -276,19 +247,5 @@ final class PrimitivePlanner {
             results.add((MarkerOperator) operator);
         }
         return results;
-    }
-
-    private static final class IsMember implements Operators.Predicate<Operator> {
-
-        private final Set<Operator> members;
-
-        public IsMember(Set<Operator> operators) {
-            this.members = operators;
-        }
-
-        @Override
-        public boolean apply(Operator argument) {
-            return members.contains(argument);
-        }
     }
 }

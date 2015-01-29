@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -138,10 +139,28 @@ public abstract class PlanningTestRoot {
      * @return the unique sub-plan which is owner of a copy of the target source
      */
     public static SubPlan ownerOf(PlanDetail detail, Operator source) {
-        Operator copy = copyOf(detail, source);
-        SubPlan owner = detail.getOwner(copy);
-        assertThat(copy.toString(), owner, is(notNullValue()));
-        return owner;
+        Set<SubPlan> candidates = ownersOf(detail, Collections.singleton(source));
+        assertThat(candidates, hasSize(1));
+        return candidates.iterator().next();
+    }
+
+    /**
+     * Returns the unique owner sub-plan from the source operator.
+     * @param detail the plan detail
+     * @param sources the source operators
+     * @return the unique sub-plan which is owner of a copy of the target source
+     */
+    public static Set<SubPlan> ownersOf(PlanDetail detail, Collection<? extends Operator> sources) {
+        Set<Operator> copies = new HashSet<>();
+        for (Operator source : sources) {
+            copies.addAll(detail.getCopies(source));
+        }
+        assertThat(copies, is(not(empty())));
+        Set<SubPlan> results = new HashSet<>();
+        for (Operator copy : copies) {
+            results.add(detail.getOwner(copy));
+        }
+        return results;
     }
 
     /**
@@ -197,9 +216,9 @@ public abstract class PlanningTestRoot {
      * @return the copy of the source
      */
     public static Operator copyOf(PlanDetail detail, SubPlan owner, Operator source) {
-        Operator copy = detail.getCopy(source, owner);
-        assertThat(copy, is(notNullValue()));
-        return copy;
+        Set<Operator> copies = detail.getCopies(source, owner);
+        assertThat(copies, hasSize(1));
+        return copies.iterator().next();
     }
 
     /**
@@ -214,6 +233,35 @@ public abstract class PlanningTestRoot {
             Operator source = detail.getSource(operator);
             assertThat(operator.toString(), source, is(notNullValue()));
             results.add(source);
+        }
+        return results;
+    }
+
+    /**
+     * Returns copies of the source operators.
+     * @param detail the detail
+     * @param operators the sources
+     * @return the related copies
+     */
+    public static Set<Operator> toCopies(PlanDetail detail, Collection<? extends Operator> operators) {
+        Set<Operator> results = new HashSet<>();
+        for (Operator operator : operators) {
+            results.addAll(detail.getCopies(operator));
+        }
+        return results;
+    }
+
+    /**
+     * Returns copies of the source operators.
+     * @param detail the detail
+     * @param owner the owner
+     * @param operators the sources
+     * @return the related copies
+     */
+    public static Set<Operator> toCopies(PlanDetail detail, SubPlan owner, Collection<? extends Operator> operators) {
+        Set<Operator> results = new HashSet<>();
+        for (Operator operator : operators) {
+            results.addAll(detail.getCopies(operator, owner));
         }
         return results;
     }

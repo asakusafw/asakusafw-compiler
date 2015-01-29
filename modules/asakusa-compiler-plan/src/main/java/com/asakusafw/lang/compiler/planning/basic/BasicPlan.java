@@ -72,6 +72,23 @@ public class BasicPlan extends AbstractAttributeContainer implements Plan {
         return element;
     }
 
+    /**
+     * Removes the sub-plan from this plan.
+     * @param sub the sub-plan
+     */
+    public void removeElement(BasicSubPlan sub) {
+        if (sub.getOwner() != this) {
+            throw new IllegalArgumentException();
+        }
+        for (BasicSubPlan.BasicInput port : sub.getInputs()) {
+            port.disconnectAll();
+        }
+        for (BasicSubPlan.BasicOutput port : sub.getOutputs()) {
+            port.disconnectAll();
+        }
+        elements.remove(sub);
+    }
+
     @Override
     public String toString() {
         return String.format(
