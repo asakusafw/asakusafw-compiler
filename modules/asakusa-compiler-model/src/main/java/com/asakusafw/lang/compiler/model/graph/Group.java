@@ -42,6 +42,36 @@ public class Group {
     }
 
     @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + grouping.hashCode();
+        result = prime * result + ordering.hashCode();
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        Group other = (Group) obj;
+        if (!grouping.equals(other.grouping)) {
+            return false;
+        }
+        if (!ordering.equals(other.ordering)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
     public String toString() {
         return MessageFormat.format(
                 "Group(grouping={0}, sort={1})", //$NON-NLS-1$
@@ -85,9 +115,39 @@ public class Group {
         }
 
         @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + direction.hashCode();
+            result = prime * result + propertyName.hashCode();
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            Ordering other = (Ordering) obj;
+            if (direction != other.direction) {
+                return false;
+            }
+            if (!propertyName.equals(other.propertyName)) {
+                return false;
+            }
+            return true;
+        }
+
+        @Override
         public String toString() {
             return MessageFormat.format(
-                    "{1}{2}", //$NON-NLS-1$
+                    "{1}{0}", //$NON-NLS-1$
                     propertyName,
                     direction);
         }
