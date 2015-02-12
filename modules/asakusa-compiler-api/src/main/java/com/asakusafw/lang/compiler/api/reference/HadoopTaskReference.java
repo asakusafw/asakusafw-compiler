@@ -9,10 +9,9 @@ import com.asakusafw.lang.compiler.model.description.ClassDescription;
 
 /**
  * A symbol of task using {@code hadoop} command.
+ * FIXME move to other project?
  */
 public class HadoopTaskReference implements TaskReference {
-
-    private final int serialNumber;
 
     private final ClassDescription mainClass;
 
@@ -20,30 +19,14 @@ public class HadoopTaskReference implements TaskReference {
 
     /**
      * Creates a new instance.
-     * @param serialNumber the serial number of this task (unique in the same execution phase)
      * @param mainClass the main class
      * @param blockerTasks the blocker tasks
      */
     public HadoopTaskReference(
-            int serialNumber,
             ClassDescription mainClass,
             List<? extends TaskReference> blockerTasks) {
-        this.serialNumber = serialNumber;
         this.mainClass = mainClass;
         this.blockerTasks = Collections.unmodifiableList(new ArrayList<>(blockerTasks));
-    }
-
-    @Override
-    public TaskKind getTaskKind() {
-        return TaskKind.HADOOP;
-    }
-
-    /**
-     * Returns the serial number of this task: this must be identical in the same execution phase.
-     * @return the serial number
-     */
-    public int getSerialNumber() {
-        return serialNumber;
     }
 
     @Override

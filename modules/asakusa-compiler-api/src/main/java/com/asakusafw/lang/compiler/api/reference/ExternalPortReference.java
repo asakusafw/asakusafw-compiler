@@ -7,7 +7,7 @@ import com.asakusafw.lang.compiler.model.description.ClassDescription;
 /**
  * An abstract interface for a symbol of external input or output.
  */
-public interface ExternalPortReference {
+public interface ExternalPortReference extends Reference {
 
     /**
      * Returns the original port name.

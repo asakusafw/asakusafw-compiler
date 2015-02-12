@@ -10,44 +10,36 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.asakusafw.lang.compiler.api.JobflowBuilder;
+import com.asakusafw.lang.compiler.api.JobflowProcessor;
+import com.asakusafw.lang.compiler.api.extension.HadoopTaskExtension;
 import com.asakusafw.lang.compiler.api.reference.CommandTaskReference;
 import com.asakusafw.lang.compiler.api.reference.CommandToken;
 import com.asakusafw.lang.compiler.api.reference.ExternalInputReference;
 import com.asakusafw.lang.compiler.api.reference.ExternalOutputReference;
+import com.asakusafw.lang.compiler.api.reference.HadoopTaskReference;
 import com.asakusafw.lang.compiler.api.reference.TaskReference;
 import com.asakusafw.lang.compiler.model.Location;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 
 /**
- * An abstract implementation of {@link JobflowBuilder}.
+ * An abstract implementation of {@link JobflowProcessor}.
  */
-public abstract class AbstractJobflowBuilderContext implements JobflowBuilder.Context {
+public abstract class AbstractJobflowProcessorContext implements JobflowProcessor.Context, HadoopTaskExtension {
 
     private static final String EXTENSION_CLASS = ".class"; //$NON-NLS-1$
 
-    private final TaskReferenceContainer mainTasks = new TaskReferenceContainer("main");
-
-    private final TaskReferenceContainer finalizeTasks = new TaskReferenceContainer("finalize");
+    private final TaskContainerMap tasks = new TaskContainerMap();
 
     private final Map<String, ExternalInputReference> externalInputs = new LinkedHashMap<>();
 
     private final Map<String, ExternalOutputReference> externalOutputs = new LinkedHashMap<>();
 
     /**
-     * Returns tasks which are executes in the main phase.
-     * @return the main tasks
+     * Returns tasks which are executed in this context.
+     * @return tasks
      */
-    public TaskReferenceContainer getMainTasks() {
-        return mainTasks;
-    }
-
-    /**
-     * Returns tasks which are executes in the finalize phase.
-     * @return the finalize tasks
-     */
-    public TaskReferenceContainer getFinalizeTasks() {
-        return finalizeTasks;
+    public TaskContainerMap getTasks() {
+        return tasks;
     }
 
     /**
@@ -119,7 +111,7 @@ public abstract class AbstractJobflowBuilderContext implements JobflowBuilder.Co
      * Creates a new {@link ExternalOutputReference}.
      * @param name the input name
      * @param descriptionClass the description class
-         * @param internalOutputPaths the output paths which will be internally generated in this jobflow
+     * @param internalOutputPaths the output paths which will be internally generated in this jobflow
      * @return the created instance
      * @see #addExternalOutput(String, ClassDescription, Collection)
      */
@@ -134,14 +126,12 @@ public abstract class AbstractJobflowBuilderContext implements JobflowBuilder.Co
             Location command,
             List<? extends CommandToken> arguments,
             TaskReference... blockers) {
-        CommandTaskReference task = new CommandTaskReference(
-                mainTasks.getNextSerialNumber(),
-                profileName,
-                command,
-                arguments,
-                Arrays.asList(blockers));
-        mainTasks.add(task);
-        return task;
+        return addTask(tasks.getMainTaskContainer(), profileName, command, arguments, blockers);
+    }
+
+    @Override
+    public TaskReference addTask(ClassDescription mainClass, TaskReference... blockers) {
+        return addTask(tasks.getMainTaskContainer(), mainClass, blockers);
     }
 
     @Override
@@ -150,18 +140,39 @@ public abstract class AbstractJobflowBuilderContext implements JobflowBuilder.Co
             Location command,
             List<? extends CommandToken> arguments,
             TaskReference... blockers) {
-        CommandTaskReference task = new CommandTaskReference(
-                finalizeTasks.getNextSerialNumber(),
-                profileName,
-                command,
-                arguments,
-                Arrays.asList(blockers));
-        finalizeTasks.add(task);
+        return addTask(tasks.getFinalizeTaskContainer(), profileName, command, arguments, blockers);
+    }
+
+    @Override
+    public TaskReference addFinalizer(ClassDescription mainClass, TaskReference... blockers) {
+        return addTask(tasks.getFinalizeTaskContainer(), mainClass, blockers);
+    }
+
+    private TaskReference addTask(
+            TaskContainer container,
+            String profileName,
+            Location command,
+            List<? extends CommandToken> arguments,
+            TaskReference... blockers) {
+        CommandTaskReference task = new CommandTaskReference(profileName, command, arguments, Arrays.asList(blockers));
+        container.add(task);
+        return task;
+    }
+
+    private TaskReference addTask(
+            TaskContainer container,
+            ClassDescription mainClass,
+            TaskReference... blockers) {
+        HadoopTaskReference task = new HadoopTaskReference(mainClass, Arrays.asList(blockers));
+        container.add(task);
         return task;
     }
 
     @Override
     public <T> T getExtension(Class<T> extension) {
+        if (extension == HadoopTaskReference.class) {
+            return extension.cast(this);
+        }
         return null;
     }
 }

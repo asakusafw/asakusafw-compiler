@@ -14,23 +14,23 @@ import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.graph.Jobflow;
 
 /**
- * Builds an Asakusa application from jobflow.
+ * Processes an Asakusa jobflow.
  */
-public interface JobflowBuilder {
+public interface JobflowProcessor {
 
     /**
-     * Builds the application.
+     * Processes the jobflow.
      * @param context the build context
-     * @param flow the target jobflow
+     * @param source the target jobflow
      * @throws IOException if build was failed by I/O error
      * @throws DiagnosticException if build was failed with diagnostics
      */
-    void process(Context context, Jobflow flow) throws IOException, DiagnosticException;
+    void process(Context context, Jobflow source) throws IOException, DiagnosticException;
 
     /**
-     * Represents a context object for {@link JobflowBuilder}.
+     * Represents a context object for {@link JobflowProcessor}.
      */
-    public static interface Context {
+    public static interface Context extends ExtensionContainer {
 
         /**
          * Returns the compiler options.
@@ -121,13 +121,5 @@ public interface JobflowBuilder {
                 Location command,
                 List<? extends CommandToken> arguments,
                 TaskReference... blockers);
-
-        /**
-         * Returns an extension service.
-         * @param extension the extension type
-         * @param <T> the extension type
-         * @return the extension service, or {@code null} if it is not found
-         */
-        <T> T getExtension(Class<T> extension);
     }
 }

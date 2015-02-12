@@ -12,8 +12,6 @@ import com.asakusafw.lang.compiler.model.Location;
  */
 public class CommandTaskReference implements TaskReference {
 
-    private final int serialNumber;
-
     private final String profileName;
 
     private final Location command;
@@ -24,36 +22,20 @@ public class CommandTaskReference implements TaskReference {
 
     /**
      * Creates a new instance.
-     * @param serialNumber the serial number of this task (unique in the same execution phase)
      * @param profileName the profile name where the command is running
      * @param command the command path (relative from {@code ASAKUSA_HOME})
      * @param arguments the command arguments
      * @param blockerTasks the blocker tasks
      */
     public CommandTaskReference(
-            int serialNumber,
             String profileName,
             Location command,
             List<? extends CommandToken> arguments,
             List<? extends TaskReference> blockerTasks) {
-        this.serialNumber = serialNumber;
         this.profileName = profileName;
         this.command = command;
         this.arguments = Collections.unmodifiableList(new ArrayList<>(arguments));
         this.blockerTasks = Collections.unmodifiableList(new ArrayList<>(blockerTasks));
-    }
-
-    @Override
-    public TaskKind getTaskKind() {
-        return TaskKind.COMMAND;
-    }
-
-    /**
-     * Returns the serial number of this task: this must be identical in the same execution phase.
-     * @return the serial number
-     */
-    public int getSerialNumber() {
-        return serialNumber;
     }
 
     @Override

@@ -22,7 +22,7 @@ import com.asakusafw.lang.compiler.model.description.TypeDescription;
 /**
  * Represents a property of data models.
  */
-public interface PropertyReference {
+public interface PropertyReference extends Reference {
 
     /**
      * Returns the original declaration.

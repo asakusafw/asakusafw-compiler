@@ -12,7 +12,7 @@ import java.util.Map;
 
 import com.asakusafw.lang.compiler.api.CompilerOptions;
 import com.asakusafw.lang.compiler.api.DataModelLoader;
-import com.asakusafw.lang.compiler.api.basic.AbstractJobflowBuilderContext;
+import com.asakusafw.lang.compiler.api.basic.AbstractJobflowProcessorContext;
 import com.asakusafw.lang.compiler.api.reference.ExternalInputReference;
 import com.asakusafw.lang.compiler.api.reference.ExternalOutputReference;
 import com.asakusafw.lang.compiler.model.Location;
@@ -20,9 +20,9 @@ import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.graph.ExternalInput;
 
 /**
- * Mock implementation of {@link com.asakusafw.lang.compiler.api.JobflowBuilder.Context}.
+ * Mock implementation of {@link com.asakusafw.lang.compiler.api.JobflowProcessor.Context}.
  */
-public class MockJobflowBuilderContext extends AbstractJobflowBuilderContext {
+public class MockJobflowProcessorContext extends AbstractJobflowProcessorContext {
 
     /**
      * Returns the base path of {@link #addExternalInput(String, ClassDescription) external inputs}.
@@ -48,7 +48,7 @@ public class MockJobflowBuilderContext extends AbstractJobflowBuilderContext {
      * @param outputDirectory the build output directory
      * @see #addExtension(Class, Object)
      */
-    public MockJobflowBuilderContext(
+    public MockJobflowProcessorContext(
             CompilerOptions options,
             ClassLoader classLoader,
             File outputDirectory) {
@@ -63,7 +63,7 @@ public class MockJobflowBuilderContext extends AbstractJobflowBuilderContext {
      * @param outputDirectory the build output directory
      * @see #addExtension(Class, Object)
      */
-    public MockJobflowBuilderContext(
+    public MockJobflowProcessorContext(
             CompilerOptions options,
             ClassLoader classLoader,
             DataModelLoader dataModelLoader,
@@ -143,7 +143,7 @@ public class MockJobflowBuilderContext extends AbstractJobflowBuilderContext {
      * @param <T> the extension type
      * @return this
      */
-    public <T> MockJobflowBuilderContext addExtension(Class<T> extensionClass, T service) {
+    public <T> MockJobflowProcessorContext addExtension(Class<T> extensionClass, T service) {
         extensions.put(extensionClass, service);
         return this;
     }

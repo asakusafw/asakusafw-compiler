@@ -1,40 +1,33 @@
 package com.asakusafw.lang.compiler.api.basic;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 import com.asakusafw.lang.compiler.api.reference.TaskReference;
 
 /**
- * Holds {@link TaskReference} objects.
+ * Holds {@link TaskReference} objects for each runtime phase.
  */
-public class TaskReferenceContainer {
+public class TaskContainer {
 
-    private final String phaseName;
-
-    private int serialNumber = 1;
+    private final TaskReference.Phase phase;
 
     private final Set<TaskReference> elements = new LinkedHashSet<>();
 
     /**
      * Creates a new instance.
-     * @param phaseName the phase name
+     * @param phase the task phase
      */
-    public TaskReferenceContainer(String phaseName) {
-        this.phaseName = phaseName;
-    }
-
-    /**
-     * Returns the next serial number of task.
-     * @return the next serial number of task
-     */
-    public int getNextSerialNumber() {
-        return serialNumber++;
+    public TaskContainer(TaskReference.Phase phase) {
+        this.phase = phase;
     }
 
     /**
      * Adds a task to this container.
+     * Each {@link TaskReference#getBlockerTasks() blocker task} must have been added.
      * If the task is already added to this, this will do nothing.
      * @param task the target task
      */
@@ -46,7 +39,7 @@ public class TaskReferenceContainer {
             if (elements.contains(blocker) == false) {
                 throw new IllegalStateException(MessageFormat.format(
                         "blocker task is not found in {0} phase: {1}",
-                        phaseName,
+                        phase,
                         blocker));
             }
         }
@@ -57,7 +50,7 @@ public class TaskReferenceContainer {
      * Returns the added elements.
      * @return the added elements
      */
-    public Set<TaskReference> getElements() {
-        return new LinkedHashSet<>(elements);
+    public List<TaskReference> getElements() {
+        return new ArrayList<>(elements);
     }
 }

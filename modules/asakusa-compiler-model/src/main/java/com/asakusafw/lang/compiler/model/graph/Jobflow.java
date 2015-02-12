@@ -1,15 +1,12 @@
 package com.asakusafw.lang.compiler.model.graph;
 
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
+import com.asakusafw.lang.compiler.model.info.JobflowInfo;
 
 /**
  * Represents a jobflow.
  */
-public class Jobflow implements Flow {
-
-    private final String flowId;
-
-    private final ClassDescription descriptionClass;
+public class Jobflow extends JobflowInfo.Basic implements Flow {
 
     private final OperatorGraph operatorGraph;
 
@@ -20,22 +17,8 @@ public class Jobflow implements Flow {
      * @param operatorGraph the operator graph
      */
     public Jobflow(String flowId, ClassDescription descriptionClass, OperatorGraph operatorGraph) {
-        this.flowId = flowId;
-        this.descriptionClass = descriptionClass;
+        super(flowId, descriptionClass);
         this.operatorGraph = operatorGraph;
-    }
-
-    /**
-     * Returns the flow ID.
-     * @return the flow ID
-     */
-    public String getFlowId() {
-        return flowId;
-    }
-
-    @Override
-    public ClassDescription getDescriptionClass() {
-        return descriptionClass;
     }
 
     @Override
