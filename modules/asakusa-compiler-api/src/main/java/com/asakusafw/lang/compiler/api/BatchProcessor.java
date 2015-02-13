@@ -18,7 +18,7 @@ public interface BatchProcessor {
      * @throws IOException if build was failed by I/O error
      * @throws DiagnosticException if build was failed with diagnostics
      */
-    void process(Context context, BatchReference source) throws IOException, DiagnosticException;
+    void process(Context context, BatchReference source) throws IOException;
 
     /**
      * Represents a context object for {@link BatchProcessor}.
@@ -30,6 +30,12 @@ public interface BatchProcessor {
          * @return the compiler options
          */
         CompilerOptions getOptions();
+
+        /**
+         * Returns the class loader to obtain the target application classes.
+         * @return the class loader
+         */
+        ClassLoader getClassLoader();
 
         /**
          * Adds a new resource file and returns its output stream.

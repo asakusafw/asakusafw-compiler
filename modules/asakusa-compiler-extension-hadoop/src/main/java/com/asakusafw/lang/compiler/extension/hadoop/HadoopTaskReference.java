@@ -1,17 +1,19 @@
-package com.asakusafw.lang.compiler.api.reference;
+package com.asakusafw.lang.compiler.extension.hadoop;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.asakusafw.lang.compiler.api.reference.TaskReference;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 
 /**
  * A symbol of task using {@code hadoop} command.
- * FIXME move to other project?
  */
 public class HadoopTaskReference implements TaskReference {
+
+    private static final String MODULE_NAME = "hadoop"; //$NON-NLS-1$
 
     private final ClassDescription mainClass;
 
@@ -27,6 +29,11 @@ public class HadoopTaskReference implements TaskReference {
             List<? extends TaskReference> blockerTasks) {
         this.mainClass = mainClass;
         this.blockerTasks = Collections.unmodifiableList(new ArrayList<>(blockerTasks));
+    }
+
+    @Override
+    public String getModuleName() {
+        return MODULE_NAME;
     }
 
     @Override

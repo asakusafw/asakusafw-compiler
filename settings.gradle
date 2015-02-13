@@ -1,8 +1,15 @@
+// core
 include 'asakusa-compiler-model'
 include 'asakusa-compiler-api'
 include 'asakusa-compiler-plan'
 include 'asakusa-compiler-core'
 include 'asakusa-compiler-cli'
+
+// extensions
+include 'asakusa-compiler-extension-hadoop'
+include 'asakusa-compiler-extension-yaess'
+
+// others
 include 'asakusa-compiler-mock'
 
 rootProject.children.each { project ->

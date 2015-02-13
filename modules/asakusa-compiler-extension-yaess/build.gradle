@@ -1,0 +1,16 @@
+description 'Asakusa DSL Compiler Extension for YAESS'
+
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'eclipse'
+
+dependencies {
+    compile project(':asakusa-compiler-model')
+    compile project(':asakusa-compiler-api')
+    compile project(':asakusa-compiler-extension-hadoop')
+    compile "com.asakusafw:asakusa-yaess-core:${asakusafwVersion}"
+
+    testRuntime project(':asakusa-compiler-mock')
+    testRuntime "com.asakusafw:simple-graph:${asakusafwVersion}"
+    testRuntime "ch.qos.logback:logback-classic:1.1.2"
+}

@@ -1,11 +1,10 @@
-package com.asakusafw.lang.compiler.api.extension;
+package com.asakusafw.lang.compiler.extension.hadoop;
 
 import com.asakusafw.lang.compiler.api.reference.TaskReference;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 
 /**
  * An extension for using Hadoop tasks.
- * FIXME move to other project?
  */
 public interface HadoopTaskExtension {
 

@@ -11,6 +11,13 @@ import java.util.Map;
 public interface TaskReference extends Reference {
 
     /**
+     * Returns the module name for processing this task.
+     * The module name must consist of lower-case alphabets or digits.
+     * @return the module name
+     */
+    String getModuleName();
+
+    /**
      * Returns tasks which must be executed before this task.
      * @return the blocker tasks
      */
@@ -87,7 +94,7 @@ public interface TaskReference extends Reference {
 
             static final Map<String, Phase> SYMBOLS;
             static {
-                Map<String, Phase> map = new HashMap<String, Phase>();
+                Map<String, Phase> map = new HashMap<>();
                 for (Phase phase : values()) {
                     map.put(phase.getSymbol(), phase);
                 }

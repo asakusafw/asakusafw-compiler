@@ -15,19 +15,42 @@
  */
 package com.asakusafw.lang.compiler.api;
 
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 /**
  * Represents a set of Asakusa DSL compiler options.
  */
 public class CompilerOptions {
 
+    private final String buildId;
+
     private final String runtimeWorkingDirectory;
+
+    private final Map<String, String> properties;
 
     /**
      * Creates a new instance.
+     * @param buildId the current build ID
      * @param runtimeWorkingDirectory the runtime working directory
+     * @param properties the generic compiler properties
      */
-    public CompilerOptions(String runtimeWorkingDirectory) {
+    public CompilerOptions(
+            String buildId,
+            String runtimeWorkingDirectory,
+            Map<String, String> properties) {
+        this.buildId = buildId;
         this.runtimeWorkingDirectory = runtimeWorkingDirectory;
+        this.properties = Collections.unmodifiableMap(new LinkedHashMap<>(properties));
+    }
+
+    /**
+     * Returns the current build ID.
+     * @return the current build ID
+     */
+    public String getBuildId() {
+        return buildId;
     }
 
     /**
@@ -37,5 +60,13 @@ public class CompilerOptions {
      */
     public String getRuntimeWorkingDirectory() {
         return runtimeWorkingDirectory;
+    }
+
+    /**
+     * Returns the generic compiler properties.
+     * @return the generic compiler properties
+     */
+    public Map<String, String> getProperties() {
+        return properties;
     }
 }

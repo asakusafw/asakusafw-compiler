@@ -11,20 +11,19 @@ import java.util.List;
 import java.util.Map;
 
 import com.asakusafw.lang.compiler.api.JobflowProcessor;
-import com.asakusafw.lang.compiler.api.extension.HadoopTaskExtension;
 import com.asakusafw.lang.compiler.api.reference.CommandTaskReference;
 import com.asakusafw.lang.compiler.api.reference.CommandToken;
 import com.asakusafw.lang.compiler.api.reference.ExternalInputReference;
 import com.asakusafw.lang.compiler.api.reference.ExternalOutputReference;
-import com.asakusafw.lang.compiler.api.reference.HadoopTaskReference;
 import com.asakusafw.lang.compiler.api.reference.TaskReference;
 import com.asakusafw.lang.compiler.model.Location;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 
 /**
- * An abstract implementation of {@link JobflowProcessor}.
+ * An abstract implementation of {@link com.asakusafw.lang.compiler.api.JobflowProcessor.Context}.
  */
-public abstract class AbstractJobflowProcessorContext implements JobflowProcessor.Context, HadoopTaskExtension {
+public abstract class AbstractJobflowProcessorContext extends BasicExtensionContainer
+        implements JobflowProcessor.Context {
 
     private static final String EXTENSION_CLASS = ".class"; //$NON-NLS-1$
 
@@ -122,57 +121,36 @@ public abstract class AbstractJobflowProcessorContext implements JobflowProcesso
 
     @Override
     public final TaskReference addTask(
+            String moduleName,
             String profileName,
             Location command,
             List<? extends CommandToken> arguments,
             TaskReference... blockers) {
-        return addTask(tasks.getMainTaskContainer(), profileName, command, arguments, blockers);
-    }
-
-    @Override
-    public TaskReference addTask(ClassDescription mainClass, TaskReference... blockers) {
-        return addTask(tasks.getMainTaskContainer(), mainClass, blockers);
+        return addTask(tasks.getMainTaskContainer(), moduleName, profileName, command, arguments, blockers);
     }
 
     @Override
     public final TaskReference addFinalizer(
+            String moduleName,
             String profileName,
             Location command,
             List<? extends CommandToken> arguments,
             TaskReference... blockers) {
-        return addTask(tasks.getFinalizeTaskContainer(), profileName, command, arguments, blockers);
-    }
-
-    @Override
-    public TaskReference addFinalizer(ClassDescription mainClass, TaskReference... blockers) {
-        return addTask(tasks.getFinalizeTaskContainer(), mainClass, blockers);
+        return addTask(tasks.getFinalizeTaskContainer(), moduleName, profileName, command, arguments, blockers);
     }
 
     private TaskReference addTask(
             TaskContainer container,
+            String moduleName,
             String profileName,
             Location command,
             List<? extends CommandToken> arguments,
             TaskReference... blockers) {
-        CommandTaskReference task = new CommandTaskReference(profileName, command, arguments, Arrays.asList(blockers));
+        CommandTaskReference task = new CommandTaskReference(
+                moduleName, profileName,
+                command, arguments,
+                Arrays.asList(blockers));
         container.add(task);
         return task;
-    }
-
-    private TaskReference addTask(
-            TaskContainer container,
-            ClassDescription mainClass,
-            TaskReference... blockers) {
-        HadoopTaskReference task = new HadoopTaskReference(mainClass, Arrays.asList(blockers));
-        container.add(task);
-        return task;
-    }
-
-    @Override
-    public <T> T getExtension(Class<T> extension) {
-        if (extension == HadoopTaskReference.class) {
-            return extension.cast(this);
-        }
-        return null;
     }
 }

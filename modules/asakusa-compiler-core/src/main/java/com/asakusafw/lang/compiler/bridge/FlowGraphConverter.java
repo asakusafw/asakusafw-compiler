@@ -118,7 +118,7 @@ public final class FlowGraphConverter {
     }
 
     private static Set<FlowElement> collect(FlowGraph graph) {
-        LinkedList<FlowElement> work = new LinkedList<FlowElement>();
+        LinkedList<FlowElement> work = new LinkedList<>();
         for (FlowIn<?> port : graph.getFlowInputs()) {
             work.add(port.getFlowElement());
         }

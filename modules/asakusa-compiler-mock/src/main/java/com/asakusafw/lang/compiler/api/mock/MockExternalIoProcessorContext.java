@@ -3,31 +3,18 @@ package com.asakusafw.lang.compiler.api.mock;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Collection;
-import java.util.Collections;
 
 import com.asakusafw.lang.compiler.api.CompilerOptions;
 import com.asakusafw.lang.compiler.api.DataModelLoader;
-import com.asakusafw.lang.compiler.api.basic.AbstractJobflowProcessorContext;
+import com.asakusafw.lang.compiler.api.basic.AbstractExternalIoProcessorContext;
 import com.asakusafw.lang.compiler.api.basic.BasicResourceContainer;
-import com.asakusafw.lang.compiler.api.reference.ExternalInputReference;
-import com.asakusafw.lang.compiler.api.reference.ExternalOutputReference;
 import com.asakusafw.lang.compiler.model.Location;
-import com.asakusafw.lang.compiler.model.description.ClassDescription;
-import com.asakusafw.lang.compiler.model.graph.ExternalInput;
 
 /**
- * Mock implementation of {@link com.asakusafw.lang.compiler.api.JobflowProcessor.Context}.
+ * Mock implementation of {@link com.asakusafw.lang.compiler.api.ExternalIoProcessor.Context}.
  */
-public class MockJobflowProcessorContext extends AbstractJobflowProcessorContext
+public class MockExternalIoProcessorContext extends AbstractExternalIoProcessorContext
         implements MockProcessorContext {
-
-    /**
-     * Returns the base path of {@link #addExternalInput(String, ClassDescription) external inputs}.
-     * The actual path will be follow its {@link ExternalInput#getName() name} after this prefix,
-     * and it is relative from {@link CompilerOptions#getRuntimeWorkingDirectory()}.
-     */
-    public static final String EXTERNAL_INPUT_BASE = "extenal/input/"; //$NON-NLS-1$
 
     private final CompilerOptions options;
 
@@ -44,7 +31,7 @@ public class MockJobflowProcessorContext extends AbstractJobflowProcessorContext
      * @param outputDirectory the build output directory
      * @see #registerExtension(Class, Object)
      */
-    public MockJobflowProcessorContext(
+    public MockExternalIoProcessorContext(
             CompilerOptions options,
             ClassLoader classLoader,
             File outputDirectory) {
@@ -59,7 +46,7 @@ public class MockJobflowProcessorContext extends AbstractJobflowProcessorContext
      * @param outputDirectory the build output directory
      * @see #registerExtension(Class, Object)
      */
-    public MockJobflowProcessorContext(
+    public MockExternalIoProcessorContext(
             CompilerOptions options,
             ClassLoader classLoader,
             DataModelLoader dataModelLoader,
@@ -93,25 +80,5 @@ public class MockJobflowProcessorContext extends AbstractJobflowProcessorContext
     @Override
     public OutputStream addResourceFile(Location location) throws IOException {
         return resources.addResourceFile(location);
-    }
-
-    @Override
-    protected ExternalInputReference createExternalInput(String name, ClassDescription descriptionClass) {
-        return new ExternalInputReference(
-                name,
-                descriptionClass,
-                Collections.singleton(path(EXTERNAL_INPUT_BASE + name)));
-    }
-
-    @Override
-    protected ExternalOutputReference createExternalOutput(
-            String name,
-            ClassDescription descriptionClass,
-            Collection<String> internalOutputPaths) {
-        return new ExternalOutputReference(name, descriptionClass, internalOutputPaths);
-    }
-
-    private String path(String relative) {
-        return String.format("%s/%s", getOptions().getRuntimeWorkingDirectory(), relative); //$NON-NLS-1$
     }
 }
