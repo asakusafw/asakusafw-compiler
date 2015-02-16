@@ -10,7 +10,7 @@ dependencies {
     compile project(':asakusa-compiler-extension-hadoop')
     compile "com.asakusafw:asakusa-yaess-core:${asakusafwVersion}"
 
-    testRuntime project(':asakusa-compiler-mock')
+    testCompile project(':asakusa-compiler-mock')
     testRuntime "com.asakusafw:simple-graph:${asakusafwVersion}"
     testRuntime "ch.qos.logback:logback-classic:1.1.2"
 }

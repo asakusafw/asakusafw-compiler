@@ -2,24 +2,18 @@ package com.asakusafw.lang.compiler.api.reference;
 
 import java.util.Set;
 
-import com.asakusafw.lang.compiler.model.description.ClassDescription;
+import com.asakusafw.lang.compiler.model.info.ExternalPortInfo;
 
 /**
  * An abstract interface for a symbol of external input or output.
  */
-public interface ExternalPortReference extends Reference {
+public interface ExternalPortReference extends ExternalPortInfo, Reference {
 
     /**
      * Returns the original port name.
      * @return the original port name
      */
     String getName();
-
-    /**
-     * Returns the importer/exporter description class.
-     * @return the importer/exporter description class
-     */
-    ClassDescription getDescriptionClass();
 
     /**
      * The internal paths for the target port.

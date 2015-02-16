@@ -12,6 +12,8 @@ import com.asakusafw.lang.compiler.api.reference.TaskReference;
 import com.asakusafw.lang.compiler.model.Location;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.graph.Jobflow;
+import com.asakusafw.lang.compiler.model.info.ExternalInputInfo;
+import com.asakusafw.lang.compiler.model.info.ExternalOutputInfo;
 
 /**
  * Processes an Asakusa jobflow.
@@ -73,25 +75,25 @@ public interface JobflowProcessor {
          * If some sub-application independently processes the target external input,
          * you should not use this method.
          * @param name the input name (each input must be unique in the jobflow)
-         * @param descriptionClass the description class for this external input
+         * @param info the structural information of the target external input
          * @return the resolved symbol
          */
         ExternalInputReference addExternalInput(
                 String name,
-                ClassDescription descriptionClass);
+                ExternalInputInfo info);
 
         /**
          * Adds an external output operator in this application.
          * If some sub-application independently processes the target external output,
          * you <em>MUST NOT</em> use this method.
          * @param name the output name (each output must be unique in the jobflow)
-         * @param descriptionClass the description class for this external output
+         * @param info the structural information of the target external output
          * @param internalOutputPaths the output paths which will be internally generated in this jobflow
          * @return the resolved symbol
          */
         ExternalOutputReference addExternalOutput(
                 String name,
-                ClassDescription descriptionClass,
+                ExternalOutputInfo info,
                 Collection<String> internalOutputPaths);
 
         /**

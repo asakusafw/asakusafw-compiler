@@ -18,6 +18,8 @@ import com.asakusafw.lang.compiler.api.reference.ExternalOutputReference;
 import com.asakusafw.lang.compiler.api.reference.TaskReference;
 import com.asakusafw.lang.compiler.model.Location;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
+import com.asakusafw.lang.compiler.model.info.ExternalInputInfo;
+import com.asakusafw.lang.compiler.model.info.ExternalOutputInfo;
 
 /**
  * An abstract implementation of {@link com.asakusafw.lang.compiler.api.JobflowProcessor.Context}.
@@ -42,7 +44,7 @@ public abstract class AbstractJobflowProcessorContext extends BasicExtensionCont
     }
 
     /**
-     * Returns the external inputs which {@link #addExternalInput(String, ClassDescription) added} to this context.
+     * Returns the external inputs which {@link #addExternalInput(String, ExternalInputInfo) added} to this context.
      * @return the added external inputs
      */
     public List<ExternalInputReference> getExternalInputs() {
@@ -50,7 +52,7 @@ public abstract class AbstractJobflowProcessorContext extends BasicExtensionCont
     }
 
     /**
-     * Returns the external outputs which {@link #addExternalOutput(String, ClassDescription, Collection) added}
+     * Returns the external outputs which {@link #addExternalOutput(String, ExternalOutputInfo, Collection) added}
      * to this context.
      * @return the added external outputs
      */
@@ -65,32 +67,30 @@ public abstract class AbstractJobflowProcessorContext extends BasicExtensionCont
     }
 
     @Override
-    public final ExternalInputReference addExternalInput(
-            String name,
-            ClassDescription descriptionClass) {
+    public ExternalInputReference addExternalInput(String name, ExternalInputInfo info) {
         if (externalInputs.containsKey(name)) {
             throw new IllegalStateException(MessageFormat.format(
                     "external input is already declared in this jobflow: \"{0}\" ({1})",
                     name,
-                    descriptionClass.getName()));
+                    info.getDescriptionClass().getName()));
         }
-        ExternalInputReference result = createExternalInput(name, descriptionClass);
+        ExternalInputReference result = createExternalInput(name, info);
         externalInputs.put(name, result);
         return result;
     }
 
     @Override
-    public final ExternalOutputReference addExternalOutput(
+    public ExternalOutputReference addExternalOutput(
             String name,
-            ClassDescription descriptionClass,
+            ExternalOutputInfo info,
             Collection<String> internalOutputPaths) {
         if (externalOutputs.containsKey(name)) {
             throw new IllegalStateException(MessageFormat.format(
                     "external output is already declared in this jobflow: \"{0}\" ({1})",
                     name,
-                    descriptionClass.getName()));
+                    info.getDescriptionClass().getName()));
         }
-        ExternalOutputReference result = createExternalOutput(name, descriptionClass, internalOutputPaths);
+        ExternalOutputReference result = createExternalOutput(name, info, internalOutputPaths);
         externalOutputs.put(name, result);
         return result;
     }
@@ -98,25 +98,23 @@ public abstract class AbstractJobflowProcessorContext extends BasicExtensionCont
     /**
      * Creates a new {@link ExternalInputReference}.
      * @param name the input name
-     * @param descriptionClass the description class
+     * @param info the structural information of this external input
      * @return the created instance
-     * @see #addExternalInput(String, ClassDescription)
+     * @see #addExternalInput(String, ExternalInputInfo)
      */
-    protected abstract ExternalInputReference createExternalInput(
-            String name,
-            ClassDescription descriptionClass);
+    protected abstract ExternalInputReference createExternalInput(String name, ExternalInputInfo info);
 
     /**
      * Creates a new {@link ExternalOutputReference}.
      * @param name the input name
-     * @param descriptionClass the description class
+     * @param info the structural information of this external output
      * @param internalOutputPaths the output paths which will be internally generated in this jobflow
      * @return the created instance
-     * @see #addExternalOutput(String, ClassDescription, Collection)
+     * @see #addExternalOutput(String, ExternalOutputInfo, Collection)
      */
     protected abstract ExternalOutputReference createExternalOutput(
             String name,
-            ClassDescription descriptionClass,
+            ExternalOutputInfo info,
             Collection<String> internalOutputPaths);
 
     @Override

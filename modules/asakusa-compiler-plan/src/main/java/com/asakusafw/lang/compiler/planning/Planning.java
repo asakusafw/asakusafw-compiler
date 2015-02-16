@@ -133,7 +133,7 @@ public final class Planning {
                 continue;
             }
             OperatorOutput orig = port.getOperatorPort();
-            ExternalInput enhanced = ExternalInput.builder(port.getName(), port.getDescriptionClass())
+            ExternalInput enhanced = ExternalInput.builder(port.getName(), port.getInfo())
                     .input(ExternalInput.PORT_NAME, port.getDataType()) // virtual
                     .output(orig.getName(), orig.getDataType())
                     .constraint(port.getConstraints())
@@ -148,7 +148,7 @@ public final class Planning {
                 continue;
             }
             OperatorInput orig = port.getOperatorPort();
-            ExternalOutput enhanced = ExternalOutput.builder(port.getName(), port.getDescriptionClass())
+            ExternalOutput enhanced = ExternalOutput.builder(port.getName(), port.getInfo())
                     .input(orig.getName(), orig.getDataType(), orig.getGroup())
                     .output(ExternalOutput.PORT_NAME, orig.getDataType()) // virtual
                     .constraint(port.getConstraints())

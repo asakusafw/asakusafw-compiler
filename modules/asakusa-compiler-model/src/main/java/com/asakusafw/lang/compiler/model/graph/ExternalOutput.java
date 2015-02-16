@@ -3,8 +3,8 @@ package com.asakusafw.lang.compiler.model.graph;
 import java.text.MessageFormat;
 import java.util.List;
 
-import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.description.TypeDescription;
+import com.asakusafw.lang.compiler.model.info.ExternalOutputInfo;
 
 /**
  * Represents an external/flow output operator.
@@ -18,16 +18,16 @@ public final class ExternalOutput extends ExternalPort {
 
     private final String name;
 
-    private final ClassDescription descriptionClass;
+    private final ExternalOutputInfo.Basic info;
 
-    private ExternalOutput(String name, ClassDescription descriptionClass) {
+    private ExternalOutput(String name, ExternalOutputInfo info) {
         this.name = name;
-        this.descriptionClass = descriptionClass;
+        this.info = info == null ? null : new ExternalOutputInfo.Basic(info);
     }
 
     @Override
     public ExternalOutput copy() {
-        return copyAttributesTo(new ExternalOutput(name, descriptionClass));
+        return copyAttributesTo(new ExternalOutput(name, info));
     }
 
     /**
@@ -35,7 +35,7 @@ public final class ExternalOutput extends ExternalPort {
      * Usually, clients use {@link #newInstance(String, TypeDescription, OperatorOutput...)} instead.
      * @param name the output name
      * @return the builder
-     * @see #builder(String, ClassDescription)
+     * @see #builder(String, ExternalOutputInfo)
      */
     public static Builder builder(String name) {
         return builder(name, null);
@@ -43,13 +43,13 @@ public final class ExternalOutput extends ExternalPort {
 
     /**
      * Creates a new builder.
-     * Usually, clients use {@link #newInstance(String, ClassDescription, TypeDescription, OperatorOutput...)} instead.
+     * Usually, clients use {@link #newInstance(String, ExternalOutputInfo, OperatorOutput...)} instead.
      * @param name the output name
-     * @param descriptionClass the exporter description class (nullable if the port is not external)
+     * @param info the structural exporter information (nullable if the port is not external)
      * @return the builder
      */
-    public static Builder builder(String name, ClassDescription descriptionClass) {
-        return new Builder(new ExternalOutput(name, descriptionClass));
+    public static Builder builder(String name, ExternalOutputInfo info) {
+        return new Builder(new ExternalOutput(name, info));
     }
 
     /**
@@ -58,43 +58,10 @@ public final class ExternalOutput extends ExternalPort {
      * @param dataType the port type
      * @param upstreams the optional upstream ports to connect to the created operator
      * @return the created instance
-     * @see #newInstance(String, ClassDescription, TypeDescription, OperatorOutput...)
+     * @see #newInstance(String, ExternalOutputInfo, OperatorOutput...)
      */
-    public static ExternalOutput newInstance(
-            String name,
-            TypeDescription dataType,
-            OperatorOutput... upstreams) {
-        return newInstance(name, null, dataType, upstreams);
-    }
-
-    /**
-     * Creates a new instance with default {@link #getOperatorPort() operator port}.
-     * @param name the output name
-     * @param upstream the mandatory upstream port to connect to the created operator
-     * @param upstreams the optional upstream ports to connect to the created operator
-     * @return the created instance
-     * @see #newInstance(String, ClassDescription, TypeDescription, OperatorOutput...)
-     */
-    public static ExternalOutput newInstance(
-            String name,
-            OperatorOutput upstream,
-            OperatorOutput... upstreams) {
-        return newInstance(name, null, upstream, upstreams);
-    }
-
-    /**
-     * Creates a new instance with default {@link #getOperatorPort() operator port}.
-     * @param name the output name
-     * @param descriptionClass the exporter description class (nullable if the port is not external)
-     * @param dataType the port type
-     * @param upstreams the optional upstream ports to connect to the created operator
-     * @return the created instance
-     */
-    public static ExternalOutput newInstance(
-            String name, ClassDescription descriptionClass,
-            TypeDescription dataType,
-            OperatorOutput... upstreams) {
-        return builder(name, descriptionClass)
+    public static ExternalOutput newInstance(String name, TypeDescription dataType, OperatorOutput... upstreams) {
+        return builder(name, null)
                 .input(PORT_NAME, dataType, upstreams)
                 .build();
     }
@@ -102,16 +69,42 @@ public final class ExternalOutput extends ExternalPort {
     /**
      * Creates a new instance with default {@link #getOperatorPort() operator port}.
      * @param name the output name
-     * @param descriptionClass the exporter description class (nullable if the port is not external)
+     * @param upstream the mandatory upstream port to connect to the created operator
+     * @param upstreams the optional upstream ports to connect to the created operator
+     * @return the created instance
+     * @see #newInstance(String, ExternalOutputInfo, OperatorOutput, OperatorOutput...)
+     */
+    public static ExternalOutput newInstance(String name, OperatorOutput upstream, OperatorOutput... upstreams) {
+        return newInstance(name, null, upstream, upstreams);
+    }
+
+    /**
+     * Creates a new instance with default {@link #getOperatorPort() operator port}.
+     * @param name the output name
+     * @param info the structural exporter information (nullable if the port is not external)
+     * @param upstreams the optional upstream ports to connect to the created operator
+     * @return the created instance
+     */
+    public static ExternalOutput newInstance(String name, ExternalOutputInfo info, OperatorOutput... upstreams) {
+        return builder(name, info)
+                .input(PORT_NAME, info.getDataModelClass(), upstreams)
+                .build();
+    }
+
+    /**
+     * Creates a new instance with default {@link #getOperatorPort() operator port}.
+     * @param name the output name
+     * @param info the structural exporter information (nullable if the port is not external)
      * @param upstream the mandatory upstream port to connect to the created operator
      * @param upstreams the optional upstream ports to connect to the created operator
      * @return the created instance
      */
     public static ExternalOutput newInstance(
-            String name, ClassDescription descriptionClass,
+            String name,
+            ExternalOutputInfo info,
             OperatorOutput upstream,
             OperatorOutput... upstreams) {
-        return builder(name, descriptionClass)
+        return builder(name, info)
                 .input(PORT_NAME, upstream, upstreams)
                 .build();
     }
@@ -141,8 +134,8 @@ public final class ExternalOutput extends ExternalPort {
     }
 
     @Override
-    public ClassDescription getDescriptionClass() {
-        return descriptionClass;
+    public ExternalOutputInfo getInfo() {
+        return info;
     }
 
     @Override

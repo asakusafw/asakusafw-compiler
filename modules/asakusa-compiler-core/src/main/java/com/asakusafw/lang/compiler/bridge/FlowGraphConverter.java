@@ -14,9 +14,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.asakusafw.lang.compiler.api.Diagnostic.Level;
 import com.asakusafw.lang.compiler.api.Diagnostic;
+import com.asakusafw.lang.compiler.api.Diagnostic.Level;
 import com.asakusafw.lang.compiler.api.DiagnosticException;
+import com.asakusafw.lang.compiler.api.ExternalIoProcessor;
 import com.asakusafw.lang.compiler.model.PropertyName;
 import com.asakusafw.lang.compiler.model.description.AnnotationDescription;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
@@ -37,8 +38,12 @@ import com.asakusafw.lang.compiler.model.graph.OperatorGraph;
 import com.asakusafw.lang.compiler.model.graph.OperatorInput;
 import com.asakusafw.lang.compiler.model.graph.OperatorOutput;
 import com.asakusafw.lang.compiler.model.graph.UserOperator;
+import com.asakusafw.lang.compiler.model.info.ExternalInputInfo;
+import com.asakusafw.lang.compiler.model.info.ExternalOutputInfo;
 import com.asakusafw.utils.graph.Graph;
 import com.asakusafw.utils.graph.Graphs;
+import com.asakusafw.vocabulary.external.ExporterDescription;
+import com.asakusafw.vocabulary.external.ImporterDescription;
 import com.asakusafw.vocabulary.flow.graph.FlowBoundary;
 import com.asakusafw.vocabulary.flow.graph.FlowElement;
 import com.asakusafw.vocabulary.flow.graph.FlowElementDescription;
@@ -76,8 +81,18 @@ public final class FlowGraphConverter {
         CORE_OPERATOR_KINDS = map;
     }
 
-    private FlowGraphConverter() {
-        return;
+    private final ExternalIoProcessor.Context ioContext;
+
+    private final ExternalIoProcessor ioProcessor;
+
+    /**
+     * Creates a new instance.
+     * @param context the current external I/O context
+     * @param processor the external I/O processor
+     */
+    public FlowGraphConverter(ExternalIoProcessor.Context context, ExternalIoProcessor processor) {
+        this.ioContext = context;
+        this.ioProcessor = processor;
     }
 
     /**
@@ -85,7 +100,7 @@ public final class FlowGraphConverter {
      * @param graph the original graph
      * @return the converted graph
      */
-    public static OperatorGraph convert(FlowGraph graph) {
+    public OperatorGraph convert(FlowGraph graph) {
         Context context = new Context();
         for (FlowElement source : sortElements(graph)) {
             Operator target = convert(source.getDescription());
@@ -151,7 +166,7 @@ public final class FlowGraphConverter {
         return results;
     }
 
-    private static Operator convert(FlowElementDescription description) {
+    private Operator convert(FlowElementDescription description) {
         switch (description.getKind()) {
         case INPUT:
             return convert((InputDescription) description);
@@ -168,25 +183,43 @@ public final class FlowGraphConverter {
         }
     }
 
-    private static Operator convert(InputDescription description) {
-        return convert(description, ExternalInput.builder(
-                description.getName(),
-                descriptionOf(description.getImporterDescription())));
+    private Operator convert(InputDescription description) {
+        ImporterDescription extern = description.getImporterDescription();
+        ExternalInputInfo info = null;
+        if (extern != null) {
+            if (ioProcessor.isSupported(ioContext, Descriptions.classOf(extern.getClass())) == false) {
+                throw new DiagnosticException(Level.ERROR, MessageFormat.format(
+                        "missing processor of importer description: {0} (name={1})",
+                        description.getName(),
+                        extern.getClass().getName()));
+            }
+            info = ioProcessor.resolveInput(ioContext, description.getName(), extern);
+        }
+        return convert(description, ExternalInput.builder(description.getName(), info));
     }
 
-    private static Operator convert(OutputDescription description) {
-        return convert(description, ExternalOutput.builder(
-                description.getName(),
-                descriptionOf(description.getExporterDescription())));
+    private Operator convert(OutputDescription description) {
+        ExporterDescription extern = description.getExporterDescription();
+        ExternalOutputInfo info = null;
+        if (extern != null) {
+            if (ioProcessor.isSupported(ioContext, Descriptions.classOf(extern.getClass())) == false) {
+                throw new DiagnosticException(Level.ERROR, MessageFormat.format(
+                        "missing processor of exporter description: {0} (name={1})",
+                        description.getName(),
+                        extern.getClass().getName()));
+            }
+            info = ioProcessor.resolveOutput(ioContext, description.getName(), extern);
+        }
+        return convert(description, ExternalOutput.builder(description.getName(), info));
     }
 
-    private static Operator convert(FlowPartDescription description) {
+    private Operator convert(FlowPartDescription description) {
         ClassDescription declaring = Descriptions.classOf(description.getFlowGraph().getDescription());
         OperatorGraph inner = convert(description.getFlowGraph());
         return convert(description, FlowOperator.builder(declaring, inner));
     }
 
-    private static Operator convert(OperatorDescription description) {
+    private Operator convert(OperatorDescription description) {
         OperatorDescription.Declaration declaration = description.getDeclaration();
         CoreOperator.CoreOperatorKind core = CORE_OPERATOR_KINDS.get(declaration.getAnnotationType());
         if (core != null) {
@@ -214,7 +247,7 @@ public final class FlowGraphConverter {
                 Descriptions.classOf(declaration.getImplementing())));
     }
 
-    private static Operator convert(PseudElementDescription description) {
+    private Operator convert(PseudElementDescription description) {
         if (isCheckpoint(description)) {
             return convert(description, CoreOperator.builder(CoreOperator.CoreOperatorKind.CHECKPOINT));
         }
@@ -298,13 +331,6 @@ public final class FlowGraphConverter {
 
     static boolean isCheckpoint(FlowElementDescription description) {
         return description.getAttribute(FlowBoundary.class) == FlowBoundary.STAGE;
-    }
-
-    private static ClassDescription descriptionOf(Object description) {
-        if (description == null) {
-            return null;
-        }
-        return Descriptions.classOf(description.getClass());
     }
 
     private static ReifiableTypeDescription typeOf(java.lang.reflect.Type type) {

@@ -4,10 +4,15 @@ import static com.asakusafw.lang.compiler.model.description.Descriptions.*;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
+import java.util.Collections;
+
 import org.junit.Test;
 
+import com.asakusafw.lang.compiler.model.description.ClassDescription;
+import com.asakusafw.lang.compiler.model.description.ValueDescription;
 import com.asakusafw.lang.compiler.model.graph.ExternalPort.PortKind;
 import com.asakusafw.lang.compiler.model.graph.Operator.OperatorKind;
+import com.asakusafw.lang.compiler.model.info.ExternalOutputInfo;
 
 /**
  * Test for {@link ExternalOutput}.
@@ -19,15 +24,20 @@ public class ExternalOutputTest {
      */
     @Test
     public void simple() {
-        ExternalOutput operator = ExternalOutput.newInstance(
-                "out", classOf(StringBuilder.class), typeOf(String.class));
+        ExternalOutputInfo info = new ExternalOutputInfo.Basic(
+                new ClassDescription("Dummy"),
+                "testing",
+                classOf(String.class),
+                Collections.<String, ValueDescription>emptyMap());
+
+        ExternalOutput operator = ExternalOutput.newInstance("out", info);
         assertThat(operator.toString(), operator.getOperatorKind(), is(OperatorKind.OUTPUT));
         assertThat(operator.getPortKind(), is(PortKind.OUTPUT));
         assertThat(operator.getName(), is("out"));
         assertThat(operator.getOperatorPort().getName(), is(ExternalOutput.PORT_NAME));
         assertThat(operator.getOperatorPort().getOwner(), is(sameInstance((Object) operator)));
         assertThat(operator.getDataType(), is((Object) typeOf(String.class)));
-        assertThat(operator.getDescriptionClass(), is(classOf(StringBuilder.class)));
+        assertThat(operator.getInfo(), is(info));
     }
 
     /**
@@ -44,7 +54,7 @@ public class ExternalOutputTest {
         assertThat(operator.getOperatorPort().getOwner(), is(sameInstance((Object) operator)));
         assertThat(operator.getOperatorPort().getOpposites(), hasItems(upstream.getOperatorPort()));
         assertThat(operator.getDataType(), is((Object) typeOf(String.class)));
-        assertThat(operator.getDescriptionClass(), is(nullValue()));
+        assertThat(operator.getInfo(), is(nullValue()));
     }
 
     /**
@@ -60,6 +70,6 @@ public class ExternalOutputTest {
         assertThat(copy.getOperatorPort().getName(), is(ExternalOutput.PORT_NAME));
         assertThat(copy.getOperatorPort().getOwner(), is(sameInstance((Object) copy)));
         assertThat(copy.getDataType(), is((Object) typeOf(String.class)));
-        assertThat(copy.getDescriptionClass(), is(nullValue()));
+        assertThat(operator.getInfo(), is(nullValue()));
     }
 }

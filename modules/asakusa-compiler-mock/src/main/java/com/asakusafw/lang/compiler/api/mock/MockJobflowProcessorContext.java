@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Set;
 
 import com.asakusafw.lang.compiler.api.CompilerOptions;
 import com.asakusafw.lang.compiler.api.DataModelLoader;
@@ -13,8 +14,9 @@ import com.asakusafw.lang.compiler.api.basic.BasicResourceContainer;
 import com.asakusafw.lang.compiler.api.reference.ExternalInputReference;
 import com.asakusafw.lang.compiler.api.reference.ExternalOutputReference;
 import com.asakusafw.lang.compiler.model.Location;
-import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.graph.ExternalInput;
+import com.asakusafw.lang.compiler.model.info.ExternalInputInfo;
+import com.asakusafw.lang.compiler.model.info.ExternalOutputInfo;
 
 /**
  * Mock implementation of {@link com.asakusafw.lang.compiler.api.JobflowProcessor.Context}.
@@ -23,7 +25,7 @@ public class MockJobflowProcessorContext extends AbstractJobflowProcessorContext
         implements MockProcessorContext {
 
     /**
-     * Returns the base path of {@link #addExternalInput(String, ClassDescription) external inputs}.
+     * Returns the base path of {@link #addExternalInput(String, ExternalInputInfo) external inputs}.
      * The actual path will be follow its {@link ExternalInput#getName() name} after this prefix,
      * and it is relative from {@link CompilerOptions#getRuntimeWorkingDirectory()}.
      */
@@ -96,19 +98,17 @@ public class MockJobflowProcessorContext extends AbstractJobflowProcessorContext
     }
 
     @Override
-    protected ExternalInputReference createExternalInput(String name, ClassDescription descriptionClass) {
-        return new ExternalInputReference(
-                name,
-                descriptionClass,
-                Collections.singleton(path(EXTERNAL_INPUT_BASE + name)));
+    protected ExternalInputReference createExternalInput(String name, ExternalInputInfo info) {
+        Set<String> paths = Collections.singleton(path(EXTERNAL_INPUT_BASE + name));
+        return new ExternalInputReference(name, info, paths);
     }
 
     @Override
     protected ExternalOutputReference createExternalOutput(
             String name,
-            ClassDescription descriptionClass,
+            ExternalOutputInfo info,
             Collection<String> internalOutputPaths) {
-        return new ExternalOutputReference(name, descriptionClass, internalOutputPaths);
+        return new ExternalOutputReference(name, info, internalOutputPaths);
     }
 
     private String path(String relative) {

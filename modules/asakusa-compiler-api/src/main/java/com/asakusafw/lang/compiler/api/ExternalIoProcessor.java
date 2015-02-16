@@ -9,6 +9,8 @@ import com.asakusafw.lang.compiler.api.reference.ExternalOutputReference;
 import com.asakusafw.lang.compiler.api.reference.TaskReference;
 import com.asakusafw.lang.compiler.model.Location;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
+import com.asakusafw.lang.compiler.model.info.ExternalInputInfo;
+import com.asakusafw.lang.compiler.model.info.ExternalOutputInfo;
 
 /**
  * Processes external I/Os.
@@ -16,34 +18,33 @@ import com.asakusafw.lang.compiler.model.description.ClassDescription;
 public interface ExternalIoProcessor {
 
     /**
-     * Returns whether this processor can process the target input description.
+     * Returns whether this processor can process the target input/output description.
      * @param context the current context
-     * @param reference the target description
-     * @return {@code true} if this processor can process the target description, otherwise {@code false}
+     * @param descriptionClass the target external input/output description type
+     * @return {@code true} if this processor can process the target description type, otherwise {@code false}
      * @throws DiagnosticException if failed to extract information from the target description
      */
-    boolean isSupported(Context context, ExternalInputReference reference);
+    boolean isSupported(Context context, ClassDescription descriptionClass);
 
     /**
-     * Returns whether this processor can process the target output description.
+     * Resolves external input description and returns structural information of it.
      * @param context the current context
-     * @param reference the target description
-     * @return {@code true} if this processor can process the target description, otherwise {@code false}
-     * @throws DiagnosticException if failed to extract information from the target description
+     * @param name the target input name (nullable)
+     * @param description the target description object
+     * @return the resolved information
+     * @throws DiagnosticException if failed to resolve the target description
      */
-    boolean isSupported(Context context, ExternalOutputReference reference);
+    ExternalInputInfo resolveInput(Context context, String name, Object description);
 
     /**
-     * Validates external I/O descriptions and returns their diagnostics.
+     * Resolves external output description and returns structural information of it.
      * @param context the current context
-     * @param inputs input descriptions
-     * @param outputs output descriptions
-     * @throws DiagnosticException if descriptions are something wrong
+     * @param name the target output name (nullable)
+     * @param description the target description object
+     * @return the resolved information
+     * @throws DiagnosticException if failed to resolve the target description
      */
-    void validate(
-            Context context,
-            List<ExternalInputReference> inputs,
-            List<ExternalOutputReference> outputs);
+    ExternalOutputInfo resolveOutput(Context context, String name, Object description);
 
     /**
      * Processes external descriptions I/O and returns required tasks for target I/Os.

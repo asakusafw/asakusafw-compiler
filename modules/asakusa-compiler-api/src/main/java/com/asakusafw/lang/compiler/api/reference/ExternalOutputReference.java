@@ -4,30 +4,33 @@ import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
+import com.asakusafw.lang.compiler.model.description.ValueDescription;
+import com.asakusafw.lang.compiler.model.info.ExternalOutputInfo;
 
 /**
  * A symbol of individual external outputs.
  */
-public class ExternalOutputReference implements ExternalPortReference {
+public class ExternalOutputReference implements ExternalOutputInfo, ExternalPortReference {
 
     private final String name;
 
-    private final ClassDescription descriptionClass;
+    private final ExternalOutputInfo info;
 
     private final Set<String> paths;
 
     /**
      * Creates a new instance.
      * @param name the original output name.
-     * @param descriptionClass the exporter description class
+     * @param info the structural information of this external output
      * @param paths the actual output paths for tasks
      */
-    public ExternalOutputReference(String name, ClassDescription descriptionClass, Collection<String> paths) {
+    public ExternalOutputReference(String name, ExternalOutputInfo info, Collection<String> paths) {
         this.name = name;
-        this.descriptionClass = descriptionClass;
+        this.info = info;
         this.paths = Collections.unmodifiableSet(new LinkedHashSet<>(paths));
     }
 
@@ -40,13 +43,24 @@ public class ExternalOutputReference implements ExternalPortReference {
         return name;
     }
 
-    /**
-     * Returns the exporter description class.
-     * @return the exporter description class
-     */
     @Override
     public ClassDescription getDescriptionClass() {
-        return descriptionClass;
+        return info.getDescriptionClass();
+    }
+
+    @Override
+    public ClassDescription getDataModelClass() {
+        return info.getDataModelClass();
+    }
+
+    @Override
+    public String getModuleName() {
+        return info.getModuleName();
+    }
+
+    @Override
+    public Map<String, ValueDescription> getProperties() {
+        return info.getProperties();
     }
 
     /**

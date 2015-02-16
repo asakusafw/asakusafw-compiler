@@ -1,7 +1,7 @@
 package com.asakusafw.lang.compiler.model.graph;
 
-import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.description.TypeDescription;
+import com.asakusafw.lang.compiler.model.info.ExternalPortInfo;
 
 /**
  * Represents an external/flow I/O port.
@@ -40,14 +40,14 @@ public abstract class ExternalPort extends Operator {
      * @return {@code true} if this is external, otherwise {@code false}
      */
     public boolean isExternal() {
-        return getDescriptionClass() != null;
+        return getInfo() != null;
     }
 
     /**
-     * Returns the importer/exporter description class.
-     * @return the importer/exporter description class, or {@code null} if this represents a flow I/O
+     * Returns structural information of this external I/O port.
+     * @return the structural information, or {@code null} if this port is not external
      */
-    public abstract ClassDescription getDescriptionClass();
+    public abstract ExternalPortInfo getInfo();
 
     /**
      * Represents a kind of port.

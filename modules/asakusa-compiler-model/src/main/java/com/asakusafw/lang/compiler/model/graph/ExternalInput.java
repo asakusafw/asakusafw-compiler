@@ -3,8 +3,8 @@ package com.asakusafw.lang.compiler.model.graph;
 import java.text.MessageFormat;
 import java.util.List;
 
-import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.description.TypeDescription;
+import com.asakusafw.lang.compiler.model.info.ExternalInputInfo;
 
 /**
  * Represents an external/flow input operator.
@@ -18,16 +18,16 @@ public final class ExternalInput extends ExternalPort {
 
     private final String name;
 
-    private final ClassDescription descriptionClass;
+    private final ExternalInputInfo.Basic info;
 
-    private ExternalInput(String name, ClassDescription descriptionClass) {
+    private ExternalInput(String name, ExternalInputInfo info) {
         this.name = name;
-        this.descriptionClass = descriptionClass;
+        this.info = info == null ? null : new ExternalInputInfo.Basic(info);
     }
 
     @Override
     public ExternalInput copy() {
-        return copyAttributesTo(new ExternalInput(name, descriptionClass));
+        return copyAttributesTo(new ExternalInput(name, info));
     }
 
     /**
@@ -35,7 +35,7 @@ public final class ExternalInput extends ExternalPort {
      * Clients use {@link #newInstance(String, TypeDescription)} instead of this.
      * @param name the input name
      * @return the builder
-     * @see #builder(String, ClassDescription)
+     * @see #builder(String, ExternalInputInfo)
      */
     public static Builder builder(String name) {
         return builder(name, null);
@@ -43,13 +43,13 @@ public final class ExternalInput extends ExternalPort {
 
     /**
      * Creates a new builder.
-     * Clients use {@link #newInstance(String, ClassDescription, TypeDescription)} instead of this.
+     * Clients use {@link #newInstance(String, ExternalInputInfo)} instead of this.
      * @param name the input name
-     * @param descriptionClass the importer description class (nullable if the port is not external)
+     * @param info the structural importer information (nullable if the port is not external)
      * @return the builder
      */
-    public static Builder builder(String name, ClassDescription descriptionClass) {
-        return new Builder(new ExternalInput(name, descriptionClass));
+    public static Builder builder(String name, ExternalInputInfo info) {
+        return new Builder(new ExternalInput(name, info));
     }
 
     /**
@@ -57,7 +57,7 @@ public final class ExternalInput extends ExternalPort {
      * @param name the input name
      * @param dataType the port type
      * @return the created instance
-     * @see #newInstance(String, ClassDescription, TypeDescription)
+     * @see #newInstance
      */
     public static ExternalInput newInstance(String name, TypeDescription dataType) {
         return builder(name)
@@ -68,13 +68,12 @@ public final class ExternalInput extends ExternalPort {
     /**
      * Creates a new instance with default {@link #getOperatorPort() operator port}.
      * @param name the input name
-     * @param descriptionClass the importer description class (nullable if the port is not external)
-     * @param dataType the port type
+     * @param info the structural importer information (nullable if the port is not external)
      * @return the created instance
      */
-    public static ExternalInput newInstance(String name, ClassDescription descriptionClass, TypeDescription dataType) {
-        return builder(name, descriptionClass)
-                .output(PORT_NAME, dataType)
+    public static ExternalInput newInstance(String name, ExternalInputInfo info) {
+        return builder(name, info)
+                .output(PORT_NAME, info.getDataModelClass())
                 .build();
     }
 
@@ -103,8 +102,8 @@ public final class ExternalInput extends ExternalPort {
     }
 
     @Override
-    public ClassDescription getDescriptionClass() {
-        return descriptionClass;
+    public ExternalInputInfo getInfo() {
+        return info;
     }
 
     @Override
