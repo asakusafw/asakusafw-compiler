@@ -1,4 +1,4 @@
-package com.asakusafw.lang.compiler.api.extension;
+package com.asakusafw.lang.compiler.extension.javac;
 
 import java.io.IOException;
 import java.io.Writer;

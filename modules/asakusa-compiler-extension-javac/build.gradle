@@ -1,0 +1,14 @@
+description 'Asakusa DSL Compiler extension for Java sources'
+
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'eclipse'
+
+dependencies {
+    compile project(':asakusa-compiler-model')
+    compile project(':asakusa-compiler-api')
+    compile "org.slf4j:slf4j-api:1.7.10"
+
+    testRuntime "ch.qos.logback:logback-classic:1.1.2"
+    testRuntime "com.asakusafw:jsr199-testing:${asakusafwVersion}"
+}
