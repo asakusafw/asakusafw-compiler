@@ -1,0 +1,15 @@
+description 'Asakusa DSL Compiler utilities'
+
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'eclipse'
+
+dependencies {
+    compile project(':asakusa-compiler-model')
+    compile project(':asakusa-compiler-api')
+    compile "com.asakusafw:asakusa-dsl-vocabulary:${asakusafwVersion}"
+
+    testRuntime "com.asakusafw:asakusa-runtime:${asakusafwVersion}"
+    testRuntime "org.apache.hadoop:hadoop-core:${hadoopVersion}"
+    testRuntime "ch.qos.logback:logback-classic:1.1.2"
+}
