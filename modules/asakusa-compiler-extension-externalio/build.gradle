@@ -1,4 +1,4 @@
-description 'Asakusa DSL Compiler Core Libraries'
+description 'Asakusa DSL Compiler Extension for External I/O'
 
 apply plugin: 'java'
 apply plugin: 'maven'
@@ -9,7 +9,7 @@ useSLF4J();
 dependencies {
     compile project(':asakusa-compiler-model')
     compile project(':asakusa-compiler-api')
-    compile "com.asakusafw:ashigel-compiler:${asakusafwVersion}"
+    compile "com.asakusafw:asakusa-windgate-vocabulary:${asakusafwVersion}"
 
     testCompile project(':asakusa-compiler-mock')
     testRuntime "com.asakusafw:asakusa-runtime:${asakusafwVersion}"

@@ -1,9 +1,6 @@
 package com.asakusafw.lang.compiler.model.info;
 
 import java.text.MessageFormat;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.description.ValueDescription;
@@ -57,7 +54,7 @@ public interface ExternalInputInfo extends ExternalPortInfo {
 
         private final String moduleName;
 
-        private final Map<String, ValueDescription> properties;
+        private final ValueDescription contents;
 
         private final DataSize dataSize;
 
@@ -67,19 +64,34 @@ public interface ExternalInputInfo extends ExternalPortInfo {
          * @param dataModelClass the target data model class
          * @param moduleName the importer module name
          * @param dataSize the estimated data size
-         * @param properties the importer properties
+         */
+        public Basic(
+                ClassDescription descriptionClass,
+                String moduleName,
+                ClassDescription dataModelClass,
+                DataSize dataSize) {
+            this(descriptionClass, moduleName, dataModelClass, dataSize, null);
+        }
+
+        /**
+         * Creates a new instance.
+         * @param descriptionClass the original importer description class
+         * @param dataModelClass the target data model class
+         * @param moduleName the importer module name
+         * @param dataSize the estimated data size
+         * @param contents the processor specific contents (nullable)
          */
         public Basic(
                 ClassDescription descriptionClass,
                 String moduleName,
                 ClassDescription dataModelClass,
                 DataSize dataSize,
-                Map<String, ValueDescription> properties) {
+                ValueDescription contents) {
             this.descriptionClass = descriptionClass;
             this.dataModelClass = dataModelClass;
             this.moduleName = moduleName;
             this.dataSize = dataSize;
-            this.properties = Collections.unmodifiableMap(new LinkedHashMap<>(properties));
+            this.contents = contents;
         }
 
         /**
@@ -88,7 +100,7 @@ public interface ExternalInputInfo extends ExternalPortInfo {
          */
         public Basic(ExternalInputInfo info) {
             this(info.getDescriptionClass(), info.getModuleName(), info.getDataModelClass(),
-                    info.getDataSize(), info.getProperties());
+                    info.getDataSize(), info.getContents());
         }
 
         @Override
@@ -107,8 +119,8 @@ public interface ExternalInputInfo extends ExternalPortInfo {
         }
 
         @Override
-        public Map<String, ValueDescription> getProperties() {
-            return properties;
+        public ValueDescription getContents() {
+            return contents;
         }
 
         @Override
@@ -132,7 +144,7 @@ public interface ExternalInputInfo extends ExternalPortInfo {
             result = prime * result + moduleName.hashCode();
             result = prime * result + dataModelClass.hashCode();
             result = prime * result + dataSize.hashCode();
-            result = prime * result + properties.hashCode();
+            result = prime * result + (contents == null ? 0 : contents.hashCode());
             return result;
         }
 
@@ -160,7 +172,11 @@ public interface ExternalInputInfo extends ExternalPortInfo {
             if (dataSize != other.dataSize) {
                 return false;
             }
-            if (!properties.equals(other.properties)) {
+            if (contents == null) {
+                if (contents != null) {
+                    return false;
+                }
+            } else if (!contents.equals(other.contents)) {
                 return false;
             }
             return true;

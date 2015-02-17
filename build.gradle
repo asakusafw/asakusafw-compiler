@@ -29,6 +29,12 @@ subprojects {
                 options.showFromProtected()
             }
         }
+        ext.useSLF4J = {
+            dependencies {
+                compile "org.slf4j:slf4j-api:1.7.10"
+                testRuntime "ch.qos.logback:logback-classic:1.1.2"
+            }
+        }
         dependencies {
             testCompile 'junit:junit:4.11'
             testCompile 'org.hamcrest:hamcrest-library:1.3'

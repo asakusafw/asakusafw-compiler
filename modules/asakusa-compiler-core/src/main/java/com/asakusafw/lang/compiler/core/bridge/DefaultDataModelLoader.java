@@ -1,4 +1,4 @@
-package com.asakusafw.lang.compiler.bridge;
+package com.asakusafw.lang.compiler.core.bridge;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;

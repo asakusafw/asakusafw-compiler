@@ -1,9 +1,6 @@
 package com.asakusafw.lang.compiler.model.info;
 
 import java.text.MessageFormat;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.description.ValueDescription;
@@ -25,24 +22,37 @@ public interface ExternalOutputInfo extends ExternalPortInfo {
 
         private final String moduleName;
 
-        private final Map<String, ValueDescription> properties;
+        private final ValueDescription contents;
 
         /**
          * Creates a new instance.
          * @param descriptionClass the original exporter description class
          * @param moduleName the exporter module name
          * @param dataModelClass the target data model class
-         * @param properties the exporter properties
+         */
+        public Basic(
+                ClassDescription descriptionClass,
+                String moduleName,
+                ClassDescription dataModelClass) {
+            this(descriptionClass, moduleName, dataModelClass, null);
+        }
+
+        /**
+         * Creates a new instance.
+         * @param descriptionClass the original exporter description class
+         * @param moduleName the exporter module name
+         * @param dataModelClass the target data model class
+         * @param contents the processor specific contents (nullable)
          */
         public Basic(
                 ClassDescription descriptionClass,
                 String moduleName,
                 ClassDescription dataModelClass,
-                Map<String, ValueDescription> properties) {
+                ValueDescription contents) {
             this.descriptionClass = descriptionClass;
             this.dataModelClass = dataModelClass;
             this.moduleName = moduleName;
-            this.properties = Collections.unmodifiableMap(new LinkedHashMap<>(properties));
+            this.contents = contents;
         }
 
         /**
@@ -50,7 +60,7 @@ public interface ExternalOutputInfo extends ExternalPortInfo {
          * @param info the original information
          */
         public Basic(ExternalOutputInfo info) {
-            this(info.getDescriptionClass(), info.getModuleName(), info.getDataModelClass(), info.getProperties());
+            this(info.getDescriptionClass(), info.getModuleName(), info.getDataModelClass(), info.getContents());
         }
 
         @Override
@@ -69,8 +79,8 @@ public interface ExternalOutputInfo extends ExternalPortInfo {
         }
 
         @Override
-        public Map<String, ValueDescription> getProperties() {
-            return properties;
+        public ValueDescription getContents() {
+            return contents;
         }
 
         @Override
@@ -80,7 +90,7 @@ public interface ExternalOutputInfo extends ExternalPortInfo {
             result = prime * result + descriptionClass.hashCode();
             result = prime * result + moduleName.hashCode();
             result = prime * result + dataModelClass.hashCode();
-            result = prime * result + properties.hashCode();
+            result = prime * result + (contents == null ? 0 : contents.hashCode());
             return result;
         }
 
@@ -105,7 +115,11 @@ public interface ExternalOutputInfo extends ExternalPortInfo {
             if (!dataModelClass.equals(other.dataModelClass)) {
                 return false;
             }
-            if (!properties.equals(other.properties)) {
+            if (contents == null) {
+                if (contents != null) {
+                    return false;
+                }
+            } else if (!contents.equals(other.contents)) {
                 return false;
             }
             return true;

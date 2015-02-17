@@ -4,12 +4,9 @@ import static com.asakusafw.lang.compiler.model.description.Descriptions.*;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
-import java.util.Collections;
-
 import org.junit.Test;
 
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
-import com.asakusafw.lang.compiler.model.description.ValueDescription;
 import com.asakusafw.lang.compiler.model.graph.ExternalPort.PortKind;
 import com.asakusafw.lang.compiler.model.graph.Operator.OperatorKind;
 import com.asakusafw.lang.compiler.model.info.ExternalOutputInfo;
@@ -27,8 +24,7 @@ public class ExternalOutputTest {
         ExternalOutputInfo info = new ExternalOutputInfo.Basic(
                 new ClassDescription("Dummy"),
                 "testing",
-                classOf(String.class),
-                Collections.<String, ValueDescription>emptyMap());
+                classOf(String.class));
 
         ExternalOutput operator = ExternalOutput.newInstance("out", info);
         assertThat(operator.toString(), operator.getOperatorKind(), is(OperatorKind.OUTPUT));

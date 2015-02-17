@@ -1,4 +1,4 @@
-package com.asakusafw.lang.compiler.bridge;
+package com.asakusafw.lang.compiler.core.bridge;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -187,7 +187,7 @@ public final class FlowGraphConverter {
         ImporterDescription extern = description.getImporterDescription();
         ExternalInputInfo info = null;
         if (extern != null) {
-            if (ioProcessor.isSupported(ioContext, Descriptions.classOf(extern.getClass())) == false) {
+            if (ioProcessor.isSupported(ioContext, extern.getClass()) == false) {
                 throw new DiagnosticException(Level.ERROR, MessageFormat.format(
                         "missing processor of importer description: {0} (name={1})",
                         description.getName(),
@@ -202,7 +202,7 @@ public final class FlowGraphConverter {
         ExporterDescription extern = description.getExporterDescription();
         ExternalOutputInfo info = null;
         if (extern != null) {
-            if (ioProcessor.isSupported(ioContext, Descriptions.classOf(extern.getClass())) == false) {
+            if (ioProcessor.isSupported(ioContext, extern.getClass()) == false) {
                 throw new DiagnosticException(Level.ERROR, MessageFormat.format(
                         "missing processor of exporter description: {0} (name={1})",
                         description.getName(),

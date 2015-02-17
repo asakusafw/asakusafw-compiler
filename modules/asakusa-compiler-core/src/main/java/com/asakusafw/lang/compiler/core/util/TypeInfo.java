@@ -1,4 +1,4 @@
-package com.asakusafw.lang.compiler.bridge;
+package com.asakusafw.lang.compiler.core.util;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;

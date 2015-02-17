@@ -1,4 +1,4 @@
-package com.asakusafw.lang.compiler.bridge;
+package com.asakusafw.lang.compiler.core.bridge;
 
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;

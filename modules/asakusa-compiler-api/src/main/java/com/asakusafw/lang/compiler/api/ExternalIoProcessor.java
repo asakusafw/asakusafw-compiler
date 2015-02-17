@@ -24,7 +24,7 @@ public interface ExternalIoProcessor {
      * @return {@code true} if this processor can process the target description type, otherwise {@code false}
      * @throws DiagnosticException if failed to extract information from the target description
      */
-    boolean isSupported(Context context, ClassDescription descriptionClass);
+    boolean isSupported(Context context, Class<?> descriptionClass);
 
     /**
      * Resolves external input description and returns structural information of it.

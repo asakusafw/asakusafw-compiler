@@ -1,7 +1,5 @@
 package com.asakusafw.lang.compiler.model.info;
 
-import java.util.Map;
-
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.description.ValueDescription;
 
@@ -29,8 +27,8 @@ public interface ExternalPortInfo {
     String getModuleName();
 
     /**
-     * Returns the extra properties.
-     * @return the extra properties
+     * Returns the processor specific contents.
+     * @return the processor specific contents, or {@code null} if there are no special contents
      */
-    Map<String, ValueDescription> getProperties();
+    ValueDescription getContents();
 }

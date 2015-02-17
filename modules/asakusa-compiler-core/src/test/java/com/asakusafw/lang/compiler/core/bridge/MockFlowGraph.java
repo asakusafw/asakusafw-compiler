@@ -1,4 +1,4 @@
-package com.asakusafw.lang.compiler.bridge;
+package com.asakusafw.lang.compiler.core.bridge;
 
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.asakusafw.lang.compiler.core.util.TypeInfo;
 import com.asakusafw.runtime.core.Result;
 import com.asakusafw.vocabulary.flow.FlowDescription;
 import com.asakusafw.vocabulary.flow.graph.FlowElement;

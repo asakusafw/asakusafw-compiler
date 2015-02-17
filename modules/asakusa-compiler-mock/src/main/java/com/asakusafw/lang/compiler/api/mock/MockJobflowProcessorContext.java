@@ -93,6 +93,11 @@ public class MockJobflowProcessorContext extends AbstractJobflowProcessorContext
     }
 
     @Override
+    public File getOutputFile(Location location) {
+        return new File(getOutputDirectory(), location.toPath(File.separatorChar));
+    }
+
+    @Override
     public OutputStream addResourceFile(Location location) throws IOException {
         return resources.addResourceFile(location);
     }

@@ -4,7 +4,6 @@ import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
-import java.util.Map;
 import java.util.Set;
 
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
@@ -64,8 +63,8 @@ public class ExternalInputReference implements ExternalInputInfo, ExternalPortRe
     }
 
     @Override
-    public Map<String, ValueDescription> getProperties() {
-        return info.getProperties();
+    public ValueDescription getContents() {
+        return info.getContents();
     }
 
     /**

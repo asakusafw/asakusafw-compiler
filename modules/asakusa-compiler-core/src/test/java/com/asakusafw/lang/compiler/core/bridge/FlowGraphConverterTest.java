@@ -1,4 +1,4 @@
-package com.asakusafw.lang.compiler.bridge;
+package com.asakusafw.lang.compiler.core.bridge;
 
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
@@ -14,6 +14,7 @@ import com.asakusafw.compiler.testing.DirectExporterDescription;
 import com.asakusafw.compiler.testing.DirectImporterDescription;
 import com.asakusafw.lang.compiler.api.DiagnosticException;
 import com.asakusafw.lang.compiler.api.mock.MockExternalIoProcessor;
+import com.asakusafw.lang.compiler.core.bridge.FlowGraphConverter;
 import com.asakusafw.lang.compiler.model.PropertyName;
 import com.asakusafw.lang.compiler.model.description.Descriptions;
 import com.asakusafw.lang.compiler.model.graph.CoreOperator.CoreOperatorKind;

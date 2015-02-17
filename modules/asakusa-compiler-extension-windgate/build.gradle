@@ -1,4 +1,4 @@
-description 'Asakusa DSL Compiler Extension for YAESS'
+description 'Asakusa DSL Compiler Extension for WindGate'
 
 apply plugin: 'java'
 apply plugin: 'maven'
@@ -9,8 +9,10 @@ useSLF4J();
 dependencies {
     compile project(':asakusa-compiler-model')
     compile project(':asakusa-compiler-api')
+    compile project(':asakusa-compiler-extension-externalio')
     compile project(':asakusa-compiler-extension-hadoop')
-    compile "com.asakusafw:asakusa-yaess-core:${asakusafwVersion}"
+    compile project(':asakusa-compiler-extension-javac')
+    compile "com.asakusafw:asakusa-windgate-vocabulary:${asakusafwVersion}"
 
     testCompile project(':asakusa-compiler-mock')
 }

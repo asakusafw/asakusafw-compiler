@@ -2,14 +2,16 @@
 include 'asakusa-compiler-model'
 include 'asakusa-compiler-api'
 include 'asakusa-compiler-plan'
-include 'asakusa-compiler-core'
 include 'asakusa-compiler-util'
+include 'asakusa-compiler-core'
 include 'asakusa-compiler-cli'
 
 // extensions
 include 'asakusa-compiler-extension-javac'
 include 'asakusa-compiler-extension-hadoop'
 include 'asakusa-compiler-extension-yaess'
+include 'asakusa-compiler-extension-externalio'
+include 'asakusa-compiler-extension-windgate'
 
 // others
 include 'asakusa-compiler-mock'

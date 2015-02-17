@@ -2,7 +2,6 @@ package com.asakusafw.lang.compiler.api.mock;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Collections;
 import java.util.List;
 
 import com.asakusafw.lang.compiler.api.CompilerOptions;
@@ -12,9 +11,7 @@ import com.asakusafw.lang.compiler.api.basic.AbstractExternalIoProcessorContext;
 import com.asakusafw.lang.compiler.api.reference.ExternalInputReference;
 import com.asakusafw.lang.compiler.api.reference.ExternalOutputReference;
 import com.asakusafw.lang.compiler.model.Location;
-import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.description.Descriptions;
-import com.asakusafw.lang.compiler.model.description.ValueDescription;
 import com.asakusafw.lang.compiler.model.info.ExternalInputInfo;
 import com.asakusafw.lang.compiler.model.info.ExternalOutputInfo;
 import com.asakusafw.vocabulary.external.ExporterDescription;
@@ -50,14 +47,9 @@ public class MockExternalIoProcessor implements ExternalIoProcessor {
     };
 
     @Override
-    public boolean isSupported(Context context, ClassDescription descriptionClass) {
-        try {
-            Class<?> aClass = descriptionClass.resolve(context.getClassLoader());
-            return ImporterDescription.class.isAssignableFrom(aClass)
-                    || ExporterDescription.class.isAssignableFrom(aClass);
-        } catch (ClassNotFoundException e) {
-            return false;
-        }
+    public boolean isSupported(Context context, Class<?> descriptionClass) {
+        return ImporterDescription.class.isAssignableFrom(descriptionClass)
+                || ExporterDescription.class.isAssignableFrom(descriptionClass);
     }
 
     @Override
@@ -70,8 +62,7 @@ public class MockExternalIoProcessor implements ExternalIoProcessor {
                 Descriptions.classOf(desc.getClass()),
                 MODULE_NAME,
                 Descriptions.classOf(desc.getModelType()),
-                ExternalInputInfo.DataSize.valueOf(desc.getDataSize().name()),
-                Collections.<String, ValueDescription>emptyMap());
+                ExternalInputInfo.DataSize.valueOf(desc.getDataSize().name()));
     }
 
     @Override
@@ -83,8 +74,7 @@ public class MockExternalIoProcessor implements ExternalIoProcessor {
         return new ExternalOutputInfo.Basic(
                 Descriptions.classOf(desc.getClass()),
                 MODULE_NAME,
-                Descriptions.classOf(desc.getModelType()),
-                Collections.<String, ValueDescription>emptyMap());
+                Descriptions.classOf(desc.getModelType()));
     }
 
     @Override
