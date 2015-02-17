@@ -14,7 +14,7 @@ import com.asakusafw.lang.compiler.model.info.BatchInfo;
  */
 public class Batch extends BatchInfo.Basic {
 
-    private final Map<Jobflow, BatchElement> elements = new LinkedHashMap<>();
+    private final Map<String, BatchElement> elements = new LinkedHashMap<>();
 
     /**
      * Creates a new instance.
@@ -34,17 +34,36 @@ public class Batch extends BatchInfo.Basic {
     }
 
     /**
+     * Creates a new instance.
+     * @param info the structural information of this batch
+     */
+    public Batch(BatchInfo info) {
+        this(info.getBatchId(), info.getDescriptionClass(),
+                info.getComment(), info.getParameters(), info.getAttributes());
+    }
+
+    /**
      * Adds a jobflow to this batch.
      * @param jobflow the jobflow
      * @return the related batch element
      */
     public BatchElement addElement(Jobflow jobflow) {
-        if (elements.containsKey(jobflow)) {
+        String flowId = jobflow.getFlowId();
+        if (elements.containsKey(flowId)) {
             throw new IllegalStateException();
         }
         BatchElement element = new BatchElement(this, jobflow);
-        elements.put(jobflow, element);
+        elements.put(flowId, element);
         return element;
+    }
+
+    /**
+     * Returns a batch element about the specified flow ID.
+     * @param flowId the target flow ID
+     * @return the corresponded batch element, or {@code null} if there are no such an element
+     */
+    public BatchElement findElement(String flowId) {
+        return elements.get(flowId);
     }
 
     /**
@@ -53,7 +72,7 @@ public class Batch extends BatchInfo.Basic {
      * @return the corresponded batch element, or {@code null} if there are no such an element
      */
     public BatchElement findElement(Jobflow jobflow) {
-        return elements.get(jobflow);
+        return findElement(jobflow.getFlowId());
     }
 
     /**

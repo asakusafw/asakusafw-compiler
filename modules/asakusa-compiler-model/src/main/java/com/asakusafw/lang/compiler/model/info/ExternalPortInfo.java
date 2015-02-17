@@ -6,12 +6,13 @@ import com.asakusafw.lang.compiler.model.description.ValueDescription;
 /**
  * Structural information of external inputs/outputs.
  */
-public interface ExternalPortInfo {
+public interface ExternalPortInfo extends DescriptionInfo {
 
     /**
      * Returns the original importer/exporter description class.
      * @return the importer description class
      */
+    @Override
     ClassDescription getDescriptionClass();
 
     /**

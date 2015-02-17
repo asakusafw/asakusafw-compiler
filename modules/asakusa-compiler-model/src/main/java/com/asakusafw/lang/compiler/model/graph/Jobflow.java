@@ -21,6 +21,15 @@ public class Jobflow extends JobflowInfo.Basic implements Flow {
         this.operatorGraph = operatorGraph;
     }
 
+    /**
+     * Creates a new instance.
+     * @param info the structural information of this jobflow
+     * @param operatorGraph the operator graph
+     */
+    public Jobflow(JobflowInfo info, OperatorGraph operatorGraph) {
+        this(info.getFlowId(), info.getDescriptionClass(), operatorGraph);
+    }
+
     @Override
     public OperatorGraph getOperatorGraph() {
         return operatorGraph;

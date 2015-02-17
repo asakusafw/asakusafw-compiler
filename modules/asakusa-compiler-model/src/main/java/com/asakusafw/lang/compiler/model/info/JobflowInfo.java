@@ -7,7 +7,7 @@ import com.asakusafw.lang.compiler.model.description.ClassDescription;
 /**
  * Structural information of jobflows.
  */
-public interface JobflowInfo {
+public interface JobflowInfo extends DescriptionInfo {
 
     /**
      * Returns the flow ID.
@@ -19,6 +19,7 @@ public interface JobflowInfo {
      * Returns the original flow description class.
      * @return the flow description class
      */
+    @Override
     ClassDescription getDescriptionClass();
 
     /**

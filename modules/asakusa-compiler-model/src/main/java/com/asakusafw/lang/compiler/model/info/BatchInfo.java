@@ -12,7 +12,7 @@ import com.asakusafw.lang.compiler.model.description.ClassDescription;
 /**
  * Structural information of batch.
  */
-public interface BatchInfo {
+public interface BatchInfo extends DescriptionInfo {
 
     /**
      * Returns the batch ID.
@@ -24,6 +24,7 @@ public interface BatchInfo {
      * Returns the original batch description class.
      * @return the batch description class
      */
+    @Override
     ClassDescription getDescriptionClass();
 
     /**

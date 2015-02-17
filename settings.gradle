@@ -3,6 +3,12 @@ include 'asakusa-compiler-model'
 include 'asakusa-compiler-api'
 include 'asakusa-compiler-plan'
 include 'asakusa-compiler-util'
+// include 'asakusa-compiler-packager'
+
+// DSL driver
+include 'asakusa-compiler-analyzer'
+
+// control
 include 'asakusa-compiler-core'
 include 'asakusa-compiler-cli'
 
