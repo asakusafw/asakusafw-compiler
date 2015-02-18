@@ -18,7 +18,7 @@ import com.asakusafw.lang.compiler.analyzer.mock.MockExporterDescription;
 import com.asakusafw.lang.compiler.analyzer.mock.MockImporterDescription;
 import com.asakusafw.lang.compiler.analyzer.mock.MockJobflow;
 import com.asakusafw.lang.compiler.analyzer.mock.NotPublicAccessor;
-import com.asakusafw.lang.compiler.api.DiagnosticException;
+import com.asakusafw.lang.compiler.common.DiagnosticException;
 import com.asakusafw.lang.compiler.model.description.Descriptions;
 import com.asakusafw.lang.compiler.model.info.JobflowInfo;
 import com.asakusafw.vocabulary.flow.Export;

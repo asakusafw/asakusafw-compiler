@@ -20,15 +20,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.asakusafw.lang.compiler.api.BatchProcessor;
-import com.asakusafw.lang.compiler.api.Diagnostic;
-import com.asakusafw.lang.compiler.api.DiagnosticException;
 import com.asakusafw.lang.compiler.api.reference.BatchReference;
 import com.asakusafw.lang.compiler.api.reference.CommandTaskReference;
 import com.asakusafw.lang.compiler.api.reference.CommandToken;
 import com.asakusafw.lang.compiler.api.reference.JobflowReference;
 import com.asakusafw.lang.compiler.api.reference.TaskReference;
+import com.asakusafw.lang.compiler.common.Diagnostic;
+import com.asakusafw.lang.compiler.common.DiagnosticException;
+import com.asakusafw.lang.compiler.common.Location;
 import com.asakusafw.lang.compiler.extension.hadoop.HadoopTaskReference;
-import com.asakusafw.lang.compiler.model.Location;
 import com.asakusafw.yaess.core.BatchScript;
 import com.asakusafw.yaess.core.CommandScript;
 import com.asakusafw.yaess.core.ExecutionPhase;

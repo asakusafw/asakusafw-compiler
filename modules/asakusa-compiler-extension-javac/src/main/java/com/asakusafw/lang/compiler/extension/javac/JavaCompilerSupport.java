@@ -1,6 +1,6 @@
 package com.asakusafw.lang.compiler.extension.javac;
 
-import com.asakusafw.lang.compiler.api.DiagnosticException;
+import com.asakusafw.lang.compiler.common.DiagnosticException;
 
 /**
  * Provides Java compiler features.

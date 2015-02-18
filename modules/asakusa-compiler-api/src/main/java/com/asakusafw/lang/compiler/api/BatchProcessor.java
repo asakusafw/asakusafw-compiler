@@ -4,7 +4,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import com.asakusafw.lang.compiler.api.reference.BatchReference;
-import com.asakusafw.lang.compiler.model.Location;
+import com.asakusafw.lang.compiler.common.DiagnosticException;
+import com.asakusafw.lang.compiler.common.Location;
 
 /**
  * Processes an Asakusa batch application.

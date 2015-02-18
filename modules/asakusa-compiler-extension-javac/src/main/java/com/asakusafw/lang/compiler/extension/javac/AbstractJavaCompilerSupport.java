@@ -25,9 +25,9 @@ import javax.tools.ToolProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.asakusafw.lang.compiler.api.DiagnosticException;
-import com.asakusafw.lang.compiler.api.basic.BasicDiagnostic;
-import com.asakusafw.lang.compiler.model.Location;
+import com.asakusafw.lang.compiler.common.BasicDiagnostic;
+import com.asakusafw.lang.compiler.common.DiagnosticException;
+import com.asakusafw.lang.compiler.common.Location;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 
 /**
@@ -69,7 +69,7 @@ public abstract class AbstractJavaCompilerSupport implements JavaCompilerSupport
             doCompile(compiler);
         } catch (IOException e) {
             throw new DiagnosticException(
-                    com.asakusafw.lang.compiler.api.Diagnostic.Level.ERROR,
+                    com.asakusafw.lang.compiler.common.Diagnostic.Level.ERROR,
                     "failed to compile Java sources",
                     e);
         }
@@ -166,7 +166,7 @@ public abstract class AbstractJavaCompilerSupport implements JavaCompilerSupport
                         getSourceFiles(fileManager));
             } catch (RuntimeException e) {
                 throw new DiagnosticException(
-                        com.asakusafw.lang.compiler.api.Diagnostic.Level.ERROR,
+                        com.asakusafw.lang.compiler.common.Diagnostic.Level.ERROR,
                         MessageFormat.format(
                                 "failed to initialize Java compiler: arguments={0}",
                                 arguments),
@@ -175,23 +175,23 @@ public abstract class AbstractJavaCompilerSupport implements JavaCompilerSupport
 
             boolean success = task.call();
             pw.close();
-            List<com.asakusafw.lang.compiler.api.Diagnostic> results = new ArrayList<>();
+            List<com.asakusafw.lang.compiler.common.Diagnostic> results = new ArrayList<>();
             for (Diagnostic<?> diagnostic : diagnostics.getDiagnostics()) {
                 switch (diagnostic.getKind()) {
                 case ERROR:
                 case MANDATORY_WARNING:
                     results.add(new BasicDiagnostic(
-                            com.asakusafw.lang.compiler.api.Diagnostic.Level.ERROR,
+                            com.asakusafw.lang.compiler.common.Diagnostic.Level.ERROR,
                             diagnostic.getMessage(null)));
                     break;
                 case WARNING:
                     results.add(new BasicDiagnostic(
-                            com.asakusafw.lang.compiler.api.Diagnostic.Level.WARN,
+                            com.asakusafw.lang.compiler.common.Diagnostic.Level.WARN,
                             diagnostic.getMessage(null)));
                     break;
                 default:
                     results.add(new BasicDiagnostic(
-                            com.asakusafw.lang.compiler.api.Diagnostic.Level.INFO,
+                            com.asakusafw.lang.compiler.common.Diagnostic.Level.INFO,
                             diagnostic.getMessage(null)));
                     break;
                 }
@@ -207,7 +207,7 @@ public abstract class AbstractJavaCompilerSupport implements JavaCompilerSupport
                 if (results.isEmpty()) {
                     // fatal error
                     throw new DiagnosticException(
-                            com.asakusafw.lang.compiler.api.Diagnostic.Level.ERROR,
+                            com.asakusafw.lang.compiler.common.Diagnostic.Level.ERROR,
                             errors.toString());
                 } else {
                     throw new DiagnosticException(results);

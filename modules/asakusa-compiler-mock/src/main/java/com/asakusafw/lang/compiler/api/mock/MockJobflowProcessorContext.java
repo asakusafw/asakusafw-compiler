@@ -13,7 +13,7 @@ import com.asakusafw.lang.compiler.api.basic.AbstractJobflowProcessorContext;
 import com.asakusafw.lang.compiler.api.basic.BasicResourceContainer;
 import com.asakusafw.lang.compiler.api.reference.ExternalInputReference;
 import com.asakusafw.lang.compiler.api.reference.ExternalOutputReference;
-import com.asakusafw.lang.compiler.model.Location;
+import com.asakusafw.lang.compiler.common.Location;
 import com.asakusafw.lang.compiler.model.graph.ExternalInput;
 import com.asakusafw.lang.compiler.model.info.ExternalInputInfo;
 import com.asakusafw.lang.compiler.model.info.ExternalOutputInfo;

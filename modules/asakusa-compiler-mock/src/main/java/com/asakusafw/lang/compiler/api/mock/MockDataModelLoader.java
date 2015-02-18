@@ -8,10 +8,10 @@ import java.util.List;
 import java.util.Map;
 
 import com.asakusafw.lang.compiler.api.DataModelLoader;
-import com.asakusafw.lang.compiler.api.Diagnostic;
-import com.asakusafw.lang.compiler.api.DiagnosticException;
 import com.asakusafw.lang.compiler.api.basic.BasicDataModelReference;
 import com.asakusafw.lang.compiler.api.reference.DataModelReference;
+import com.asakusafw.lang.compiler.common.Diagnostic;
+import com.asakusafw.lang.compiler.common.DiagnosticException;
 import com.asakusafw.lang.compiler.model.PropertyName;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.description.Descriptions;

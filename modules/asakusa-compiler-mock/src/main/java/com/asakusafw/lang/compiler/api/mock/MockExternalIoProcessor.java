@@ -10,7 +10,7 @@ import com.asakusafw.lang.compiler.api.ExternalIoProcessor;
 import com.asakusafw.lang.compiler.api.basic.AbstractExternalIoProcessorContext;
 import com.asakusafw.lang.compiler.api.reference.ExternalInputReference;
 import com.asakusafw.lang.compiler.api.reference.ExternalOutputReference;
-import com.asakusafw.lang.compiler.model.Location;
+import com.asakusafw.lang.compiler.common.Location;
 import com.asakusafw.lang.compiler.model.description.Descriptions;
 import com.asakusafw.lang.compiler.model.info.ExternalInputInfo;
 import com.asakusafw.lang.compiler.model.info.ExternalOutputInfo;

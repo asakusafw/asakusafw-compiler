@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.asakusafw.lang.compiler.analyzer.adapter.JobflowAdapter;
-import com.asakusafw.lang.compiler.api.Diagnostic;
-import com.asakusafw.lang.compiler.api.DiagnosticException;
-import com.asakusafw.lang.compiler.api.basic.BasicDiagnostic;
+import com.asakusafw.lang.compiler.common.BasicDiagnostic;
+import com.asakusafw.lang.compiler.common.Diagnostic;
+import com.asakusafw.lang.compiler.common.DiagnosticException;
 import com.asakusafw.lang.compiler.model.graph.Jobflow;
 import com.asakusafw.lang.compiler.model.graph.OperatorGraph;
 import com.asakusafw.vocabulary.external.ExporterDescription;

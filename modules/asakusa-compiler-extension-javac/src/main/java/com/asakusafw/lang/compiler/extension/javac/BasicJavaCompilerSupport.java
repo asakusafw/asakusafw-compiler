@@ -18,7 +18,7 @@ import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.StandardLocation;
 
-import com.asakusafw.lang.compiler.model.Location;
+import com.asakusafw.lang.compiler.common.Location;
 
 /**
  * A basic implementation of {@link JavaCompilerSupport}.

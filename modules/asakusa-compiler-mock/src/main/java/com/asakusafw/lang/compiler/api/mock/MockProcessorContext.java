@@ -2,7 +2,7 @@ package com.asakusafw.lang.compiler.api.mock;
 
 import java.io.File;
 
-import com.asakusafw.lang.compiler.model.Location;
+import com.asakusafw.lang.compiler.common.Location;
 
 /**
  * An abstract super interface of mock context for processors.

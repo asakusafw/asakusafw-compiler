@@ -7,9 +7,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import com.asakusafw.lang.compiler.api.Diagnostic;
-import com.asakusafw.lang.compiler.api.DiagnosticException;
-import com.asakusafw.lang.compiler.api.basic.BasicDiagnostic;
+import com.asakusafw.lang.compiler.common.BasicDiagnostic;
+import com.asakusafw.lang.compiler.common.Diagnostic;
+import com.asakusafw.lang.compiler.common.DiagnosticException;
 import com.asakusafw.utils.graph.Graph;
 import com.asakusafw.utils.graph.Graphs;
 import com.asakusafw.vocabulary.flow.graph.Connectivity;

@@ -1,9 +1,10 @@
 // core
+include 'asakusa-compiler-common'
 include 'asakusa-compiler-model'
 include 'asakusa-compiler-api'
 include 'asakusa-compiler-plan'
 include 'asakusa-compiler-util'
-// include 'asakusa-compiler-packager'
+include 'asakusa-compiler-packaging'
 
 // DSL driver
 include 'asakusa-compiler-analyzer'
@@ -21,6 +22,7 @@ include 'asakusa-compiler-extension-windgate'
 
 // others
 include 'asakusa-compiler-mock'
+include 'asakusa-compiler-testing'
 
 rootProject.children.each { project ->
     project.projectDir = new File(settingsDir, "modules/${project.name}")

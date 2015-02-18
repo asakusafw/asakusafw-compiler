@@ -9,10 +9,9 @@ import java.util.List;
 
 import org.junit.Test;
 
-import com.asakusafw.lang.compiler.api.DiagnosticException;
 import com.asakusafw.lang.compiler.api.reference.DataModelReference;
 import com.asakusafw.lang.compiler.api.reference.PropertyReference;
-import com.asakusafw.lang.compiler.core.bridge.DefaultDataModelLoader;
+import com.asakusafw.lang.compiler.common.DiagnosticException;
 import com.asakusafw.lang.compiler.model.PropertyName;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.description.Descriptions;

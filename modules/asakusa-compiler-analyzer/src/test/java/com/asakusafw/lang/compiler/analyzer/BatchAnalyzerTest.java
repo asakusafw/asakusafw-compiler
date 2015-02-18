@@ -12,8 +12,7 @@ import com.asakusafw.lang.compiler.analyzer.mock.BatchWithWrongJobflow;
 import com.asakusafw.lang.compiler.analyzer.mock.MockBatch;
 import com.asakusafw.lang.compiler.analyzer.mock.MockDiamondBatch;
 import com.asakusafw.lang.compiler.analyzer.mock.MockJobflow;
-import com.asakusafw.lang.compiler.api.DiagnosticException;
-import com.asakusafw.lang.compiler.api.mock.MockExternalIoProcessor;
+import com.asakusafw.lang.compiler.common.DiagnosticException;
 import com.asakusafw.lang.compiler.model.description.Descriptions;
 import com.asakusafw.lang.compiler.model.graph.Batch;
 import com.asakusafw.lang.compiler.model.graph.BatchElement;
@@ -23,9 +22,8 @@ import com.asakusafw.lang.compiler.model.graph.BatchElement;
  */
 public class BatchAnalyzerTest {
 
-    private final BatchAnalyzer analyzer = new BatchAnalyzer(new JobflowAnalyzer(new FlowGraphAnalyzer(
-            MockExternalIoProcessor.CONTEXT,
-            new MockExternalIoProcessor())));
+    private final BatchAnalyzer analyzer =
+            new BatchAnalyzer(new JobflowAnalyzer(new FlowGraphAnalyzer(new MockExternalIoAnalyzer())));
 
     /**
      * simple case.

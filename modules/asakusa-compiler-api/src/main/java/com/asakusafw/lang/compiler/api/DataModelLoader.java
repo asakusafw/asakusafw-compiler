@@ -16,6 +16,7 @@
 package com.asakusafw.lang.compiler.api;
 
 import com.asakusafw.lang.compiler.api.reference.DataModelReference;
+import com.asakusafw.lang.compiler.common.DiagnosticException;
 import com.asakusafw.lang.compiler.model.description.TypeDescription;
 
 /**

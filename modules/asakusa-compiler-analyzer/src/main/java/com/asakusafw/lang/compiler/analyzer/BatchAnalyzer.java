@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.Map;
 
 import com.asakusafw.lang.compiler.analyzer.adapter.BatchAdapter;
-import com.asakusafw.lang.compiler.api.Diagnostic;
-import com.asakusafw.lang.compiler.api.DiagnosticException;
-import com.asakusafw.lang.compiler.api.basic.BasicDiagnostic;
+import com.asakusafw.lang.compiler.common.BasicDiagnostic;
+import com.asakusafw.lang.compiler.common.Diagnostic;
+import com.asakusafw.lang.compiler.common.DiagnosticException;
 import com.asakusafw.lang.compiler.model.graph.Batch;
 import com.asakusafw.lang.compiler.model.graph.BatchElement;
 import com.asakusafw.lang.compiler.model.graph.Jobflow;

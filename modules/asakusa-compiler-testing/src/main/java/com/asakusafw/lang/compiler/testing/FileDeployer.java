@@ -1,4 +1,4 @@
-package com.asakusafw.lang.compiler.extension.javac;
+package com.asakusafw.lang.compiler.testing;
 
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;

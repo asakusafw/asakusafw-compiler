@@ -1,4 +1,4 @@
-package com.asakusafw.lang.compiler.api;
+package com.asakusafw.lang.compiler.common;
 
 import java.io.Serializable;
 

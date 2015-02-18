@@ -12,11 +12,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.asakusafw.lang.compiler.api.Diagnostic;
-import com.asakusafw.lang.compiler.api.Diagnostic.Level;
-import com.asakusafw.lang.compiler.api.DiagnosticException;
-import com.asakusafw.lang.compiler.api.ExternalIoProcessor;
-import com.asakusafw.lang.compiler.api.basic.BasicDiagnostic;
+import com.asakusafw.lang.compiler.common.BasicDiagnostic;
+import com.asakusafw.lang.compiler.common.Diagnostic;
+import com.asakusafw.lang.compiler.common.Diagnostic.Level;
+import com.asakusafw.lang.compiler.common.DiagnosticException;
 import com.asakusafw.lang.compiler.model.PropertyName;
 import com.asakusafw.lang.compiler.model.description.AnnotationDescription;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
@@ -79,18 +78,14 @@ public final class FlowGraphAnalyzer {
         CORE_OPERATOR_KINDS = map;
     }
 
-    private final ExternalIoProcessor.Context ioContext;
-
-    private final ExternalIoProcessor ioProcessor;
+    private final ExternalIoAnalyzer ioAnalyzer;
 
     /**
      * Creates a new instance.
-     * @param context the current external I/O context
-     * @param processor the external I/O processor
+     * @param ioAnalyzer the external I/O analyzer
      */
-    public FlowGraphAnalyzer(ExternalIoProcessor.Context context, ExternalIoProcessor processor) {
-        this.ioContext = context;
-        this.ioProcessor = processor;
+    public FlowGraphAnalyzer(ExternalIoAnalyzer ioAnalyzer) {
+        this.ioAnalyzer = ioAnalyzer;
     }
 
     /**
@@ -138,15 +133,8 @@ public final class FlowGraphAnalyzer {
         ImporterDescription extern = description.getImporterDescription();
         ExternalInputInfo info = null;
         if (extern != null) {
-            if (ioProcessor.isSupported(ioContext, extern.getClass()) == false) {
-                context.error(MessageFormat.format(
-                        "missing processor of importer description: {0} (name={1})",
-                        description.getName(),
-                        extern.getClass().getName()));
-                return null;
-            }
             try {
-                info = ioProcessor.resolveInput(ioContext, description.getName(), extern);
+                info = ioAnalyzer.analyze(description.getName(), extern);
             } catch (DiagnosticException e) {
                 context.merge(e.getDiagnostics());
                 return null;
@@ -159,15 +147,8 @@ public final class FlowGraphAnalyzer {
         ExporterDescription extern = description.getExporterDescription();
         ExternalOutputInfo info = null;
         if (extern != null) {
-            if (ioProcessor.isSupported(ioContext, extern.getClass()) == false) {
-                context.error(MessageFormat.format(
-                        "missing processor of exporter description: {0} (name={1})",
-                        description.getName(),
-                        extern.getClass().getName()));
-                return null;
-            }
             try {
-                info = ioProcessor.resolveOutput(ioContext, description.getName(), extern);
+                info = ioAnalyzer.analyze(description.getName(), extern);
             } catch (DiagnosticException e) {
                 context.merge(e.getDiagnostics());
                 return null;

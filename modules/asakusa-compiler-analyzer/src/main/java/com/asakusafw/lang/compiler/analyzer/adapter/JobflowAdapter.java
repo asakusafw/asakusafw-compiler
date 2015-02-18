@@ -28,9 +28,9 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import com.asakusafw.lang.compiler.analyzer.util.TypeInfo;
-import com.asakusafw.lang.compiler.api.Diagnostic;
-import com.asakusafw.lang.compiler.api.DiagnosticException;
-import com.asakusafw.lang.compiler.api.basic.BasicDiagnostic;
+import com.asakusafw.lang.compiler.common.BasicDiagnostic;
+import com.asakusafw.lang.compiler.common.Diagnostic;
+import com.asakusafw.lang.compiler.common.DiagnosticException;
 import com.asakusafw.lang.compiler.model.description.Descriptions;
 import com.asakusafw.lang.compiler.model.info.JobflowInfo;
 import com.asakusafw.vocabulary.flow.Export;

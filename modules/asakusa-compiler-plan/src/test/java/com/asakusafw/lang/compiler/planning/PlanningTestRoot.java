@@ -13,11 +13,11 @@ import java.util.Set;
 import org.hamcrest.FeatureMatcher;
 import org.hamcrest.Matcher;
 
+import com.asakusafw.lang.compiler.common.Predicate;
 import com.asakusafw.lang.compiler.model.graph.MarkerOperator;
 import com.asakusafw.lang.compiler.model.graph.Operator;
 import com.asakusafw.lang.compiler.model.graph.OperatorConstraint;
 import com.asakusafw.lang.compiler.model.graph.OperatorGraph;
-import com.asakusafw.lang.compiler.model.graph.Operators;
 
 /**
  * A common test base class for planning.
@@ -107,8 +107,8 @@ public abstract class PlanningTestRoot {
      * @param constraint the constraint
      * @return the predicate
      */
-    public static Operators.Predicate<Operator> only(final OperatorConstraint constraint) {
-        return new Operators.Predicate<Operator>() {
+    public static Predicate<Operator> only(final OperatorConstraint constraint) {
+        return new Predicate<Operator>() {
             @Override
             public boolean apply(Operator argument) {
                 return argument.getConstraints().contains(constraint);

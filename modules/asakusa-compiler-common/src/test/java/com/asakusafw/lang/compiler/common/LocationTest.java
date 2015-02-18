@@ -1,4 +1,4 @@
-package com.asakusafw.lang.compiler.model;
+package com.asakusafw.lang.compiler.common;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -59,6 +59,7 @@ public class LocationTest {
         Location a = Location.of("a");
         Location ab = Location.of("a/b");
         Location abc = Location.of("a/b/c");
+        Location abd = Location.of("a/b/d");
         Location bc = Location.of("b/c");
         Location abc2 = Location.of("a/b/c");
         Location abc3 = abc.getParent().append("c");
@@ -77,5 +78,11 @@ public class LocationTest {
         assertThat(abc, is(equalTo(abc3)));
         assertThat(abc, is(not(equalTo(ab))));
         assertThat(abc, is(not(equalTo(bc))));
+
+        assertThat(abc, allOf(not(lessThan(abc2)), not(greaterThan(abc2))));
+        assertThat(ab, is(lessThan(abc)));
+        assertThat(abc, is(greaterThan(ab)));
+        assertThat(abc, is(lessThan(abd)));
+        assertThat(abd, is(greaterThan(abc)));
     }
 }

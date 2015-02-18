@@ -10,8 +10,7 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import com.asakusafw.lang.compiler.api.DiagnosticException;
-import com.asakusafw.lang.compiler.api.mock.MockExternalIoProcessor;
+import com.asakusafw.lang.compiler.common.DiagnosticException;
 import com.asakusafw.lang.compiler.model.PropertyName;
 import com.asakusafw.lang.compiler.model.description.Descriptions;
 import com.asakusafw.lang.compiler.model.graph.CoreOperator.CoreOperatorKind;
@@ -38,9 +37,7 @@ import com.asakusafw.vocabulary.model.Key;
  */
 public class FlowGraphAnalyzerTest {
 
-    private final FlowGraphAnalyzer converter = new FlowGraphAnalyzer(
-            MockExternalIoProcessor.CONTEXT,
-            new MockExternalIoProcessor());
+    private final FlowGraphAnalyzer converter = new FlowGraphAnalyzer(new MockExternalIoAnalyzer());
 
     /**
      * simple case.

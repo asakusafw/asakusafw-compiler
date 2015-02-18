@@ -20,17 +20,7 @@ import com.asakusafw.lang.compiler.model.description.ReifiableTypeDescription;
 import com.asakusafw.lang.compiler.model.description.TypeDescription;
 import com.asakusafw.lang.compiler.model.description.ValueDescription;
 import com.asakusafw.lang.compiler.model.description.ValueDescription.ValueKind;
-import com.asakusafw.lang.compiler.model.graph.ExternalInput;
-import com.asakusafw.lang.compiler.model.graph.ExternalOutput;
-import com.asakusafw.lang.compiler.model.graph.FlowOperator;
-import com.asakusafw.lang.compiler.model.graph.MarkerOperator;
-import com.asakusafw.lang.compiler.model.graph.Operator;
 import com.asakusafw.lang.compiler.model.graph.Operator.OperatorKind;
-import com.asakusafw.lang.compiler.model.graph.OperatorArgument;
-import com.asakusafw.lang.compiler.model.graph.OperatorGraph;
-import com.asakusafw.lang.compiler.model.graph.OperatorInput;
-import com.asakusafw.lang.compiler.model.graph.OperatorOutput;
-import com.asakusafw.lang.compiler.model.graph.UserOperator;
 
 /**
  * Mock operator graph builder.

@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.asakusafw.lang.compiler.common.Predicate;
 import com.asakusafw.lang.compiler.model.graph.MarkerOperator;
 import com.asakusafw.lang.compiler.model.graph.Operator;
 import com.asakusafw.lang.compiler.model.graph.OperatorInput;
@@ -30,7 +31,7 @@ final class Util {
         terminators.addAll(inputs);
         terminators.addAll(consumers);
 
-        Operators.Predicate<Operator> isTerminator = new IsMember(terminators);
+        Predicate<Operator> isTerminator = new IsMember(terminators);
         Set<OperatorInput> results = new HashSet<>();
         for (Operator consumer : consumers) {
             for (OperatorInput port : consumer.getInputs()) {
@@ -76,7 +77,7 @@ final class Util {
     private static Map<Operator, Set<MarkerOperator>> computeBroadcastConsumers0(
             Set<Operator> inputs, Set<Operator> outputs) {
         Set<Operator> nonBroadcastOperators = collectNonBroadcastOperators(inputs, outputs);
-        Operators.Predicate<Operator> isNonBroadcast = new IsMember(nonBroadcastOperators);
+        Predicate<Operator> isNonBroadcast = new IsMember(nonBroadcastOperators);
         Map<Operator, Set<MarkerOperator>> results = new HashMap<>();
         for (Operator operator : inputs) {
             PlanMarker kind = PlanMarkers.get(operator);
@@ -125,7 +126,7 @@ final class Util {
         return results;
     }
 
-    private static final class IsMember implements Operators.Predicate<Operator> {
+    private static final class IsMember implements Predicate<Operator> {
 
         private final Set<? extends Operator> members;
 

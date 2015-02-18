@@ -1,8 +1,6 @@
-package com.asakusafw.lang.compiler.api.basic;
+package com.asakusafw.lang.compiler.common;
 
 import java.text.MessageFormat;
-
-import com.asakusafw.lang.compiler.api.Diagnostic;
 
 /**
  * A basic implementation of {@link Diagnostic}.

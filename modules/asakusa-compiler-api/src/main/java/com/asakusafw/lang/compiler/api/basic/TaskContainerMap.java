@@ -6,8 +6,8 @@ import java.util.EnumMap;
 import java.util.Map;
 
 import com.asakusafw.lang.compiler.api.reference.TaskReference;
-import com.asakusafw.lang.compiler.api.reference.TaskReferenceMap;
 import com.asakusafw.lang.compiler.api.reference.TaskReference.Phase;
+import com.asakusafw.lang.compiler.api.reference.TaskReferenceMap;
 
 /**
  * Holds {@link TaskReference} objects for whole executions.

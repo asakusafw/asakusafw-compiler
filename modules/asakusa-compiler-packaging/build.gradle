@@ -1,0 +1,13 @@
+description 'Asakusa DSL Compiler packaging support'
+
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'eclipse'
+
+useSLF4J()
+
+dependencies {
+    compile project(':asakusa-compiler-common')
+
+    testCompile project(':asakusa-compiler-testing')
+}

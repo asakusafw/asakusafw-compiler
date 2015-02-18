@@ -13,15 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.asakusafw.lang.compiler.model;
+package com.asakusafw.lang.compiler.common;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.regex.Pattern;
 
 /**
  * Represents a resource location.
  */
-public class Location {
+public class Location implements Comparable<Location> {
 
     /**
      * The default path segment separator character.
@@ -73,13 +74,8 @@ public class Location {
      * @return the child location
      */
     public Location append(Location suffix) {
-        LinkedList<String> segments = new LinkedList<>();
-        Location current = suffix;
-        while (current != null) {
-            segments.addFirst(current.name);
-            current = current.parent;
-        }
-        current = this;
+        LinkedList<String> segments = suffix.asList();
+        Location current = this;
         for (String segment : segments) {
             current = new Location(current, segment);
         }
@@ -131,12 +127,7 @@ public class Location {
      * @return the path string
      */
     public String toPath(char separator) {
-        LinkedList<String> segments = new LinkedList<>();
-        Location current = this;
-        while (current != null) {
-            segments.addFirst(current.name);
-            current = current.parent;
-        }
+        LinkedList<String> segments = asList();
         StringBuilder buf = new StringBuilder();
         buf.append(segments.removeFirst());
         for (String segment : segments) {
@@ -144,6 +135,14 @@ public class Location {
             buf.append(segment);
         }
         return buf.toString();
+    }
+
+    private LinkedList<String> asList() {
+        LinkedList<String> segments = new LinkedList<>();
+        for (Location current = this; current != null; current = current.parent) {
+            segments.addFirst(current.name);
+        }
+        return segments;
     }
 
     /**
@@ -215,6 +214,31 @@ public class Location {
             otherCur = otherCur.parent;
         }
         return thisCur == otherCur;
+    }
+
+    @Override
+    public int compareTo(Location o) {
+        Iterator<String> a = asList().iterator();
+        Iterator<String> b = o.asList().iterator();
+        while (true) {
+            if (a.hasNext() && b.hasNext()) {
+                String aSegment = a.next();
+                String bSegment = b.next();
+                int diff = aSegment.compareTo(bSegment);
+                if (diff != 0) {
+                    return diff;
+                }
+                continue;
+            } else if (a.hasNext()) {
+                assert b.hasNext() == false;
+                return +1;
+            } else if (b.hasNext()) {
+                assert a.hasNext() == false;
+                return -1;
+            } else {
+                return 0;
+            }
+        }
     }
 
     @Override

@@ -9,8 +9,8 @@ import java.lang.annotation.Annotation;
 import org.junit.Test;
 
 import com.asakusafw.lang.compiler.model.graph.CoreOperator;
-import com.asakusafw.lang.compiler.model.graph.UserOperator;
 import com.asakusafw.lang.compiler.model.graph.CoreOperator.CoreOperatorKind;
+import com.asakusafw.lang.compiler.model.graph.UserOperator;
 import com.asakusafw.vocabulary.operator.Logging;
 import com.asakusafw.vocabulary.operator.Update;
 

@@ -1,0 +1,12 @@
+description 'Asakusa DSL Compiler testing utilities'
+
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'eclipse'
+
+useSLF4J()
+
+dependencies {
+    compile 'junit:junit:4.11'
+    compile 'org.hamcrest:hamcrest-library:1.3'
+}

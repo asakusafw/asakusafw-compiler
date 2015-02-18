@@ -6,7 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import com.asakusafw.lang.compiler.model.Location;
+import com.asakusafw.lang.compiler.common.Location;
 
 /**
  * A symbol of task with any command.

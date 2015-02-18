@@ -5,7 +5,7 @@ import java.io.OutputStream;
 
 import com.asakusafw.lang.compiler.api.ExternalIoProcessor;
 import com.asakusafw.lang.compiler.api.reference.TaskReference;
-import com.asakusafw.lang.compiler.model.Location;
+import com.asakusafw.lang.compiler.common.Location;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 
 /**

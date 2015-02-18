@@ -19,6 +19,8 @@ import java.util.zip.ZipFile;
 import org.junit.Rule;
 import org.junit.Test;
 
+import com.asakusafw.lang.compiler.testing.FileDeployer;
+
 /**
  * Test for {@link JavaCompilerUtil}.
  */

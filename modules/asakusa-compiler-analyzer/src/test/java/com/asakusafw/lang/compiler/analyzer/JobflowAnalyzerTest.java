@@ -16,8 +16,7 @@ import com.asakusafw.lang.compiler.analyzer.mock.JobflowWithWrongDescription;
 import com.asakusafw.lang.compiler.analyzer.mock.MockExporterDescription;
 import com.asakusafw.lang.compiler.analyzer.mock.MockImporterDescription;
 import com.asakusafw.lang.compiler.analyzer.mock.MockJobflow;
-import com.asakusafw.lang.compiler.api.DiagnosticException;
-import com.asakusafw.lang.compiler.api.mock.MockExternalIoProcessor;
+import com.asakusafw.lang.compiler.common.DiagnosticException;
 import com.asakusafw.lang.compiler.model.description.Descriptions;
 import com.asakusafw.lang.compiler.model.graph.CoreOperator;
 import com.asakusafw.lang.compiler.model.graph.CoreOperator.CoreOperatorKind;
@@ -34,9 +33,7 @@ import com.asakusafw.lang.compiler.model.graph.Operators;
  */
 public class JobflowAnalyzerTest {
 
-    private final JobflowAnalyzer analyzer = new JobflowAnalyzer(new FlowGraphAnalyzer(
-            MockExternalIoProcessor.CONTEXT,
-            new MockExternalIoProcessor()));
+    private final JobflowAnalyzer analyzer = new JobflowAnalyzer(new FlowGraphAnalyzer(new MockExternalIoAnalyzer()));
 
     /**
      * simple case.

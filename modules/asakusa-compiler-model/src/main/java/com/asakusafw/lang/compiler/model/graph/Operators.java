@@ -6,6 +6,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import com.asakusafw.lang.compiler.common.Predicate;
+
 /**
  * Utilities for {@link Operator}.
  */
@@ -477,19 +479,5 @@ public final class Operators {
         if (outputs.size() != 1) {
             throw new IllegalArgumentException();
         }
-    }
-
-    /**
-     * Represents a predicate of finding operators.
-     * @param <T> the target type
-     */
-    public interface Predicate<T> {
-
-        /**
-         * Returns whether the argument satisfies this predicate or not.
-         * @param argument the target argument
-         * @return {@code true} if the argument satisfies this, otherwise {@code false}
-         */
-        boolean apply(T argument);
     }
 }

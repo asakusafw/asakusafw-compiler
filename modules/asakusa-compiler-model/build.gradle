@@ -5,4 +5,5 @@ apply plugin: 'maven'
 apply plugin: 'eclipse'
 
 dependencies {
+    compile project(':asakusa-compiler-common')
 }

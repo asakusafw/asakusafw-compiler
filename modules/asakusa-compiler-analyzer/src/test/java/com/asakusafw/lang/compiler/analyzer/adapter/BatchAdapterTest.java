@@ -13,7 +13,7 @@ import com.asakusafw.lang.compiler.analyzer.mock.BatchWithoutDescription;
 import com.asakusafw.lang.compiler.analyzer.mock.BatchWithoutValidConstructor;
 import com.asakusafw.lang.compiler.analyzer.mock.MockBatch;
 import com.asakusafw.lang.compiler.analyzer.mock.NotPublicAccessor;
-import com.asakusafw.lang.compiler.api.DiagnosticException;
+import com.asakusafw.lang.compiler.common.DiagnosticException;
 import com.asakusafw.lang.compiler.model.description.Descriptions;
 import com.asakusafw.lang.compiler.model.info.BatchInfo;
 import com.asakusafw.vocabulary.batch.Batch;

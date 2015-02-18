@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.asakusafw.lang.compiler.common.Predicate;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.description.MethodDescription;
 import com.asakusafw.lang.compiler.model.graph.CoreOperator;
@@ -24,7 +25,6 @@ import com.asakusafw.lang.compiler.model.graph.OperatorGraph;
 import com.asakusafw.lang.compiler.model.graph.OperatorInput;
 import com.asakusafw.lang.compiler.model.graph.OperatorOutput;
 import com.asakusafw.lang.compiler.model.graph.OperatorPort;
-import com.asakusafw.lang.compiler.model.graph.Operators.Predicate;
 import com.asakusafw.lang.compiler.model.graph.UserOperator;
 
 /**

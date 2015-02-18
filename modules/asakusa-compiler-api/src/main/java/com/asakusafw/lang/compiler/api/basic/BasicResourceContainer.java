@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.text.MessageFormat;
 
-import com.asakusafw.lang.compiler.model.Location;
+import com.asakusafw.lang.compiler.common.Location;
 
 /**
  * A local file system based resource container.

@@ -2,7 +2,7 @@ package com.asakusafw.lang.compiler.analyzer;
 
 import org.junit.Test;
 
-import com.asakusafw.lang.compiler.api.DiagnosticException;
+import com.asakusafw.lang.compiler.common.DiagnosticException;
 import com.asakusafw.runtime.core.Result;
 import com.asakusafw.vocabulary.flow.graph.Connectivity;
 import com.asakusafw.vocabulary.flow.graph.FlowGraph;

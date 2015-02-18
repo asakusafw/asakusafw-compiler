@@ -9,6 +9,7 @@ import java.util.Set;
 
 import org.junit.Test;
 
+import com.asakusafw.lang.compiler.common.Predicate;
 import com.asakusafw.lang.compiler.model.graph.Operator.OperatorKind;
 
 /**
@@ -16,7 +17,7 @@ import com.asakusafw.lang.compiler.model.graph.Operator.OperatorKind;
  */
 public class OperatorsTest {
 
-    private static final Operators.Predicate<Operator> MARKERS = new Operators.Predicate<Operator>() {
+    private static final Predicate<Operator> MARKERS = new Predicate<Operator>() {
         @Override
         public boolean apply(Operator argument) {
             return argument.getOperatorKind() == OperatorKind.MARKER;

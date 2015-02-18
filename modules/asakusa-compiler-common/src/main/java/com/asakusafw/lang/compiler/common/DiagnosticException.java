@@ -1,12 +1,10 @@
-package com.asakusafw.lang.compiler.api;
+package com.asakusafw.lang.compiler.common;
 
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-
-import com.asakusafw.lang.compiler.api.basic.BasicDiagnostic;
 
 /**
  * Represents an exception with {@link Diagnostic}s.

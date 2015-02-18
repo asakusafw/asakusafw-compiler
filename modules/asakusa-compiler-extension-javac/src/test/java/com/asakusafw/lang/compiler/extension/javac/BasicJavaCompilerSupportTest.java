@@ -18,8 +18,9 @@ import java.util.concurrent.Callable;
 import org.junit.Rule;
 import org.junit.Test;
 
-import com.asakusafw.lang.compiler.api.DiagnosticException;
+import com.asakusafw.lang.compiler.common.DiagnosticException;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
+import com.asakusafw.lang.compiler.testing.FileDeployer;
 
 /**
  * Test for {@link BasicJavaCompilerSupport}.
