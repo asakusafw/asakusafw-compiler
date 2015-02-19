@@ -2,6 +2,8 @@ package com.asakusafw.lang.compiler.api.mock;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import com.asakusafw.lang.compiler.api.CompilerOptions;
@@ -53,7 +55,7 @@ public class MockExternalIoProcessor implements ExternalIoProcessor {
     }
 
     @Override
-    public ExternalInputInfo resolveInput(Context context, String name, Object description) {
+    public ExternalInputInfo analyzeInput(Context context, String name, Object description) {
         if ((description instanceof ImporterDescription) == false) {
             throw new IllegalArgumentException();
         }
@@ -66,7 +68,7 @@ public class MockExternalIoProcessor implements ExternalIoProcessor {
     }
 
     @Override
-    public ExternalOutputInfo resolveOutput(Context context, String name, Object description) {
+    public ExternalOutputInfo analyzeOutput(Context context, String name, Object description) {
         if ((description instanceof ExporterDescription) == false) {
             throw new IllegalArgumentException();
         }
@@ -75,6 +77,22 @@ public class MockExternalIoProcessor implements ExternalIoProcessor {
                 Descriptions.classOf(desc.getClass()),
                 MODULE_NAME,
                 Descriptions.classOf(desc.getModelType()));
+    }
+
+    @Override
+    public ExternalInputReference resolveInput(Context context, String name, ExternalInputInfo info) {
+        String relativePath = String.format("%s/input/%s-*", MODULE_NAME, name);
+        String path = context.getOptions().getRuntimeWorkingPath(relativePath);
+        return new ExternalInputReference(name, info, Collections.singleton(path));
+    }
+
+    @Override
+    public ExternalOutputReference resolveOutput(
+            Context context,
+            String name,
+            ExternalOutputInfo info,
+            Collection<String> internalOutputPaths) {
+        return new ExternalOutputReference(name, info, internalOutputPaths);
     }
 
     @Override

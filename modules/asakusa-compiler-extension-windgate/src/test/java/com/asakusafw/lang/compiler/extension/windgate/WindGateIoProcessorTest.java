@@ -83,7 +83,7 @@ public class WindGateIoProcessorTest {
         InputDesc desc = new InputDesc(String.class, "p", script("r", "k0", "v0"));
         MockExternalIoProcessorContext context = context();
         WindGateIoProcessor proc = new WindGateIoProcessor();
-        ValueDescription contents = proc.resolveInputProperties(context, "t", desc);
+        ValueDescription contents = proc.analyzeInputProperties(context, "t", desc);
         DescriptionModel model = restore(contents);
 
         assertThat(model.getProfileName(), is("p"));
@@ -100,7 +100,7 @@ public class WindGateIoProcessorTest {
         OutputDesc desc = new OutputDesc(String.class, "p", script("r", "k0", "v0"));
         MockExternalIoProcessorContext context = context();
         WindGateIoProcessor proc = new WindGateIoProcessor();
-        ValueDescription contents = proc.resolveOutputProperties(context, "t", desc);
+        ValueDescription contents = proc.analyzeOutputProperties(context, "t", desc);
         DescriptionModel model = restore(contents);
 
         assertThat(model.getProfileName(), is("p"));
@@ -117,7 +117,7 @@ public class WindGateIoProcessorTest {
         InputDesc desc = new InputDesc(String.class, "p", null);
         MockExternalIoProcessorContext context = context();
         WindGateIoProcessor proc = new WindGateIoProcessor();
-        proc.resolveInput(context, "n", desc);
+        proc.analyzeInput(context, "n", desc);
     }
 
     /**
@@ -128,7 +128,7 @@ public class WindGateIoProcessorTest {
         OutputDesc desc = new OutputDesc(String.class, "p", null);
         MockExternalIoProcessorContext context = context();
         WindGateIoProcessor proc = new WindGateIoProcessor();
-        proc.resolveOutput(context, "n", desc);
+        proc.analyzeOutput(context, "n", desc);
     }
 
     /**
@@ -271,7 +271,7 @@ public class WindGateIoProcessorTest {
             int index = 0;
             for (ImporterDescription desc : descriptions) {
                 String name = String.format("p%d", index++);
-                ExternalInputInfo info = proc.resolveInput(context, name, desc);
+                ExternalInputInfo info = proc.analyzeInput(context, name, desc);
                 results.add(new ExternalInputReference(name, info, Collections.singleton(name)));
             }
             return results;
@@ -288,7 +288,7 @@ public class WindGateIoProcessorTest {
             int index = 0;
             for (ExporterDescription desc : descriptions) {
                 String name = String.format("p%d", index++);
-                ExternalOutputInfo info = proc.resolveOutput(context, name, desc);
+                ExternalOutputInfo info = proc.analyzeOutput(context, name, desc);
                 results.add(new ExternalOutputReference(name, info, Collections.singleton(name)));
             }
             return results;

@@ -2,6 +2,7 @@ package com.asakusafw.lang.compiler.api;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Collection;
 import java.util.List;
 
 import com.asakusafw.lang.compiler.api.reference.ExternalInputReference;
@@ -28,24 +29,47 @@ public interface ExternalIoProcessor {
     boolean isSupported(Context context, Class<?> descriptionClass);
 
     /**
-     * Resolves external input description and returns structural information of it.
+     * Analyzes external input description and returns structural information of it.
      * @param context the current context
      * @param name the target input name (nullable)
      * @param description the target description object
-     * @return the resolved information
+     * @return the analyzed information
      * @throws DiagnosticException if failed to resolve the target description
      */
-    ExternalInputInfo resolveInput(Context context, String name, Object description);
+    ExternalInputInfo analyzeInput(Context context, String name, Object description);
 
     /**
-     * Resolves external output description and returns structural information of it.
+     * Analyzes external output description and returns structural information of it.
      * @param context the current context
      * @param name the target output name (nullable)
      * @param description the target description object
-     * @return the resolved information
+     * @return the analyzed information
      * @throws DiagnosticException if failed to resolve the target description
      */
-    ExternalOutputInfo resolveOutput(Context context, String name, Object description);
+    ExternalOutputInfo analyzeOutput(Context context, String name, Object description);
+
+    /**
+     * Resolves external input and returns a reference to the input port.
+     * @param context the current context
+     * @param name the target output name (nullable)
+     * @param info the structural information of the target external input
+     * @return the resolved reference
+     */
+    ExternalInputReference resolveInput(Context context, String name, ExternalInputInfo info);
+
+    /**
+     * Resolves external output and returns a reference to the output port.
+     * @param context the current context
+     * @param name the target output name (nullable)
+     * @param info the structural information of the target external output
+     * @param internalOutputPaths the output file paths which have been generated before
+     *     {@link com.asakusafw.lang.compiler.api.reference.TaskReference.Phase#EPILOGUE eplilogue phase}
+     * @return the resolved reference
+     */
+    ExternalOutputReference resolveOutput(
+            Context context,
+            String name, ExternalOutputInfo info,
+            Collection<String> internalOutputPaths);
 
     /**
      * Processes external descriptions I/O and returns required tasks for target I/Os.

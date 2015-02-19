@@ -6,12 +6,13 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.text.MessageFormat;
 
+import com.asakusafw.lang.compiler.api.ResourceContainer;
 import com.asakusafw.lang.compiler.common.Location;
 
 /**
  * A local file system based resource container.
  */
-public class BasicResourceContainer {
+public class BasicResourceContainer implements ResourceContainer {
 
     private final File basePath;
 
@@ -41,13 +42,8 @@ public class BasicResourceContainer {
         return file;
     }
 
-    /**
-     * Adds a new resource file and returns its output stream.
-     * @param location the resource path (relative from the base path)
-     * @return the output stream to set the target file contents
-     * @throws IOException if failed to create a new file
-     */
-    public OutputStream addResourceFile(Location location) throws IOException {
+    @Override
+    public OutputStream addResource(Location location) throws IOException {
         File file = toFile(location);
         if (file.exists()) {
             throw new IOException(MessageFormat.format(

@@ -7,6 +7,7 @@ import java.util.Map;
 
 import com.asakusafw.lang.compiler.api.reference.DataModelReference;
 import com.asakusafw.lang.compiler.api.reference.PropertyReference;
+import com.asakusafw.lang.compiler.common.BasicAttributeContainer;
 import com.asakusafw.lang.compiler.model.PropertyName;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.description.MethodDescription;
@@ -15,7 +16,7 @@ import com.asakusafw.lang.compiler.model.description.TypeDescription;
 /**
  * A basic implementation of {@link DataModelReference}.
  */
-public class BasicDataModelReference implements DataModelReference {
+public class BasicDataModelReference extends BasicAttributeContainer implements DataModelReference {
 
     private final ClassDescription declaration;
 

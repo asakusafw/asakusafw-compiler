@@ -1,6 +1,11 @@
 package com.asakusafw.lang.compiler.extension.externalio;
 
+import java.util.Collection;
+import java.util.Set;
+
 import com.asakusafw.lang.compiler.api.ExternalIoProcessor;
+import com.asakusafw.lang.compiler.api.reference.ExternalInputReference;
+import com.asakusafw.lang.compiler.api.reference.ExternalOutputReference;
 import com.asakusafw.lang.compiler.model.description.Descriptions;
 import com.asakusafw.lang.compiler.model.description.ValueDescription;
 import com.asakusafw.lang.compiler.model.info.ExternalInputInfo;
@@ -43,7 +48,7 @@ public abstract class AbstractExternalIoProcessor<
      * @param description the target description
      * @return the extracted properties, or {@code null} if the input does not have any additional properties
      */
-    protected abstract ValueDescription resolveInputProperties(Context context, String name, TInput description);
+    protected abstract ValueDescription analyzeInputProperties(Context context, String name, TInput description);
 
     /**
      * Returns the properties of the target exporter description.
@@ -52,7 +57,16 @@ public abstract class AbstractExternalIoProcessor<
      * @param description the target description
      * @return the extracted properties, or {@code null} if the output does not have any additional properties
      */
-    protected abstract ValueDescription resolveOutputProperties(Context context, String name, TOutput description);
+    protected abstract ValueDescription analyzeOutputProperties(Context context, String name, TOutput description);
+
+    /**
+     * Returns input paths, which will be used in main phase, of the target external input.
+     * @param context  the current context
+     * @param name the input name
+     * @param info the structural information of the target input
+     * @return the computed input paths
+     */
+    protected abstract Set<String> computeInputPaths(Context context, String name, ExternalInputInfo info);
 
     @Override
     public final boolean isSupported(Context context, Class<?> descriptionClass) {
@@ -62,13 +76,13 @@ public abstract class AbstractExternalIoProcessor<
     }
 
     @Override
-    public final ExternalInputInfo resolveInput(Context context, String name, Object description) {
+    public final ExternalInputInfo analyzeInput(Context context, String name, Object description) {
         Class<TInput> type = getInputDescriptionType();
         if (type.isInstance(description) == false) {
             throw new IllegalArgumentException();
         }
         TInput desc = type.cast(description);
-        ValueDescription properties = resolveInputProperties(context, name, desc);
+        ValueDescription properties = analyzeInputProperties(context, name, desc);
         return new ExternalInputInfo.Basic(
                 Descriptions.classOf(desc.getClass()),
                 getModuleName(),
@@ -78,18 +92,33 @@ public abstract class AbstractExternalIoProcessor<
     }
 
     @Override
-    public final ExternalOutputInfo resolveOutput(Context context, String name, Object description) {
+    public final ExternalOutputInfo analyzeOutput(Context context, String name, Object description) {
         Class<TOutput> type = getOutputDescriptionType();
         if (type.isInstance(description) == false) {
             throw new IllegalArgumentException();
         }
         TOutput desc = type.cast(description);
-        ValueDescription properties = resolveOutputProperties(context, name, desc);
+        ValueDescription properties = analyzeOutputProperties(context, name, desc);
         return new ExternalOutputInfo.Basic(
                 Descriptions.classOf(desc.getClass()),
                 getModuleName(),
                 Descriptions.classOf(desc.getModelType()),
                 properties);
+    }
+
+    @Override
+    public ExternalInputReference resolveInput(Context context, String name, ExternalInputInfo info) {
+        Collection<String> paths = computeInputPaths(context, name, info);
+        return new ExternalInputReference(name, info, paths);
+    }
+
+    @Override
+    public ExternalOutputReference resolveOutput(
+            Context context,
+            String name,
+            ExternalOutputInfo info,
+            Collection<String> internalOutputPaths) {
+        return new ExternalOutputReference(name, info, internalOutputPaths);
     }
 
     private static ExternalInputInfo.DataSize convert(ImporterDescription.DataSize value) {

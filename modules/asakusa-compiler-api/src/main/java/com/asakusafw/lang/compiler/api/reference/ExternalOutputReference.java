@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import com.asakusafw.lang.compiler.common.BasicAttributeContainer;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.description.ValueDescription;
 import com.asakusafw.lang.compiler.model.info.ExternalOutputInfo;
@@ -13,7 +14,8 @@ import com.asakusafw.lang.compiler.model.info.ExternalOutputInfo;
 /**
  * A symbol of individual external outputs.
  */
-public class ExternalOutputReference implements ExternalOutputInfo, ExternalPortReference {
+public class ExternalOutputReference extends BasicAttributeContainer
+        implements ExternalOutputInfo, ExternalPortReference {
 
     private final String name;
 

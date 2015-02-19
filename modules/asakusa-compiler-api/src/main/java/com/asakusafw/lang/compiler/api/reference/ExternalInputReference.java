@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import com.asakusafw.lang.compiler.common.BasicAttributeContainer;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.description.ValueDescription;
 import com.asakusafw.lang.compiler.model.info.ExternalInputInfo;
@@ -13,7 +14,8 @@ import com.asakusafw.lang.compiler.model.info.ExternalInputInfo;
 /**
  * A symbol of individual external inputs.
  */
-public class ExternalInputReference implements ExternalInputInfo, ExternalPortReference {
+public class ExternalInputReference extends BasicAttributeContainer
+        implements ExternalInputInfo, ExternalPortReference {
 
     private final String name;
 

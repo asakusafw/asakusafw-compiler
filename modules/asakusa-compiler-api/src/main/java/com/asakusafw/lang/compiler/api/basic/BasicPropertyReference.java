@@ -4,6 +4,7 @@ import java.text.MessageFormat;
 
 import com.asakusafw.lang.compiler.api.reference.DataModelReference;
 import com.asakusafw.lang.compiler.api.reference.PropertyReference;
+import com.asakusafw.lang.compiler.common.BasicAttributeContainer;
 import com.asakusafw.lang.compiler.model.PropertyName;
 import com.asakusafw.lang.compiler.model.description.MethodDescription;
 import com.asakusafw.lang.compiler.model.description.TypeDescription;
@@ -11,7 +12,7 @@ import com.asakusafw.lang.compiler.model.description.TypeDescription;
 /**
  * A basic implementation of {@link PropertyReference}.
  */
-public class BasicPropertyReference implements PropertyReference {
+public class BasicPropertyReference extends BasicAttributeContainer implements PropertyReference {
 
     private final MethodDescription declaration;
 

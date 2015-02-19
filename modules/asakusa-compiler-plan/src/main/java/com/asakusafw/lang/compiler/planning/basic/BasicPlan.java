@@ -18,6 +18,7 @@ package com.asakusafw.lang.compiler.planning.basic;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import com.asakusafw.lang.compiler.common.BasicAttributeContainer;
 import com.asakusafw.lang.compiler.model.graph.MarkerOperator;
 import com.asakusafw.lang.compiler.planning.Plan;
 import com.asakusafw.lang.compiler.planning.PlanMarker;
@@ -27,7 +28,7 @@ import com.asakusafw.lang.compiler.planning.SubPlan;
 /**
  * A basic implementation of {@link Plan}.
  */
-public class BasicPlan extends AbstractAttributeContainer implements Plan {
+public class BasicPlan extends BasicAttributeContainer implements Plan {
 
     private final Set<BasicSubPlan> elements = new LinkedHashSet<>();
 

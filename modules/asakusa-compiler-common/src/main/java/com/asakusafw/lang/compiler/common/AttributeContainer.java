@@ -1,4 +1,4 @@
-package com.asakusafw.lang.compiler.planning;
+package com.asakusafw.lang.compiler.common;
 
 import java.util.Collection;
 

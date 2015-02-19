@@ -54,12 +54,25 @@ public class CompilerOptions {
     }
 
     /**
-     * Returns the path of runtime working directory.
-     * This may relative path, or may include variables (<code>${...}</code>).
+     * Returns the framework specific runtime working directory.
+     * <p>
+     * This generally contains variables (<code>${...}</code>) to prevent from conflict between working files
+     * of jobflow executions.
+     * </p>
      * @return the runtime working directory path (trailing {@code '/'} is removed)
+     * @see #getRuntimeWorkingPath(String)
      */
     public String getRuntimeWorkingDirectory() {
         return runtimeWorkingDirectory;
+    }
+
+    /**
+     * Returns the framework specific runtime working file path.
+     * @param relativePath relative path from {@link #getRuntimeWorkingDirectory() the runtime working directory}
+     * @return the runtime working file path
+     */
+    public String getRuntimeWorkingPath(String relativePath) {
+        return String.format("%s/%s", getRuntimeWorkingDirectory(), relativePath); //$NON-NLS-1$
     }
 
     /**

@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -75,6 +76,15 @@ public abstract class ResourceTestRoot {
             out.write(contents.getBytes(ENCODING));
         }
         return item;
+    }
+
+    /**
+     * Creates a {@link ResourceItemRepository}.
+     * @param items element items
+     * @return the created repository
+     */
+    public static ResourceItemRepository repository(ResourceItem... items) {
+        return new ResourceItemRepository(Arrays.asList(items));
     }
 
     /**

@@ -337,7 +337,7 @@ public class YaessBatchProcessorTest {
         try {
             BatchProcessor processor = new YaessBatchProcessor();
             processor.process(context, batch);
-            File script = YaessBatchProcessor.getScriptOutput(context.getOutputDirectory());
+            File script = YaessBatchProcessor.getScriptOutput(context.getBaseDirectory());
             Properties properties = new Properties();
             try (InputStream in = new FileInputStream(script)) {
                 properties.load(in);

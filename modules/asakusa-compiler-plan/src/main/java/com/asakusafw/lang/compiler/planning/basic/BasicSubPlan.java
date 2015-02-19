@@ -22,6 +22,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.asakusafw.lang.compiler.common.BasicAttributeContainer;
 import com.asakusafw.lang.compiler.model.graph.MarkerOperator;
 import com.asakusafw.lang.compiler.model.graph.Operator;
 import com.asakusafw.lang.compiler.model.graph.Operators;
@@ -32,7 +33,7 @@ import com.asakusafw.lang.compiler.planning.SubPlan;
 /**
  * A basic implementation of {@link SubPlan}.
  */
-public final class BasicSubPlan extends AbstractAttributeContainer implements SubPlan {
+public final class BasicSubPlan extends BasicAttributeContainer implements SubPlan {
 
     private final BasicPlan owner;
 
@@ -220,7 +221,7 @@ public final class BasicSubPlan extends AbstractAttributeContainer implements Su
     public abstract static class BasicPort<
                 TSelf extends BasicPort<TSelf, TOpposite>,
                 TOpposite extends BasicPort<TOpposite, TSelf>>
-            extends AbstractAttributeContainer implements SubPlan.Port {
+            extends BasicAttributeContainer implements SubPlan.Port {
 
         private final BasicSubPlan owner;
 

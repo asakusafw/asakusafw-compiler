@@ -30,6 +30,7 @@ import com.asakusafw.lang.compiler.extension.externalio.AbstractExternalIoProces
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.description.Descriptions;
 import com.asakusafw.lang.compiler.model.description.ValueDescription;
+import com.asakusafw.lang.compiler.model.info.ExternalInputInfo;
 import com.asakusafw.lang.compiler.model.info.ExternalPortInfo;
 import com.asakusafw.vocabulary.windgate.Constants;
 import com.asakusafw.vocabulary.windgate.WindGateExporterDescription;
@@ -70,6 +71,8 @@ public class WindGateIoProcessor
 
     private static final ClassDescription MODEL_CLASS = Descriptions.classOf(DescriptionModel.class);
 
+    private static final String PATTERN_INPUT_PATH = "{0}/{1}"; //$NON-NLS-1$
+
     @Override
     protected String getModuleName() {
         return MODULE_NAME;
@@ -86,7 +89,7 @@ public class WindGateIoProcessor
     }
 
     @Override
-    protected ValueDescription resolveInputProperties(
+    protected ValueDescription analyzeInputProperties(
             Context context, String name, WindGateImporterDescription description) {
         try {
             return extract(description);
@@ -99,7 +102,7 @@ public class WindGateIoProcessor
     }
 
     @Override
-    protected ValueDescription resolveOutputProperties(
+    protected ValueDescription analyzeOutputProperties(
             Context context, String name, WindGateExporterDescription description) {
         try {
             return extract(description);
@@ -109,6 +112,13 @@ public class WindGateIoProcessor
                     name,
                     e.getMessage()));
         }
+    }
+
+    @Override
+    protected Set<String> computeInputPaths(Context context, String name, ExternalInputInfo info) {
+        String relativePath = MessageFormat.format(PATTERN_INPUT_PATH, getModuleName(), name);
+        String path = context.getOptions().getRuntimeWorkingPath(relativePath);
+        return Collections.singleton(path);
     }
 
     @Override

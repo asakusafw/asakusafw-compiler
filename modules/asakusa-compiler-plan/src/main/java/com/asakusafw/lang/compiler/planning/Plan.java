@@ -2,6 +2,8 @@ package com.asakusafw.lang.compiler.planning;
 
 import java.util.Set;
 
+import com.asakusafw.lang.compiler.common.AttributeContainer;
+
 /**
  * Represents an execution plan.
  * <p>

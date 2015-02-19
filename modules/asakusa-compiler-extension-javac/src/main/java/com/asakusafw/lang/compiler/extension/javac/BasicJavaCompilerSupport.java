@@ -92,16 +92,16 @@ public class BasicJavaCompilerSupport extends AbstractJavaCompilerSupport {
     }
 
     @Override
-    public String getCompliantVersion() {
+    protected String getCompliantVersion(Context context) {
         String result = compliantVersion;
         if (result == null) {
-            return super.getCompliantVersion();
+            return super.getCompliantVersion(context);
         }
         return result;
     }
 
     @Override
-    public boolean isCompileRequired() {
+    protected boolean isCompileRequired(Context context) {
         return isCompileRequired(sourcePath);
     }
 
@@ -125,7 +125,7 @@ public class BasicJavaCompilerSupport extends AbstractJavaCompilerSupport {
     }
 
     @Override
-    protected OutputStream createFile(Location location) throws IOException {
+    public OutputStream addResource(Location location) throws IOException {
         File file = new File(sourcePath, location.toPath(File.separatorChar)).getAbsoluteFile();
         if (file.exists()) {
             throw new IOException(MessageFormat.format(
@@ -143,9 +143,10 @@ public class BasicJavaCompilerSupport extends AbstractJavaCompilerSupport {
 
     @Override
     protected JavaFileManager getJavaFileManager(
+            Context context,
             JavaCompiler compiler,
             DiagnosticListener<JavaFileObject> listener) throws IOException {
-        assert isCompileRequired();
+        assert isCompileRequired(context);
         if (destinationPath.mkdirs() == false && destinationPath.isDirectory() == false) {
             throw new IOException(MessageFormat.format(
                     "failed to create Java compiler output directory: {0}",
@@ -166,7 +167,7 @@ public class BasicJavaCompilerSupport extends AbstractJavaCompilerSupport {
     }
 
     @Override
-    protected List<String> getCompilerOptions() {
+    protected List<String> getCompilerOptions(Context context) {
         List<String> results = new ArrayList<>();
         Collections.addAll(results, "-proc:none"); //$NON-NLS-1$
         Collections.addAll(results, "-Xlint:all"); //$NON-NLS-1$
@@ -175,8 +176,8 @@ public class BasicJavaCompilerSupport extends AbstractJavaCompilerSupport {
     }
 
     @Override
-    protected Iterable<? extends JavaFileObject> getSourceFiles(JavaFileManager fileManager) {
-        assert isCompileRequired();
+    protected Iterable<? extends JavaFileObject> getSourceFiles(Context context, JavaFileManager fileManager) {
+        assert isCompileRequired(context);
         assert fileManager instanceof StandardJavaFileManager;
         StandardJavaFileManager files = (StandardJavaFileManager) fileManager;
         List<File> sources = new ArrayList<>();

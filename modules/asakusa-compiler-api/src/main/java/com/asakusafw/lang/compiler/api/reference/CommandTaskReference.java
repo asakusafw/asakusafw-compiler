@@ -6,12 +6,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import com.asakusafw.lang.compiler.common.BasicAttributeContainer;
 import com.asakusafw.lang.compiler.common.Location;
 
 /**
  * A symbol of task with any command.
  */
-public class CommandTaskReference implements TaskReference {
+public class CommandTaskReference extends BasicAttributeContainer implements TaskReference {
 
     private static final Pattern PATTERN_MODULE_NAME = Pattern.compile("[a-z0-9\\-]+"); //$NON-NLS-1$
 

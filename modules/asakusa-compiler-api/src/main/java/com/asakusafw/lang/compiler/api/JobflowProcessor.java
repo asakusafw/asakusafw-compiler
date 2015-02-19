@@ -73,8 +73,16 @@ public interface JobflowProcessor {
 
         /**
          * Adds an external input operator in this application.
+         * <p>
+         * Each path in the result must represent a URI (absolute or relative from the remote system working directory
+         * on runtime), and may contain an asterisk ({@code '*'}) as the wildcard character.
+         * If you want to use {@link CompilerOptions#getRuntimeWorkingDirectory() the framework specific remote
+         * working directory}, you should insert the prefix manually.
+         * </p>
+         * <p>
          * If some sub-application independently processes the target external input,
          * you should not use this method.
+         * </p>
          * @param name the input name (each input must be unique in the jobflow)
          * @param info the structural information of the target external input
          * @return the resolved symbol
@@ -85,8 +93,16 @@ public interface JobflowProcessor {
 
         /**
          * Adds an external output operator in this application.
+         * <p>
+         * Each path must represent a URI (absolute or relative from the remote system working directory on runtime),
+         * and can contain an asterisk ({@code '*'}) as the wildcard character.
+         * If you want to use {@link CompilerOptions#getRuntimeWorkingDirectory() the framework specific remote
+         * working directory}, you should insert the prefix manually.
+         * </p>
+         * <p>
          * If some sub-application independently processes the target external output,
          * you <em>MUST NOT</em> use this method.
+         * </p>
          * @param name the output name (each output must be unique in the jobflow)
          * @param info the structural information of the target external output
          * @param internalOutputPaths the output paths which will be internally generated in this jobflow

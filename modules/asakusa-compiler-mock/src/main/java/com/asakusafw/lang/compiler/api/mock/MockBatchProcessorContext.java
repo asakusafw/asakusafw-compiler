@@ -47,17 +47,17 @@ public class MockBatchProcessorContext extends AbstractBatchProcessorContext imp
     }
 
     @Override
-    public File getOutputDirectory() {
+    public File getBaseDirectory() {
         return resources.getBasePath();
     }
 
     @Override
     public File getOutputFile(Location location) {
-        return new File(getOutputDirectory(), location.toPath(File.separatorChar));
+        return new File(getBaseDirectory(), location.toPath(File.separatorChar));
     }
 
     @Override
     public OutputStream addResourceFile(Location location) throws IOException {
-        return resources.addResourceFile(location);
+        return resources.addResource(location);
     }
 }

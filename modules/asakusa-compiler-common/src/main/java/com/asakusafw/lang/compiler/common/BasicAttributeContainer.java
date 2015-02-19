@@ -13,19 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.asakusafw.lang.compiler.planning.basic;
+package com.asakusafw.lang.compiler.common;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.asakusafw.lang.compiler.planning.AttributeContainer;
-
 /**
- * An abstract implementation of {@link AttributeContainer}.
+ * A basic implementation of {@link AttributeContainer}.
+ * Clients can inherit this class.
  */
-public abstract class AbstractAttributeContainer implements AttributeContainer {
+public class BasicAttributeContainer implements AttributeContainer {
 
     private final Map<Class<?>, Object> attributes = new HashMap<>();
 

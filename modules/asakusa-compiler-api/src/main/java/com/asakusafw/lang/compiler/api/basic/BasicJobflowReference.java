@@ -8,13 +8,14 @@ import java.util.Set;
 import com.asakusafw.lang.compiler.api.reference.JobflowReference;
 import com.asakusafw.lang.compiler.api.reference.TaskReference;
 import com.asakusafw.lang.compiler.api.reference.TaskReferenceMap;
+import com.asakusafw.lang.compiler.common.BasicAttributeContainer;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.info.JobflowInfo;
 
 /**
  * A basic implementation of {@link JobflowReference}.
  */
-public class BasicJobflowReference implements JobflowReference {
+public class BasicJobflowReference extends BasicAttributeContainer implements JobflowReference {
 
     private final JobflowInfo info;
 

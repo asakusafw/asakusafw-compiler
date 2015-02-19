@@ -46,7 +46,7 @@ public abstract class AbstractJavaCompilerSupport implements JavaCompilerSupport
     @Override
     public final Writer addJavaFile(ClassDescription aClass) throws IOException {
         Location location = toLocation(aClass);
-        OutputStream output = createFile(location);
+        OutputStream output = addResource(location);
         return new OutputStreamWriter(output, getEncoding());
     }
 
@@ -57,16 +57,13 @@ public abstract class AbstractJavaCompilerSupport implements JavaCompilerSupport
     }
 
     @Override
-    public void compile() {
-        if (isCompileRequired() == false) {
+    public final void process(Context context) throws IOException {
+        if (isCompileRequired(context) == false) {
             return;
         }
-        JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-        if (compiler == null) {
-            throw new IllegalStateException("system Java compiler is not enabled");
-        }
+        JavaCompiler compiler = getJavaCompiler(context);
         try {
-            doCompile(compiler);
+            doCompile(context, compiler);
         } catch (IOException e) {
             throw new DiagnosticException(
                     com.asakusafw.lang.compiler.common.Diagnostic.Level.ERROR,
@@ -84,73 +81,87 @@ public abstract class AbstractJavaCompilerSupport implements JavaCompilerSupport
     }
 
     /**
-     * Returns whether compile is required or not.
-     * @return {@code true} if compile is required, otherwise {@code false}
+     * Returns the available Java compiler.
+     * @param context the current context
+     * @return the available Java compiler
      */
-    public abstract boolean isCompileRequired();
+    protected JavaCompiler getJavaCompiler(Context context) {
+        JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+        if (compiler == null) {
+            throw new DiagnosticException(
+                    com.asakusafw.lang.compiler.common.Diagnostic.Level.ERROR,
+                    "system Java compiler is not enabled");
+        }
+        return compiler;
+    }
 
     /**
-     * Creates an output stream for the target file location.
-     * @param location the target file location
-     * @return the created output stream
-     * @throws IOException if failed to create a new file
+     * Returns whether compile is required or not.
+     * @param context the current context
+     * @return {@code true} if compile is required, otherwise {@code false}
      */
-    protected abstract OutputStream createFile(Location location) throws IOException;
+    protected abstract boolean isCompileRequired(Context context);
 
     /**
      * Creates a configured {@link JavaFileManager}.
+     * @param context the current context
      * @param compiler the current Java compiler
      * @param listener the diagnostic listener
      * @return the created {@link JavaFileManager}
      * @throws IOException if failed to configure the
      */
     protected abstract JavaFileManager getJavaFileManager(
+            Context context,
             JavaCompiler compiler,
             DiagnosticListener<JavaFileObject> listener) throws IOException;
 
     /**
      * Returns the source and target version.
+     * @param context the current context
      * @return the source and target version
      */
-    protected String getCompliantVersion() {
+    protected String getCompliantVersion(Context context) {
         return DEFAULT_COMPLIANT_VERSION;
     }
 
     /**
      * Returns the extra Java compiler options.
+     * @param context the current context
      * @return the extra Java compiler options
      */
-    protected List<String> getCompilerOptions() {
+    protected List<String> getCompilerOptions(Context context) {
         return Collections.emptyList();
     }
 
     /**
      * Returns the annotation processor class names.
+     * @param context the current context
      * @return the annotation processor class names
      */
-    protected List<String> getAnnotationProcessors() {
+    protected List<String> getAnnotationProcessors(Context context) {
         return Collections.emptyList();
     }
 
     /**
      * Returns the compilation target source files.
+     * @param context the current context
      * @param fileManager the file manager to detecting for source files
      * @return the compilation target source files
      */
-    protected abstract Iterable<? extends JavaFileObject> getSourceFiles(JavaFileManager fileManager);
+    protected abstract Iterable<? extends JavaFileObject> getSourceFiles(Context context, JavaFileManager fileManager);
 
-    private void doCompile(JavaCompiler compiler) throws IOException {
+    private void doCompile(Context context, JavaCompiler compiler) throws IOException {
         assert compiler != null;
         DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
-        try (JavaFileManager fileManager = getJavaFileManager(compiler, diagnostics)) {
+        try (JavaFileManager fileManager = getJavaFileManager(context, compiler, diagnostics)) {
             List<String> arguments = new ArrayList<>();
-            String compliance = getCompliantVersion();
+            String compliance = getCompliantVersion(context);
             if (compliance != null) {
                 Collections.addAll(arguments, "-source", compliance); //$NON-NLS-1$
                 Collections.addAll(arguments, "-target", compliance); //$NON-NLS-1$
             }
             Collections.addAll(arguments, "-encoding", getEncoding().name()); //$NON-NLS-1$
-            arguments.addAll(getCompilerOptions());
+            arguments.addAll(getCompilerOptions(context));
 
             StringWriter errors = new StringWriter();
             PrintWriter pw = new PrintWriter(errors);
@@ -162,8 +173,8 @@ public abstract class AbstractJavaCompilerSupport implements JavaCompilerSupport
                         fileManager,
                         diagnostics,
                         arguments,
-                        getAnnotationProcessors(),
-                        getSourceFiles(fileManager));
+                        getAnnotationProcessors(context),
+                        getSourceFiles(context, fileManager));
             } catch (RuntimeException e) {
                 throw new DiagnosticException(
                         com.asakusafw.lang.compiler.common.Diagnostic.Level.ERROR,

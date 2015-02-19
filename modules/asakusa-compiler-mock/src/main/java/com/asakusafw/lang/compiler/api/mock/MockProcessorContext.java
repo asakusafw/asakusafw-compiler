@@ -13,7 +13,7 @@ public interface MockProcessorContext {
      * Returns the base output directory in this context.
      * @return the base output directory
      */
-    File getOutputDirectory();
+    File getBaseDirectory();
 
     /**
      * Returns an output file.

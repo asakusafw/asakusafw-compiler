@@ -6,12 +6,13 @@ import java.util.Collections;
 import java.util.List;
 
 import com.asakusafw.lang.compiler.api.reference.TaskReference;
+import com.asakusafw.lang.compiler.common.BasicAttributeContainer;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 
 /**
  * A symbol of task using {@code hadoop} command.
  */
-public class HadoopTaskReference implements TaskReference {
+public class HadoopTaskReference extends BasicAttributeContainer implements TaskReference {
 
     private static final String MODULE_NAME = "hadoop"; //$NON-NLS-1$
 

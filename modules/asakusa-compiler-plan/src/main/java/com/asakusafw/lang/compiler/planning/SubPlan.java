@@ -2,6 +2,7 @@ package com.asakusafw.lang.compiler.planning;
 
 import java.util.Set;
 
+import com.asakusafw.lang.compiler.common.AttributeContainer;
 import com.asakusafw.lang.compiler.model.graph.MarkerOperator;
 import com.asakusafw.lang.compiler.model.graph.Operator;
 
