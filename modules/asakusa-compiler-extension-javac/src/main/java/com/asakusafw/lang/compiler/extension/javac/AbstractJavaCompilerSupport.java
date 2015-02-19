@@ -50,6 +50,14 @@ public abstract class AbstractJavaCompilerSupport implements JavaCompilerSupport
         return new OutputStreamWriter(output, getEncoding());
     }
 
+    /**
+     * Adds a new Java source file and returns its output stream.
+     * @param location the source file location
+     * @return the output stream to set the target file contents
+     * @throws IOException if failed to create a new file
+     */
+    protected abstract OutputStream addResource(Location location) throws IOException;
+
     private Location toLocation(ClassDescription aClass) {
         Location location = Location.of(aClass.getName(), '.');
         location = new Location(location.getParent(), location.getName() + JAVA_EXTENSION);
@@ -57,13 +65,13 @@ public abstract class AbstractJavaCompilerSupport implements JavaCompilerSupport
     }
 
     @Override
-    public final void process(Context context) throws IOException {
-        if (isCompileRequired(context) == false) {
+    public final void process() {
+        if (isCompileRequired() == false) {
             return;
         }
-        JavaCompiler compiler = getJavaCompiler(context);
+        JavaCompiler compiler = getJavaCompiler();
         try {
-            doCompile(context, compiler);
+            doCompile(compiler);
         } catch (IOException e) {
             throw new DiagnosticException(
                     com.asakusafw.lang.compiler.common.Diagnostic.Level.ERROR,
@@ -82,10 +90,9 @@ public abstract class AbstractJavaCompilerSupport implements JavaCompilerSupport
 
     /**
      * Returns the available Java compiler.
-     * @param context the current context
      * @return the available Java compiler
      */
-    protected JavaCompiler getJavaCompiler(Context context) {
+    protected JavaCompiler getJavaCompiler() {
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         if (compiler == null) {
             throw new DiagnosticException(
@@ -97,71 +104,64 @@ public abstract class AbstractJavaCompilerSupport implements JavaCompilerSupport
 
     /**
      * Returns whether compile is required or not.
-     * @param context the current context
      * @return {@code true} if compile is required, otherwise {@code false}
      */
-    protected abstract boolean isCompileRequired(Context context);
+    protected abstract boolean isCompileRequired();
 
     /**
      * Creates a configured {@link JavaFileManager}.
-     * @param context the current context
      * @param compiler the current Java compiler
      * @param listener the diagnostic listener
      * @return the created {@link JavaFileManager}
      * @throws IOException if failed to configure the
      */
     protected abstract JavaFileManager getJavaFileManager(
-            Context context,
             JavaCompiler compiler,
             DiagnosticListener<JavaFileObject> listener) throws IOException;
 
     /**
      * Returns the source and target version.
-     * @param context the current context
      * @return the source and target version
      */
-    protected String getCompliantVersion(Context context) {
+    protected String getCompliantVersion() {
         return DEFAULT_COMPLIANT_VERSION;
     }
 
     /**
      * Returns the extra Java compiler options.
-     * @param context the current context
      * @return the extra Java compiler options
      */
-    protected List<String> getCompilerOptions(Context context) {
+    protected List<String> getCompilerOptions() {
         return Collections.emptyList();
     }
 
     /**
      * Returns the annotation processor class names.
-     * @param context the current context
      * @return the annotation processor class names
      */
-    protected List<String> getAnnotationProcessors(Context context) {
+    protected List<String> getAnnotationProcessors() {
         return Collections.emptyList();
     }
 
     /**
      * Returns the compilation target source files.
-     * @param context the current context
      * @param fileManager the file manager to detecting for source files
      * @return the compilation target source files
      */
-    protected abstract Iterable<? extends JavaFileObject> getSourceFiles(Context context, JavaFileManager fileManager);
+    protected abstract Iterable<? extends JavaFileObject> getSourceFiles(JavaFileManager fileManager);
 
-    private void doCompile(Context context, JavaCompiler compiler) throws IOException {
+    private void doCompile(JavaCompiler compiler) throws IOException {
         assert compiler != null;
         DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
-        try (JavaFileManager fileManager = getJavaFileManager(context, compiler, diagnostics)) {
+        try (JavaFileManager fileManager = getJavaFileManager(compiler, diagnostics)) {
             List<String> arguments = new ArrayList<>();
-            String compliance = getCompliantVersion(context);
+            String compliance = getCompliantVersion();
             if (compliance != null) {
                 Collections.addAll(arguments, "-source", compliance); //$NON-NLS-1$
                 Collections.addAll(arguments, "-target", compliance); //$NON-NLS-1$
             }
             Collections.addAll(arguments, "-encoding", getEncoding().name()); //$NON-NLS-1$
-            arguments.addAll(getCompilerOptions(context));
+            arguments.addAll(getCompilerOptions());
 
             StringWriter errors = new StringWriter();
             PrintWriter pw = new PrintWriter(errors);
@@ -173,8 +173,8 @@ public abstract class AbstractJavaCompilerSupport implements JavaCompilerSupport
                         fileManager,
                         diagnostics,
                         arguments,
-                        getAnnotationProcessors(context),
-                        getSourceFiles(context, fileManager));
+                        getAnnotationProcessors(),
+                        getSourceFiles(fileManager));
             } catch (RuntimeException e) {
                 throw new DiagnosticException(
                         com.asakusafw.lang.compiler.common.Diagnostic.Level.ERROR,

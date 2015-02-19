@@ -56,7 +56,21 @@ public class FileRepository implements ResourceRepository {
         return new ResourceItemRepository.ItemCursor(results.iterator());
     }
 
-    private void collect(List<FileItem> results, Location location, File file) {
+    /**
+     * Creates a cursor for enumerating files in the directory.
+     * @param root the base directory
+     * @return the created cursor
+     */
+    public static Cursor createCursor(File root) {
+        if (root.isDirectory() == false) {
+            return Cursor.EMPTY;
+        }
+        List<FileItem> results = new ArrayList<>();
+        collect(results, null, root);
+        return new ResourceItemRepository.ItemCursor(results.iterator());
+    }
+
+    private static void collect(List<FileItem> results, Location location, File file) {
         assert results != null;
         assert file != null;
         if (file.isFile()) {

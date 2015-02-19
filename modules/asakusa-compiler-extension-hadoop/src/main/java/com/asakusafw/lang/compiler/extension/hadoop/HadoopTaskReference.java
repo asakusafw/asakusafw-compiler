@@ -38,7 +38,7 @@ public class HadoopTaskReference extends BasicAttributeContainer implements Task
     }
 
     @Override
-    public List<TaskReference> getBlockerTasks() {
+    public List<TaskReference> getBlockers() {
         return blockerTasks;
     }
 

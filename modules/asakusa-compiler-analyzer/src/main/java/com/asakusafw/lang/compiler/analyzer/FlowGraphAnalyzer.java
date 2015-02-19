@@ -78,13 +78,13 @@ public final class FlowGraphAnalyzer {
         CORE_OPERATOR_KINDS = map;
     }
 
-    private final ExternalIoAnalyzer ioAnalyzer;
+    private final ExternalPortAnalyzer ioAnalyzer;
 
     /**
      * Creates a new instance.
      * @param ioAnalyzer the external I/O analyzer
      */
-    public FlowGraphAnalyzer(ExternalIoAnalyzer ioAnalyzer) {
+    public FlowGraphAnalyzer(ExternalPortAnalyzer ioAnalyzer) {
         this.ioAnalyzer = ioAnalyzer;
     }
 

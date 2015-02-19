@@ -6,7 +6,7 @@ import java.io.OutputStream;
 
 import com.asakusafw.lang.compiler.api.CompilerOptions;
 import com.asakusafw.lang.compiler.api.basic.AbstractBatchProcessorContext;
-import com.asakusafw.lang.compiler.api.basic.BasicResourceContainer;
+import com.asakusafw.lang.compiler.common.BasicResourceContainer;
 import com.asakusafw.lang.compiler.common.Location;
 
 /**

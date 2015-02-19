@@ -57,6 +57,22 @@ public class FileDeployer implements TestRule {
     }
 
     /**
+     * Copies a contents in {@link InputStream} into the target path.
+     * @param contents the source contents
+     * @param targetPath the target path (relative from the temporary folder root)
+     * @return the copied file
+     */
+    public File copy(InputStream contents, String targetPath) {
+        File target = toOutputFile(targetPath);
+        try (OutputStream output = create(target)) {
+            copy(contents, output);
+        } catch (IOException e) {
+            throw new AssertionError(e);
+        }
+        return target;
+    }
+
+    /**
      * Extracts a ZIP archive file onto the target path.
      * @param sourcePath the source path (relative from class path)
      * @param targetPath the target path (relative from the temporary folder root)
@@ -83,16 +99,6 @@ public class FileDeployer implements TestRule {
             throw new AssertionError(e);
         }
         return outputDirectory;
-    }
-
-    private File copy(InputStream input, String targetPath) {
-        File target = toOutputFile(targetPath);
-        try (OutputStream output = create(target)) {
-            copy(input, output);
-        } catch (IOException e) {
-            throw new AssertionError(e);
-        }
-        return target;
     }
 
     private void copy(InputStream input, OutputStream output) throws IOException {

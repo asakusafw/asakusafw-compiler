@@ -54,7 +54,7 @@ public class BasicJobflowReference extends BasicAttributeContainer implements Jo
     }
 
     @Override
-    public Set<JobflowReference> getBlockerJobflows() {
+    public Set<JobflowReference> getBlockers() {
         return blockers;
     }
 

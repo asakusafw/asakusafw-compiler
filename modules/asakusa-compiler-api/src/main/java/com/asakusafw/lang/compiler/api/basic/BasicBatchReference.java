@@ -1,12 +1,12 @@
 package com.asakusafw.lang.compiler.api.basic;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 import com.asakusafw.lang.compiler.api.reference.BatchReference;
 import com.asakusafw.lang.compiler.api.reference.JobflowReference;
+import com.asakusafw.lang.compiler.api.reference.JobflowReferenceMap;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.info.BatchInfo;
 
@@ -17,7 +17,7 @@ public class BasicBatchReference implements BatchReference {
 
     private final BatchInfo info;
 
-    private final Set<JobflowReference> jobflows;
+    private final JobflowReferenceMap jobflows;
 
     /**
      * Creates a new instance.
@@ -26,7 +26,17 @@ public class BasicBatchReference implements BatchReference {
      */
     public BasicBatchReference(BatchInfo info, Collection<? extends JobflowReference> jobflows) {
         this.info = info;
-        this.jobflows = Collections.unmodifiableSet(new LinkedHashSet<>(jobflows));
+        this.jobflows = new JobflowContainer(jobflows);
+    }
+
+    /**
+     * Creates a new instance.
+     * @param info the structural information of this batch
+     * @param jobflows the element jobflows
+     */
+    public BasicBatchReference(BatchInfo info, JobflowReferenceMap jobflows) {
+        this.info = info;
+        this.jobflows = new JobflowContainer(jobflows.getJobflows());
     }
 
     @Override
@@ -55,7 +65,12 @@ public class BasicBatchReference implements BatchReference {
     }
 
     @Override
+    public JobflowReference find(String flowId) {
+        return jobflows.find(flowId);
+    }
+
+    @Override
     public Set<JobflowReference> getJobflows() {
-        return jobflows;
+        return new LinkedHashSet<>(jobflows.getJobflows());
     }
 }

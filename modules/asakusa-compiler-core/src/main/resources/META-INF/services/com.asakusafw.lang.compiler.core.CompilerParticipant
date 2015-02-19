@@ -1,0 +1,7 @@
+# for batch
+com.asakusafw.lang.compiler.core.participant.AttachedLibrariesParticipant
+
+# for jobflow
+com.asakusafw.lang.compiler.core.participant.RuntimeContextParticipant
+com.asakusafw.lang.compiler.core.participant.HadoopTaskExtensionParticipant
+com.asakusafw.lang.compiler.core.participant.JavaSourceExtensionParticipant

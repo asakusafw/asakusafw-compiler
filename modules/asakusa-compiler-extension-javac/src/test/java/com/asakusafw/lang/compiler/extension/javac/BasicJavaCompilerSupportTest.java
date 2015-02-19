@@ -18,8 +18,6 @@ import java.util.concurrent.Callable;
 import org.junit.Rule;
 import org.junit.Test;
 
-import com.asakusafw.lang.compiler.api.CompilerOptions;
-import com.asakusafw.lang.compiler.api.mock.MockResourceProcessorContext;
 import com.asakusafw.lang.compiler.common.DiagnosticException;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.testing.FileDeployer;
@@ -60,7 +58,7 @@ public class BasicJavaCompilerSupportTest {
                 "    public String call() { return \"Hello, world!\"; }",
                 "}",
         });
-        compiler.process(context());
+        compiler.process();
         try (URLClassLoader loader = loader(target)) {
             Class<?> built = loader.loadClass("com.example.Hello");
             assertThat(built, is(typeCompatibleWith(Callable.class)));
@@ -87,7 +85,7 @@ public class BasicJavaCompilerSupportTest {
                 "package com.example;",
                 "public class Inherit extends com.example.Hello {}",
         });
-        compiler.process(context());
+        compiler.process();
         try (URLClassLoader loader = loader(lib, target)) {
             Class<?> built = loader.loadClass("com.example.Inherit");
             assertThat(built.getSuperclass().getName(), is("com.example.Hello"));
@@ -106,7 +104,7 @@ public class BasicJavaCompilerSupportTest {
                 source,
                 Collections.<File>emptyList(),
                 target);
-        compiler.process(context());
+        compiler.process();
         assertThat(target.exists(), is(false));
     }
 
@@ -124,7 +122,7 @@ public class BasicJavaCompilerSupportTest {
                 Collections.<File>emptyList(),
                 target);
         put(compiler, "com.example.Hello", "?");
-        compiler.process(context());
+        compiler.process();
     }
 
     /**
@@ -141,7 +139,7 @@ public class BasicJavaCompilerSupportTest {
                 "package com.example;",
                 "public class Hello {}",
         });
-        compiler.process(context());
+        compiler.process();
     }
 
     /**
@@ -158,13 +156,7 @@ public class BasicJavaCompilerSupportTest {
                 "package com.example;",
                 "public class Hello {}",
         });
-        compiler.process(context());
-    }
-
-    private MockResourceProcessorContext context() {
-        return new MockResourceProcessorContext(
-                new CompilerOptions("testing", "rw", Collections.<String, String>emptyMap()),
-                getClass().getClassLoader());
+        compiler.process();
     }
 
     private URLClassLoader loader(File... files) {

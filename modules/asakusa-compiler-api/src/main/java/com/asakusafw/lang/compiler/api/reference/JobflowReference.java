@@ -7,7 +7,7 @@ import com.asakusafw.lang.compiler.model.info.JobflowInfo;
 /**
  * A symbol of jobflow.
  */
-public interface JobflowReference extends JobflowInfo, Reference, TaskReferenceMap {
+public interface JobflowReference extends JobflowInfo, BlockingReference<JobflowReference>, TaskReferenceMap {
 
     /**
      * Returns the tasks which must be executed in the specified phase on this jobflow.
@@ -21,5 +21,6 @@ public interface JobflowReference extends JobflowInfo, Reference, TaskReferenceM
      * Returns jobflows which must be executed before this jobflow.
      * @return the blocker jobflows
      */
-    Collection<? extends JobflowReference> getBlockerJobflows();
+    @Override
+    Collection<? extends JobflowReference> getBlockers();
 }

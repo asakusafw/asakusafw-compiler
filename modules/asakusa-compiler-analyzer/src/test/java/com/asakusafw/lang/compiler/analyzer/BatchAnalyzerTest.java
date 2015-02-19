@@ -23,7 +23,7 @@ import com.asakusafw.lang.compiler.model.graph.BatchElement;
 public class BatchAnalyzerTest {
 
     private final BatchAnalyzer analyzer =
-            new BatchAnalyzer(new JobflowAnalyzer(new FlowGraphAnalyzer(new MockExternalIoAnalyzer())));
+            new BatchAnalyzer(new JobflowAnalyzer(new FlowGraphAnalyzer(new MockExternalPortAnalyzer())));
 
     /**
      * simple case.

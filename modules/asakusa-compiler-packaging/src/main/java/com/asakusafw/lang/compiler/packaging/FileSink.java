@@ -31,6 +31,14 @@ public class FileSink implements ResourceSink {
     }
 
     @Override
+    public void add(Location location, Callback callback) throws IOException {
+        File file = ResourceUtil.toFile(root, location);
+        try (OutputStream output = ResourceUtil.create(file)) {
+            callback.add(location, output);
+        }
+    }
+
+    @Override
     public void close() throws IOException {
         return;
     }

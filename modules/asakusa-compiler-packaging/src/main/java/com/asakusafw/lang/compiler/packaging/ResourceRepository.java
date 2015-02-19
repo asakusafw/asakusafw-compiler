@@ -24,6 +24,32 @@ public interface ResourceRepository {
     public interface Cursor extends Closeable {
 
         /**
+         * An empty cursor.
+         */
+        Cursor EMPTY = new Cursor() {
+
+            @Override
+            public boolean next() {
+                return false;
+            }
+
+            @Override
+            public Location getLocation() {
+                throw new IllegalStateException();
+            }
+
+            @Override
+            public InputStream openResource() {
+                throw new IllegalStateException();
+            }
+
+            @Override
+            public void close() {
+                return;
+            }
+        };
+
+        /**
          * Advances this cursor and returns whether the next resource exists or not.
          * @return {@code true} if the next resource exists, otherwise {@code false}
          * @throws IOException if failed to advance this cursor by I/O error

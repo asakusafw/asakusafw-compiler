@@ -37,7 +37,7 @@ import com.asakusafw.vocabulary.model.Key;
  */
 public class FlowGraphAnalyzerTest {
 
-    private final FlowGraphAnalyzer converter = new FlowGraphAnalyzer(new MockExternalIoAnalyzer());
+    private final FlowGraphAnalyzer converter = new FlowGraphAnalyzer(new MockExternalPortAnalyzer());
 
     /**
      * simple case.

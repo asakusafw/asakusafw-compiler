@@ -6,6 +6,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -79,45 +80,21 @@ public class ResourceAssembler {
     }
 
     /**
-     * Assembles resources into the sink.
-     * @param sink the target sink
-     * @throws IOException if failed to assemble by I/O error
+     * Assembles resources and returns {@link ResourceRepository}.
+     * @return the resource repository to obtain assembled results
      */
-    public void build(ResourceSink sink) throws IOException {
-        List<RepositoryInfo> repos = new ArrayList<>();
+    public ResourceRepository build() {
+        List<AssemblyRepository> assemblies = new ArrayList<>();
         if (items.isEmpty() == false) {
-            repos.add(new RepositoryInfo(new ResourceItemRepository(items.values())));
+            assemblies.add(new AssemblyRepository(new ResourceItemRepository(new ArrayList<>(items.values())), ANY));
         }
-        repos.addAll(repositories.values());
-        Set<Location> saw = new HashSet<>();
-        for (RepositoryInfo repo : repos) {
-            copy(saw, repo, sink);
+        for (RepositoryInfo info : repositories.values()) {
+            assemblies.add(info.toRepository());
         }
-    }
-
-    private void copy(Set<Location> saw, RepositoryInfo repo, ResourceSink sink) throws IOException {
-        Predicate<? super Location> predicate = repo.getAcceptor();
-        try (ResourceRepository.Cursor cursor = repo.open()) {
-            while (cursor.next()) {
-                Location location = cursor.getLocation();
-                if (saw.contains(location)) {
-                    LOG.warn(MessageFormat.format(
-                            "duplicate resource is ignored: {0} ({1})",
-                            location,
-                            repo));
-                    continue;
-                }
-                saw.add(location);
-                if (predicate.apply(location)) {
-                    LOG.debug("include: {} ({})", location, repo);
-                    try (InputStream contents = cursor.openResource()) {
-                        sink.add(location, contents);
-                    }
-                } else {
-                    LOG.debug("exclude: {} ({})", location, repo);
-                }
-            }
+        if (assemblies.size() == 1) {
+            return assemblies.get(0);
         }
+        return new CompositeRepository(assemblies);
     }
 
     private static class RepositoryInfo {
@@ -134,11 +111,11 @@ public class ResourceAssembler {
             predicates.add(predicate);
         }
 
-        ResourceRepository.Cursor open() throws IOException {
-            return repository.createCursor();
+        AssemblyRepository toRepository() {
+            return new AssemblyRepository(repository, getAcceptor());
         }
 
-        Predicate<? super Location> getAcceptor() {
+        private Predicate<? super Location> getAcceptor() {
             if (predicates.isEmpty()) {
                 return ANY;
             } else if (predicates.size() == 1) {
@@ -167,6 +144,163 @@ public class ResourceAssembler {
         @Override
         public String toString() {
             return repository.toString();
+        }
+    }
+
+    private static class AssemblyRepository implements ResourceRepository {
+
+        private final ResourceRepository repository;
+
+        private final Predicate<? super Location> predicate;
+
+        public AssemblyRepository(ResourceRepository repository, Predicate<? super Location> predicate) {
+            this.repository = repository;
+            this.predicate = predicate;
+        }
+
+        @Override
+        public AssemblyCusor createCursor() throws IOException {
+            return new AssemblyCusor(repository, predicate);
+        }
+
+        @Override
+        public String toString() {
+            return repository.toString();
+        }
+    }
+
+    private static class AssemblyCusor implements ResourceRepository.Cursor {
+
+        private final ResourceRepository repository;
+
+        private final ResourceRepository.Cursor cursor;
+
+        private final Predicate<? super Location> predicate;
+
+        public AssemblyCusor(ResourceRepository repository, Predicate<? super Location> predicate) throws IOException {
+            this.repository = repository;
+            this.cursor = repository.createCursor();
+            this.predicate = predicate;
+        }
+
+        ResourceRepository getRepository() {
+            return repository;
+        }
+
+        @Override
+        public boolean next() throws IOException {
+            while (cursor.next()) {
+                Location location = cursor.getLocation();
+                if (predicate.apply(location)) {
+                    LOG.debug("include: {} ({})", location, repository);
+                    return true;
+                } else {
+                    LOG.debug("exclude: {} ({})", location, repository);
+                    continue;
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public Location getLocation() {
+            return cursor.getLocation();
+        }
+
+        @Override
+        public InputStream openResource() throws IOException {
+            return cursor.openResource();
+        }
+
+        @Override
+        public void close() throws IOException {
+            cursor.close();
+        }
+    }
+
+    private static class CompositeRepository implements ResourceRepository {
+
+        private final List<AssemblyRepository> elements;
+
+        public CompositeRepository(List<AssemblyRepository> elements) {
+            this.elements = elements;
+        }
+
+        @Override
+        public Cursor createCursor() throws IOException {
+            return new CompositeCursor(elements.iterator());
+        }
+    }
+
+    private static class CompositeCursor implements ResourceRepository.Cursor {
+
+        private final Iterator<AssemblyRepository> repositories;
+
+        private AssemblyCusor current;
+
+        private final Set<Location> saw = new HashSet<>();
+
+        CompositeCursor(Iterator<AssemblyRepository> repositories) {
+            this.repositories = repositories;
+        }
+
+        @Override
+        public boolean next() throws IOException {
+            while (true) {
+                if (current == null) {
+                    if (repositories.hasNext() == false) {
+                        return false;
+                    }
+                    current = repositories.next().createCursor();
+                }
+                if (current.next()) {
+                    Location location = current.getLocation();
+                    if (saw.contains(location)) {
+                        LOG.warn(MessageFormat.format(
+                                "ignore duplicated resource: {0} (in {1})",
+                                location,
+                                current.getRepository()));
+                        continue;
+                    }
+                    saw.add(location);
+                    return true;
+                } else {
+                    closeCurrent();
+                }
+            }
+        }
+
+        @Override
+        public Location getLocation() {
+            checkCurrent();
+            return current.getLocation();
+        }
+
+        @Override
+        public InputStream openResource() throws IOException {
+            checkCurrent();
+            return current.openResource();
+        }
+
+        private void checkCurrent() {
+            if (current == null) {
+                throw new IllegalStateException();
+            }
+        }
+
+        @Override
+        public void close() throws IOException {
+            closeCurrent();
+            while (repositories.hasNext()) {
+                repositories.next();
+            }
+        }
+
+        private void closeCurrent() throws IOException {
+            if (current != null) {
+                current.close();
+                current = null;
+            }
         }
     }
 }

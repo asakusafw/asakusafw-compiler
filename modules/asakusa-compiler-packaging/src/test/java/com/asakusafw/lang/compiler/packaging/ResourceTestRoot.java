@@ -15,6 +15,7 @@
  */
 package com.asakusafw.lang.compiler.packaging;
 
+import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
 
 import java.io.ByteArrayOutputStream;
@@ -145,23 +146,11 @@ public abstract class ResourceTestRoot {
     public static Map<String, String> dump(Collection<? extends ResourceItem> items) {
         Map<String, String> results = new LinkedHashMap<>();
         for (ResourceItem item : items) {
-            results.put(item.getLocation().toPath(), contents(item));
+            String key = item.getLocation().toPath();
+            assertThat(results, not(hasKey(key)));
+            results.put(key, contents(item));
         }
         return results;
-    }
-
-    /**
-     * Dumps assembled items.
-     * @param assembler the target assembler
-     * @return all items
-     */
-    public static Map<String, String> dump(ResourceAssembler assembler) {
-        try (ResourceItemSink sink = new ResourceItemSink()) {
-            assembler.build(sink);
-            return dump(sink.getItems());
-        } catch (IOException e) {
-            throw new AssertionError(e);
-        }
     }
 
     /**
@@ -175,6 +164,20 @@ public abstract class ResourceTestRoot {
         } catch (IOException e) {
             throw new AssertionError(e);
         }
+    }
+
+    /**
+     * Creates a callback object for writing the contents.
+     * @param contents the target contents
+     * @return the callback object
+     */
+    public static ResourceSink.Callback callback(final String contents) {
+        return new ResourceSink.Callback() {
+            @Override
+            public void add(Location location, OutputStream output) throws IOException {
+                output.write(contents.getBytes(ENCODING));
+            }
+        };
     }
 
     /**

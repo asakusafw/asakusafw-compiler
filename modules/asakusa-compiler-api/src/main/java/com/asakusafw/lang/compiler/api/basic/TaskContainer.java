@@ -27,7 +27,7 @@ public class TaskContainer {
 
     /**
      * Adds a task to this container.
-     * Each {@link TaskReference#getBlockerTasks() blocker task} must have been added.
+     * Each {@link TaskReference#getBlockers() blocker task} must have been added.
      * If the task is already added to this, this will do nothing.
      * @param task the target task
      */
@@ -35,7 +35,7 @@ public class TaskContainer {
         if (elements.contains(task)) {
             return;
         }
-        for (TaskReference blocker : task.getBlockerTasks()) {
+        for (TaskReference blocker : task.getBlockers()) {
             if (elements.contains(blocker) == false) {
                 throw new IllegalStateException(MessageFormat.format(
                         "blocker task is not found in {0} phase: {1}",

@@ -8,9 +8,13 @@ useSLF4J()
 
 dependencies {
     compile project(':asakusa-compiler-api')
-    compile "com.asakusafw:asakusa-dsl-vocabulary:${asakusafwVersion}"
-    compile "com.asakusafw:asakusa-runtime:${asakusafwVersion}"
+    compile project(':asakusa-compiler-analyzer')
+    compile project(':asakusa-compiler-packaging')
+    compile project(':asakusa-compiler-extension-javac')
+    compile project(':asakusa-compiler-extension-hadoop')
+    compile "com.asakusafw:simple-graph:${asakusafwVersion}"
     
+    testCompile project(':asakusa-compiler-testing')
     testCompile project(':asakusa-compiler-mock')
     testRuntime "org.apache.hadoop:hadoop-core:${hadoopVersion}"
 }

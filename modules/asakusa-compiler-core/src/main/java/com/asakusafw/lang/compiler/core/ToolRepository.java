@@ -1,0 +1,270 @@
+package com.asakusafw.lang.compiler.core;
+
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.ServiceLoader;
+import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.asakusafw.lang.compiler.api.BatchProcessor;
+import com.asakusafw.lang.compiler.api.DataModelLoader;
+import com.asakusafw.lang.compiler.api.ExternalPortProcessor;
+import com.asakusafw.lang.compiler.api.JobflowProcessor;
+import com.asakusafw.lang.compiler.core.util.CompositeBatchProcessor;
+import com.asakusafw.lang.compiler.core.util.CompositeCompilerParticipant;
+import com.asakusafw.lang.compiler.core.util.CompositeExternalPortProcessor;
+import com.asakusafw.lang.compiler.core.util.CompositeJobflowProcessor;
+
+/**
+ * Provides compiler services.
+ */
+public class ToolRepository {
+
+    static final Logger LOG = LoggerFactory.getLogger(ToolRepository.class);
+
+    private final DataModelLoader dataModelLoader;
+
+    private final BatchProcessor batchProcessor;
+
+    private final JobflowProcessor jobflowProcessor;
+
+    private final ExternalPortProcessor externalPortProcessor;
+
+    private final CompilerParticipant participant;
+
+    /**
+     * Creates a new instance.
+     * @param dataModelLoader the data model loader
+     * @param batchProcessor the batch processor
+     * @param jobflowProcessor the jobflow processor
+     * @param externalPortProcessor the external I/O port processor
+     * @param participant the compiler participant
+     */
+    public ToolRepository(
+            DataModelLoader dataModelLoader,
+            BatchProcessor batchProcessor,
+            JobflowProcessor jobflowProcessor,
+            ExternalPortProcessor externalPortProcessor,
+            CompilerParticipant participant) {
+        this.dataModelLoader = dataModelLoader;
+        this.batchProcessor = batchProcessor;
+        this.jobflowProcessor = jobflowProcessor;
+        this.externalPortProcessor = externalPortProcessor;
+        this.participant = participant;
+    }
+
+    /**
+     * Creates a new builder.
+     * @param serviceClassLoader the service class loader
+     * @return the created builder
+     */
+    public static Builder builder(ClassLoader serviceClassLoader) {
+        return new Builder(serviceClassLoader);
+    }
+
+
+    /**
+     * Returns the data model loader.
+     * @return the data model loader
+     */
+    public DataModelLoader getDataModelLoader() {
+        return dataModelLoader;
+    }
+
+    /**
+     * Returns the batch processor.
+     * @return the batch processor
+     */
+    public BatchProcessor getBatchProcessor() {
+        return batchProcessor;
+    }
+
+    /**
+     * Returns the jobflow processor.
+     * @return the jobflow processor
+     */
+    public JobflowProcessor getJobflowProcessor() {
+        return jobflowProcessor;
+    }
+
+    /**
+     * Returns the external I/O processor.
+     * @return the external I/O processor
+     */
+    public ExternalPortProcessor getExternalPortProcessor() {
+        return externalPortProcessor;
+    }
+
+    /**
+     * Returns the compiler participant.
+     * @return the compiler participant
+     */
+    public CompilerParticipant getParticipant() {
+        return participant;
+    }
+
+    /**
+     * A builder for {@link ToolRepository}.
+     */
+    public static class Builder {
+
+        private static final Set<Class<?>> ALL_TOOLS;
+        private static final Set<Class<?>> MANDATORY_TOOLS;
+        private static final Set<Class<?>> SINGLETON_TOOLS;
+        static {
+            Set<Class<?>> all = new LinkedHashSet<>();
+            all.add(DataModelLoader.class);
+            all.add(BatchProcessor.class);
+            all.add(JobflowProcessor.class);
+            all.add(ExternalPortProcessor.class);
+            all.add(CompilerParticipant.class);
+
+            Set<Class<?>> mandatory = new LinkedHashSet<>();
+            mandatory.add(DataModelLoader.class);
+            mandatory.add(ExternalPortProcessor.class);
+
+            Set<Class<?>> singleton = new LinkedHashSet<>();
+            singleton.add(DataModelLoader.class);
+
+            ALL_TOOLS = Collections.unmodifiableSet(all);
+            MANDATORY_TOOLS = Collections.unmodifiableSet(mandatory);
+            SINGLETON_TOOLS = Collections.unmodifiableSet(singleton);
+        }
+
+        private final ClassLoader serviceClassLoader;
+
+        private final Map<Class<?>, List<?>> tools;
+
+        /**
+         * Creates a new instance.
+         * @param serviceClassLoader the service class loader
+         */
+        public Builder(ClassLoader serviceClassLoader) {
+            this.serviceClassLoader = serviceClassLoader;
+            Map<Class<?>, List<?>> map = new LinkedHashMap<>();
+            for (Class<?> toolType : ALL_TOOLS) {
+                map.put(toolType, new ArrayList<>());
+            }
+            this.tools = Collections.unmodifiableMap(map);
+        }
+
+        /**
+         * Adds a {@link DataModelLoader}.
+         * @param tool the tool
+         * @return this
+         */
+        public Builder use(DataModelLoader tool) {
+            use(DataModelLoader.class, tool);
+            return this;
+        }
+
+        /**
+         * Adds a {@link BatchProcessor}.
+         * @param tool the tool
+         * @return this
+         */
+        public Builder use(BatchProcessor tool) {
+            use(BatchProcessor.class, tool);
+            return this;
+        }
+
+        /**
+         * Adds a {@link JobflowProcessor}.
+         * @param tool the tool
+         * @return this
+         */
+        public Builder use(JobflowProcessor tool) {
+            use(JobflowProcessor.class, tool);
+            return this;
+        }
+
+        /**
+         * Adds a {@link ExternalPortProcessor}.
+         * @param tool the tool
+         * @return this
+         */
+        public Builder use(ExternalPortProcessor tool) {
+            use(ExternalPortProcessor.class, tool);
+            return this;
+        }
+
+        /**
+         * Adds a {@link CompilerParticipant}.
+         * @param tool the tool
+         * @return this
+         */
+        public Builder use(CompilerParticipant tool) {
+            use(CompilerParticipant.class, tool);
+            return this;
+        }
+
+        /**
+         * Adds default tools about the target type.
+         * @param toolType the target tool type (e.g. {@link JobflowProcessor JobflowProcessor.class}})
+         * @return this
+         */
+        public Builder useDefaults(Class<?> toolType) {
+            useDefaults0(toolType);
+            return this;
+        }
+
+        private <T> void useDefaults0(Class<T> toolType) {
+            List<T> elements = get(toolType);
+            for (T service : ServiceLoader.load(toolType, serviceClassLoader)) {
+                elements.add(service);
+            }
+        }
+
+        private <T> void use(Class<T> toolType, T tool) {
+            get(toolType).add(tool);
+        }
+
+        private <T> List<T> get(Class<T> toolType) {
+            @SuppressWarnings("unchecked")
+            List<T> elements = (List<T>) tools.get(toolType);
+            if (elements == null) {
+                throw new IllegalArgumentException(MessageFormat.format(
+                        "unknown tool type: {0}",
+                        toolType.getName()));
+            }
+            return elements;
+        }
+
+        /**
+         * Builds {@link ToolRepository} from added tools.
+         * @return the built object
+         */
+        public ToolRepository build() {
+            for (Class<?> toolType : MANDATORY_TOOLS) {
+                List<?> elements = get(toolType);
+                if (elements.isEmpty()) {
+                    throw new IllegalStateException(MessageFormat.format(
+                            "{0} must be specified",
+                            toolType.getSimpleName()));
+                }
+            }
+            for (Class<?> toolType : SINGLETON_TOOLS) {
+                List<?> elements = get(toolType);
+                if (elements.size() >= 2) {
+                    throw new IllegalStateException(MessageFormat.format(
+                            "{0} must be single: {1}",
+                            toolType.getSimpleName(),
+                            elements));
+                }
+            }
+            return new ToolRepository(
+                    get(DataModelLoader.class).get(0),
+                    CompositeBatchProcessor.composite(get(BatchProcessor.class)),
+                    CompositeJobflowProcessor.composite(get(JobflowProcessor.class)),
+                    CompositeExternalPortProcessor.composite(get(ExternalPortProcessor.class)),
+                    CompositeCompilerParticipant.composite(get(CompilerParticipant.class)));
+        }
+    }
+}

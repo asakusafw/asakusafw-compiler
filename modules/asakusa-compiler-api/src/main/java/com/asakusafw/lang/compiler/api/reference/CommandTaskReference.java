@@ -58,7 +58,7 @@ public class CommandTaskReference extends BasicAttributeContainer implements Tas
     }
 
     @Override
-    public List<TaskReference> getBlockerTasks() {
+    public List<TaskReference> getBlockers() {
         return blockerTasks;
     }
 

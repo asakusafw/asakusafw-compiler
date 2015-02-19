@@ -98,7 +98,7 @@ public class YaessBatchProcessor implements BatchProcessor {
 
     private FlowScript processJobflow(BatchReference batch, JobflowReference jobflow) {
         Set<String> blockerIds = new LinkedHashSet<>();
-        for (JobflowReference blocker : jobflow.getBlockerJobflows()) {
+        for (JobflowReference blocker : jobflow.getBlockers()) {
             blockerIds.add(blocker.getFlowId());
         }
         Map<ExecutionPhase, List<ExecutionScript>> scripts = new EnumMap<>(ExecutionPhase.class);
@@ -161,7 +161,7 @@ public class YaessBatchProcessor implements BatchProcessor {
             Map<TaskReference, String> idMap) {
         String stageId = idMap.get(task);
         assert stageId != null;
-        Set<String> blockerIds = toStageIds(task.getBlockerTasks(), idMap);
+        Set<String> blockerIds = toStageIds(task.getBlockers(), idMap);
         List<String> command = resolveCommandLine(batch, jobflow, phase, task);
         Map<String, String> envs = Collections.<String, String>emptyMap();
         return new CommandScript(stageId, blockerIds, task.getProfileName(), task.getModuleName(), command, envs);
@@ -204,7 +204,7 @@ public class YaessBatchProcessor implements BatchProcessor {
             Map<TaskReference, String> idMap) {
         String stageId = idMap.get(task);
         assert stageId != null;
-        Set<String> blockerIds = toStageIds(task.getBlockerTasks(), idMap);
+        Set<String> blockerIds = toStageIds(task.getBlockers(), idMap);
         String className = task.getMainClass().getName();
         Map<String, String> props = Collections.emptyMap();
         Map<String, String> envs = Collections.emptyMap();

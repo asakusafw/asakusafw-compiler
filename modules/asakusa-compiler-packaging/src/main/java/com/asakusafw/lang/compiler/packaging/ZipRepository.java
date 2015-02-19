@@ -156,13 +156,10 @@ public class ZipRepository implements ResourceRepository {
 
         private final ZipInputStream zipped;
 
+        private boolean closed = false;
+
         public ZipEntryInputStream(ZipInputStream zipped) {
             this.zipped = zipped;
-        }
-
-        @Override
-        public void close() throws IOException {
-            zipped.closeEntry();
         }
 
         @Override
@@ -191,18 +188,12 @@ public class ZipRepository implements ResourceRepository {
         }
 
         @Override
-        public boolean markSupported() {
-            return zipped.markSupported();
-        }
-
-        @Override
-        public synchronized void mark(int readlimit) {
-            zipped.mark(readlimit);
-        }
-
-        @Override
-        public synchronized void reset() throws IOException {
-            zipped.reset();
+        public void close() throws IOException {
+            if (closed) {
+                return;
+            }
+            zipped.closeEntry();
+            closed = true;
         }
     }
 }

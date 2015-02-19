@@ -23,16 +23,27 @@ public class ResourceItemRepository implements ResourceRepository {
      * @param items the resource items
      */
     public ResourceItemRepository(Collection<? extends ResourceItem> items) {
+        this(items, true);
+    }
+
+    /**
+     * Creates a new instance.
+     * @param items the resource items
+     * @param failOnConflict {@code true} to fail if locations are conflict between items, otherwise {@code false}
+     */
+    public ResourceItemRepository(Collection<? extends ResourceItem> items, boolean failOnConflict) {
         this.items = new LinkedHashSet<>(items);
-        Set<Location> saw = new HashSet<>();
-        for (ResourceItem item : items) {
-            Location location = item.getLocation();
-            if (saw.contains(location)) {
-                throw new IllegalArgumentException(MessageFormat.format(
-                        "duplicated item location: {0}",
-                        location));
+        if (failOnConflict) {
+            Set<Location> saw = new HashSet<>();
+            for (ResourceItem item : items) {
+                Location location = item.getLocation();
+                if (saw.contains(location)) {
+                    throw new IllegalArgumentException(MessageFormat.format(
+                            "duplicated item location: {0}",
+                            location));
+                }
+                saw.add(location);
             }
-            saw.add(location);
         }
     }
 

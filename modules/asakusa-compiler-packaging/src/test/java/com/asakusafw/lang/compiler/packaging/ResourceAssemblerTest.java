@@ -41,7 +41,7 @@ public class ResourceAssemblerTest extends ResourceTestRoot {
         ResourceAssembler assembler = new ResourceAssembler();
         assembler.addItem(item("a.txt", "A"));
 
-        Map<String, String> items = dump(assembler);
+        Map<String, String> items = dump(assembler.build());
         assertThat(items.keySet(), hasSize(1));
         assertThat(items, hasEntry("a.txt", "A"));
     }
@@ -53,7 +53,7 @@ public class ResourceAssemblerTest extends ResourceTestRoot {
     @Test
     public void no_items() throws Exception {
         ResourceAssembler assembler = new ResourceAssembler();
-        Map<String, String> items = dump(assembler);
+        Map<String, String> items = dump(assembler.build());
         assertThat(items.keySet(), hasSize(0));
     }
 
@@ -68,7 +68,7 @@ public class ResourceAssemblerTest extends ResourceTestRoot {
         assembler.addItem(item("b.txt", "B"));
         assembler.addItem(item("c.txt", "C"));
 
-        Map<String, String> items = dump(assembler);
+        Map<String, String> items = dump(assembler.build());
         assertThat(items.keySet(), hasSize(3));
         assertThat(items, hasEntry("a.txt", "A"));
         assertThat(items, hasEntry("b.txt", "B"));
@@ -87,7 +87,7 @@ public class ResourceAssemblerTest extends ResourceTestRoot {
                 item("b.txt", "B"),
                 item("c.txt", "C"),
         }));
-        Map<String, String> items = dump(assembler);
+        Map<String, String> items = dump(assembler.build());
         assertThat(items.keySet(), hasSize(3));
         assertThat(items, hasEntry("a.txt", "A"));
         assertThat(items, hasEntry("b.txt", "B"));
@@ -113,7 +113,7 @@ public class ResourceAssemblerTest extends ResourceTestRoot {
                 item("a2.txt", "A2"),
                 item("b2.txt", "B2"),
         }));
-        Map<String, String> items = dump(assembler);
+        Map<String, String> items = dump(assembler.build());
         assertThat(items.keySet(), hasSize(6));
         assertThat(items, hasEntry("a0.txt", "A0"));
         assertThat(items, hasEntry("a1.txt", "A1"));
@@ -121,6 +121,32 @@ public class ResourceAssemblerTest extends ResourceTestRoot {
         assertThat(items, hasEntry("b0.txt", "B0"));
         assertThat(items, hasEntry("b1.txt", "B1"));
         assertThat(items, hasEntry("b2.txt", "B2"));
+    }
+
+    /**
+     * w/ duplicated resources.
+     * @throws Exception if failed
+     */
+    @Test
+    public void duplicate() throws Exception {
+        ResourceAssembler assembler = new ResourceAssembler();
+        assembler.addRepository(repo(new ResourceItem[] {
+                item("a.txt", "A"),
+                item("b.txt", "B"),
+        }));
+        assembler.addRepository(repo(new ResourceItem[] {
+                item("b.txt", "B"),
+                item("c.txt", "C"),
+        }));
+        assembler.addRepository(repo(new ResourceItem[] {
+                item("c.txt", "C"),
+                item("a.txt", "A"),
+        }));
+        Map<String, String> items = dump(assembler.build());
+        assertThat(items.keySet(), hasSize(3));
+        assertThat(items, hasEntry("a.txt", "A"));
+        assertThat(items, hasEntry("b.txt", "B"));
+        assertThat(items, hasEntry("c.txt", "C"));
     }
 
     /**
@@ -135,7 +161,7 @@ public class ResourceAssemblerTest extends ResourceTestRoot {
                 item("b.bin", "B"), // filtered
                 item("c.txt", "C"),
         }), pattern(".*\\.txt"));
-        Map<String, String> items = dump(assembler);
+        Map<String, String> items = dump(assembler.build());
         assertThat(items.keySet(), hasSize(2));
         assertThat(items, hasEntry("a.txt", "A"));
         assertThat(items, hasEntry("c.txt", "C"));
@@ -156,7 +182,7 @@ public class ResourceAssemblerTest extends ResourceTestRoot {
                 item("c.txt", "C"),
                 item("d.bin", "D"),
         }), pattern(".*\\.txt"));
-        Map<String, String> items = dump(assembler);
+        Map<String, String> items = dump(assembler.build());
         assertThat(items.keySet(), hasSize(2));
         assertThat(items, hasEntry("a.txt", "A"));
         assertThat(items, hasEntry("c.txt", "C"));
@@ -181,7 +207,7 @@ public class ResourceAssemblerTest extends ResourceTestRoot {
                 item("c.txt", "C"),
                 item("d.txt", "D"), // filtered
         }), pattern("[bc]\\.txt"));
-        Map<String, String> items = dump(assembler);
+        Map<String, String> items = dump(assembler.build());
         assertThat(items.keySet(), hasSize(3));
         assertThat(items, hasEntry("a.txt", "A"));
         assertThat(items, hasEntry("b.txt", "B"));

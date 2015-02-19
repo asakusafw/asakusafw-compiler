@@ -25,6 +25,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
+import com.asakusafw.lang.compiler.common.Location;
+
 /**
  * Test for {@link ZipSink}.
  */
@@ -62,6 +64,25 @@ public class ZipSinkTest extends ResourceTestRoot {
             put(sink, item("a.txt", "A"));
             put(sink, item("b.txt", "B"));
             put(sink, item("c.txt", "C"));
+        }
+        Map<String, String> items = dump(new ZipRepository(base));
+        assertThat(items.keySet(), hasSize(3));
+        assertThat(items, hasEntry("a.txt", "A"));
+        assertThat(items, hasEntry("b.txt", "B"));
+        assertThat(items, hasEntry("c.txt", "C"));
+    }
+
+    /**
+     * add using callback.
+     * @throws Exception if failed
+     */
+    @Test
+    public void callback() throws Exception {
+        File base = folder.newFile();
+        try (ZipSink sink = new ZipSink(base)) {
+            sink.add(Location.of("a.txt"), callback("A"));
+            sink.add(Location.of("b.txt"), callback("B"));
+            sink.add(Location.of("c.txt"), callback("C"));
         }
         Map<String, String> items = dump(new ZipRepository(base));
         assertThat(items.keySet(), hasSize(3));

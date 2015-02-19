@@ -15,6 +15,7 @@
  */
 package com.asakusafw.lang.compiler.packaging;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -52,6 +53,14 @@ public class ResourceItemSink implements ResourceSink {
     public void add(Location location, InputStream contents) throws IOException {
         ByteArrayItem item = ResourceUtil.toItem(location, contents);
         items.put(location, item);
+    }
+
+    @Override
+    public void add(Location location, Callback callback) throws IOException {
+        try (ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+            callback.add(location, output);
+            items.put(location, new ByteArrayItem(location, output.toByteArray()));
+        }
     }
 
     @Override

@@ -10,6 +10,7 @@ import com.asakusafw.lang.compiler.api.reference.ExternalInputReference;
 import com.asakusafw.lang.compiler.api.reference.ExternalOutputReference;
 import com.asakusafw.lang.compiler.api.reference.TaskReference;
 import com.asakusafw.lang.compiler.common.DiagnosticException;
+import com.asakusafw.lang.compiler.common.ExtensionContainer;
 import com.asakusafw.lang.compiler.common.Location;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.graph.Jobflow;
@@ -17,12 +18,12 @@ import com.asakusafw.lang.compiler.model.info.ExternalInputInfo;
 import com.asakusafw.lang.compiler.model.info.ExternalOutputInfo;
 
 /**
- * Processes an Asakusa jobflow.
+ * Processes operator graphs in jobflow.
  */
 public interface JobflowProcessor {
 
     /**
-     * Processes the jobflow.
+     * Processes an operator graph in the jobflow.
      * @param context the build context
      * @param source the target jobflow
      * @throws IOException if build was failed by I/O error

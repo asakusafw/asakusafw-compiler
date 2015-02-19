@@ -81,6 +81,22 @@ public final class ResourceUtil {
     }
 
     /**
+     * Copies resources from {@link ResourceRepository} into {@link ResourceSink}.
+     * @param source the source repository
+     * @param sink the target sink
+     * @throws IOException if error occurred while copying resources
+     */
+    public static void copy(ResourceRepository source, ResourceSink sink) throws IOException {
+        try (ResourceRepository.Cursor cursor = source.createCursor()) {
+            while (cursor.next()) {
+                try (InputStream contents = cursor.openResource()) {
+                    sink.add(cursor.getLocation(), contents);
+                }
+            }
+        }
+    }
+
+    /**
      * Returns library file which contains the target class.
      * @param aClass the target class
      * @return the related library file, or {@code null} if the library file is not found
@@ -199,6 +215,27 @@ public final class ResourceUtil {
         File file = new File(archive);
         assert file.isFile() : file;
         return file;
+    }
+
+    /**
+     * Deletes file recursively.
+     * @param file the target file
+     * @return {@code true} if file is successfully deleted, otherwise {@code false}
+     */
+    public static boolean delete(File file) {
+        if (file.exists() == false) {
+            return false;
+        }
+        boolean deleted = true;
+        if (file.isDirectory()) {
+            for (File child : file.listFiles()) {
+                deleted &= delete(child);
+            }
+        }
+        if (deleted && file.delete() == false) {
+            LOG.debug("failed to delete file: {}", file);
+        }
+        return deleted && file.delete();
     }
 
     /**

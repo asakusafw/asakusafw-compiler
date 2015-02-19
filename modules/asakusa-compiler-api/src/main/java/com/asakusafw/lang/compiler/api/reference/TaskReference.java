@@ -8,7 +8,7 @@ import java.util.Map;
 /**
  * Represents a task in runtime.
  */
-public interface TaskReference extends Reference {
+public interface TaskReference extends BlockingReference<TaskReference> {
 
     /**
      * Returns the module name for processing this task.
@@ -21,7 +21,8 @@ public interface TaskReference extends Reference {
      * Returns tasks which must be executed before this task.
      * @return the blocker tasks
      */
-    Collection<? extends TaskReference> getBlockerTasks();
+    @Override
+    Collection<? extends TaskReference> getBlockers();
 
     /**
      * Phases each task replies on.

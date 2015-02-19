@@ -1,11 +1,15 @@
 package com.asakusafw.lang.compiler.extension.javac;
 
-import com.asakusafw.lang.compiler.api.ResourceProcessor;
+import com.asakusafw.lang.compiler.common.DiagnosticException;
 
 /**
  * Provides Java compiler features.
  */
-public interface JavaCompilerSupport extends JavaSourceExtension, ResourceProcessor {
+public interface JavaCompilerSupport extends JavaSourceExtension {
 
-    // no special members
+    /**
+     * Performs compiling Java source files.
+     * @throws DiagnosticException if compilation was failed
+     */
+    void process();
 }

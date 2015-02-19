@@ -33,7 +33,7 @@ import com.asakusafw.lang.compiler.model.graph.Operators;
  */
 public class JobflowAnalyzerTest {
 
-    private final JobflowAnalyzer analyzer = new JobflowAnalyzer(new FlowGraphAnalyzer(new MockExternalIoAnalyzer()));
+    private final JobflowAnalyzer analyzer = new JobflowAnalyzer(new FlowGraphAnalyzer(new MockExternalPortAnalyzer()));
 
     /**
      * simple case.
