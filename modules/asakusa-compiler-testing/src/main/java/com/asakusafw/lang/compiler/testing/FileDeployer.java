@@ -34,6 +34,18 @@ public class FileDeployer implements TestRule {
     }
 
     /**
+     * Returns a new folder.
+     * @return a new folder
+     */
+    public File newFolder() {
+        try {
+            return folder.newFolder();
+        } catch (IOException e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    /**
      * Returns a file on the temporary directory.
      * @param targetPath the target path
      * @return the file on the temporary directory

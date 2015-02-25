@@ -235,7 +235,7 @@ public final class ResourceUtil {
         if (deleted && file.delete() == false) {
             LOG.debug("failed to delete file: {}", file);
         }
-        return deleted && file.delete();
+        return deleted;
     }
 
     /**

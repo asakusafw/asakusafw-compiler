@@ -269,6 +269,26 @@ public class ProjectRepository implements Closeable {
         }
 
         /**
+         * Builds a class loader from added libraries.
+         * @return the built class loader
+         */
+        public URLClassLoader buildClassLoader() {
+            List<URL> urls = new ArrayList<>();
+            for (File file : libraryFiles) {
+                try {
+                    URL location = file.toURI().toURL();
+                    urls.add(location);
+                } catch (MalformedURLException e) {
+                    LOG.warn(MessageFormat.format(
+                            "failed to obtain the URL of library file: {0}",
+                            file), e);
+                    continue;
+                }
+            }
+            return URLClassLoader.newInstance(urls.toArray(new URL[urls.size()]), baseClassLoader);
+        }
+
+        /**
          * Builds {@link ProjectRepository} object from added libraries.
          * @return the built object
          * @throws IOException if failed to load libraries
@@ -291,7 +311,7 @@ public class ProjectRepository implements Closeable {
                         continue;
                     }
                 }
-                URLClassLoader classLoader = buildClassLoader(libraryFiles);
+                URLClassLoader classLoader = buildClassLoader();
                 success = true;
                 return new ProjectRepository(
                         classLoader,
@@ -334,22 +354,6 @@ public class ProjectRepository implements Closeable {
                 }
             }
             return temporary;
-        }
-
-        private URLClassLoader buildClassLoader(Set<File> files) {
-            List<URL> urls = new ArrayList<>();
-            for (File file : files) {
-                try {
-                    URL location = file.toURI().toURL();
-                    urls.add(location);
-                } catch (MalformedURLException e) {
-                    LOG.warn(MessageFormat.format(
-                            "failed to obtain the URL of library file: {0}",
-                            file), e);
-                    continue;
-                }
-            }
-            return URLClassLoader.newInstance(urls.toArray(new URL[urls.size()]), baseClassLoader);
         }
     }
 }

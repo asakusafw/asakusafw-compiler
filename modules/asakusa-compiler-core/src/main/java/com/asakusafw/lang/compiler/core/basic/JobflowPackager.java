@@ -38,7 +38,7 @@ public class JobflowPackager {
     /**
      * The jobflow element location of fragment marker file in each class library.
      */
-    static final Location FRAGMENT_MARKER = FRAMEWORK_INFO.append("fragment"); //$NON-NLS-1$
+    public static final Location FRAGMENT_MARKER = FRAMEWORK_INFO.append("fragment"); //$NON-NLS-1$
 
     /**
      * The batch element location of jobflow libraries.

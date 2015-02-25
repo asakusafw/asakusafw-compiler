@@ -8,4 +8,8 @@ useSLF4J()
 
 dependencies {
     compile project(':asakusa-compiler-core')
+    compile 'commons-cli:commons-cli:1.2'
+
+    testCompile project(':asakusa-compiler-testing')
+    testCompile project(':asakusa-compiler-mock')
 }
