@@ -50,7 +50,7 @@ public final class LoggingOperatorUtil {
     /**
      * Extracts log level in {@code Logging} operator.
      * @param classLoader the class loader to resolve target operator
-     * @param operator the target branch kind operator
+     * @param operator the target logging kind operator
      * @return the log level
      * @throws ReflectiveOperationException if failed to resolve operators
      * @throws IllegalArgumentException if the target operator is not supported
