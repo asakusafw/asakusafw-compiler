@@ -5,12 +5,11 @@ apply plugin: 'maven'
 apply plugin: 'eclipse'
 
 useSLF4J()
+useHadoop()
 
 dependencies {
     compile project(':asakusa-compiler-model')
     compile "com.asakusafw:simple-graph:${asakusafwVersion}"
     compile "com.asakusafw:asakusa-dsl-vocabulary:${asakusafwVersion}"
     compile "com.asakusafw:asakusa-runtime:${asakusafwVersion}"
-
-    testRuntime "org.apache.hadoop:hadoop-core:${hadoopVersion}"
 }

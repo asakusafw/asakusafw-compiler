@@ -5,6 +5,7 @@ apply plugin: 'maven'
 apply plugin: 'eclipse'
 
 useSLF4J()
+useHadoop()
 
 dependencies {
     compile project(':asakusa-compiler-api')
@@ -16,5 +17,4 @@ dependencies {
     
     testCompile project(':asakusa-compiler-testing')
     testCompile project(':asakusa-compiler-mock')
-    testRuntime "org.apache.hadoop:hadoop-core:${hadoopVersion}"
 }

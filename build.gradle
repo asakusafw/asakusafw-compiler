@@ -4,7 +4,6 @@ allprojects {
     group 'com.asakusafw.lang.compiler'
     version '0.1-SNAPSHOT'
     ext.asakusafwVersion = '0.7.2-hadoop1'
-    ext.hadoopVersion = '1.2.1'
 }
 
 subprojects {
@@ -20,7 +19,6 @@ subprojects {
             options.encoding = 'UTF-8'
         }
         tasks.withType(Javadoc) {
-            failOnError = false
             options.locale = 'en_US'
             options.encoding = 'UTF-8'
             if (options instanceof org.gradle.external.javadoc.StandardJavadocDocletOptions) {
@@ -33,6 +31,11 @@ subprojects {
             dependencies {
                 compile "org.slf4j:slf4j-api:1.7.10"
                 testRuntime "ch.qos.logback:logback-classic:1.1.2"
+            }
+        }
+        ext.useHadoop = {
+            dependencies {
+                testRuntime "org.apache.hadoop:hadoop-core:1.2.1"
             }
         }
         dependencies {
