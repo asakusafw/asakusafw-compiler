@@ -56,6 +56,78 @@ import com.asakusafw.lang.compiler.packaging.ResourceUtil;
 
 /**
  * Command line interface for {@link BatchCompiler}.
+ *
+ * <h3> Program Arguments </h3>
+ * <dl>
+ * <dt><code>--explore &lt;/path/to/lib1[:/path/to/lib2[:..]]&gt;</code></dt>
+ * <dd>library paths with batch classes</dd>
+ *
+ * <dt><code>--output &lt;/path/to/output&gt;</code></dt>
+ * <dd>output directory</dd>
+ *
+ * <dt><code>--attach &lt;/path/to/lib1[:/path/to/lib2[:..]]&gt;</code> <em>(optional)</em></dt>
+ * <dd>library paths to be attached to each batch package</dd>
+ * <dd>default: <em>(empty)</em></dd>
+ *
+ * <dt><code>--embed &lt;/path/to/lib1[:/path/to/lib2[:..]]&gt;</code> <em>(optional)</em></dt>
+ * <dd>library paths to be embedded to each jobflow package</dd>
+ * <dd>default: <em>(empty)</em></dd>
+ *
+ * <dt><code>--external &lt;/path/to/lib1[:/path/to/lib2[:..]]&gt;</code> <em>(optional)</em></dt>
+ * <dd>external library paths</dd>
+ * <dd>default: <em>(empty)</em></dd>
+ *
+ * <dt><code>--include &lt;class-name-pattern&gt;</code> <em>(optional)</em></dt>
+ * <dd>accepting batch class name pattern ({@code "*"} as a wildcard character)</dd>
+ * <dd>default: <em>(accepts anything)</em></dd>
+ *
+ * <dt><code>--exclude &lt;class-name-pattern&gt;</code> <em>(optional)</em></dt>
+ * <dd>denying batch class name pattern ({@code "*"} as a wildcard character)</dd>
+ * <dd>default: <em>(denies nothing)</em></dd>
+ *
+ * <dt><code>--dataModelLoaderFactory &lt;class-name&gt;</code> <em>(optional)</em></dt>
+ * <dd>custom data model loader factory class</dd>
+ * <dd>default: {@link BasicDataModelLoaderFactory}</dd>
+ *
+ * <dt><code>--externalPortProcessors &lt;class-name1[,class-name2[,..]]&gt;</code> <em>(optional)</em></dt>
+ * <dd>custom external port processor classes</dd>
+ * <dd>default: <em>(empty)</em></dd>
+ *
+ * <dt><code>--jobflowProcessors &lt;class-name1[,class-name2[,..]]&gt;</code> <em>(optional)</em></dt>
+ * <dd>custom jobflow processor classes</dd>
+ * <dd>default: <em>(empty)</em></dd>
+ *
+ * <dt><code>--batchProcessors &lt;class-name1[,class-name2[,..]]&gt;</code> <em>(optional)</em></dt>
+ * <dd>custom batch processor classes</dd>
+ * <dd>default: <em>(empty)</em></dd>
+ *
+ * <dt><code>--participants &lt;class-name1[,class-name2[,..]]&gt;</code> <em>(optional)</em></dt>
+ * <dd>custom compiler participant classes</dd>
+ * <dd>default: <em>(empty)</em></dd>
+ *
+ *
+ * <dt><code>--runtimeWorkingDirectory &lt;path/to/working&gt;</code> <em>(optional)</em></dt>
+ * <dd>custom runtime working directory path</dd>
+ * <dd>default: {@link #DEFAULT_RUNTIME_WORKING_DIRECTORY}</dd>
+ *
+ * <dt><code>-P,--property &lt;key=value&gt;</code> <em>(optional)</em></dt>
+ * <dd>compiler property</dd>
+ * <dd>default: <em>(empty)</em></dd>
+ *
+ * <dt><code>--failOnError</code> <em>(optional)</em></dt>
+ * <dd>whether fails on compilation errors or not</dd>
+ * <dd>default: <em>(skip on errors)</em></dd>
+ *
+ *
+ * <dt><code>--batchCompiler &lt;class-name&gt;</code> <em>(optional)</em></dt>
+ * <dd>custom batch compiler class</dd>
+ * <dd>default: {@link BasicBatchCompiler}</dd>
+ *
+ * <dt><code>--classAnalyzer &lt;class-name&gt;</code> <em>(optional)</em></dt>
+ * <dd>custom class analyzer class</dd>
+ * <dd>default: {@link BasicClassAnalyzer}</dd>
+ *
+ * </dl>
  */
 public class BatchCompilerCli {
 
@@ -68,7 +140,10 @@ public class BatchCompilerCli {
 
     static final ClassDescription DEFAULT_CLASS_ANALYZER = Descriptions.classOf(BasicClassAnalyzer.class);
 
-    static final String DEFAULT_RUNTIME_WORKING_DIRECTORY = "target/hadoopwork/${executionId}"; //$NON-NLS-1$
+    /**
+     * The default runtime working directory.
+     */
+    public static final String DEFAULT_RUNTIME_WORKING_DIRECTORY = "target/hadoopwork/${executionId}"; //$NON-NLS-1$
 
     static final Logger LOG = LoggerFactory.getLogger(BatchCompilerCli.class);
 
@@ -407,55 +482,79 @@ public class BatchCompilerCli {
 
     private static class Opts {
 
-        final Option classAnalyzer = optional("classAnalyzer", 1)
-                .withDescription("custom class analyzer class");
+        private static final String ARG_CLASS_PATTERN = "class-name-pattern";
 
-        final Option batchCompiler = optional("batchCompiler", 1)
-                .withDescription("custom batch compiler class");
+        private static final String ARG_CLASS = "class-name";
 
-        final Option output = required("output", 1)
-                .withDescription("output directory");
+        private static final String ARG_CLASSES = "class-name1[,class-name2[,..]]";
 
-        final Option external = optional("external", 1)
-                .withDescription("external library paths");
+        private static final String ARG_LIBRARIES = files("/path/to/lib1", "/path/to/lib2");
 
-        final Option explore = required("explore", 1)
-                .withDescription("library paths with batch classes");
+        final Option classAnalyzer = optional("classAnalyzer", 1) //$NON-NLS-1$
+                .withDescription("custom class analyzer class")
+                .withArgumentDescription(ARG_CLASS);
 
-        final Option embed = optional("embed", 1)
-                .withDescription("library paths to be embedded to each jobflow package");
+        final Option batchCompiler = optional("batchCompiler", 1) //$NON-NLS-1$
+                .withDescription("custom batch compiler class")
+                .withArgumentDescription(ARG_CLASS);
 
-        final Option attach = optional("attach", 1)
-                .withDescription("library paths to be attached to each batch package");
+        final Option output = required("output", 1) //$NON-NLS-1$
+                .withDescription("output directory")
+                .withArgumentDescription("/path/to/output");
 
-        final Option include = optional("include", 1)
-                .withDescription("included batch class name pattern");
+        final Option external = optional("external", 1) //$NON-NLS-1$
+                .withDescription("external library paths")
+                .withArgumentDescription(ARG_LIBRARIES);
 
-        final Option exclude = optional("exclude", 1)
-                .withDescription("excluded batch class name pattern");
+        final Option explore = required("explore", 1) //$NON-NLS-1$
+                .withDescription("library paths with batch classes")
+                .withArgumentDescription(ARG_LIBRARIES);
 
-        final Option dataModelLoaderFactory = optional("dataModelLoaderFactory", 1)
-                .withDescription("custom data model loader factory class");
+        final Option embed = optional("embed", 1) //$NON-NLS-1$
+                .withDescription("library paths to be embedded to each jobflow package")
+                .withArgumentDescription(ARG_LIBRARIES);
 
-        final Option externalPortProcessors = optional("externalPortProcessors", 1)
-                .withDescription("custom external port processor classes");
+        final Option attach = optional("attach", 1) //$NON-NLS-1$
+                .withDescription("library paths to be attached to each batch package")
+                .withArgumentDescription(ARG_LIBRARIES);
 
-        final Option batchProcessors = optional("batchProcessors", 1)
-                .withDescription("custom batch processor classes");
+        final Option include = optional("include", 1) //$NON-NLS-1$
+                .withDescription("included batch class name pattern")
+                .withArgumentDescription(ARG_CLASS_PATTERN);
 
-        final Option jobflowProcessors = optional("jobflowProcessors", 1)
-                .withDescription("custom jobflow processor classes");
+        final Option exclude = optional("exclude", 1) //$NON-NLS-1$
+                .withDescription("excluded batch class name pattern")
+                .withArgumentDescription(ARG_CLASS_PATTERN);
 
-        final Option compilerParticipants = optional("participants", 1)
-                .withDescription("custom compiler participant classes");
+        final Option dataModelLoaderFactory = optional("dataModelLoaderFactory", 1) //$NON-NLS-1$
+                .withDescription("custom data model loader factory class")
+                .withArgumentDescription(ARG_CLASS);
 
-        final Option runtimeWorkingDirectory = optional("runtimeWorkingDirectory", 1)
-                .withDescription("custom runtime working directory path");
+        final Option externalPortProcessors = optional("externalPortProcessors", 1) //$NON-NLS-1$
+                .withDescription("custom external port processor classes")
+                .withArgumentDescription(ARG_CLASSES);
 
-        final Option properties = properties("P", "property")
-                .withDescription("compiler property");
+        final Option batchProcessors = optional("batchProcessors", 1) //$NON-NLS-1$
+                .withDescription("custom batch processor classes")
+                .withArgumentDescription(ARG_CLASSES);
 
-        final Option failOnError = optional("failOnError", 0)
+        final Option jobflowProcessors = optional("jobflowProcessors", 1) //$NON-NLS-1$
+                .withDescription("custom jobflow processor classes")
+                .withArgumentDescription(ARG_CLASSES);
+
+        final Option compilerParticipants = optional("participants", 1) //$NON-NLS-1$
+                .withDescription("custom compiler participant classes")
+                .withArgumentDescription(ARG_CLASSES);
+
+        final Option runtimeWorkingDirectory = optional("runtimeWorkingDirectory", 1) //$NON-NLS-1$
+                .withDescription("custom runtime working directory path")
+                .withArgumentDescription("path/to/working");
+
+        final Option properties = properties("P", "property") //$NON-NLS-1$ //$NON-NLS-2$
+                .withDescription("compiler property")
+                .withArgumentDescription("key=value");
+
+        final Option failOnError = optional("failOnError", 0) //$NON-NLS-1$
                 .withDescription("whether fails on compilation errors or not");
 
         final Options options = new Options();
@@ -486,6 +585,14 @@ public class BatchCompilerCli {
             RichOption option = new RichOption(shortName, longName, 2, false);
             option.setValueSeparator('=');
             return option;
+        }
+
+        private static String files(String a, String b) {
+            return elements(a, b, File.pathSeparator);
+        }
+
+        private static String elements(String a, String b, String separator) {
+            return String.format("%s[%s%s[%s..]]", a, separator, b, separator); //$NON-NLS-1$
         }
     }
 
