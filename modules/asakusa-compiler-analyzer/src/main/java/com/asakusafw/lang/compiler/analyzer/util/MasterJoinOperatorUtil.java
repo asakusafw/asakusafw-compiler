@@ -19,7 +19,7 @@ import com.asakusafw.vocabulary.operator.MasterJoinUpdate;
 import com.asakusafw.vocabulary.operator.MasterSelection;
 
 /**
- * Utilities for {@code MasterJoin} operator kind.
+ * Utilities for <em>master-join kind</em> operator.
  */
 public final class MasterJoinOperatorUtil {
 
@@ -34,9 +34,9 @@ public final class MasterJoinOperatorUtil {
     }
 
     /**
-     * Returns whether the target operator is {@code MasterJoin} kind or not.
+     * Returns whether the target operator is <em>master-join kind</em> or not.
      * @param operator the target operator
-     * @return {@code true} if the target operator is {@code Branch} kind, otherwise {@code false}
+     * @return {@code true} if the target operator is <em>master-join kind</em>, otherwise {@code false}
      */
     public static boolean isSupported(Operator operator) {
         if (operator.getOperatorKind() != OperatorKind.USER) {
@@ -48,10 +48,10 @@ public final class MasterJoinOperatorUtil {
     }
 
     /**
-     * Extracts log level in {@code Logging} operator.
+     * Extracts <em>master selection method</em> in the <em>master-join kind</em> operator.
      * @param classLoader the class loader to resolve target operator
      * @param operator the target branch kind operator
-     * @return the log level
+     * @return the <em>master selection method</em>, or {@code null} if it is not defined
      * @throws ReflectiveOperationException if failed to resolve operators
      * @throws IllegalArgumentException if the target operator is not supported
      * @see #isSupported(Operator)

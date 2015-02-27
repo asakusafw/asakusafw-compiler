@@ -20,7 +20,7 @@ import com.asakusafw.vocabulary.operator.Branch;
 import com.asakusafw.vocabulary.operator.MasterBranch;
 
 /**
- * Utilities for {@code Branch} kind operator.
+ * Utilities for <em>branch kind</em> operator.
  */
 public final class BranchOperatorUtil {
 
@@ -37,9 +37,9 @@ public final class BranchOperatorUtil {
     }
 
     /**
-     * Returns whether the target operator is {@code Branch} kind or not.
+     * Returns whether the target operator is <em>branch kind</em> or not.
      * @param operator the target operator
-     * @return {@code true} if the target operator is {@code Branch} kind, otherwise {@code false}
+     * @return {@code true} if the target operator is <em>branch kind</em>, otherwise {@code false}
      */
     public static boolean isSupported(Operator operator) {
         if (operator.getOperatorKind() != OperatorKind.USER) {

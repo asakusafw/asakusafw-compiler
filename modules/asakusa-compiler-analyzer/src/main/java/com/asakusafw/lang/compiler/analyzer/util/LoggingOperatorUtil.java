@@ -16,7 +16,7 @@ import com.asakusafw.lang.compiler.model.graph.UserOperator;
 import com.asakusafw.vocabulary.operator.Logging;
 
 /**
- * Utilities for {@code Logging} like operators.
+ * Utilities for <em>branch kind</em> operators.
  */
 public final class LoggingOperatorUtil {
 
@@ -34,9 +34,9 @@ public final class LoggingOperatorUtil {
     }
 
     /**
-     * Returns whether the target operator is {@code Logging} kind or not.
+     * Returns whether the target operator is <em>branch kind</em> or not.
      * @param operator the target operator
-     * @return {@code true} if the target operator is {@code Logging} kind, otherwise {@code false}
+     * @return {@code true} if the target operator is <em>branch kind</em>, otherwise {@code false}
      */
     public static boolean isSupported(Operator operator) {
         if (operator.getOperatorKind() != OperatorKind.USER) {
@@ -48,7 +48,7 @@ public final class LoggingOperatorUtil {
     }
 
     /**
-     * Extracts log level in {@code Logging} operator.
+     * Extracts log level in <em>branch kind</em> operator.
      * @param classLoader the class loader to resolve target operator
      * @param operator the target logging kind operator
      * @return the log level

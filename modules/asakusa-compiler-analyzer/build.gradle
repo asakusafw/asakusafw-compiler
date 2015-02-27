@@ -8,8 +8,10 @@ useSLF4J()
 useHadoop()
 
 dependencies {
-    compile project(':asakusa-compiler-model')
+    compile project(':asakusa-compiler-api')
     compile "com.asakusafw:simple-graph:${asakusafwVersion}"
     compile "com.asakusafw:asakusa-dsl-vocabulary:${asakusafwVersion}"
     compile "com.asakusafw:asakusa-runtime:${asakusafwVersion}"
+
+    testCompile project(':asakusa-compiler-mock')
 }
