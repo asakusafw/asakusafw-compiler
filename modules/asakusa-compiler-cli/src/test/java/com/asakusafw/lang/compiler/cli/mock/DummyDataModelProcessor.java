@@ -1,6 +1,7 @@
 package com.asakusafw.lang.compiler.cli.mock;
 
 import com.asakusafw.lang.compiler.api.DataModelLoader;
+import com.asakusafw.lang.compiler.api.DataModelProcessor;
 import com.asakusafw.lang.compiler.api.reference.DataModelReference;
 import com.asakusafw.lang.compiler.model.description.TypeDescription;
 
@@ -8,15 +9,15 @@ import com.asakusafw.lang.compiler.model.description.TypeDescription;
  * Mock {@link DataModelLoader}.
  */
 @SuppressWarnings("javadoc")
-public class DummyDataModelLoader implements DataModelLoader, DummyElement {
+public class DummyDataModelProcessor implements DataModelProcessor, DummyElement {
 
     final String id;
 
-    public DummyDataModelLoader() {
+    public DummyDataModelProcessor() {
         this("default");
     }
 
-    public DummyDataModelLoader(String id) {
+    public DummyDataModelProcessor(String id) {
         this.id = id;
     }
 
@@ -26,7 +27,12 @@ public class DummyDataModelLoader implements DataModelLoader, DummyElement {
     }
 
     @Override
-    public DataModelReference load(TypeDescription type) {
+    public boolean isSupported(Context context, TypeDescription type) {
+        return false;
+    }
+
+    @Override
+    public DataModelReference process(Context context, TypeDescription type) {
         throw new UnsupportedOperationException();
     }
 }

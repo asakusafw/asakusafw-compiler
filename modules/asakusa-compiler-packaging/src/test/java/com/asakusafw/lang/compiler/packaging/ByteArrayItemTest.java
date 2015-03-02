@@ -19,7 +19,6 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 
 import org.junit.Test;
 
@@ -43,10 +42,8 @@ public class ByteArrayItemTest extends ResourceTestRoot {
 
         assertThat(item.getContents(), is(contents));
 
-        try (ByteArrayOutputStream buf = new ByteArrayOutputStream();
-                DataOutputStream output = new DataOutputStream(buf)) {
-            item.writeTo(output);
-            output.flush();
+        try (ByteArrayOutputStream buf = new ByteArrayOutputStream()) {
+            item.writeTo(buf);
             assertThat(buf.toByteArray(), is(contents));
         }
     }

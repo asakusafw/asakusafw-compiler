@@ -84,6 +84,14 @@ public class FileRepository implements ResourceRepository {
             }
         }
     }
+    /**
+     * Accepts a {@link FileVisitor} in this repository.
+     * @param visitor the visitor
+     * @throws IOException if failed to visit files in this repository
+     */
+    public void accept(FileVisitor visitor) throws IOException {
+        ResourceUtil.visit(visitor, root);
+    }
 
     @Override
     public int hashCode() {

@@ -11,8 +11,10 @@ import org.junit.Test;
 
 import com.asakusafw.lang.compiler.api.reference.DataModelReference;
 import com.asakusafw.lang.compiler.api.reference.PropertyReference;
+import com.asakusafw.lang.compiler.common.BasicExtensionContainer;
 import com.asakusafw.lang.compiler.common.DiagnosticException;
-import com.asakusafw.lang.compiler.core.basic.BasicDataModelLoader;
+import com.asakusafw.lang.compiler.core.adapter.DataModelLoaderAdapter;
+import com.asakusafw.lang.compiler.core.adapter.DataModelProcessorAdapter;
 import com.asakusafw.lang.compiler.model.PropertyName;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.description.Descriptions;
@@ -23,16 +25,16 @@ import com.asakusafw.runtime.value.StringOption;
 import com.asakusafw.runtime.value.ValueOption;
 
 /**
- * Test for {@link BasicDataModelLoader}.
+ * Test for {@link BasicDataModelProcessor}.
  */
-public class BasicDataModelLoaderTest {
+public class BasicDataModelProcessorTest {
 
     /**
      * simple case.
      */
     @Test
     public void simple() {
-        BasicDataModelLoader loader = new BasicDataModelLoader(getClass().getClassLoader());
+        DataModelLoaderAdapter loader = newInstance();
         DataModelReference ref = loader.load(Descriptions.typeOf(Simple.class));
         assertThat(loader.load(Descriptions.typeOf(Simple.class)), is(ref));
 
@@ -52,7 +54,7 @@ public class BasicDataModelLoaderTest {
      */
     @Test
     public void sorted() {
-        BasicDataModelLoader loader = new BasicDataModelLoader(getClass().getClassLoader());
+        DataModelLoaderAdapter loader = newInstance();
         DataModelReference ref = loader.load(Descriptions.typeOf(Sorted.class));
 
         List<PropertyReference> properties = new ArrayList<>(ref.getProperties());
@@ -69,7 +71,7 @@ public class BasicDataModelLoaderTest {
      */
     @Test(expected = DiagnosticException.class)
     public void class_not_found() {
-        BasicDataModelLoader loader = new BasicDataModelLoader(getClass().getClassLoader());
+        DataModelLoaderAdapter loader = newInstance();
         loader.load(new ClassDescription("___MISSING___"));
     }
 
@@ -78,7 +80,7 @@ public class BasicDataModelLoaderTest {
      */
     @Test(expected = DiagnosticException.class)
     public void class_unsupported() {
-        BasicDataModelLoader loader = new BasicDataModelLoader(getClass().getClassLoader());
+        DataModelLoaderAdapter loader = newInstance();
         loader.load(classOf(String.class));
     }
 
@@ -87,8 +89,14 @@ public class BasicDataModelLoaderTest {
      */
     @Test(expected = DiagnosticException.class)
     public void missing_properties() {
-        BasicDataModelLoader loader = new BasicDataModelLoader(getClass().getClassLoader());
+        DataModelLoaderAdapter loader = newInstance();
         loader.load(classOf(MissingProperties.class));
+    }
+
+    private DataModelLoaderAdapter newInstance() {
+        return new DataModelLoaderAdapter(
+                new BasicDataModelProcessor(),
+                new DataModelProcessorAdapter(getClass().getClassLoader(), new BasicExtensionContainer()));
     }
 
     private static abstract class Abstract<T extends Abstract<T>> implements DataModel<T> {

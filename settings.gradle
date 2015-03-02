@@ -23,6 +23,7 @@ include 'asakusa-compiler-extension-windgate'
 // others
 include 'asakusa-compiler-mock'
 include 'asakusa-compiler-testing'
+include 'asakusa-compiler-tester'
 
 rootProject.children.each { project ->
     project.projectDir = new File(settingsDir, "modules/${project.name}")

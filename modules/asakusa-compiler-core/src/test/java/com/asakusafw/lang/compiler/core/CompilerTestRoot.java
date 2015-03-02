@@ -3,7 +3,6 @@ package com.asakusafw.lang.compiler.core;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -13,10 +12,10 @@ import org.junit.rules.TemporaryFolder;
 
 import com.asakusafw.lang.compiler.api.BatchProcessor;
 import com.asakusafw.lang.compiler.api.CompilerOptions;
-import com.asakusafw.lang.compiler.api.DataModelLoader;
+import com.asakusafw.lang.compiler.api.DataModelProcessor;
 import com.asakusafw.lang.compiler.api.ExternalPortProcessor;
 import com.asakusafw.lang.compiler.api.JobflowProcessor;
-import com.asakusafw.lang.compiler.core.basic.BasicDataModelLoader;
+import com.asakusafw.lang.compiler.core.basic.BasicDataModelProcessor;
 import com.asakusafw.lang.compiler.core.dummy.DummyExternalPortProcessor;
 import com.asakusafw.lang.compiler.core.dummy.DummyImporterDescription;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
@@ -65,10 +64,7 @@ public abstract class CompilerTestRoot {
     /**
      * compiler options.
      */
-    public CompilerOptions options = new CompilerOptions(
-            "testing",
-            "working",
-            Collections.<String, String>emptyMap());
+    public CompilerOptions options = CompilerOptions.builder().build();
 
     /**
      * embedded libraries.
@@ -83,7 +79,7 @@ public abstract class CompilerTestRoot {
     /**
      * data model loaders.
      */
-    public List<DataModelLoader> dataModelLoaders = new ArrayList<>();
+    public List<DataModelProcessor> dataModelProcessors = new ArrayList<>();
 
     /**
      * batch processors.
@@ -139,12 +135,7 @@ public abstract class CompilerTestRoot {
      * @return info
      */
     public BatchInfo batchInfo(String id) {
-        return new BatchInfo.Basic(
-                id,
-                new ClassDescription(id),
-                null,
-                Collections.<BatchInfo.Parameter>emptyList(),
-                Collections.<BatchInfo.Attribute>emptyList());
+        return new BatchInfo.Basic(id, new ClassDescription(id));
     }
 
     /**
@@ -168,8 +159,8 @@ public abstract class CompilerTestRoot {
 
     private ToolRepository tools(boolean defaults, ClassLoader classLoader) {
         ToolRepository.Builder builder = ToolRepository.builder(classLoader);
-        for (DataModelLoader loader : dataModelLoaders) {
-            builder.use(loader);
+        for (DataModelProcessor processor : dataModelProcessors) {
+            builder.use(processor);
         }
         for (BatchProcessor processor : batchProcessors) {
             builder.use(processor);
@@ -184,8 +175,8 @@ public abstract class CompilerTestRoot {
             builder.use(participant);
         }
         if (defaults) {
-            if (dataModelLoaders.isEmpty()) {
-                builder.use(new BasicDataModelLoader(classLoader));
+            if (dataModelProcessors.isEmpty()) {
+                builder.use(new BasicDataModelProcessor());
             }
             if (externalPortProcessors.isEmpty()) {
                 builder.use(new DummyExternalPortProcessor());

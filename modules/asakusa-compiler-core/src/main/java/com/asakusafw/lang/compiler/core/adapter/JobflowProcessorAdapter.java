@@ -29,12 +29,15 @@ public class JobflowProcessorAdapter implements JobflowProcessor.Context {
 
     private final JobflowCompiler.Context delegate;
 
+    private final DataModelLoaderAdapter dataModelLoader;
+
     /**
      * Creates a new instance.
      * @param delegate the delegate target context
      */
     public JobflowProcessorAdapter(JobflowCompiler.Context delegate) {
         this.delegate = delegate;
+        this.dataModelLoader = new DataModelLoaderAdapter(delegate);
     }
 
     @Override
@@ -49,7 +52,7 @@ public class JobflowProcessorAdapter implements JobflowProcessor.Context {
 
     @Override
     public DataModelLoader getDataModelLoader() {
-        return delegate.getTools().getDataModelLoader();
+        return dataModelLoader;
     }
 
     @Override

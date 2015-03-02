@@ -4,13 +4,10 @@ import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
+import java.io.IOError;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import org.junit.rules.TemporaryFolder;
@@ -64,7 +61,7 @@ public class FileDeployer implements TestRule {
         try (InputStream in = open(sourcePath)) {
             return copy(in, targetPath);
         } catch (IOException e) {
-            throw new AssertionError(e);
+            throw new IOError(e);
         }
     }
 
@@ -76,11 +73,7 @@ public class FileDeployer implements TestRule {
      */
     public File copy(InputStream contents, String targetPath) {
         File target = toOutputFile(targetPath);
-        try (OutputStream output = create(target)) {
-            copy(contents, output);
-        } catch (IOException e) {
-            throw new AssertionError(e);
-        }
+        FileEditor.copy(contents, target);
         return target;
     }
 
@@ -93,35 +86,11 @@ public class FileDeployer implements TestRule {
     public File extract(String sourcePath, String targetPath) {
         File outputDirectory = toOutputFile(targetPath);
         try (ZipInputStream in = new ZipInputStream(open(sourcePath))) {
-            while (true) {
-                ZipEntry entry = in.getNextEntry();
-                if (entry == null) {
-                    break;
-                }
-                File target = new File(outputDirectory, entry.getName());
-                if (entry.isDirectory()) {
-                    target.mkdirs();
-                } else {
-                    try (OutputStream out = create(target)) {
-                        copy(in, out);
-                    }
-                }
-            }
+            FileEditor.extract(in, outputDirectory);
         } catch (IOException e) {
-            throw new AssertionError(e);
+            throw new IOError(e);
         }
         return outputDirectory;
-    }
-
-    private void copy(InputStream input, OutputStream output) throws IOException {
-        byte[] buf = new byte[256];
-        while (true) {
-            int read = input.read(buf);
-            if (read < 0) {
-                break;
-            }
-            output.write(buf, 0, read);
-        }
     }
 
     private InputStream open(String sourcePath) {
@@ -135,10 +104,5 @@ public class FileDeployer implements TestRule {
     private File toOutputFile(String path) {
         File target = new File(folder.getRoot(), path);
         return target;
-    }
-
-    private OutputStream create(File target) throws IOException {
-        target.getAbsoluteFile().getParentFile().mkdirs();
-        return new BufferedOutputStream(new FileOutputStream(target));
     }
 }

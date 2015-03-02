@@ -18,11 +18,27 @@ package com.asakusafw.lang.compiler.api;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Represents a set of Asakusa DSL compiler options.
  */
 public class CompilerOptions {
+
+    /**
+     * Represents a path of the default file system root.
+     */
+    public static final String ROOT_DIRECTORY = "/"; //$NON-NLS-1$
+
+    /**
+     * Represents a path of the file system working directory.
+     */
+    public static final String CURRENT_DIRECTORY = "."; //$NON-NLS-1$
+
+    /**
+     * Represents a path segment of execution ID.
+     */
+    public static final String NAME_EXECUTION_ID = "${execution_id}"; //$NON-NLS-1$
 
     private final String buildId;
 
@@ -32,17 +48,27 @@ public class CompilerOptions {
 
     /**
      * Creates a new instance.
+     * Clients may use {@link #builder()} instead of directly use this constructor.
      * @param buildId the current build ID
-     * @param runtimeWorkingDirectory the runtime working directory
+     * @param runtimeWorkingDirectory URI of the runtime working directory
      * @param properties the generic compiler properties
+     * @see #builder()
      */
     public CompilerOptions(
             String buildId,
             String runtimeWorkingDirectory,
             Map<String, String> properties) {
         this.buildId = buildId;
-        this.runtimeWorkingDirectory = runtimeWorkingDirectory;
+        this.runtimeWorkingDirectory = normalize(runtimeWorkingDirectory);
         this.properties = Collections.unmodifiableMap(new LinkedHashMap<>(properties));
+    }
+
+    /**
+     * Creates a new builder instance.
+     * @return a new builder
+     */
+    public static Builder builder() {
+        return new Builder();
     }
 
     /**
@@ -56,11 +82,14 @@ public class CompilerOptions {
     /**
      * Returns the framework specific runtime working directory.
      * <p>
-     * This generally contains variables (<code>${...}</code>) to prevent from conflict between working files
-     * of jobflow executions.
+     * This generally contains variables (<code>${...}</code>) to isolate working files
+     * between different jobflow executions.
      * </p>
      * @return the runtime working directory path (trailing {@code '/'} is removed)
      * @see #getRuntimeWorkingPath(String)
+     * @see #CURRENT_DIRECTORY
+     * @see #ROOT_DIRECTORY
+     * @see #NAME_EXECUTION_ID
      */
     public String getRuntimeWorkingDirectory() {
         return runtimeWorkingDirectory;
@@ -72,7 +101,7 @@ public class CompilerOptions {
      * @return the runtime working file path
      */
     public String getRuntimeWorkingPath(String relativePath) {
-        return String.format("%s/%s", getRuntimeWorkingDirectory(), relativePath); //$NON-NLS-1$
+        return path(getRuntimeWorkingDirectory(), relativePath);
     }
 
     /**
@@ -81,5 +110,114 @@ public class CompilerOptions {
      */
     public Map<String, String> getProperties() {
         return properties;
+    }
+
+    static String normalize(String path) {
+        String result = path;
+        while (result.endsWith("/")) { //$NON-NLS-1$
+            if (result.equals(ROOT_DIRECTORY)) {
+                break;
+            }
+            result = result.substring(0, result.length() - 1);
+        }
+        if (result.isEmpty()) {
+            return CURRENT_DIRECTORY;
+        }
+        return result;
+    }
+
+    static String path(String basePath, String relativePath) {
+        switch (basePath) {
+        case CURRENT_DIRECTORY:
+            return relativePath;
+        case ROOT_DIRECTORY:
+            return String.format("/%s", relativePath); //$NON-NLS-1$
+        default:
+            return String.format("%s/%s", basePath, relativePath); //$NON-NLS-1$
+        }
+    }
+
+    /**
+     * A builder for {@link CompilerOptions}.
+     */
+    public static class Builder {
+
+        /**
+         * The default runtime working directory.
+         */
+        public static final String DEFAULT_RUNTIME_WORKING_DIRECTORY =
+                ".asakusafw.tmp/" + NAME_EXECUTION_ID; //$NON-NLS-1$
+
+        private String buildId;
+
+        private String runtimeWorkingDirectory = DEFAULT_RUNTIME_WORKING_DIRECTORY;
+
+        private final Map<String, String> properties = new LinkedHashMap<>();
+
+        /**
+         * Sets the explicit build ID, instead of generated one.
+         * @param newValue the explicit build ID
+         * @return this
+         */
+        public Builder withBuildId(String newValue) {
+            this.buildId = newValue;
+            return this;
+        }
+
+        /**
+         * Sets the framework specific runtime working directory.
+         * @param newValue the runtime working directory path (trailing {@code '/'} is removed)
+         * @param isolate isolates working directories between different jobflow executions
+         *     by inserting {@link CompilerOptions#NAME_EXECUTION_ID execution ID} to end of the path
+         * @return this
+         */
+        public Builder withRuntimeWorkingDirectory(String newValue, boolean isolate) {
+            String base = newValue == null ? CURRENT_DIRECTORY : normalize(newValue);
+            if (isolate) {
+                this.runtimeWorkingDirectory = path(base, NAME_EXECUTION_ID);
+            } else {
+                this.runtimeWorkingDirectory = base;
+            }
+            return this;
+        }
+
+        /**
+         * Sets a property.
+         * @param key the property key
+         * @param value the property value
+         * @return this
+         */
+        public Builder withProperty(String key, String value) {
+            return withProperties(Collections.singletonMap(key, value));
+        }
+
+        /**
+         * Sets a property.
+         * @param newValues new keys and values
+         * @return this
+         */
+        public Builder withProperties(Map<String, String> newValues) {
+            for (Map.Entry<String, String> entry : newValues.entrySet()) {
+                String key = entry.getKey();
+                String value = entry.getValue();
+                if (value == null) {
+                    properties.remove(key);
+                } else {
+                    properties.put(key, value);
+                }
+            }
+            return this;
+        }
+
+        /**
+         * Builds and returns a {@link CompilerOptions} object.
+         * @return the built object
+         */
+        public CompilerOptions build() {
+            return new CompilerOptions(
+                    buildId == null ? UUID.randomUUID().toString() : buildId,
+                    runtimeWorkingDirectory,
+                    properties);
+        }
     }
 }

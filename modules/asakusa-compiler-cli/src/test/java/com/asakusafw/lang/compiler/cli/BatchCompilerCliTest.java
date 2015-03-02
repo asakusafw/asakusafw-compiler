@@ -28,8 +28,7 @@ import com.asakusafw.lang.compiler.cli.mock.DummyBatchCompiler;
 import com.asakusafw.lang.compiler.cli.mock.DummyBatchProcessor;
 import com.asakusafw.lang.compiler.cli.mock.DummyClassAnalyzer;
 import com.asakusafw.lang.compiler.cli.mock.DummyCompilerParticipant;
-import com.asakusafw.lang.compiler.cli.mock.DummyDataModelLoader;
-import com.asakusafw.lang.compiler.cli.mock.DummyDataModelLoaderFactory;
+import com.asakusafw.lang.compiler.cli.mock.DummyDataModelProcessor;
 import com.asakusafw.lang.compiler.cli.mock.DummyExternalPortProcessor;
 import com.asakusafw.lang.compiler.cli.mock.DummyJobflowProcessor;
 import com.asakusafw.lang.compiler.common.Diagnostic;
@@ -38,7 +37,6 @@ import com.asakusafw.lang.compiler.common.Location;
 import com.asakusafw.lang.compiler.common.Predicate;
 import com.asakusafw.lang.compiler.common.Predicates;
 import com.asakusafw.lang.compiler.core.BatchCompiler;
-import com.asakusafw.lang.compiler.core.basic.BasicDataModelLoaderFactory;
 import com.asakusafw.lang.compiler.core.util.CompositeElement;
 import com.asakusafw.lang.compiler.model.graph.Batch;
 import com.asakusafw.lang.compiler.packaging.ResourceRepository;
@@ -84,7 +82,6 @@ public class BatchCompilerCliTest {
         assertThat(conf.external, isEmpty());
         assertThat(conf.embed, isEmpty());
         assertThat(conf.attach, isEmpty());
-        assertThat(conf.dataModelLoaderFactory, contains(classOf(BasicDataModelLoaderFactory.class)));
         assertThat(conf.sourcePredicate, isEmpty());
         assertThat(conf.runtimeWorkingDirectory, contains(BatchCompilerCli.DEFAULT_RUNTIME_WORKING_DIRECTORY));
         assertThat(conf.properties.entrySet(), is(empty()));
@@ -115,7 +112,7 @@ public class BatchCompilerCliTest {
                 "--attach", files(attach1, attach2),
                 "--include", "*Buffer",
                 "--exclude", "java.lang.*",
-                "--dataModelLoaderFactory", classes(DummyDataModelLoaderFactory.class),
+                "--dataModelProcessors", classes(DummyDataModelProcessor.class),
                 "--externalPortProcessors", classes(DummyExternalPortProcessor.class),
                 "--batchProcessors", classes(DummyBatchProcessor.class),
                 "--jobflowProcessors", classes(DummyJobflowProcessor.class),
@@ -132,7 +129,7 @@ public class BatchCompilerCliTest {
         assertThat(conf.external, containsInAnyOrder(external1, external2));
         assertThat(conf.embed, containsInAnyOrder(embed1, embed2));
         assertThat(conf.attach, containsInAnyOrder(attach1, attach2));
-        assertThat(conf.dataModelLoaderFactory, containsInAnyOrder(classOf(DummyDataModelLoaderFactory.class)));
+        assertThat(conf.dataModelProcessors, containsInAnyOrder(classOf(DummyDataModelProcessor.class)));
         assertThat(conf.externalPortProcessors, containsInAnyOrder(classOf(DummyExternalPortProcessor.class)));
         assertThat(conf.batchProcessors, containsInAnyOrder(classOf(DummyBatchProcessor.class)));
         assertThat(conf.jobflowProcessors, containsInAnyOrder(classOf(DummyJobflowProcessor.class)));
@@ -210,7 +207,7 @@ public class BatchCompilerCliTest {
                 "--embed", files(embed),
                 "--attach", files(attach),
                 "--include", classes(DummyBatch.class),
-                "--dataModelLoaderFactory", classes(DummyDataModelLoaderFactory.class),
+                "--dataModelProcessors", classes(DummyDataModelProcessor.class),
                 "--externalPortProcessors", classes(DummyExternalPortProcessor.class),
                 "--batchProcessors", classes(DummyBatchProcessor.class),
                 "--jobflowProcessors", classes(DummyJobflowProcessor.class),
@@ -249,7 +246,7 @@ public class BatchCompilerCliTest {
                 assertThat(context.getProject().getAttachedLibraries(), deepIncludes("attach"));
                 assertThat(context.getProject().getAttachedLibraries(), not(deepIncludes("external")));
 
-                assertThat(context.getTools().getDataModelLoader(), is(consistsOf(DummyDataModelLoader.class)));
+                assertThat(context.getTools().getDataModelProcessor(), is(consistsOf(DummyDataModelProcessor.class)));
                 assertThat(context.getTools().getExternalPortProcessor(), is(consistsOf(DummyExternalPortProcessor.class)));
                 assertThat(context.getTools().getBatchProcessor(), is(consistsOf(DummyBatchProcessor.class)));
                 assertThat(context.getTools().getJobflowProcessor(), is(consistsOf(DummyJobflowProcessor.class)));

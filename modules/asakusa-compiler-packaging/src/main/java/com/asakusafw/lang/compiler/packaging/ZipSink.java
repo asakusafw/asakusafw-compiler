@@ -43,10 +43,10 @@ public class ZipSink implements ResourceSink {
     }
 
     @Override
-    public void add(Location location, Callback callback) throws IOException {
+    public void add(Location location, ContentProvider provider) throws IOException {
         output.putNextEntry(new ZipEntry(location.toPath()));
         try (OutputStream contents = new ZipEntryOutputStream(output)) {
-            callback.add(location, contents);
+            provider.writeTo(output);
         }
     }
 

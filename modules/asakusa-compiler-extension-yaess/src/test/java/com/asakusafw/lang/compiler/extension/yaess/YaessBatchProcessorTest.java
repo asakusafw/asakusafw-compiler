@@ -65,10 +65,7 @@ public class YaessBatchProcessorTest {
     @Test
     public void simple() {
         MockBatchProcessorContext context = new MockBatchProcessorContext(
-                new CompilerOptions(
-                        "testing",
-                        "runtime/testing",
-                        Collections.<String, String>emptyMap()),
+                CompilerOptions.builder().withBuildId("TESTING").build(),
                 getClass().getClassLoader(),
                 temporary.getRoot());
 
@@ -77,7 +74,7 @@ public class YaessBatchProcessorTest {
         BatchReference batch = batch("b", jobflow("f0", tasks));
 
         BatchScript script = execute(context, batch);
-        assertThat(script.getBuildId(), is("testing"));
+        assertThat(script.getBuildId(), is("TESTING"));
         assertThat(script.getId(), is("b"));
         assertThat(script.getAllFlows(), hasSize(1));
 
@@ -238,10 +235,7 @@ public class YaessBatchProcessorTest {
     @Test
     public void command() {
         MockBatchProcessorContext context = new MockBatchProcessorContext(
-                new CompilerOptions(
-                        "testing",
-                        "runtime/testing",
-                        Collections.<String, String>emptyMap()),
+                CompilerOptions.builder().build(),
                 getClass().getClassLoader(),
                 temporary.getRoot());
 
@@ -324,10 +318,7 @@ public class YaessBatchProcessorTest {
 
     private BatchScript execute(BatchReference batch) {
         MockBatchProcessorContext context = new MockBatchProcessorContext(
-                new CompilerOptions(
-                        "testing",
-                        "runtime/testing",
-                        Collections.<String, String>emptyMap()),
+                CompilerOptions.builder().build(),
                 getClass().getClassLoader(),
                 temporary.getRoot());
         return execute(context, batch);
@@ -350,12 +341,7 @@ public class YaessBatchProcessorTest {
 
     private BatchReference batch(String id, JobflowReference... jobflows) {
         return new BasicBatchReference(
-                new BatchInfo.Basic(
-                        id,
-                        new ClassDescription("Dummy"),
-                        null,
-                        Collections.<BatchInfo.Parameter>emptyList(),
-                        Collections.<BatchInfo.Attribute>emptySet()),
+                new BatchInfo.Basic(id, new ClassDescription("Dummy")),
                 Arrays.asList(jobflows));
     }
 

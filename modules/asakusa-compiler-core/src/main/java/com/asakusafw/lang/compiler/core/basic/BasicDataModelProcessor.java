@@ -4,14 +4,16 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.asakusafw.lang.compiler.api.DataModelLoader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.asakusafw.lang.compiler.api.DataModelProcessor;
 import com.asakusafw.lang.compiler.api.basic.BasicDataModelReference;
 import com.asakusafw.lang.compiler.api.reference.DataModelReference;
 import com.asakusafw.lang.compiler.common.Diagnostic;
@@ -27,55 +29,42 @@ import com.asakusafw.runtime.model.PropertyOrder;
 import com.asakusafw.runtime.value.ValueOption;
 
 /**
- * A basic implementation of {@link DataModelLoader}.
+ * A basic implementation of {@link DataModelProcessor}.
  */
-public class BasicDataModelLoader implements DataModelLoader {
+public class BasicDataModelProcessor implements DataModelProcessor {
 
-    private final Map<Class<?>, DataModelReference> cache = new HashMap<>();
+    static final Logger LOG = LoggerFactory.getLogger(BasicDataModelProcessor.class);
 
-    private final ClassLoader classLoader;
-
-    /**
-     * Creates a new instance.
-     * @param classLoader the original class loader
-     */
-    public BasicDataModelLoader(ClassLoader classLoader) {
-        this.classLoader = classLoader;
+    private Class<?> resolve(Context context, TypeDescription type) {
+        if (type.getTypeKind() == TypeKind.CLASS) {
+            Class<?> aClass;
+            try {
+                aClass = ((ClassDescription) type).resolve(context.getClassLoader());
+            } catch (ClassNotFoundException e) {
+                return null;
+            }
+            if (DataModel.class.isAssignableFrom(aClass)) {
+                return aClass.asSubclass(DataModel.class);
+            }
+        }
+        return null;
     }
 
     @Override
-    public DataModelReference load(TypeDescription type) {
-        try {
-            if (type.getTypeKind() == TypeKind.CLASS) {
-                Class<?> aClass = ((ClassDescription) type).resolve(classLoader);
-                DataModelReference cached = cache.get(aClass);
-                if (cached != null) {
-                    return cached;
-                }
-                if (DataModel.class.isAssignableFrom(aClass)) {
-                    DataModelReference result = load0(aClass);
-                    if (result != null) {
-                        cache.put(aClass, result);
-                        return result;
-                    }
-                }
-            }
-        } catch (ReflectiveOperationException e) {
+    public boolean isSupported(Context context, TypeDescription type) {
+        return resolve(context, type) != null;
+    }
+
+    @Override
+    public DataModelReference process(Context context, TypeDescription type) {
+        Class<?> aClass = resolve(context, type);
+        if (aClass == null) {
             throw new DiagnosticException(
                     Diagnostic.Level.ERROR,
                     MessageFormat.format(
-                            "failed to load data model: {0}",
-                            type),
-                    e);
+                            "unsupported data model: {0}",
+                            type));
         }
-        throw new DiagnosticException(
-                Diagnostic.Level.ERROR,
-                MessageFormat.format(
-                        "unsupported data model: {0}",
-                        type));
-    }
-
-    private DataModelReference load0(Class<?> aClass) {
         Map<PropertyName, Method> map = extractPropertyMap(aClass);
         List<PropertyName> order = extractPropertyOrder(aClass, map);
         BasicDataModelReference.Builder builder = BasicDataModelReference.builder(Descriptions.classOf(aClass));

@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.UUID;
 import java.util.regex.Pattern;
 
 import org.apache.commons.cli.BasicParser;
@@ -30,7 +29,7 @@ import org.slf4j.LoggerFactory;
 import com.asakusafw.lang.compiler.analyzer.adapter.BatchAdapter;
 import com.asakusafw.lang.compiler.api.BatchProcessor;
 import com.asakusafw.lang.compiler.api.CompilerOptions;
-import com.asakusafw.lang.compiler.api.DataModelLoaderFactory;
+import com.asakusafw.lang.compiler.api.DataModelProcessor;
 import com.asakusafw.lang.compiler.api.ExternalPortProcessor;
 import com.asakusafw.lang.compiler.api.JobflowProcessor;
 import com.asakusafw.lang.compiler.common.Diagnostic;
@@ -45,7 +44,6 @@ import com.asakusafw.lang.compiler.core.ProjectRepository;
 import com.asakusafw.lang.compiler.core.ToolRepository;
 import com.asakusafw.lang.compiler.core.basic.BasicBatchCompiler;
 import com.asakusafw.lang.compiler.core.basic.BasicClassAnalyzer;
-import com.asakusafw.lang.compiler.core.basic.BasicDataModelLoaderFactory;
 import com.asakusafw.lang.compiler.core.basic.JobflowPackager;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.description.Descriptions;
@@ -85,9 +83,9 @@ import com.asakusafw.lang.compiler.packaging.ResourceUtil;
  * <dd>denying batch class name pattern ({@code "*"} as a wildcard character)</dd>
  * <dd>default: <em>(denies nothing)</em></dd>
  *
- * <dt><code>--dataModelLoaderFactory &lt;class-name&gt;</code> <em>(optional)</em></dt>
- * <dd>custom data model loader factory class</dd>
- * <dd>default: {@link BasicDataModelLoaderFactory}</dd>
+ * <dt><code>--dataModelProcessors &lt;class-name1[,class-name2[,..]]&gt;</code> <em>(optional)</em></dt>
+ * <dd>custom data model processor classes</dd>
+ * <dd>default: <em>(empty)</em></dd>
  *
  * <dt><code>--externalPortProcessors &lt;class-name1[,class-name2[,..]]&gt;</code> <em>(optional)</em></dt>
  * <dd>custom external port processor classes</dd>
@@ -133,9 +131,6 @@ public class BatchCompilerCli {
 
     static final String CLASS_SEPARATOR = ","; //$NON-NLS-1$
 
-    static final ClassDescription DEFAULT_DATA_MODEL_LOADER_FACTORY =
-            Descriptions.classOf(BasicDataModelLoaderFactory.class);
-
     static final ClassDescription DEFAULT_BATCH_COMPILER = Descriptions.classOf(BasicBatchCompiler.class);
 
     static final ClassDescription DEFAULT_CLASS_ANALYZER = Descriptions.classOf(BasicClassAnalyzer.class);
@@ -143,7 +138,7 @@ public class BatchCompilerCli {
     /**
      * The default runtime working directory.
      */
-    public static final String DEFAULT_RUNTIME_WORKING_DIRECTORY = "target/hadoopwork/${executionId}"; //$NON-NLS-1$
+    public static final String DEFAULT_RUNTIME_WORKING_DIRECTORY = "target/hadoopwork"; //$NON-NLS-1$
 
     static final Logger LOG = LoggerFactory.getLogger(BatchCompilerCli.class);
 
@@ -217,7 +212,7 @@ public class BatchCompilerCli {
         results.explore.addAll(parseFiles(cmd, opts.explore, true));
         results.embed.addAll(parseFiles(cmd, opts.embed, true));
         results.attach.addAll(parseFiles(cmd, opts.attach, true));
-        results.dataModelLoaderFactory.set(parseClass(cmd, opts.dataModelLoaderFactory));
+        results.dataModelProcessors.addAll(parseClasses(cmd, opts.dataModelProcessors));
         results.externalPortProcessors.addAll(parseClasses(cmd, opts.externalPortProcessors));
         results.batchProcessors.addAll(parseClasses(cmd, opts.batchProcessors));
         results.jobflowProcessors.addAll(parseClasses(cmd, opts.jobflowProcessors));
@@ -347,10 +342,10 @@ public class BatchCompilerCli {
     }
 
     private static CompilerOptions loadOptions(Configuration configuration) {
-        return new CompilerOptions(
-                UUID.randomUUID().toString(),
-                configuration.runtimeWorkingDirectory.get(),
-                configuration.properties);
+        return CompilerOptions.builder()
+                .withRuntimeWorkingDirectory(configuration.runtimeWorkingDirectory.get(), true)
+                .withProperties(configuration.properties)
+                .build();
     }
 
     private static FileContainerRepository loadTemporary(Configuration configuration) throws IOException {
@@ -387,8 +382,10 @@ public class BatchCompilerCli {
 
     private static ToolRepository loadTools(ClassLoader classLoader, Configuration configuration) {
         ToolRepository.Builder builder = ToolRepository.builder(classLoader);
-        builder.use(newInstance(classLoader, DataModelLoaderFactory.class, configuration.dataModelLoaderFactory.get())
-                .get(classLoader));
+        for (ClassDescription aClass : configuration.dataModelProcessors) {
+            builder.use(newInstance(classLoader, DataModelProcessor.class, aClass));
+        }
+        builder.useDefaults(DataModelProcessor.class);
         for (ClassDescription aClass : configuration.externalPortProcessors) {
             builder.use(newInstance(classLoader, ExternalPortProcessor.class, aClass));
         }
@@ -526,9 +523,9 @@ public class BatchCompilerCli {
                 .withDescription("excluded batch class name pattern")
                 .withArgumentDescription(ARG_CLASS_PATTERN);
 
-        final Option dataModelLoaderFactory = optional("dataModelLoaderFactory", 1) //$NON-NLS-1$
-                .withDescription("custom data model loader factory class")
-                .withArgumentDescription(ARG_CLASS);
+        final Option dataModelProcessors = optional("dataModelProcessors", 1) //$NON-NLS-1$
+                .withDescription("custom data model processor classes")
+                .withArgumentDescription(ARG_CLASSES);
 
         final Option externalPortProcessors = optional("externalPortProcessors", 1) //$NON-NLS-1$
                 .withDescription("custom external port processor classes")
@@ -612,8 +609,7 @@ public class BatchCompilerCli {
 
         final ListHolder<File> attach = new ListHolder<>();
 
-        final ValueHolder<ClassDescription> dataModelLoaderFactory =
-                new ValueHolder<>(DEFAULT_DATA_MODEL_LOADER_FACTORY);
+        final ListHolder<ClassDescription> dataModelProcessors = new ListHolder<>();
 
         final ListHolder<ClassDescription> externalPortProcessors = new ListHolder<>();
 

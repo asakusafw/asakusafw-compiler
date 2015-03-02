@@ -67,8 +67,11 @@ public class ExternalPortAnalyzerAdapter implements ExternalPortAnalyzer {
 
         private final AnalyzerContext delegate;
 
+        private final DataModelLoader dataModelLoader;
+
         public ContextAdapter(AnalyzerContext delegate) {
             this.delegate = delegate;
+            this.dataModelLoader = new DataModelLoaderAdapter(delegate);
         }
 
         @Override
@@ -78,7 +81,7 @@ public class ExternalPortAnalyzerAdapter implements ExternalPortAnalyzer {
 
         @Override
         public DataModelLoader getDataModelLoader() {
-            return delegate.getTools().getDataModelLoader();
+            return dataModelLoader;
         }
     }
 }

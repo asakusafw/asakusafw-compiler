@@ -1,0 +1,16 @@
+description 'Asakusa DSL Compiler Testers'
+
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'eclipse'
+
+useSLF4J()
+
+dependencies {
+    compile project(':asakusa-compiler-core')
+    compile "com.asakusafw:asakusa-dsl-vocabulary:${asakusafwVersion}"
+    compile "com.asakusafw:asakusa-runtime:${asakusafwVersion}"
+
+    testCompile project(':asakusa-compiler-testing')
+    testCompile project(':asakusa-compiler-mock')
+}

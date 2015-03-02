@@ -55,6 +55,7 @@ public class ProjectRepository implements Closeable {
 
     /**
      * Creates a new instance.
+     * Clients use {@link #builder(ClassLoader)} instead of directly use this constructor.
      * @param classLoader the project class loader
      * @param projectContents repositories which provide project contents
      * @param embeddedContents repositories which provide embedded contents for each jobflow package
@@ -199,6 +200,8 @@ public class ProjectRepository implements Closeable {
 
         private final Set<File> attachedLibraries = new LinkedHashSet<>();
 
+        private final Set<ResourceRepository> embeddedItems = new LinkedHashSet<>();
+
         /**
          * Creates a new instance.
          * @param baseClassLoader the base class loader
@@ -231,6 +234,18 @@ public class ProjectRepository implements Closeable {
             checkFile(file);
             embeddedContents.add(file);
             libraryFiles.add(file);
+            return this;
+        }
+
+        /**
+         * Embeds items in the repository into each jobflow package.
+         * Note that, items in the repository will not be included into
+         * {@link ProjectRepository#getClassLoader() the project class loader}.
+         * @param repository the repository
+         * @return this
+         */
+        public Builder embed(ResourceRepository repository) {
+            embeddedItems.add(repository);
             return this;
         }
 
@@ -296,6 +311,7 @@ public class ProjectRepository implements Closeable {
         public ProjectRepository build() throws IOException {
             Set<ResourceRepository> project = buildRepositories(projectContents);
             Set<ResourceRepository> embedded = buildRepositories(embeddedContents);
+            embedded.addAll(embeddedItems);
             List<ResourceItem> attachedItems = new ArrayList<>();
             List<File> temporary = new ArrayList<>();
             boolean success = false;
@@ -340,6 +356,10 @@ public class ProjectRepository implements Closeable {
 
         private File buildJar(File file) throws IOException {
             ResourceRepository source = new FileRepository(file);
+            return buildJar(source);
+        }
+
+        private File buildJar(ResourceRepository source) throws IOException {
             File temporary = File.createTempFile(TEMP_FILE_PREFIX, EXTENSION_ARCHIVE);
             boolean success = false;
             try {

@@ -16,7 +16,7 @@ import com.asakusafw.lang.compiler.model.info.ExternalInputInfo;
 import com.asakusafw.lang.compiler.model.info.ExternalOutputInfo;
 
 /**
- * Processes external I/O ports..
+ * Processes external I/O ports.
  */
 public interface ExternalPortProcessor {
 
@@ -73,7 +73,7 @@ public interface ExternalPortProcessor {
             Collection<String> internalOutputPaths);
 
     /**
-     * Processes external descriptions I/O and returns required tasks for target I/Os.
+     * Processes external descriptions I/O.
      * @param context the current context
      * @param inputs input descriptions
      * @param outputs output descriptions

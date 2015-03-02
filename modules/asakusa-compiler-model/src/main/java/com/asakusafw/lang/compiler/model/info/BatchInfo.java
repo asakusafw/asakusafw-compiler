@@ -3,6 +3,7 @@ package com.asakusafw.lang.compiler.model.info;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -161,13 +162,22 @@ public interface BatchInfo extends DescriptionInfo {
                 String comment,
                 Collection<Parameter> parameters,
                 Collection<Attribute> attributes) {
-            super();
             this.batchId = batchId;
             this.descriptionClass = descriptionClass;
             this.comment = comment;
             this.parameters = new ArrayList<>(parameters);
             this.attributes = EnumSet.noneOf(Attribute.class);
             this.attributes.addAll(attributes);
+        }
+
+        /**
+         * Creates a new instance.
+         * @param batchId the batch ID
+         * @param descriptionClass the original batch description class
+         */
+        public Basic(String batchId, ClassDescription descriptionClass) {
+            this(batchId, descriptionClass,
+                    null, Collections.<Parameter>emptyList(), Collections.<Attribute>emptyList());
         }
 
         /**

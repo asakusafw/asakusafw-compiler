@@ -299,10 +299,7 @@ public class WindGatePortProcessorTest {
 
     private MockExternalPortProcessorContext context() {
         return new MockExternalPortProcessorContext(
-                new CompilerOptions(
-                        "testing",
-                        "rwd",
-                        Collections.<String, String>emptyMap()),
+                CompilerOptions.builder().build(),
                 getClass().getClassLoader(),
                 temporary.getRoot());
     }

@@ -8,11 +8,12 @@ import java.util.Map;
 
 import com.asakusafw.lang.compiler.api.reference.ExternalInputReference;
 import com.asakusafw.lang.compiler.api.reference.ExternalOutputReference;
+import com.asakusafw.lang.compiler.api.reference.ExternalPortReferenceMap;
 
 /**
  * Holds {@link ExternalInputReference}s and {@link ExternalOutputReference}s.
  */
-public class ExternalPortContainer {
+public class ExternalPortContainer implements ExternalPortReferenceMap {
 
     private final Map<String, ExternalInputReference> inputs = new LinkedHashMap<>();
 
@@ -49,9 +50,30 @@ public class ExternalPortContainer {
     }
 
     /**
+     * Returns an external input.
+     * @param name the target input port name
+     * @return the external input, or {@code null} if there is no such an external input
+     */
+    @Override
+    public ExternalInputReference findInput(String name) {
+        return inputs.get(name);
+    }
+
+    /**
+     * Returns an external output.
+     * @param name the target output port name
+     * @return the external output, or {@code null} if there is no such an external output
+     */
+    @Override
+    public ExternalOutputReference findOutput(String name) {
+        return outputs.get(name);
+    }
+
+    /**
      * Returns the external inputs which {@link #addInput(ExternalInputReference) added} to this container.
      * @return the added external inputs
      */
+    @Override
     public List<ExternalInputReference> getInputs() {
         return new ArrayList<>(inputs.values());
     }
@@ -60,6 +82,7 @@ public class ExternalPortContainer {
      * Returns the external outputs which {@link #addOutput(ExternalOutputReference) added} to this container.
      * @return the added external outputs
      */
+    @Override
     public List<ExternalOutputReference> getOutputs() {
         return new ArrayList<>(outputs.values());
     }

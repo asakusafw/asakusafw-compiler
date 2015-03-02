@@ -8,7 +8,7 @@ import com.asakusafw.lang.compiler.common.Location;
 /**
  * Represents a resource.
  */
-public interface ResourceItem {
+public interface ResourceItem extends ContentProvider {
 
     /**
      * Returns the resource path where this item exists.

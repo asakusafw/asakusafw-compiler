@@ -31,11 +31,20 @@ public class FileSink implements ResourceSink {
     }
 
     @Override
-    public void add(Location location, Callback callback) throws IOException {
+    public void add(Location location, ContentProvider provider) throws IOException {
         File file = ResourceUtil.toFile(root, location);
         try (OutputStream output = ResourceUtil.create(file)) {
-            callback.add(location, output);
+            provider.writeTo(output);
         }
+    }
+
+    /**
+     * Accepts a {@link FileVisitor} in this sink.
+     * @param visitor the visitor
+     * @throws IOException if failed to visit files in this sink
+     */
+    public void accept(FileVisitor visitor) throws IOException {
+        ResourceUtil.visit(visitor, root);
     }
 
     @Override

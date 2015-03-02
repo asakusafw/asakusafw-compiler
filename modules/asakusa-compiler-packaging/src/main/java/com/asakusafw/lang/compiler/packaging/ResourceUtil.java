@@ -65,6 +65,23 @@ public final class ResourceUtil {
     }
 
     /**
+     * Creates a {@link ResourceItem} from the class file.
+     * @param aClass the target class
+     * @return the created item
+     * @throws IOException if failed to locate the target class file
+     */
+    public static UrlItem toItem(Class<?> aClass) throws IOException {
+        Location location = toResourceLocation(aClass);
+        URL url = toUrl(aClass);
+        if (url == null) {
+            throw new IOException(MessageFormat.format(
+                    "Failed to locate the class file: {0}",
+                    aClass.getName()));
+        }
+        return new UrlItem(location, url);
+    }
+
+    /**
      * Creates a {@link ResourceRepository} from file.
      * @param file the target file
      * @return a {@link ResourceRepository} for enumerating contents in the file
@@ -102,18 +119,27 @@ public final class ResourceUtil {
      * @return the related library file, or {@code null} if the library file is not found
      */
     public static File findLibraryByClass(Class<?> aClass) {
-        String className = aClass.getName();
-        int start = className.lastIndexOf('.') + 1;
-        String name = className.substring(start);
-        URL resource = aClass.getResource(name + CLASS_EXTENSION);
+        URL resource = toUrl(aClass);
         if (resource == null) {
             LOG.warn(MessageFormat.format(
                     "Failed to locate the class file: {0}",
                     aClass.getName()));
             return null;
         }
-        String resourcePath = className.replace('.', '/') + CLASS_EXTENSION;
+        String resourcePath = toResourceLocation(aClass).toPath();
         return findLibraryFromUrl(resource, resourcePath);
+    }
+
+    private static Location toResourceLocation(Class<?> aClass) {
+        return Location.of(aClass.getName().replace('.', '/') + CLASS_EXTENSION);
+    }
+
+    private static URL toUrl(Class<?> aClass) {
+        String className = aClass.getName();
+        int start = className.lastIndexOf('.') + 1;
+        String name = className.substring(start);
+        URL resource = aClass.getResource(name + CLASS_EXTENSION);
+        return resource;
     }
 
     /**
@@ -278,6 +304,29 @@ public final class ResourceUtil {
                 break;
             }
             output.write(buf, 0, read);
+        }
+    }
+
+    static void visit(FileVisitor visitor, File file) throws IOException {
+        if (file.exists() == false) {
+            return;
+        }
+        if (file.isDirectory() == false) {
+            throw new IOException(MessageFormat.format(
+                    "visit target must be a directory: {0}",
+                    file));
+        }
+        visitElements(visitor, null, file);
+    }
+
+    private static void visitElements(FileVisitor visitor, Location current, File directory) throws IOException {
+        assert directory.isDirectory();
+        for (File file : directory.listFiles()) {
+            Location location = new Location(current, file.getName());
+            boolean enter = visitor.process(location, file);
+            if (enter && file.isDirectory()) {
+                visitElements(visitor, location, file);
+            }
         }
     }
 }

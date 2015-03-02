@@ -13,17 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.asakusafw.lang.compiler.api;
-
 /**
- * A factory interface for {@link DataModelLoader}.
+ * Utilities for Asakusa DSL compiler testers.
  */
-public interface DataModelLoaderFactory {
-
-    /**
-     * Returns a {@link DataModelLoader} for the target class loader.
-     * @param classLoader the base class loader
-     * @return a data model loader for the target class loader
-     */
-    DataModelLoader get(ClassLoader classLoader);
-}
+package com.asakusafw.lang.compiler.tester.executor.util;

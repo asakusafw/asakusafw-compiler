@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.MessageFormat;
 import java.util.Arrays;
 
@@ -44,6 +45,11 @@ public class ByteArrayItem implements ResourceItem {
      */
     public byte[] getContents() {
         return contents.clone();
+    }
+
+    @Override
+    public void writeTo(OutputStream output) throws IOException {
+        output.write(contents);
     }
 
     /**

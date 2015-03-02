@@ -25,11 +25,12 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import com.asakusafw.lang.compiler.api.BatchProcessor;
+import com.asakusafw.lang.compiler.api.DataModelProcessor;
 import com.asakusafw.lang.compiler.api.ExternalPortProcessor;
 import com.asakusafw.lang.compiler.api.JobflowProcessor;
 import com.asakusafw.lang.compiler.core.dummy.DummyBatchProcessor;
 import com.asakusafw.lang.compiler.core.dummy.DummyCompilerParticipant;
-import com.asakusafw.lang.compiler.core.dummy.DummyDataModelLoader;
+import com.asakusafw.lang.compiler.core.dummy.DummyDataModelProcessor;
 import com.asakusafw.lang.compiler.core.dummy.DummyElement;
 import com.asakusafw.lang.compiler.core.dummy.DummyExternalPortProcessor;
 import com.asakusafw.lang.compiler.core.dummy.DummyJobflowProcessor;
@@ -52,13 +53,13 @@ public class ToolRepositoryTest {
     @Test
     public void simple() {
         ToolRepository tools = ToolRepository.builder(getClass().getClassLoader())
-            .use(new DummyDataModelLoader())
+            .use(new DummyDataModelProcessor())
             .use(new DummyExternalPortProcessor())
             .use(new DummyBatchProcessor())
             .use(new DummyJobflowProcessor())
             .use(new DummyCompilerParticipant())
             .build();
-        assertThat(tools.getDataModelLoader(), hasIds("default"));
+        assertThat(tools.getDataModelProcessor(), hasIds("default"));
         assertThat(tools.getBatchProcessor(), hasIds("default"));
         assertThat(tools.getJobflowProcessor(), hasIds("default"));
         assertThat(tools.getExternalPortProcessor(), hasIds("default"));
@@ -71,21 +72,22 @@ public class ToolRepositoryTest {
     @Test
     public void multiplex() {
         ToolRepository tools = ToolRepository.builder(getClass().getClassLoader())
-            .use(new DummyDataModelLoader())
-            .use(new DummyExternalPortProcessor("a"))
-            .use(new DummyExternalPortProcessor("b"))
-            .use(new DummyBatchProcessor("c"))
-            .use(new DummyBatchProcessor("d"))
-            .use(new DummyJobflowProcessor("e"))
-            .use(new DummyJobflowProcessor("f"))
-            .use(new DummyCompilerParticipant("g"))
-            .use(new DummyCompilerParticipant("h"))
+            .use(new DummyDataModelProcessor("a"))
+            .use(new DummyDataModelProcessor("b"))
+            .use(new DummyExternalPortProcessor("c"))
+            .use(new DummyExternalPortProcessor("d"))
+            .use(new DummyBatchProcessor("e"))
+            .use(new DummyBatchProcessor("f"))
+            .use(new DummyJobflowProcessor("g"))
+            .use(new DummyJobflowProcessor("h"))
+            .use(new DummyCompilerParticipant("i"))
+            .use(new DummyCompilerParticipant("j"))
             .build();
-        assertThat(tools.getDataModelLoader(), hasIds("default"));
-        assertThat(tools.getExternalPortProcessor(), hasIds("a", "b"));
-        assertThat(tools.getBatchProcessor(), hasIds("c", "d"));
-        assertThat(tools.getJobflowProcessor(), hasIds("e", "f"));
-        assertThat(tools.getParticipant(), hasIds("g", "h"));
+        assertThat(tools.getDataModelProcessor(), hasIds("a", "b"));
+        assertThat(tools.getExternalPortProcessor(), hasIds("c", "d"));
+        assertThat(tools.getBatchProcessor(), hasIds("e", "f"));
+        assertThat(tools.getJobflowProcessor(), hasIds("g", "h"));
+        assertThat(tools.getParticipant(), hasIds("i", "j"));
     }
 
     /**
@@ -94,10 +96,10 @@ public class ToolRepositoryTest {
     @Test
     public void optional() {
         ToolRepository tools = ToolRepository.builder(getClass().getClassLoader())
-            .use(new DummyDataModelLoader())
+            .use(new DummyDataModelProcessor())
             .use(new DummyExternalPortProcessor())
             .build();
-        assertThat(tools.getDataModelLoader(), hasIds("default"));
+        assertThat(tools.getDataModelProcessor(), hasIds("default"));
         assertThat(tools.getExternalPortProcessor(), hasIds("default"));
         assertThat(tools.getBatchProcessor(), hasIds());
         assertThat(tools.getJobflowProcessor(), hasIds());
@@ -110,19 +112,20 @@ public class ToolRepositoryTest {
      */
     @Test
     public void defaults() throws Exception {
+        register(DataModelProcessor.class, DummyDataModelProcessor.class);
         register(ExternalPortProcessor.class, DummyExternalPortProcessor.class);
         register(BatchProcessor.class, DummyBatchProcessor.class);
         register(JobflowProcessor.class, DummyJobflowProcessor.class);
         register(CompilerParticipant.class, DummyCompilerParticipant.class);
         try (URLClassLoader loader = loader()) {
             ToolRepository tools = ToolRepository.builder(loader)
-                    .use(new DummyDataModelLoader())
+                    .useDefaults(DataModelProcessor.class)
                     .useDefaults(ExternalPortProcessor.class)
                     .useDefaults(BatchProcessor.class)
                     .useDefaults(JobflowProcessor.class)
                     .useDefaults(CompilerParticipant.class)
                     .build();
-                assertThat(tools.getDataModelLoader(), hasIds("default"));
+                assertThat(tools.getDataModelProcessor(), hasIds("default"));
                 assertThat(tools.getBatchProcessor(), hasIds("default"));
                 assertThat(tools.getJobflowProcessor(), hasIds("default"));
                 assertThat(tools.getExternalPortProcessor(), hasIds("default"));
@@ -136,7 +139,7 @@ public class ToolRepositoryTest {
     @Test(expected = RuntimeException.class)
     public void invalid_unknown() {
         ToolRepository.builder(getClass().getClassLoader())
-            .use(new DummyDataModelLoader())
+            .use(new DummyDataModelProcessor())
             .use(new DummyExternalPortProcessor())
             .use(new DummyBatchProcessor())
             .use(new DummyJobflowProcessor())
@@ -151,21 +154,6 @@ public class ToolRepositoryTest {
     @Test(expected = RuntimeException.class)
     public void invalid_missing() {
         ToolRepository.builder(getClass().getClassLoader())
-            .use(new DummyExternalPortProcessor())
-            .use(new DummyBatchProcessor())
-            .use(new DummyJobflowProcessor())
-            .use(new DummyCompilerParticipant())
-            .build();
-    }
-
-    /**
-     * duplicate singleton.
-     */
-    @Test(expected = RuntimeException.class)
-    public void invalid_duplicate() {
-        ToolRepository.builder(getClass().getClassLoader())
-            .use(new DummyDataModelLoader("a"))
-            .use(new DummyDataModelLoader("b"))
             .use(new DummyExternalPortProcessor())
             .use(new DummyBatchProcessor())
             .use(new DummyJobflowProcessor())

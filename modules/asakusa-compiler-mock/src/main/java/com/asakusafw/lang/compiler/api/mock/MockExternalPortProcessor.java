@@ -1,104 +1,87 @@
 package com.asakusafw.lang.compiler.api.mock;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import com.asakusafw.lang.compiler.api.CompilerOptions;
-import com.asakusafw.lang.compiler.api.DataModelLoader;
 import com.asakusafw.lang.compiler.api.ExternalPortProcessor;
-import com.asakusafw.lang.compiler.api.basic.AbstractExternalPortProcessorContext;
+import com.asakusafw.lang.compiler.api.JobflowProcessor;
 import com.asakusafw.lang.compiler.api.reference.ExternalInputReference;
 import com.asakusafw.lang.compiler.api.reference.ExternalOutputReference;
 import com.asakusafw.lang.compiler.common.Location;
-import com.asakusafw.lang.compiler.model.description.Descriptions;
 import com.asakusafw.lang.compiler.model.info.ExternalInputInfo;
 import com.asakusafw.lang.compiler.model.info.ExternalOutputInfo;
-import com.asakusafw.vocabulary.external.ExporterDescription;
-import com.asakusafw.vocabulary.external.ImporterDescription;
 
 /**
- * Mock implementation of {@link ExternalPortProcessor}.
+ * A mock {@link ExternalPortProcessor} implementation for
+ * {@link MockImporterDescription} and {@link MockExporterDescription}.
+ * <p>
+ * This does nothing in {@link #process(com.asakusafw.lang.compiler.api.ExternalPortProcessor.Context, List, List)}.
+ * Clients should prepare the jobflow input datasets onto {@link ExternalInputReference#getPaths()},
+ * and obtain the jobflow output datasets from {@link ExternalOutputReference#getPaths()}.
+ * </p>
+ * <p>
+ * This may be used for testing {@link JobflowProcessor}s.
+ * </p>
+ * @see MockJobflowProcessor
  */
 public class MockExternalPortProcessor implements ExternalPortProcessor {
 
-    private static final String MODULE_NAME = "mock";
+    private static Location DEFAULT_INPUT_PREFIX = Location.of("mock/input");
+
+    private final Location inputPrefix;
 
     /**
-     * A dummy context for this processor.
+     * Creates a new instance.
      */
-    public static final Context CONTEXT = new AbstractExternalPortProcessorContext() {
-        @Override
-        public CompilerOptions getOptions() {
-            throw new UnsupportedOperationException();
-        }
-        @Override
-        public DataModelLoader getDataModelLoader() {
-            throw new UnsupportedOperationException();
-        }
-        @Override
-        public ClassLoader getClassLoader() {
-            return MockExternalPortProcessor.class.getClassLoader();
-        }
-        @Override
-        public OutputStream addResourceFile(Location location) throws IOException {
-            throw new UnsupportedOperationException();
-        }
-    };
+    public MockExternalPortProcessor() {
+        this(DEFAULT_INPUT_PREFIX);
+    }
+
+    /**
+     * Creates a new instance.
+     * @param inputPrefix the input path prefix
+     */
+    public MockExternalPortProcessor(Location inputPrefix) {
+        this.inputPrefix = inputPrefix;
+    }
 
     @Override
     public boolean isSupported(AnalyzeContext context, Class<?> descriptionClass) {
-        return ImporterDescription.class.isAssignableFrom(descriptionClass)
-                || ExporterDescription.class.isAssignableFrom(descriptionClass);
+        return MockImporterDescription.class.isAssignableFrom(descriptionClass)
+                || MockExporterDescription.class.isAssignableFrom(descriptionClass);
     }
 
     @Override
     public ExternalInputInfo analyzeInput(AnalyzeContext context, String name, Object description) {
-        if ((description instanceof ImporterDescription) == false) {
-            throw new IllegalArgumentException();
+        if (description instanceof MockImporterDescription) {
+            return ((MockImporterDescription) description).toInfo();
         }
-        ImporterDescription desc = (ImporterDescription) description;
-        return new ExternalInputInfo.Basic(
-                Descriptions.classOf(desc.getClass()),
-                MODULE_NAME,
-                Descriptions.classOf(desc.getModelType()),
-                ExternalInputInfo.DataSize.valueOf(desc.getDataSize().name()));
+        throw new IllegalStateException();
     }
 
     @Override
     public ExternalOutputInfo analyzeOutput(AnalyzeContext context, String name, Object description) {
-        if ((description instanceof ExporterDescription) == false) {
-            throw new IllegalArgumentException();
+        if (description instanceof MockExporterDescription) {
+            return ((MockExporterDescription) description).toInfo();
         }
-        ExporterDescription desc = (ExporterDescription) description;
-        return new ExternalOutputInfo.Basic(
-                Descriptions.classOf(desc.getClass()),
-                MODULE_NAME,
-                Descriptions.classOf(desc.getModelType()));
+        throw new IllegalStateException();
     }
 
     @Override
     public ExternalInputReference resolveInput(Context context, String name, ExternalInputInfo info) {
-        String relativePath = String.format("%s/input/%s-*", MODULE_NAME, name);
-        String path = context.getOptions().getRuntimeWorkingPath(relativePath);
+        String path = context.getOptions().getRuntimeWorkingPath(inputPrefix.append(name).toPath());
         return new ExternalInputReference(name, info, Collections.singleton(path));
     }
 
     @Override
-    public ExternalOutputReference resolveOutput(
-            Context context,
-            String name,
-            ExternalOutputInfo info,
+    public ExternalOutputReference resolveOutput(Context context, String name, ExternalOutputInfo info,
             Collection<String> internalOutputPaths) {
         return new ExternalOutputReference(name, info, internalOutputPaths);
     }
 
     @Override
-    public void process(Context context,
-            List<ExternalInputReference> inputs,
-            List<ExternalOutputReference> outputs) throws IOException {
+    public void process(Context context, List<ExternalInputReference> inputs, List<ExternalOutputReference> outputs) {
         return;
     }
 }

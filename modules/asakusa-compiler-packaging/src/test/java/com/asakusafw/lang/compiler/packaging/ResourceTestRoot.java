@@ -171,10 +171,10 @@ public abstract class ResourceTestRoot {
      * @param contents the target contents
      * @return the callback object
      */
-    public static ResourceSink.Callback callback(final String contents) {
-        return new ResourceSink.Callback() {
+    public static ContentProvider callback(final String contents) {
+        return new ContentProvider() {
             @Override
-            public void add(Location location, OutputStream output) throws IOException {
+            public void writeTo(OutputStream output) throws IOException {
                 output.write(contents.getBytes(ENCODING));
             }
         };

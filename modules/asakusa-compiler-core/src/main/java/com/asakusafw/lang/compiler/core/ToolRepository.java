@@ -2,6 +2,7 @@ package com.asakusafw.lang.compiler.core;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -14,11 +15,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.asakusafw.lang.compiler.api.BatchProcessor;
-import com.asakusafw.lang.compiler.api.DataModelLoader;
+import com.asakusafw.lang.compiler.api.DataModelProcessor;
 import com.asakusafw.lang.compiler.api.ExternalPortProcessor;
 import com.asakusafw.lang.compiler.api.JobflowProcessor;
 import com.asakusafw.lang.compiler.core.util.CompositeBatchProcessor;
 import com.asakusafw.lang.compiler.core.util.CompositeCompilerParticipant;
+import com.asakusafw.lang.compiler.core.util.CompositeDataModelProcessor;
 import com.asakusafw.lang.compiler.core.util.CompositeExternalPortProcessor;
 import com.asakusafw.lang.compiler.core.util.CompositeJobflowProcessor;
 
@@ -29,7 +31,7 @@ public class ToolRepository {
 
     static final Logger LOG = LoggerFactory.getLogger(ToolRepository.class);
 
-    private final DataModelLoader dataModelLoader;
+    private final DataModelProcessor dataModelProcessor;
 
     private final BatchProcessor batchProcessor;
 
@@ -41,19 +43,20 @@ public class ToolRepository {
 
     /**
      * Creates a new instance.
-     * @param dataModelLoader the data model loader
+     * Clients use {@link #builder(ClassLoader)} instead of directly use this constructor.
+     * @param dataModelProcessor the data model processor
      * @param batchProcessor the batch processor
      * @param jobflowProcessor the jobflow processor
      * @param externalPortProcessor the external I/O port processor
      * @param participant the compiler participant
      */
     public ToolRepository(
-            DataModelLoader dataModelLoader,
+            DataModelProcessor dataModelProcessor,
             BatchProcessor batchProcessor,
             JobflowProcessor jobflowProcessor,
             ExternalPortProcessor externalPortProcessor,
             CompilerParticipant participant) {
-        this.dataModelLoader = dataModelLoader;
+        this.dataModelProcessor = dataModelProcessor;
         this.batchProcessor = batchProcessor;
         this.jobflowProcessor = jobflowProcessor;
         this.externalPortProcessor = externalPortProcessor;
@@ -69,13 +72,12 @@ public class ToolRepository {
         return new Builder(serviceClassLoader);
     }
 
-
     /**
-     * Returns the data model loader.
-     * @return the data model loader
+     * Returns the data model processor.
+     * @return the data model processor
      */
-    public DataModelLoader getDataModelLoader() {
-        return dataModelLoader;
+    public DataModelProcessor getDataModelProcessor() {
+        return dataModelProcessor;
     }
 
     /**
@@ -120,18 +122,17 @@ public class ToolRepository {
         private static final Set<Class<?>> SINGLETON_TOOLS;
         static {
             Set<Class<?>> all = new LinkedHashSet<>();
-            all.add(DataModelLoader.class);
+            all.add(DataModelProcessor.class);
             all.add(BatchProcessor.class);
             all.add(JobflowProcessor.class);
             all.add(ExternalPortProcessor.class);
             all.add(CompilerParticipant.class);
 
             Set<Class<?>> mandatory = new LinkedHashSet<>();
-            mandatory.add(DataModelLoader.class);
+            mandatory.add(DataModelProcessor.class);
             mandatory.add(ExternalPortProcessor.class);
 
             Set<Class<?>> singleton = new LinkedHashSet<>();
-            singleton.add(DataModelLoader.class);
 
             ALL_TOOLS = Collections.unmodifiableSet(all);
             MANDATORY_TOOLS = Collections.unmodifiableSet(mandatory);
@@ -156,12 +157,12 @@ public class ToolRepository {
         }
 
         /**
-         * Adds a {@link DataModelLoader}.
+         * Adds a {@link DataModelProcessor}.
          * @param tool the tool
          * @return this
          */
-        public Builder use(DataModelLoader tool) {
-            use(DataModelLoader.class, tool);
+        public Builder use(DataModelProcessor tool) {
+            use(DataModelProcessor.class, tool);
             return this;
         }
 
@@ -209,10 +210,32 @@ public class ToolRepository {
          * Adds default tools about the target type.
          * @param toolType the target tool type (e.g. {@link JobflowProcessor JobflowProcessor.class}})
          * @return this
+         * @see #useDefaults()
          */
         public Builder useDefaults(Class<?> toolType) {
-            useDefaults0(toolType);
+            return useDefaults(Collections.singleton(toolType));
+        }
+
+        /**
+         * Adds default tools about the target types.
+         * @param toolTypes the target tool types (e.g. {@link JobflowProcessor JobflowProcessor.class}})
+         * @return this
+         * @see #useDefaults()
+         */
+        public Builder useDefaults(Collection<? extends Class<?>> toolTypes) {
+            for (Class<?> aClass : toolTypes) {
+                useDefaults0(aClass);
+            }
             return this;
+        }
+
+        /**
+         * Adds default tools for all available tool types.
+         * @return this
+         * @see #useDefaults(Collection)
+         */
+        public Builder useDefaults() {
+            return useDefaults(ALL_TOOLS);
         }
 
         private <T> void useDefaults0(Class<T> toolType) {
@@ -260,7 +283,7 @@ public class ToolRepository {
                 }
             }
             return new ToolRepository(
-                    get(DataModelLoader.class).get(0),
+                    CompositeDataModelProcessor.composite(get(DataModelProcessor.class)),
                     CompositeBatchProcessor.composite(get(BatchProcessor.class)),
                     CompositeJobflowProcessor.composite(get(JobflowProcessor.class)),
                     CompositeExternalPortProcessor.composite(get(ExternalPortProcessor.class)),

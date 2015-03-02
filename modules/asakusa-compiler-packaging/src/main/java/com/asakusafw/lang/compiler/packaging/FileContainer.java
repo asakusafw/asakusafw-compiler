@@ -85,6 +85,15 @@ public class FileContainer implements ResourceContainer, ResourceRepository {
         return FileRepository.createCursor(basePath);
     }
 
+    /**
+     * Accepts a {@link FileVisitor} in this container.
+     * @param visitor the visitor
+     * @throws IOException if failed to visit files in this container
+     */
+    public void accept(FileVisitor visitor) throws IOException {
+        ResourceUtil.visit(visitor, basePath);
+    }
+
     @Override
     public String toString() {
         return MessageFormat.format(

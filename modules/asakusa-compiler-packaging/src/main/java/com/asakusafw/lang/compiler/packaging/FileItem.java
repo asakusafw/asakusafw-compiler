@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.MessageFormat;
 
 import com.asakusafw.lang.compiler.common.Location;
@@ -35,6 +36,13 @@ public class FileItem implements ResourceItem {
     @Override
     public InputStream openResource() throws IOException {
         return new FileInputStream(file);
+    }
+
+    @Override
+    public void writeTo(OutputStream output) throws IOException {
+        try (InputStream input = openResource()) {
+            ResourceUtil.copy(input, output);
+        }
     }
 
     /**
