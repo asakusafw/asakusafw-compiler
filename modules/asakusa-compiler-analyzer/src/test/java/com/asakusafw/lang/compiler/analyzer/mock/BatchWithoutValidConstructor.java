@@ -13,6 +13,6 @@ public class BatchWithoutValidConstructor extends BatchDescription {
 
     @Override
     protected void describe() {
-        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException();
     }
 }

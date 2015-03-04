@@ -15,6 +15,8 @@
  */
 package com.asakusafw.lang.compiler.analyzer;
 
+import java.util.Map;
+
 import com.asakusafw.lang.compiler.common.DiagnosticException;
 import com.asakusafw.lang.compiler.model.info.ExternalInputInfo;
 import com.asakusafw.lang.compiler.model.info.ExternalOutputInfo;
@@ -43,4 +45,12 @@ public interface ExternalPortAnalyzer {
      * @throws DiagnosticException if failed to resolve the target description
      */
     ExternalOutputInfo analyze(String name, ExporterDescription description);
+
+    /**
+     * Validates inputs and outputs.
+     * @param inputs the external inputs
+     * @param outputs the external outputs
+     * @throws DiagnosticException if failed to resolve the target description
+     */
+    void validate(Map<String, ExternalInputInfo> inputs, Map<String, ExternalOutputInfo> outputs);
 }

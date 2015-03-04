@@ -14,6 +14,7 @@ import com.asakusafw.lang.compiler.api.reference.CommandToken;
 import com.asakusafw.lang.compiler.common.Location;
 import com.asakusafw.lang.compiler.core.basic.JobflowPackager;
 import com.asakusafw.lang.compiler.tester.executor.TaskExecutor.Context;
+import com.asakusafw.runtime.stage.StageConstants;
 import com.asakusafw.runtime.util.VariableTable;
 
 /**
@@ -46,6 +47,21 @@ public final class TaskExecutors {
             executors.add(executor);
         }
         return executors;
+    }
+
+    /**
+     * Resolves a path string using the current context.
+     * @param context the current task execution context
+     * @param path the target path
+     * @return the resolved path
+     */
+    public static String resolvePath(Context context, String path) {
+        VariableTable table = new VariableTable(VariableTable.RedefineStrategy.ERROR);
+        table.defineVariable(StageConstants.VAR_USER, System.getProperty("user.name")); //$NON-NLS-1$
+        table.defineVariable(StageConstants.VAR_BATCH_ID, context.getBatch().getBatchId());
+        table.defineVariable(StageConstants.VAR_FLOW_ID, context.getJobflow().getFlowId());
+        table.defineVariable(StageConstants.VAR_EXECUTION_ID, context.getExecutionId());
+        return table.parse(path, true);
     }
 
     /**

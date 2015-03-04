@@ -9,5 +9,5 @@ useSLF4J()
 dependencies {
     compile project(':asakusa-compiler-common')
 
-    testCompile project(':asakusa-compiler-testing')
+    testCompile project(':asakusa-compiler-common-testing')
 }

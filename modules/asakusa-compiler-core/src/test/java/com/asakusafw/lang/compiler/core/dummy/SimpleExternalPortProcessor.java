@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import com.asakusafw.lang.compiler.api.ExternalPortProcessor;
 import com.asakusafw.lang.compiler.api.reference.CommandTaskReference;
@@ -60,6 +61,13 @@ public class SimpleExternalPortProcessor implements ExternalPortProcessor {
                 Descriptions.classOf(description.getClass()),
                 MODULE_NAME,
                 Descriptions.classOf(String.class));
+    }
+
+    @Override
+    public void validate(
+            AnalyzeContext context,
+            Map<String, ExternalInputInfo> inputs, Map<String, ExternalOutputInfo> outputs) {
+        return;
     }
 
     @Override

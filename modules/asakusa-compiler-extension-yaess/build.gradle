@@ -11,5 +11,5 @@ dependencies {
     compile project(':asakusa-compiler-extension-hadoop')
     compile "com.asakusafw:asakusa-yaess-core:${asakusafwVersion}"
 
-    testCompile project(':asakusa-compiler-mock')
+    testCompile project(':asakusa-compiler-api-testing')
 }

@@ -34,7 +34,7 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import com.asakusafw.lang.compiler.common.Location;
-import com.asakusafw.lang.compiler.testing.FileDeployer;
+import com.asakusafw.lang.compiler.common.testing.FileDeployer;
 
 /**
  * Test for {@link ResourceUtil}.

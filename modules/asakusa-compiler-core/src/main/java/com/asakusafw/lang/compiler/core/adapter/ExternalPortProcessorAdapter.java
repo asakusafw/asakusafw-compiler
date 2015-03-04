@@ -11,6 +11,8 @@ import com.asakusafw.lang.compiler.api.reference.TaskReference.Phase;
 import com.asakusafw.lang.compiler.common.Location;
 import com.asakusafw.lang.compiler.core.JobflowCompiler;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
+import com.asakusafw.lang.compiler.model.info.BatchInfo;
+import com.asakusafw.lang.compiler.model.info.JobflowInfo;
 
 /**
  * An adapter for {@link ExternalPortProcessor}.
@@ -19,20 +21,48 @@ public class ExternalPortProcessorAdapter implements ExternalPortProcessor.Conte
 
     private final JobflowCompiler.Context delegate;
 
+    private final String batchId;
+
+    private final String flowId;
+
     private final DataModelLoaderAdapter dataModelLoader;
 
     /**
      * Creates a new instance.
      * @param delegate the delegate target context
+     * @param batch the structural information of the target batch
+     * @param jobflow the structural information of the target jobflow
      */
-    public ExternalPortProcessorAdapter(JobflowCompiler.Context delegate) {
+    public ExternalPortProcessorAdapter(JobflowCompiler.Context delegate, BatchInfo batch, JobflowInfo jobflow) {
+        this(delegate, batch.getBatchId(), jobflow.getFlowId());
+    }
+
+    /**
+     * Creates a new instance.
+     * @param delegate the delegate target context
+     * @param batchId the target batch ID
+     * @param flowId the target flow ID
+     */
+    public ExternalPortProcessorAdapter(JobflowCompiler.Context delegate, String batchId, String flowId) {
         this.delegate = delegate;
+        this.batchId = batchId;
+        this.flowId = flowId;
         this.dataModelLoader = new DataModelLoaderAdapter(delegate);
     }
 
     @Override
     public CompilerOptions getOptions() {
         return delegate.getOptions();
+    }
+
+    @Override
+    public String getBatchId() {
+        return batchId;
+    }
+
+    @Override
+    public String getFlowId() {
+        return flowId;
     }
 
     @Override

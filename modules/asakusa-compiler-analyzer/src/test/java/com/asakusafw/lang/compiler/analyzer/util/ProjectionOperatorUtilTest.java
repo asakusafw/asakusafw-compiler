@@ -11,7 +11,7 @@ import java.util.Set;
 import org.junit.Test;
 
 import com.asakusafw.lang.compiler.api.DataModelLoader;
-import com.asakusafw.lang.compiler.api.mock.MockDataModelLoader;
+import com.asakusafw.lang.compiler.api.testing.MockDataModelLoader;
 import com.asakusafw.lang.compiler.common.DiagnosticException;
 import com.asakusafw.lang.compiler.model.PropertyName;
 import com.asakusafw.lang.compiler.model.graph.CoreOperator;

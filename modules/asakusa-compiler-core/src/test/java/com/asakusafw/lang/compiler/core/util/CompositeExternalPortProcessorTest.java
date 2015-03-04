@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Test;
 
@@ -183,7 +184,9 @@ public class CompositeExternalPortProcessorTest extends CompilerTestRoot {
     }
 
     private ExternalPortProcessor.Context context() {
-        return new ExternalPortProcessorAdapter(new JobflowCompiler.Context(context(true), container()));
+        return new ExternalPortProcessorAdapter(
+                new JobflowCompiler.Context(context(true), container()),
+                "dummybatch", "dummyflow");
     }
 
     private static class DummyInA {
@@ -256,6 +259,13 @@ public class CompositeExternalPortProcessorTest extends CompilerTestRoot {
                     Descriptions.classOf(supportedOutputClass),
                     moduleName,
                     Descriptions.classOf(String.class));
+        }
+
+        @Override
+        public void validate(
+                AnalyzeContext context,
+                Map<String, ExternalInputInfo> inputs, Map<String, ExternalOutputInfo> outputs) {
+            return;
         }
 
         @Override

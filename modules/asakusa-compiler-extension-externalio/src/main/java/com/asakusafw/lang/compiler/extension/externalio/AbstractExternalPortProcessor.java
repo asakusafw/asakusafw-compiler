@@ -1,11 +1,14 @@
 package com.asakusafw.lang.compiler.extension.externalio;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
 
 import com.asakusafw.lang.compiler.api.ExternalPortProcessor;
 import com.asakusafw.lang.compiler.api.reference.ExternalInputReference;
 import com.asakusafw.lang.compiler.api.reference.ExternalOutputReference;
+import com.asakusafw.lang.compiler.api.reference.TaskReference;
+import com.asakusafw.lang.compiler.common.Location;
 import com.asakusafw.lang.compiler.model.description.Descriptions;
 import com.asakusafw.lang.compiler.model.description.ValueDescription;
 import com.asakusafw.lang.compiler.model.info.ExternalInputInfo;
@@ -70,6 +73,21 @@ public abstract class AbstractExternalPortProcessor<
      */
     protected abstract Set<String> computeInputPaths(Context context, String name, ExternalInputInfo info);
 
+    /**
+     * Returns a temporary path for this component execution.
+     * @param context the current context
+     * @param phase the target phase
+     * @param location relative location, or {@code null} for base path
+     * @return a temporary working path
+     */
+    protected String getTemporaryPath(Context context, TaskReference.Phase phase, Location location) {
+        Location path = Location.of(getModuleName()).append(phase.getSymbol());
+        if (location != null) {
+            path = path.append(location);
+        }
+        return context.getOptions().getRuntimeWorkingPath(path.toPath());
+    }
+
     @Override
     public final boolean isSupported(AnalyzeContext context, Class<?> descriptionClass) {
         Class<TInput> input = getInputDescriptionType();
@@ -106,6 +124,13 @@ public abstract class AbstractExternalPortProcessor<
                 getModuleName(),
                 Descriptions.classOf(desc.getModelType()),
                 properties);
+    }
+
+    @Override
+    public void validate(
+            AnalyzeContext context,
+            Map<String, ExternalInputInfo> inputs, Map<String, ExternalOutputInfo> outputs) {
+        return;
     }
 
     @Override

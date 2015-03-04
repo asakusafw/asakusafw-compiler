@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import com.asakusafw.lang.compiler.api.reference.ExternalInputReference;
 import com.asakusafw.lang.compiler.api.reference.ExternalOutputReference;
@@ -32,7 +33,7 @@ public interface ExternalPortProcessor {
     /**
      * Analyzes external input description and returns structural information of it.
      * @param context the current context
-     * @param name the target input name (nullable)
+     * @param name the target input name
      * @param description the target description object
      * @return the analyzed information
      * @throws DiagnosticException if failed to resolve the target description
@@ -42,7 +43,7 @@ public interface ExternalPortProcessor {
     /**
      * Analyzes external output description and returns structural information of it.
      * @param context the current context
-     * @param name the target output name (nullable)
+     * @param name the target output name
      * @param description the target description object
      * @return the analyzed information
      * @throws DiagnosticException if failed to resolve the target description
@@ -50,9 +51,20 @@ public interface ExternalPortProcessor {
     ExternalOutputInfo analyzeOutput(AnalyzeContext context, String name, Object description);
 
     /**
+     * Validates external inputs and outputs.
+     * @param context the current context
+     * @param inputs the external inputs
+     * @param outputs the external outputs
+     * @throws DiagnosticException if failed to resolve the target description
+     */
+    void validate(
+            AnalyzeContext context,
+            Map<String, ExternalInputInfo> inputs, Map<String, ExternalOutputInfo> outputs);
+
+    /**
      * Resolves external input and returns a reference to the input port.
      * @param context the current context
-     * @param name the target output name (nullable)
+     * @param name the target output name
      * @param info the structural information of the target external input
      * @return the resolved reference
      */
@@ -61,10 +73,10 @@ public interface ExternalPortProcessor {
     /**
      * Resolves external output and returns a reference to the output port.
      * @param context the current context
-     * @param name the target output name (nullable)
+     * @param name the target output name
      * @param info the structural information of the target external output
      * @param internalOutputPaths the output file paths which have been generated before
-     *     {@link com.asakusafw.lang.compiler.api.reference.TaskReference.Phase#EPILOGUE eplilogue phase}
+     *     {@link com.asakusafw.lang.compiler.api.reference.TaskReference.Phase#EPILOGUE epilogue phase}
      * @return the resolved reference
      */
     ExternalOutputReference resolveOutput(
@@ -113,6 +125,18 @@ public interface ExternalPortProcessor {
          * @return the compiler options
          */
         CompilerOptions getOptions();
+
+        /**
+         * Returns the current batch ID.
+         * @return the current batch ID
+         */
+        String getBatchId();
+
+        /**
+         * Returns the current flow ID.
+         * @return the current flow ID
+         */
+        String getFlowId();
 
         /**
          * Adds a new Java class file and returns its output stream.

@@ -21,9 +21,9 @@ import org.junit.Test;
 
 import com.asakusafw.lang.compiler.common.Location;
 import com.asakusafw.lang.compiler.common.Predicate;
+import com.asakusafw.lang.compiler.common.testing.FileDeployer;
 import com.asakusafw.lang.compiler.packaging.ResourceRepository;
 import com.asakusafw.lang.compiler.packaging.ZipRepository;
-import com.asakusafw.lang.compiler.testing.FileDeployer;
 
 /**
  * Test for {@link ProjectRepository}.

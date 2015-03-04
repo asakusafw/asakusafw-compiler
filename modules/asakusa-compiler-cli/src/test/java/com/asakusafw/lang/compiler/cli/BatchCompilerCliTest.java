@@ -36,12 +36,12 @@ import com.asakusafw.lang.compiler.common.DiagnosticException;
 import com.asakusafw.lang.compiler.common.Location;
 import com.asakusafw.lang.compiler.common.Predicate;
 import com.asakusafw.lang.compiler.common.Predicates;
+import com.asakusafw.lang.compiler.common.testing.FileDeployer;
 import com.asakusafw.lang.compiler.core.BatchCompiler;
 import com.asakusafw.lang.compiler.core.util.CompositeElement;
 import com.asakusafw.lang.compiler.model.graph.Batch;
 import com.asakusafw.lang.compiler.packaging.ResourceRepository;
 import com.asakusafw.lang.compiler.packaging.ResourceUtil;
-import com.asakusafw.lang.compiler.testing.FileDeployer;
 
 /**
  * Test for {@link BatchCompilerCli}.

@@ -11,6 +11,7 @@ import java.util.Set;
 import org.junit.Rule;
 import org.junit.Test;
 
+import com.asakusafw.lang.compiler.common.testing.FileDeployer;
 import com.asakusafw.lang.compiler.core.BatchCompiler;
 import com.asakusafw.lang.compiler.core.CompilerTestRoot;
 import com.asakusafw.lang.compiler.core.basic.BasicBatchCompiler;
@@ -18,7 +19,6 @@ import com.asakusafw.lang.compiler.core.dummy.SimpleBatchProcessor;
 import com.asakusafw.lang.compiler.core.dummy.SimpleJobflowProcessor;
 import com.asakusafw.lang.compiler.model.graph.Batch;
 import com.asakusafw.lang.compiler.packaging.FileContainer;
-import com.asakusafw.lang.compiler.testing.FileDeployer;
 
 /**
  * Test for {@link AttachedLibrariesParticipant}.

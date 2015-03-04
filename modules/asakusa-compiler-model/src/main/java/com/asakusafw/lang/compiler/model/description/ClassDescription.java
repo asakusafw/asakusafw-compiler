@@ -54,6 +54,18 @@ public class ClassDescription extends ReifiableTypeDescription {
         return name.substring(index + 1);
     }
 
+    /**
+     * Returns package name of the class.
+     * @return the package name
+     */
+    public String getPackageName() {
+        int index = name.lastIndexOf('.');
+        if (index <= 0) {
+            return null;
+        }
+        return name.substring(0, index);
+    }
+
     @Override
     public Class<?> resolve(ClassLoader classLoader) throws ClassNotFoundException {
         return classLoader.loadClass(name);

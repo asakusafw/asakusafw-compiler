@@ -18,12 +18,12 @@ import org.junit.rules.TemporaryFolder;
 
 import com.asakusafw.lang.compiler.api.reference.CommandToken;
 import com.asakusafw.lang.compiler.common.Location;
+import com.asakusafw.lang.compiler.common.testing.FileEditor;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.info.BatchInfo;
 import com.asakusafw.lang.compiler.model.info.JobflowInfo;
 import com.asakusafw.lang.compiler.tester.TesterContext;
 import com.asakusafw.lang.compiler.tester.executor.TaskExecutor.Context;
-import com.asakusafw.lang.compiler.testing.FileEditor;
 import com.asakusafw.runtime.util.VariableTable;
 
 /**

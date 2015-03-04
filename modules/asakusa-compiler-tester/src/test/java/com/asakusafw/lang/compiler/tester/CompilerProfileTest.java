@@ -16,15 +16,16 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import com.asakusafw.lang.compiler.api.JobflowProcessor;
-import com.asakusafw.lang.compiler.api.mock.MockBatchProcessor;
-import com.asakusafw.lang.compiler.api.mock.MockDataModelProcessor;
-import com.asakusafw.lang.compiler.api.mock.MockExternalPortProcessor;
-import com.asakusafw.lang.compiler.api.mock.MockImporterDescription;
-import com.asakusafw.lang.compiler.api.mock.MockJobflowProcessor;
 import com.asakusafw.lang.compiler.api.reference.CommandToken;
 import com.asakusafw.lang.compiler.api.reference.TaskReference;
 import com.asakusafw.lang.compiler.api.reference.TaskReferenceMap;
+import com.asakusafw.lang.compiler.api.testing.MockBatchProcessor;
+import com.asakusafw.lang.compiler.api.testing.MockDataModelProcessor;
+import com.asakusafw.lang.compiler.api.testing.MockExternalPortProcessor;
+import com.asakusafw.lang.compiler.api.testing.MockImporterDescription;
+import com.asakusafw.lang.compiler.api.testing.MockJobflowProcessor;
 import com.asakusafw.lang.compiler.common.Location;
+import com.asakusafw.lang.compiler.common.testing.FileEditor;
 import com.asakusafw.lang.compiler.core.CompilerParticipant;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.description.Descriptions;
@@ -38,7 +39,6 @@ import com.asakusafw.lang.compiler.packaging.ByteArrayItem;
 import com.asakusafw.lang.compiler.packaging.ResourceItem;
 import com.asakusafw.lang.compiler.tester.executor.DummyTaskExecutor;
 import com.asakusafw.lang.compiler.tester.executor.JobflowExecutor;
-import com.asakusafw.lang.compiler.testing.FileEditor;
 
 /**
  * Test for {@link CompilerProfile} and {@link CompilerTester}.

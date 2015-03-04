@@ -15,6 +15,8 @@
  */
 package com.asakusafw.lang.compiler.analyzer;
 
+import java.util.Map;
+
 import com.asakusafw.lang.compiler.model.description.Descriptions;
 import com.asakusafw.lang.compiler.model.info.ExternalInputInfo;
 import com.asakusafw.lang.compiler.model.info.ExternalOutputInfo;
@@ -41,5 +43,10 @@ public class MockExternalPortAnalyzer implements ExternalPortAnalyzer {
                 Descriptions.classOf(description.getClass()),
                 "mock",
                 Descriptions.classOf(description.getModelType()));
+    }
+
+    @Override
+    public void validate(Map<String, ExternalInputInfo> inputs, Map<String, ExternalOutputInfo> outputs) {
+        return;
     }
 }

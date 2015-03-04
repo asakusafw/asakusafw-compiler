@@ -1,9 +1,8 @@
-// core
+// compiler core
 include 'asakusa-compiler-common'
 include 'asakusa-compiler-model'
 include 'asakusa-compiler-api'
 include 'asakusa-compiler-plan'
-include 'asakusa-compiler-util'
 include 'asakusa-compiler-packaging'
 
 // DSL driver
@@ -14,15 +13,20 @@ include 'asakusa-compiler-core'
 include 'asakusa-compiler-cli'
 
 // extensions
-include 'asakusa-compiler-extension-javac'
 include 'asakusa-compiler-extension-hadoop'
 include 'asakusa-compiler-extension-yaess'
 include 'asakusa-compiler-extension-externalio'
+include 'asakusa-compiler-extension-directio'
 include 'asakusa-compiler-extension-windgate'
 
-// others
-include 'asakusa-compiler-mock'
-include 'asakusa-compiler-testing'
+// utilities
+include 'asakusa-compiler-javac'
+include 'asakusa-compiler-mapreduce'
+
+// testing utilities
+include 'asakusa-compiler-common-testing'
+include 'asakusa-compiler-javac-testing'
+include 'asakusa-compiler-api-testing'
 include 'asakusa-compiler-tester'
 
 rootProject.children.each { project ->

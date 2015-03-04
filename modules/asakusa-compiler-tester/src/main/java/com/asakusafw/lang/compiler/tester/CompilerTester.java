@@ -18,6 +18,7 @@ import com.asakusafw.lang.compiler.api.reference.JobflowReference;
 import com.asakusafw.lang.compiler.common.DiagnosticException;
 import com.asakusafw.lang.compiler.core.BatchCompiler;
 import com.asakusafw.lang.compiler.core.BatchCompiler.Context;
+import com.asakusafw.lang.compiler.core.ClassAnalyzer;
 import com.asakusafw.lang.compiler.core.CompilerContext;
 import com.asakusafw.lang.compiler.core.CompilerParticipant;
 import com.asakusafw.lang.compiler.core.JobflowCompiler;
@@ -25,6 +26,7 @@ import com.asakusafw.lang.compiler.core.ProjectRepository;
 import com.asakusafw.lang.compiler.core.ToolRepository;
 import com.asakusafw.lang.compiler.core.basic.AbstractCompilerParticipant;
 import com.asakusafw.lang.compiler.core.basic.BasicBatchCompiler;
+import com.asakusafw.lang.compiler.core.basic.BasicClassAnalyzer;
 import com.asakusafw.lang.compiler.core.util.CompositeCompilerParticipant;
 import com.asakusafw.lang.compiler.model.description.Descriptions;
 import com.asakusafw.lang.compiler.model.graph.Batch;
@@ -80,6 +82,8 @@ public class CompilerTester implements Closeable {
 
     static final Logger LOG = LoggerFactory.getLogger(CompilerTester.class);
 
+    private final ClassAnalyzer classAnalyzer;
+
     private final BatchCompiler batchCompiler;
 
     private final TesterContext testerContext;
@@ -94,16 +98,20 @@ public class CompilerTester implements Closeable {
      * @param compilerContext the compiler context
      */
     public CompilerTester(TesterContext testerContext, CompilerContext compilerContext) {
-        this(new BasicBatchCompiler(), testerContext, compilerContext);
+        this(new BasicClassAnalyzer(), new BasicBatchCompiler(), testerContext, compilerContext);
     }
 
     /**
      * Creates a new instance.
+     * @param classAnalyzer the class analyzer
      * @param batchCompiler the batch compiler
      * @param testerContext the tester context
      * @param compilerContext the compiler context
      */
-    public CompilerTester(BatchCompiler batchCompiler, TesterContext testerContext, CompilerContext compilerContext) {
+    public CompilerTester(
+            ClassAnalyzer classAnalyzer, BatchCompiler batchCompiler,
+            TesterContext testerContext, CompilerContext compilerContext) {
+        this.classAnalyzer = classAnalyzer;
         this.batchCompiler = batchCompiler;
         this.testerContext = testerContext;
         this.collector = new ResultCollector();
@@ -153,6 +161,26 @@ public class CompilerTester implements Closeable {
      */
     public TesterContext getTesterContext() {
         return testerContext;
+    }
+
+    /**
+     * Analyzes a jobflow class.
+     * @param jobflowClass the target jobflow class
+     * @return the analyzed model
+     * @throws DiagnosticException if the target jobflow class is not valid
+     */
+    public Jobflow analyzeJobflow(Class<?> jobflowClass) {
+        return classAnalyzer.analyzeJobflow(new ClassAnalyzer.Context(compilerContext), jobflowClass);
+    }
+
+    /**
+     * Analyzes a batch class.
+     * @param batchClass the target batch class
+     * @return the analyzed model
+     * @throws DiagnosticException if the target batch class is not valid
+     */
+    public Batch analyzeBatch(Class<?> batchClass) {
+        return classAnalyzer.analyzeBatch(new ClassAnalyzer.Context(compilerContext), batchClass);
     }
 
     /**

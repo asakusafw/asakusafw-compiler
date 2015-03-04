@@ -10,5 +10,5 @@ dependencies {
     compile project(':asakusa-compiler-extension-externalio')
     compile "com.asakusafw:asakusa-windgate-vocabulary:${asakusafwVersion}"
 
-    testCompile project(':asakusa-compiler-mock')
+    testCompile project(':asakusa-compiler-api-testing')
 }

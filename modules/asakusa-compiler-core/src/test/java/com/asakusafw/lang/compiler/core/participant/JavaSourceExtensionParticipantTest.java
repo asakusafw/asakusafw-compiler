@@ -19,7 +19,7 @@ import com.asakusafw.lang.compiler.core.CompilerTestRoot;
 import com.asakusafw.lang.compiler.core.JobflowCompiler;
 import com.asakusafw.lang.compiler.core.basic.BasicJobflowCompiler;
 import com.asakusafw.lang.compiler.core.dummy.SimpleExternalPortProcessor;
-import com.asakusafw.lang.compiler.extension.javac.JavaSourceExtension;
+import com.asakusafw.lang.compiler.javac.JavaSourceExtension;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.graph.Jobflow;
 import com.asakusafw.lang.compiler.packaging.FileContainer;

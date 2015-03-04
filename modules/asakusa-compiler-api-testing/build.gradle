@@ -1,0 +1,14 @@
+description 'Testing utilities for Asakusa DSL Compiler APIs'
+
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'eclipse'
+
+useSLF4J()
+useHadoopInTest()
+
+dependencies {
+    compile project(':asakusa-compiler-api')
+    compile "com.asakusafw:asakusa-dsl-vocabulary:${asakusafwVersion}"
+    compile "com.asakusafw:asakusa-runtime:${asakusafwVersion}"
+}

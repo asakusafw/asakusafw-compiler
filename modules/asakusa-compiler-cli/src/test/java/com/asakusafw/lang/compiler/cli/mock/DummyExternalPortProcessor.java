@@ -3,6 +3,7 @@ package com.asakusafw.lang.compiler.cli.mock;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import com.asakusafw.lang.compiler.api.ExternalPortProcessor;
 import com.asakusafw.lang.compiler.api.reference.ExternalInputReference;
@@ -43,6 +44,13 @@ public class DummyExternalPortProcessor implements ExternalPortProcessor, DummyE
 
     @Override
     public ExternalOutputInfo analyzeOutput(AnalyzeContext context, String name, Object description) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void validate(
+            AnalyzeContext context,
+            Map<String, ExternalInputInfo> inputs, Map<String, ExternalOutputInfo> outputs) {
         throw new UnsupportedOperationException();
     }
 

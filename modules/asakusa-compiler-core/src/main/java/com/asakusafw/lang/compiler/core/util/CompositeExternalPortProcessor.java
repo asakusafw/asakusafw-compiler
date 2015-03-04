@@ -69,7 +69,7 @@ public class CompositeExternalPortProcessor implements ExternalPortProcessor, Co
         return supported;
     }
 
-    private ExternalPortProcessor getSupportedChecked(Context context, ExternalPortInfo info) {
+    private ExternalPortProcessor getSupportedChecked(AnalyzeContext context, ExternalPortInfo info) {
         try {
             Class<?> aClass = info.getDescriptionClass().resolve(context.getClassLoader());
             return getSupportedChecked(context, aClass);
@@ -98,6 +98,37 @@ public class CompositeExternalPortProcessor implements ExternalPortProcessor, Co
     }
 
     @Override
+    public void validate(
+            AnalyzeContext context,
+            Map<String, ExternalInputInfo> inputs, Map<String, ExternalOutputInfo> outputs) {
+        Map<ExternalPortProcessor, InfoPair> pairs = new LinkedHashMap<>();
+        for (ExternalPortProcessor element : elements) {
+            pairs.put(element, new InfoPair());
+        }
+        for (Map.Entry<String, ExternalInputInfo> entry : inputs.entrySet()) {
+            String key = entry.getKey();
+            ExternalInputInfo port = entry.getValue();
+            ExternalPortProcessor supported = getSupportedChecked(context, port);
+            assert pairs.containsKey(supported);
+            pairs.get(supported).inputs.put(key, port);
+        }
+        for (Map.Entry<String, ExternalOutputInfo> entry : outputs.entrySet()) {
+            String key = entry.getKey();
+            ExternalOutputInfo port = entry.getValue();
+            ExternalPortProcessor supported = getSupportedChecked(context, port);
+            assert pairs.containsKey(supported);
+            pairs.get(supported).outputs.put(key, port);
+        }
+        for (Map.Entry<ExternalPortProcessor, InfoPair> entry : pairs.entrySet()) {
+            ExternalPortProcessor element = entry.getKey();
+            InfoPair pair = entry.getValue();
+            if (pair.isValid()) {
+                element.validate(context, pair.inputs, pair.outputs);
+            }
+        }
+    }
+
+    @Override
     public ExternalInputReference resolveInput(Context context, String name, ExternalInputInfo info) {
         ExternalPortProcessor element = getSupportedChecked(context, info);
         return element.resolveInput(context, name, info);
@@ -113,9 +144,9 @@ public class CompositeExternalPortProcessor implements ExternalPortProcessor, Co
     @Override
     public void process(Context context, List<ExternalInputReference> inputs, List<ExternalOutputReference> outputs)
             throws IOException {
-        Map<ExternalPortProcessor, Pair> pairs = new LinkedHashMap<>();
+        Map<ExternalPortProcessor, ReferencePair> pairs = new LinkedHashMap<>();
         for (ExternalPortProcessor element : elements) {
-            pairs.put(element, new Pair());
+            pairs.put(element, new ReferencePair());
         }
         for (ExternalInputReference port : inputs) {
             ExternalPortProcessor supported = getSupportedChecked(context, port);
@@ -127,9 +158,9 @@ public class CompositeExternalPortProcessor implements ExternalPortProcessor, Co
             assert pairs.containsKey(supported);
             pairs.get(supported).outputs.add(port);
         }
-        for (Map.Entry<ExternalPortProcessor, Pair> entry : pairs.entrySet()) {
+        for (Map.Entry<ExternalPortProcessor, ReferencePair> entry : pairs.entrySet()) {
             ExternalPortProcessor element = entry.getKey();
-            Pair pair = entry.getValue();
+            ReferencePair pair = entry.getValue();
             if (pair.isValid()) {
                 element.process(context, pair.inputs, pair.outputs);
             }
@@ -146,13 +177,28 @@ public class CompositeExternalPortProcessor implements ExternalPortProcessor, Co
                 elements);
     }
 
-    private static final class Pair {
+    private static final class InfoPair {
+
+        final Map<String, ExternalInputInfo> inputs = new LinkedHashMap<>();
+
+        final Map<String, ExternalOutputInfo> outputs = new LinkedHashMap<>();
+
+        InfoPair() {
+            return;
+        }
+
+        boolean isValid() {
+            return inputs.isEmpty() == false || outputs.isEmpty() == false;
+        }
+    }
+
+    private static final class ReferencePair {
 
         final List<ExternalInputReference> inputs = new ArrayList<>();
 
         final List<ExternalOutputReference> outputs = new ArrayList<>();
 
-        Pair() {
+        ReferencePair() {
             return;
         }
 

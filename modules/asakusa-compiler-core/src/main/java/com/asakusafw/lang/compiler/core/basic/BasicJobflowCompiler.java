@@ -34,7 +34,7 @@ public class BasicJobflowCompiler implements JobflowCompiler {
     }
 
     private void runOperatorGraphProcessor(Context context, BatchInfo batch, Jobflow jobflow) {
-        JobflowProcessorAdapter adapter = new JobflowProcessorAdapter(context);
+        JobflowProcessorAdapter adapter = new JobflowProcessorAdapter(context, batch, jobflow);
         JobflowProcessor processor = context.getTools().getJobflowProcessor();
         try {
             processor.process(adapter, jobflow);
@@ -50,7 +50,7 @@ public class BasicJobflowCompiler implements JobflowCompiler {
         if (externals.isEmpty()) {
             return;
         }
-        ExternalPortProcessorAdapter adapter = new ExternalPortProcessorAdapter(context);
+        ExternalPortProcessorAdapter adapter = new ExternalPortProcessorAdapter(context, batch, jobflow);
         ExternalPortProcessor processor = context.getTools().getExternalPortProcessor();
         try {
             processor.process(adapter, externals.getInputs(), externals.getOutputs());

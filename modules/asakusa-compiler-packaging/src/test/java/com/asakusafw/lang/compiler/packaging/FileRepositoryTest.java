@@ -33,8 +33,8 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import com.asakusafw.lang.compiler.common.Location;
+import com.asakusafw.lang.compiler.common.testing.FileDeployer;
 import com.asakusafw.lang.compiler.packaging.ResourceRepository.Cursor;
-import com.asakusafw.lang.compiler.testing.FileDeployer;
 
 /**
  * Test for {@link FileRepository}.

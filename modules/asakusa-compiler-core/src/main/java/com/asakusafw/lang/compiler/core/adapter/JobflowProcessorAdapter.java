@@ -19,8 +19,10 @@ import com.asakusafw.lang.compiler.api.reference.TaskReference;
 import com.asakusafw.lang.compiler.common.Location;
 import com.asakusafw.lang.compiler.core.JobflowCompiler;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
+import com.asakusafw.lang.compiler.model.info.BatchInfo;
 import com.asakusafw.lang.compiler.model.info.ExternalInputInfo;
 import com.asakusafw.lang.compiler.model.info.ExternalOutputInfo;
+import com.asakusafw.lang.compiler.model.info.JobflowInfo;
 
 /**
  * An adapter for {@link JobflowProcessor}.
@@ -31,12 +33,30 @@ public class JobflowProcessorAdapter implements JobflowProcessor.Context {
 
     private final DataModelLoaderAdapter dataModelLoader;
 
+    private final String batchId;
+
+    private final String flowId;
+
     /**
      * Creates a new instance.
      * @param delegate the delegate target context
+     * @param batch the structural information of the target batch
+     * @param jobflow the structural information of the target jobflow
      */
-    public JobflowProcessorAdapter(JobflowCompiler.Context delegate) {
+    public JobflowProcessorAdapter(JobflowCompiler.Context delegate, BatchInfo batch, JobflowInfo jobflow) {
+        this(delegate, batch.getBatchId(), jobflow.getFlowId());
+    }
+
+    /**
+     * Creates a new instance.
+     * @param delegate the delegate target context
+     * @param batchId the target batch ID
+     * @param flowId the target flow ID
+     */
+    public JobflowProcessorAdapter(JobflowCompiler.Context delegate, String batchId, String flowId) {
         this.delegate = delegate;
+        this.batchId = batchId;
+        this.flowId = flowId;
         this.dataModelLoader = new DataModelLoaderAdapter(delegate);
     }
 
@@ -67,7 +87,7 @@ public class JobflowProcessorAdapter implements JobflowProcessor.Context {
 
     @Override
     public ExternalInputReference addExternalInput(String name, ExternalInputInfo info) {
-        ExternalPortProcessorAdapter adapter = new ExternalPortProcessorAdapter(delegate);
+        ExternalPortProcessorAdapter adapter = newExternalPortProcessorAdapter();
         ExternalPortProcessor processor = delegate.getTools().getExternalPortProcessor();
         ExternalInputReference reference = processor.resolveInput(adapter, name, info);
         delegate.getExternalPorts().addInput(reference);
@@ -79,11 +99,15 @@ public class JobflowProcessorAdapter implements JobflowProcessor.Context {
             String name,
             ExternalOutputInfo info,
             Collection<String> internalOutputPaths) {
-        ExternalPortProcessorAdapter adapter = new ExternalPortProcessorAdapter(delegate);
+        ExternalPortProcessorAdapter adapter = newExternalPortProcessorAdapter();
         ExternalPortProcessor processor = delegate.getTools().getExternalPortProcessor();
         ExternalOutputReference reference = processor.resolveOutput(adapter, name, info, internalOutputPaths);
         delegate.getExternalPorts().addOutput(reference);
         return reference;
+    }
+
+    private ExternalPortProcessorAdapter newExternalPortProcessorAdapter() {
+        return new ExternalPortProcessorAdapter(delegate, batchId, flowId);
     }
 
     @Override

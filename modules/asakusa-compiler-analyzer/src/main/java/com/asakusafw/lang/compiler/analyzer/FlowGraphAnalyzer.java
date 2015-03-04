@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -94,7 +95,14 @@ public final class FlowGraphAnalyzer {
      * @return the equivalent operator graph
      */
     public OperatorGraph analyze(FlowGraph graph) {
-        Context context = new Context();
+        Context root = new Context(null);
+        OperatorGraph result = analyze0(root, graph);
+        root.validate(ioAnalyzer);
+        return result;
+    }
+
+    private OperatorGraph analyze0(Context parent, FlowGraph graph) {
+        Context context = new Context(parent);
         Graph<FlowElement> dependencies = FlowElementUtil.toDependencyGraph(graph);
         Set<Set<FlowElement>> circuits = Graphs.findCircuit(dependencies);
         if (circuits.isEmpty() == false) {
@@ -139,6 +147,7 @@ public final class FlowGraphAnalyzer {
                 context.merge(e.getDiagnostics());
                 return null;
             }
+            context.registerExternalInput(description.getName(), info);
         }
         return convert(description, ExternalInput.builder(description.getName(), info));
     }
@@ -153,6 +162,7 @@ public final class FlowGraphAnalyzer {
                 context.merge(e.getDiagnostics());
                 return null;
             }
+            context.registerExternalOutput(description.getName(), info);
         }
         return convert(description, ExternalOutput.builder(description.getName(), info));
     }
@@ -161,7 +171,7 @@ public final class FlowGraphAnalyzer {
         ClassDescription declaring = Descriptions.classOf(description.getFlowGraph().getDescription());
         OperatorGraph inner;
         try {
-            inner = analyze(description.getFlowGraph());
+            inner = analyze0(context, description.getFlowGraph());
         } catch (DiagnosticException e) {
             context.merge(e.getDiagnostics());
             return null;
@@ -302,8 +312,22 @@ public final class FlowGraphAnalyzer {
 
         private final Map<FlowElementOutput, OperatorOutput> upstreams = new HashMap<>();
 
-        Context() {
-            return;
+        private final Map<String, ExternalInputInfo> inputs;
+
+        private final Map<String, ExternalOutputInfo> outputs;
+
+        Context(Context parent) {
+            if (parent == null) {
+                this.inputs = new LinkedHashMap<>();
+                this.outputs = new LinkedHashMap<>();
+            } else {
+                this.inputs = parent.inputs;
+                this.outputs = parent.outputs;
+            }
+        }
+
+        public void validate(ExternalPortAnalyzer analyzer) {
+            analyzer.validate(inputs, outputs);
         }
 
         OperatorGraph done() {
@@ -319,6 +343,14 @@ public final class FlowGraphAnalyzer {
 
         void merge(List<Diagnostic> diagnostics) {
             errors.addAll(diagnostics);
+        }
+
+        void registerExternalInput(String name, ExternalInputInfo info) {
+            inputs.put(name, info);
+        }
+
+        void registerExternalOutput(String name, ExternalOutputInfo info) {
+            outputs.put(name, info);
         }
 
         void register(FlowElement source, Operator target) {

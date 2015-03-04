@@ -23,6 +23,7 @@ import com.asakusafw.lang.compiler.api.reference.CommandToken;
 import com.asakusafw.lang.compiler.api.reference.ExternalInputReference;
 import com.asakusafw.lang.compiler.api.reference.ExternalOutputReference;
 import com.asakusafw.lang.compiler.api.reference.TaskReference;
+import com.asakusafw.lang.compiler.api.reference.TaskReference.Phase;
 import com.asakusafw.lang.compiler.common.Diagnostic;
 import com.asakusafw.lang.compiler.common.DiagnosticException;
 import com.asakusafw.lang.compiler.common.Location;
@@ -71,8 +72,6 @@ public class WindGatePortProcessor
 
     private static final ClassDescription MODEL_CLASS = Descriptions.classOf(DescriptionModel.class);
 
-    private static final String PATTERN_INPUT_PATH = "{0}/{1}"; //$NON-NLS-1$
-
     @Override
     protected String getModuleName() {
         return MODULE_NAME;
@@ -116,8 +115,7 @@ public class WindGatePortProcessor
 
     @Override
     protected Set<String> computeInputPaths(Context context, String name, ExternalInputInfo info) {
-        String relativePath = MessageFormat.format(PATTERN_INPUT_PATH, getModuleName(), name);
-        String path = context.getOptions().getRuntimeWorkingPath(relativePath);
+        String path = getTemporaryPath(context, Phase.IMPORT, Location.of(name));
         return Collections.singleton(path);
     }
 

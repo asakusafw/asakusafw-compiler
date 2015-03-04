@@ -1,12 +1,10 @@
 package com.asakusafw.lang.compiler.core.adapter;
 
-import java.text.MessageFormat;
+import java.util.Map;
 
 import com.asakusafw.lang.compiler.analyzer.ExternalPortAnalyzer;
 import com.asakusafw.lang.compiler.api.DataModelLoader;
 import com.asakusafw.lang.compiler.api.ExternalPortProcessor;
-import com.asakusafw.lang.compiler.common.Diagnostic;
-import com.asakusafw.lang.compiler.common.DiagnosticException;
 import com.asakusafw.lang.compiler.core.AnalyzerContext;
 import com.asakusafw.lang.compiler.model.info.ExternalInputInfo;
 import com.asakusafw.lang.compiler.model.info.ExternalOutputInfo;
@@ -43,24 +41,17 @@ public class ExternalPortAnalyzerAdapter implements ExternalPortAnalyzer {
 
     @Override
     public ExternalInputInfo analyze(String name, ImporterDescription description) {
-        if (processor.isSupported(context, description.getClass())) {
-            return processor.analyzeInput(context, name, description);
-        }
-        throw new DiagnosticException(Diagnostic.Level.ERROR, MessageFormat.format(
-                "unsupported external input: {0} ({1})",
-                name,
-                description.getClass().getName()));
+        return processor.analyzeInput(context, name, description);
     }
 
     @Override
     public ExternalOutputInfo analyze(String name, ExporterDescription description) {
-        if (processor.isSupported(context, description.getClass())) {
-            return processor.analyzeOutput(context, name, description);
-        }
-        throw new DiagnosticException(Diagnostic.Level.ERROR, MessageFormat.format(
-                "unsupported external output: {0} ({1})",
-                name,
-                description.getClass().getName()));
+        return processor.analyzeOutput(context, name, description);
+    }
+
+    @Override
+    public void validate(Map<String, ExternalInputInfo> inputs, Map<String, ExternalOutputInfo> outputs) {
+        processor.validate(context, inputs, outputs);
     }
 
     private static final class ContextAdapter implements ExternalPortProcessor.AnalyzeContext {

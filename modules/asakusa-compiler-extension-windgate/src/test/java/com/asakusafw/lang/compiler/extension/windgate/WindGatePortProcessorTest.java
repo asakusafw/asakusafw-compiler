@@ -20,13 +20,13 @@ import org.junit.rules.TemporaryFolder;
 
 import com.asakusafw.lang.compiler.api.CompilerOptions;
 import com.asakusafw.lang.compiler.api.basic.TaskContainer;
-import com.asakusafw.lang.compiler.api.mock.MockExternalPortProcessorContext;
 import com.asakusafw.lang.compiler.api.reference.CommandTaskReference;
 import com.asakusafw.lang.compiler.api.reference.CommandToken;
 import com.asakusafw.lang.compiler.api.reference.ExternalInputReference;
 import com.asakusafw.lang.compiler.api.reference.ExternalOutputReference;
 import com.asakusafw.lang.compiler.api.reference.TaskReference;
 import com.asakusafw.lang.compiler.api.reference.TaskReference.Phase;
+import com.asakusafw.lang.compiler.api.testing.MockExternalPortProcessorContext;
 import com.asakusafw.lang.compiler.common.DiagnosticException;
 import com.asakusafw.lang.compiler.model.description.ValueDescription;
 import com.asakusafw.lang.compiler.model.info.ExternalInputInfo;

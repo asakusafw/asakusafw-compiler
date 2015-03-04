@@ -16,6 +16,8 @@ public class HadoopTaskReference extends BasicAttributeContainer implements Task
 
     private static final String MODULE_NAME = "hadoop"; //$NON-NLS-1$
 
+    private final String moduleName;
+
     private final ClassDescription mainClass;
 
     private final List<TaskReference> blockerTasks;
@@ -28,13 +30,27 @@ public class HadoopTaskReference extends BasicAttributeContainer implements Task
     public HadoopTaskReference(
             ClassDescription mainClass,
             List<? extends TaskReference> blockerTasks) {
+        this(MODULE_NAME, mainClass, blockerTasks);
+    }
+
+    /**
+     * Creates a new instance.
+     * @param moduleName the module name
+     * @param mainClass the main class
+     * @param blockerTasks the blocker tasks
+     */
+    public HadoopTaskReference(
+            String moduleName,
+            ClassDescription mainClass,
+            List<? extends TaskReference> blockerTasks) {
+        this.moduleName = moduleName;
         this.mainClass = mainClass;
         this.blockerTasks = Collections.unmodifiableList(new ArrayList<>(blockerTasks));
     }
 
     @Override
     public String getModuleName() {
-        return MODULE_NAME;
+        return moduleName;
     }
 
     @Override
