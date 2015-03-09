@@ -1,4 +1,4 @@
-package com.asakusafw.lang.compiler.extension.hadoop;
+package com.asakusafw.lang.compiler.hadoop;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;

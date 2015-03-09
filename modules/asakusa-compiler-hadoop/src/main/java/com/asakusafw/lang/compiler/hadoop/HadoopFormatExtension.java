@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.asakusafw.lang.compiler.extension.hadoop;
+package com.asakusafw.lang.compiler.hadoop;
 
 import com.asakusafw.lang.compiler.common.ExtensionContainer;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
@@ -32,14 +32,14 @@ public class HadoopFormatExtension {
     /**
      * Output format class for Asakusa temporary dataset.
      */
-    public static final ClassDescription DEFAULT_OUPUT_FORMAT =
+    public static final ClassDescription DEFAULT_OUTPUT_FORMAT =
             new ClassDescription("com.asakusafw.runtime.stage.output.TemporaryOutputFormat"); //$NON-NLS-1$
 
     /**
      * The default configuration.
      */
     public static final HadoopFormatExtension DEFAULT =
-            new HadoopFormatExtension(DEFAULT_INPUT_FORMAT, DEFAULT_OUPUT_FORMAT);
+            new HadoopFormatExtension(DEFAULT_INPUT_FORMAT, DEFAULT_OUTPUT_FORMAT);
 
     private final ClassDescription inputFormat;
 

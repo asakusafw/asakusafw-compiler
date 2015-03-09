@@ -8,7 +8,7 @@ useSLF4J()
 
 dependencies {
     compile project(':asakusa-compiler-api')
-    compile project(':asakusa-compiler-extension-hadoop')
+    compile project(':asakusa-compiler-hadoop')
     compile "com.asakusafw:asakusa-yaess-core:${asakusafwVersion}"
 
     testCompile project(':asakusa-compiler-api-testing')

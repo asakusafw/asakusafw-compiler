@@ -1,4 +1,4 @@
-description 'Asakusa DSL Compiler Extension for Hadoop'
+description 'Hadoop operation support for Asakusa DSL Compiler'
 
 apply plugin: 'java'
 apply plugin: 'maven'

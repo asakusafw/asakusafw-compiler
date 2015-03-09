@@ -112,6 +112,20 @@ public class CompilerOptions {
         return properties;
     }
 
+    /**
+     * Returns a generic compiler property.
+     * @param propertyKey the property key
+     * @param defaultValue the default value (nullable)
+     * @return the property value, or the default value if the property value is not defined
+     */
+    public String get(String propertyKey, String defaultValue) {
+        String value = properties.get(propertyKey);
+        if (value == null) {
+            return defaultValue;
+        }
+        return value;
+    }
+
     static String normalize(String path) {
         String result = path;
         while (result.endsWith("/")) { //$NON-NLS-1$

@@ -9,8 +9,8 @@ useHadoop()
 
 dependencies {
     compile project(':asakusa-compiler-extension-externalio')
-    compile project(':asakusa-compiler-extension-hadoop')
     compile project(':asakusa-compiler-javac')
+    compile project(':asakusa-compiler-hadoop')
     compile project(':asakusa-compiler-mapreduce')
     compile "com.asakusafw:asakusa-directio-vocabulary:${asakusafwVersion}"
 

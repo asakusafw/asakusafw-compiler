@@ -1,10 +1,11 @@
-package com.asakusafw.lang.compiler.extension.hadoop;
+package com.asakusafw.lang.compiler.hadoop;
 
 import java.util.Arrays;
 
 import com.asakusafw.lang.compiler.api.basic.TaskContainer;
 import com.asakusafw.lang.compiler.api.basic.TaskContainerMap;
 import com.asakusafw.lang.compiler.api.reference.TaskReference;
+import com.asakusafw.lang.compiler.api.reference.TaskReference.Phase;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 
 /**
@@ -23,20 +24,9 @@ public class BasicHadoopTaskExtension implements HadoopTaskExtension {
     }
 
     @Override
-    public TaskReference addTask(ClassDescription mainClass, TaskReference... blockers) {
-        return addTask(tasks.getMainTaskContainer(), mainClass, blockers);
-    }
-
-    @Override
-    public TaskReference addFinalizer(ClassDescription mainClass, TaskReference... blockers) {
-        return addTask(tasks.getFinalizeTaskContainer(), mainClass, blockers);
-    }
-
-    private TaskReference addTask(
-            TaskContainer container,
-            ClassDescription mainClass,
-            TaskReference... blockers) {
+    public TaskReference addTask(Phase phase, ClassDescription mainClass, TaskReference... blockers) {
         HadoopTaskReference task = new HadoopTaskReference(mainClass, Arrays.asList(blockers));
+        TaskContainer container = tasks.getTaskContainer(phase);
         container.add(task);
         return task;
     }

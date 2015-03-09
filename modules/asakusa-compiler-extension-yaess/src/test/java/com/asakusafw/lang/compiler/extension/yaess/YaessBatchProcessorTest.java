@@ -32,7 +32,7 @@ import com.asakusafw.lang.compiler.api.reference.TaskReferenceMap;
 import com.asakusafw.lang.compiler.api.testing.MockBatchProcessorContext;
 import com.asakusafw.lang.compiler.api.testing.MockTaskReferenceMap;
 import com.asakusafw.lang.compiler.common.Location;
-import com.asakusafw.lang.compiler.extension.hadoop.HadoopTaskReference;
+import com.asakusafw.lang.compiler.hadoop.HadoopTaskReference;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.info.BatchInfo;
 import com.asakusafw.lang.compiler.model.info.JobflowInfo;

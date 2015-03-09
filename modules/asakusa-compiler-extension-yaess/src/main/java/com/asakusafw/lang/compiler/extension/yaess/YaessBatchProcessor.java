@@ -28,7 +28,7 @@ import com.asakusafw.lang.compiler.api.reference.TaskReference;
 import com.asakusafw.lang.compiler.common.Diagnostic;
 import com.asakusafw.lang.compiler.common.DiagnosticException;
 import com.asakusafw.lang.compiler.common.Location;
-import com.asakusafw.lang.compiler.extension.hadoop.HadoopTaskReference;
+import com.asakusafw.lang.compiler.hadoop.HadoopTaskReference;
 import com.asakusafw.yaess.core.BatchScript;
 import com.asakusafw.yaess.core.CommandScript;
 import com.asakusafw.yaess.core.ExecutionPhase;

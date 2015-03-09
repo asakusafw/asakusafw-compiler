@@ -13,14 +13,14 @@ include 'asakusa-compiler-core'
 include 'asakusa-compiler-cli'
 
 // extensions
-include 'asakusa-compiler-extension-hadoop'
-include 'asakusa-compiler-extension-yaess'
 include 'asakusa-compiler-extension-externalio'
 include 'asakusa-compiler-extension-directio'
 include 'asakusa-compiler-extension-windgate'
+include 'asakusa-compiler-extension-yaess'
 
 // utilities
 include 'asakusa-compiler-javac'
+include 'asakusa-compiler-hadoop'
 include 'asakusa-compiler-mapreduce'
 
 // testing utilities

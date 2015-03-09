@@ -10,12 +10,13 @@ import org.junit.Test;
 
 import com.asakusafw.lang.compiler.api.JobflowProcessor;
 import com.asakusafw.lang.compiler.api.reference.TaskReference;
+import com.asakusafw.lang.compiler.api.reference.TaskReference.Phase;
 import com.asakusafw.lang.compiler.core.CompilerTestRoot;
 import com.asakusafw.lang.compiler.core.JobflowCompiler;
 import com.asakusafw.lang.compiler.core.basic.BasicJobflowCompiler;
 import com.asakusafw.lang.compiler.core.dummy.SimpleExternalPortProcessor;
-import com.asakusafw.lang.compiler.extension.hadoop.HadoopTaskExtension;
-import com.asakusafw.lang.compiler.extension.hadoop.HadoopTaskReference;
+import com.asakusafw.lang.compiler.hadoop.HadoopTaskExtension;
+import com.asakusafw.lang.compiler.hadoop.HadoopTaskReference;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.graph.Jobflow;
 import com.asakusafw.lang.compiler.packaging.FileContainer;
@@ -37,7 +38,7 @@ public class HadoopTaskExtensionParticipantTest extends CompilerTestRoot {
             public void process(Context context, Jobflow source) throws IOException {
                 HadoopTaskExtension extension = context.getExtension(HadoopTaskExtension.class);
                 assertThat(extension, is(notNullValue()));
-                extension.addTask(new ClassDescription("testing"));
+                extension.addTask(Phase.MAIN, new ClassDescription("testing"));
             }
         });
 
