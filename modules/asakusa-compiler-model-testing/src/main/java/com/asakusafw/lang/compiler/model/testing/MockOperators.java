@@ -1,4 +1,4 @@
-package com.asakusafw.lang.compiler.planning;
+package com.asakusafw.lang.compiler.model.testing;
 
 import static com.asakusafw.lang.compiler.model.description.Descriptions.*;
 import static org.hamcrest.Matchers.*;

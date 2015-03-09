@@ -25,6 +25,7 @@ include 'asakusa-compiler-mapreduce'
 
 // testing utilities
 include 'asakusa-compiler-common-testing'
+include 'asakusa-compiler-model-testing'
 include 'asakusa-compiler-javac-testing'
 include 'asakusa-compiler-api-testing'
 include 'asakusa-compiler-tester'

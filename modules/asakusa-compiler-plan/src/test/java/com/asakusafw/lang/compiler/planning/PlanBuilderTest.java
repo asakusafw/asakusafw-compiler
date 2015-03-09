@@ -8,6 +8,7 @@ import java.util.Collections;
 import org.junit.Test;
 
 import com.asakusafw.lang.compiler.model.graph.Operator;
+import com.asakusafw.lang.compiler.model.testing.MockOperators;
 
 /**
  * Test for {@link PlanBuilder}.

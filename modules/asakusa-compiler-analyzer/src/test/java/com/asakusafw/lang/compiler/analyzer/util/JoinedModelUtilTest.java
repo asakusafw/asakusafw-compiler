@@ -10,10 +10,11 @@ import org.junit.Test;
 
 import com.asakusafw.lang.compiler.model.PropertyName;
 import com.asakusafw.lang.compiler.model.graph.CoreOperator;
+import com.asakusafw.lang.compiler.model.graph.CoreOperator.CoreOperatorKind;
 import com.asakusafw.lang.compiler.model.graph.Operator;
 import com.asakusafw.lang.compiler.model.graph.OperatorInput;
 import com.asakusafw.lang.compiler.model.graph.OperatorOutput;
-import com.asakusafw.lang.compiler.model.graph.CoreOperator.CoreOperatorKind;
+import com.asakusafw.lang.compiler.model.testing.OperatorExtractor;
 import com.asakusafw.vocabulary.model.Joined;
 import com.asakusafw.vocabulary.model.Key;
 import com.asakusafw.vocabulary.operator.MasterJoin;

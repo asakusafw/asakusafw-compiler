@@ -11,7 +11,7 @@ import org.junit.Test;
 import com.asakusafw.lang.compiler.model.graph.Operator;
 import com.asakusafw.lang.compiler.model.graph.OperatorConstraint;
 import com.asakusafw.lang.compiler.model.graph.Operators;
-import com.asakusafw.lang.compiler.planning.MockOperators;
+import com.asakusafw.lang.compiler.model.testing.MockOperators;
 import com.asakusafw.lang.compiler.planning.PlanBuilder;
 import com.asakusafw.lang.compiler.planning.PlanDetail;
 import com.asakusafw.lang.compiler.planning.PlanMarker;

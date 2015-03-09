@@ -15,6 +15,7 @@ import com.asakusafw.lang.compiler.model.graph.CoreOperator;
 import com.asakusafw.lang.compiler.model.graph.CoreOperator.CoreOperatorKind;
 import com.asakusafw.lang.compiler.model.graph.OperatorOutput;
 import com.asakusafw.lang.compiler.model.graph.UserOperator;
+import com.asakusafw.lang.compiler.model.testing.OperatorExtractor;
 import com.asakusafw.vocabulary.operator.Branch;
 import com.asakusafw.vocabulary.operator.MasterBranch;
 import com.asakusafw.vocabulary.operator.Update;

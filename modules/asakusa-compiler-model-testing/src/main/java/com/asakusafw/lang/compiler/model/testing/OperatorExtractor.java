@@ -1,4 +1,4 @@
-package com.asakusafw.lang.compiler.analyzer.util;
+package com.asakusafw.lang.compiler.model.testing;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -10,7 +10,7 @@ import com.asakusafw.lang.compiler.model.description.MethodDescription;
 import com.asakusafw.lang.compiler.model.graph.UserOperator;
 
 /**
- * Mock.
+ * Extracts operator from declaring operator methods.
  */
 public final class OperatorExtractor {
 

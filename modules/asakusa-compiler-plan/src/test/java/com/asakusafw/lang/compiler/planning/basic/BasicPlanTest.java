@@ -6,7 +6,7 @@ import static org.junit.Assert.*;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import com.asakusafw.lang.compiler.planning.MockOperators;
+import com.asakusafw.lang.compiler.model.testing.MockOperators;
 import com.asakusafw.lang.compiler.planning.PlanMarker;
 
 /**

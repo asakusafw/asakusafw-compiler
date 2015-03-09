@@ -18,6 +18,7 @@ import com.asakusafw.lang.compiler.model.graph.MarkerOperator;
 import com.asakusafw.lang.compiler.model.graph.Operator;
 import com.asakusafw.lang.compiler.model.graph.OperatorConstraint;
 import com.asakusafw.lang.compiler.model.graph.OperatorGraph;
+import com.asakusafw.lang.compiler.model.testing.MockOperators;
 
 /**
  * A common test base class for planning.

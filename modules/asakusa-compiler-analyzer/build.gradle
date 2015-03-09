@@ -13,5 +13,6 @@ dependencies {
     compile "com.asakusafw:asakusa-dsl-vocabulary:${asakusafwVersion}"
     compile "com.asakusafw:asakusa-runtime:${asakusafwVersion}"
 
+    testCompile project(':asakusa-compiler-model-testing')
     testCompile project(':asakusa-compiler-api-testing')
 }

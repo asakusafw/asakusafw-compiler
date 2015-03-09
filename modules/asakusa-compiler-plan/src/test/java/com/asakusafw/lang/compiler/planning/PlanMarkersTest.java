@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import com.asakusafw.lang.compiler.model.graph.CoreOperator;
 import com.asakusafw.lang.compiler.model.graph.CoreOperator.CoreOperatorKind;
+import com.asakusafw.lang.compiler.model.testing.MockOperators;
 
 /**
  * Test for {@link PlanMarkers}.

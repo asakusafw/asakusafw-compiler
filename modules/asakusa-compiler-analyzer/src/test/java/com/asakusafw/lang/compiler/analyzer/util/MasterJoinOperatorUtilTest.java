@@ -12,6 +12,7 @@ import org.junit.Test;
 import com.asakusafw.lang.compiler.model.graph.CoreOperator;
 import com.asakusafw.lang.compiler.model.graph.CoreOperator.CoreOperatorKind;
 import com.asakusafw.lang.compiler.model.graph.UserOperator;
+import com.asakusafw.lang.compiler.model.testing.OperatorExtractor;
 import com.asakusafw.vocabulary.operator.MasterBranch;
 import com.asakusafw.vocabulary.operator.MasterCheck;
 import com.asakusafw.vocabulary.operator.MasterJoin;

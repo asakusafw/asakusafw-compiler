@@ -17,6 +17,7 @@ import com.asakusafw.lang.compiler.model.PropertyName;
 import com.asakusafw.lang.compiler.model.graph.CoreOperator;
 import com.asakusafw.lang.compiler.model.graph.CoreOperator.CoreOperatorKind;
 import com.asakusafw.lang.compiler.model.graph.UserOperator;
+import com.asakusafw.lang.compiler.model.testing.OperatorExtractor;
 import com.asakusafw.runtime.model.DataModel;
 import com.asakusafw.runtime.value.DateTimeOption;
 import com.asakusafw.runtime.value.DecimalOption;
