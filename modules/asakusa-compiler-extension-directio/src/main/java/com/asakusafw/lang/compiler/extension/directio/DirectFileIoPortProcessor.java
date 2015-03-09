@@ -166,62 +166,7 @@ public class DirectFileIoPortProcessor
         if (diagnostics.isEmpty() == false) {
             throw new DiagnosticException(diagnostics);
         }
-        validateResolved(context, resolvedInputs, resolvedOutputs);
-    }
-
-    private void validateResolved(AnalyzeContext context, List<ResolvedInput> inputs, List<ResolvedOutput> outputs) {
-        assert inputs != null;
-        assert outputs != null;
-        ValidateContext c = new ValidateContext(context, null);
-        NavigableMap<String, ResolvedInput> inputPaths = new TreeMap<>();
-        for (ResolvedInput input : inputs) {
-            String path = normalizePath(input.model.getBasePath());
-            inputPaths.put(path, input);
-        }
-        NavigableMap<String, ResolvedOutput> outputPaths = new TreeMap<>();
-        for (ResolvedOutput self : outputs) {
-            String path = normalizePath(self.model.getBasePath());
-            for (Map.Entry<String, ResolvedInput> entry : inputPaths.tailMap(path, true).entrySet()) {
-                if (entry.getKey().startsWith(path) == false) {
-                    break;
-                }
-                ResolvedInput other = entry.getValue();
-                c.error(MessageFormat.format(
-                        "conflict input/output base paths: {0}[{1}] -> {2}[{3}]",
-                        self.info.getDescriptionClass().getName(),
-                        self.model.getBasePath(),
-                        other.info.getDescriptionClass().getName(),
-                        other.model.getBasePath()));
-            }
-            if (outputPaths.containsKey(path)) {
-                ResolvedOutput other = outputPaths.get(path);
-                c.error(MessageFormat.format(
-                        "conflict output/output base paths: {0}[{1}] <-> {2}[{3}]",
-                        self.info.getDescriptionClass().getName(),
-                        self.model.getBasePath(),
-                        other.info.getDescriptionClass().getName(),
-                        other.model.getBasePath()));
-            } else {
-                outputPaths.put(path, self);
-            }
-        }
-        for (Map.Entry<String, ResolvedOutput> base : outputPaths.entrySet()) {
-            String path = base.getKey();
-            for (Map.Entry<String, ResolvedOutput> entry : outputPaths.tailMap(path, false).entrySet()) {
-                if (entry.getKey().startsWith(path) == false) {
-                    break;
-                }
-                ResolvedOutput self = base.getValue();
-                ResolvedOutput other = entry.getValue();
-                c.error(MessageFormat.format(
-                        "conflict input/output base paths: {0}[{1}] -> {2}[{3}]",
-                        self.info.getDescriptionClass().getName(),
-                        self.model.getBasePath(),
-                        other.info.getDescriptionClass().getName(),
-                        other.model.getBasePath()));
-            }
-        }
-        c.raiseException();
+        checkConflict(context, resolvedInputs, resolvedOutputs);
     }
 
     private String normalizePath(String path) {
@@ -344,6 +289,12 @@ public class DirectFileIoPortProcessor
                         + "({0}.getResourcePattern()): {1}",
                         context.target.getName()));
             }
+            if (orders.isEmpty() == false) {
+                context.error(MessageFormat.format(
+                        "output resource pattern with wildcards (*) must not contain any orders "
+                        + "({0}.getOrder()): {1}",
+                        context.target.getName()));
+            }
         }
     }
 
@@ -396,6 +347,61 @@ public class DirectFileIoPortProcessor
                     formatClass.getName(),
                     dataType.getName()));
         }
+    }
+
+    private void checkConflict(AnalyzeContext context, List<ResolvedInput> inputs, List<ResolvedOutput> outputs) {
+        assert inputs != null;
+        assert outputs != null;
+        ValidateContext c = new ValidateContext(context, null);
+        NavigableMap<String, ResolvedInput> inputPaths = new TreeMap<>();
+        for (ResolvedInput input : inputs) {
+            String path = normalizePath(input.model.getBasePath());
+            inputPaths.put(path, input);
+        }
+        NavigableMap<String, ResolvedOutput> outputPaths = new TreeMap<>();
+        for (ResolvedOutput self : outputs) {
+            String path = normalizePath(self.model.getBasePath());
+            for (Map.Entry<String, ResolvedInput> entry : inputPaths.tailMap(path, true).entrySet()) {
+                if (entry.getKey().startsWith(path) == false) {
+                    break;
+                }
+                ResolvedInput other = entry.getValue();
+                c.error(MessageFormat.format(
+                        "conflict input/output base paths: {0}[{1}] -> {2}[{3}]",
+                        self.info.getDescriptionClass().getName(),
+                        self.model.getBasePath(),
+                        other.info.getDescriptionClass().getName(),
+                        other.model.getBasePath()));
+            }
+            if (outputPaths.containsKey(path)) {
+                ResolvedOutput other = outputPaths.get(path);
+                c.error(MessageFormat.format(
+                        "conflict output/output base paths: {0}[{1}] <-> {2}[{3}]",
+                        self.info.getDescriptionClass().getName(),
+                        self.model.getBasePath(),
+                        other.info.getDescriptionClass().getName(),
+                        other.model.getBasePath()));
+            } else {
+                outputPaths.put(path, self);
+            }
+        }
+        for (Map.Entry<String, ResolvedOutput> base : outputPaths.entrySet()) {
+            String path = base.getKey();
+            for (Map.Entry<String, ResolvedOutput> entry : outputPaths.tailMap(path, false).entrySet()) {
+                if (entry.getKey().startsWith(path) == false) {
+                    break;
+                }
+                ResolvedOutput self = base.getValue();
+                ResolvedOutput other = entry.getValue();
+                c.error(MessageFormat.format(
+                        "conflict input/output base paths: {0}[{1}] -> {2}[{3}]",
+                        self.info.getDescriptionClass().getName(),
+                        self.model.getBasePath(),
+                        other.info.getDescriptionClass().getName(),
+                        other.model.getBasePath()));
+            }
+        }
+        c.raiseException();
     }
 
     @Override
@@ -499,7 +505,7 @@ public class DirectFileIoPortProcessor
                         HadoopFormatExtension.getInputFormat(context),
                         Collections.<String, String>emptyMap())),
                 model.getBasePath(),
-                OutputPattern.compile(dataModel, model.getResourcePattern()),
+                OutputPattern.compile(dataModel, model.getResourcePattern(), model.getOrder()),
                 deletePatterns,
                 model.getFormatClass());
     }

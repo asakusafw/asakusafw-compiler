@@ -192,13 +192,381 @@ public class DirectFileIoPortProcessorTest {
     }
 
     /**
+     * validate - dual inputs and outputs.
+     */
+    @Test
+    public void validate_dual() {
+        Map<String, ExternalInputInfo> inputs = resolveToMap(input("i", "0.txt"), input("i", "1.txt"));
+        Map<String, ExternalOutputInfo> outputs = resolveToMap(output("o0", "a.txt"), output("o1", "a.txt"));
+
+        MockExternalPortProcessorContext mock = mock();
+        DirectFileIoPortProcessor processor = new DirectFileIoPortProcessor();
+        processor.validate(mock, inputs, outputs);
+    }
+
+    /**
+     * validate - w/o inputs.
+     */
+    @Test
+    public void validate_wo_inputs() {
+        Map<String, ExternalInputInfo> inputs = Collections.emptyMap();
+        Map<String, ExternalOutputInfo> outputs = resolveToMap(output("b", "c"));
+
+        MockExternalPortProcessorContext mock = mock();
+        DirectFileIoPortProcessor processor = new DirectFileIoPortProcessor();
+        processor.validate(mock, inputs, outputs);
+    }
+
+    /**
+     * validate - w/o outputs.
+     */
+    @Test
+    public void validate_wo_outputs() {
+        Map<String, ExternalInputInfo> inputs = resolveToMap(input("a", "b"));
+        Map<String, ExternalOutputInfo> outputs = Collections.emptyMap();
+
+        MockExternalPortProcessorContext mock = mock();
+        DirectFileIoPortProcessor processor = new DirectFileIoPortProcessor();
+        processor.validate(mock, inputs, outputs);
+    }
+
+    /**
+     * validate - input w/ variables.
+     */
+    @Test
+    public void validate_input_variable() {
+        Map<String, ExternalInputInfo> inputs = resolveToMap(input("a", "${input}.txt"));
+        Map<String, ExternalOutputInfo> outputs = resolveToMap(output("b", "c"));
+
+        MockExternalPortProcessorContext mock = mock();
+        DirectFileIoPortProcessor processor = new DirectFileIoPortProcessor();
+        processor.validate(mock, inputs, outputs);
+    }
+
+    /**
+     * validate - output w/ property.
+     */
+    @Test
+    public void validate_output_property() {
+        Map<String, ExternalInputInfo> inputs = resolveToMap(input("a", "b"));
+        Map<String, ExternalOutputInfo> outputs = resolveToMap(output("b", "{stringValue}.txt"));
+
+        MockExternalPortProcessorContext mock = mock();
+        DirectFileIoPortProcessor processor = new DirectFileIoPortProcessor();
+        processor.validate(mock, inputs, outputs);
+    }
+
+    /**
+     * validate - output w/ variable.
+     */
+    @Test
+    public void validate_output_variable() {
+        Map<String, ExternalInputInfo> inputs = resolveToMap(input("a", "b"));
+        Map<String, ExternalOutputInfo> outputs = resolveToMap(output("b", "${output}.txt"));
+
+        MockExternalPortProcessorContext mock = mock();
+        DirectFileIoPortProcessor processor = new DirectFileIoPortProcessor();
+        processor.validate(mock, inputs, outputs);
+    }
+
+    /**
+     * validate - output w/ wildcard.
+     */
+    @Test
+    public void validate_output_wildcard() {
+        Map<String, ExternalInputInfo> inputs = resolveToMap(input("a", "b"));
+        Map<String, ExternalOutputInfo> outputs = resolveToMap(output("b", "*.txt"));
+
+        MockExternalPortProcessorContext mock = mock();
+        DirectFileIoPortProcessor processor = new DirectFileIoPortProcessor();
+        processor.validate(mock, inputs, outputs);
+    }
+
+    /**
+     * validate - output w/ order asc.
+     */
+    @Test
+    public void validate_output_order_asc() {
+        Map<String, ExternalInputInfo> inputs = resolveToMap(input("a", "b"));
+        Map<String, ExternalOutputInfo> outputs = resolveToMap(output("b", "c.txt").withOrder("+intValue"));
+
+        MockExternalPortProcessorContext mock = mock();
+        DirectFileIoPortProcessor processor = new DirectFileIoPortProcessor();
+        processor.validate(mock, inputs, outputs);
+    }
+
+    /**
+     * validate - output w/ order desc.
+     */
+    @Test
+    public void validate_output_order_desc() {
+        Map<String, ExternalInputInfo> inputs = resolveToMap(input("a", "b"));
+        Map<String, ExternalOutputInfo> outputs = resolveToMap(output("b", "c.txt").withOrder("-intValue"));
+
+        MockExternalPortProcessorContext mock = mock();
+        DirectFileIoPortProcessor processor = new DirectFileIoPortProcessor();
+        processor.validate(mock, inputs, outputs);
+    }
+
+    /**
+     * validate - output w/ order mixed.
+     */
+    @Test
+    public void validate_output_order_mixed() {
+        Map<String, ExternalInputInfo> inputs = resolveToMap(input("a", "b"));
+        Map<String, ExternalOutputInfo> outputs = resolveToMap(output("b", "c.txt")
+                .withOrder("+intValue", "+stringValue"));
+
+        MockExternalPortProcessorContext mock = mock();
+        DirectFileIoPortProcessor processor = new DirectFileIoPortProcessor();
+        processor.validate(mock, inputs, outputs);
+    }
+
+    /**
+     * validate - output w/ delete patterns.
+     */
+    @Test
+    public void validate_output_delete() {
+        Map<String, ExternalInputInfo> inputs = resolveToMap(input("a", "b"));
+        Map<String, ExternalOutputInfo> outputs = resolveToMap(output("b", "a.txt").withDeletePatterns("*.txt"));
+
+        MockExternalPortProcessorContext mock = mock();
+        DirectFileIoPortProcessor processor = new DirectFileIoPortProcessor();
+        processor.validate(mock, inputs, outputs);
+    }
+
+    /**
+     * validate - output w/ delete patterns.
+     */
+    @Test
+    public void validate_output_delete_many() {
+        Map<String, ExternalInputInfo> inputs = resolveToMap(input("a", "b"));
+        Map<String, ExternalOutputInfo> outputs = resolveToMap(output("b", "a.txt")
+                .withDeletePatterns("*.txt")
+                .withDeletePatterns("*.csv")
+                .withDeletePatterns("*.md"));
+
+        MockExternalPortProcessorContext mock = mock();
+        DirectFileIoPortProcessor processor = new DirectFileIoPortProcessor();
+        processor.validate(mock, inputs, outputs);
+    }
+
+    /**
+     * validate - input base path w/ wildcard.
+     */
+    @Test(expected = DiagnosticException.class)
+    public void validate_input_basepath_wildcard() {
+        Map<String, ExternalInputInfo> inputs = resolveToMap(input("a/*", "b"));
+        Map<String, ExternalOutputInfo> outputs = resolveToMap(output("b", "c"));
+
+        MockExternalPortProcessorContext mock = mock();
+        DirectFileIoPortProcessor processor = new DirectFileIoPortProcessor();
+        processor.validate(mock, inputs, outputs);
+    }
+
+    /**
+     * validate - output base path w/ wildcard.
+     */
+    @Test(expected = DiagnosticException.class)
+    public void validate_output_basepath_wildcard() {
+        Map<String, ExternalInputInfo> inputs = resolveToMap(input("a", "b"));
+        Map<String, ExternalOutputInfo> outputs = resolveToMap(output("b/*", "c"));
+
+        MockExternalPortProcessorContext mock = mock();
+        DirectFileIoPortProcessor processor = new DirectFileIoPortProcessor();
+        processor.validate(mock, inputs, outputs);
+    }
+
+    /**
+     * validate - input w/ unrecognized character.
+     */
+    @Test(expected = DiagnosticException.class)
+    public void validate_input_unrecognized() {
+        Map<String, ExternalInputInfo> inputs = resolveToMap(input("a", "?"));
+        Map<String, ExternalOutputInfo> outputs = resolveToMap(output("b", "c"));
+
+        MockExternalPortProcessorContext mock = mock();
+        DirectFileIoPortProcessor processor = new DirectFileIoPortProcessor();
+        processor.validate(mock, inputs, outputs);
+    }
+
+    /**
+     * validate - output w/ unrecognized character.
+     */
+    @Test(expected = DiagnosticException.class)
+    public void validate_output_unrecognized() {
+        Map<String, ExternalInputInfo> inputs = resolveToMap(input("a", "b"));
+        Map<String, ExternalOutputInfo> outputs = resolveToMap(output("b", "?"));
+
+        MockExternalPortProcessorContext mock = mock();
+        DirectFileIoPortProcessor processor = new DirectFileIoPortProcessor();
+        processor.validate(mock, inputs, outputs);
+    }
+
+    /**
+     * validate - output order w/ unknown property.
+     */
+    @Test(expected = DiagnosticException.class)
+    public void validate_output_order_unrecognized() {
+        Map<String, ExternalInputInfo> inputs = resolveToMap(input("a", "b"));
+        Map<String, ExternalOutputInfo> outputs = resolveToMap(output("b", "c").withOrder("+UNKNOWN"));
+
+        MockExternalPortProcessorContext mock = mock();
+        DirectFileIoPortProcessor processor = new DirectFileIoPortProcessor();
+        processor.validate(mock, inputs, outputs);
+    }
+
+    /**
+     * validate - output delete pattern w/ unrecognized character.
+     */
+    @Test(expected = DiagnosticException.class)
+    public void validate_output_delete_unrecognized() {
+        Map<String, ExternalInputInfo> inputs = resolveToMap(input("a", "b"));
+        Map<String, ExternalOutputInfo> outputs = resolveToMap(output("b", "c").withDeletePatterns("?"));
+
+        MockExternalPortProcessorContext mock = mock();
+        DirectFileIoPortProcessor processor = new DirectFileIoPortProcessor();
+        processor.validate(mock, inputs, outputs);
+    }
+
+    /**
+     * validate - output w/ both wildcard and property.
+     */
+    @Test(expected = DiagnosticException.class)
+    public void validate_output_wildcard_property() {
+        Map<String, ExternalInputInfo> inputs = resolveToMap(input("a", "b"));
+        Map<String, ExternalOutputInfo> outputs = resolveToMap(output("b", "*/{intValue}.txt"));
+
+        MockExternalPortProcessorContext mock = mock();
+        DirectFileIoPortProcessor processor = new DirectFileIoPortProcessor();
+        processor.validate(mock, inputs, outputs);
+    }
+
+    /**
+     * validate - output w/ both wildcard and random.
+     */
+    @Test(expected = DiagnosticException.class)
+    public void validate_output_wildcard_random() {
+        Map<String, ExternalInputInfo> inputs = resolveToMap(input("a", "b"));
+        Map<String, ExternalOutputInfo> outputs = resolveToMap(output("b", "*/[1..9].txt"));
+
+        MockExternalPortProcessorContext mock = mock();
+        DirectFileIoPortProcessor processor = new DirectFileIoPortProcessor();
+        processor.validate(mock, inputs, outputs);
+    }
+
+    /**
+     * validate - output w/ both wildcard and order.
+     */
+    @Test(expected = DiagnosticException.class)
+    public void validate_output_wildcard_order() {
+        Map<String, ExternalInputInfo> inputs = resolveToMap(input("a", "b"));
+        Map<String, ExternalOutputInfo> outputs = resolveToMap(output("b", "*.txt").withOrder("+intValue"));
+
+        MockExternalPortProcessorContext mock = mock();
+        DirectFileIoPortProcessor processor = new DirectFileIoPortProcessor();
+        processor.validate(mock, inputs, outputs);
+    }
+
+    /**
+     * validate - conflict input/input (OK).
+     */
+    @Test
+    public void validate_conflict_input_input() {
+        Map<String, ExternalInputInfo> inputs = resolveToMap(input("x", "a.txt"), input("x", "b.txt"));
+        Map<String, ExternalOutputInfo> outputs = resolveToMap(output("out0", "a.txt"));
+
+        MockExternalPortProcessorContext mock = mock();
+        DirectFileIoPortProcessor processor = new DirectFileIoPortProcessor();
+        processor.validate(mock, inputs, outputs);
+    }
+
+    /**
+     * validate - conflict input/output.
+     */
+    @Test(expected = DiagnosticException.class)
+    public void validate_conflict_input_output() {
+        Map<String, ExternalInputInfo> inputs = resolveToMap(input("x", "a.txt"));
+        Map<String, ExternalOutputInfo> outputs = resolveToMap(output("x", "a.txt"));
+
+        MockExternalPortProcessorContext mock = mock();
+        DirectFileIoPortProcessor processor = new DirectFileIoPortProcessor();
+        processor.validate(mock, inputs, outputs);
+    }
+
+    /**
+     * validate - conflict output/output.
+     */
+    @Test(expected = DiagnosticException.class)
+    public void validate_conflict_output_output() {
+        Map<String, ExternalInputInfo> inputs = resolveToMap(input("in", "a.txt"));
+        Map<String, ExternalOutputInfo> outputs = resolveToMap(output("x", "a.txt"), output("x", "b.txt"));
+
+        MockExternalPortProcessorContext mock = mock();
+        DirectFileIoPortProcessor processor = new DirectFileIoPortProcessor();
+        processor.validate(mock, inputs, outputs);
+    }
+
+    /**
+     * validate - input contains input (OK).
+     */
+    @Test
+    public void validate_input_contain_input() {
+        Map<String, ExternalInputInfo> inputs = resolveToMap(input("x", "a.txt"), input("x/contain", "a.txt"));
+        Map<String, ExternalOutputInfo> outputs = resolveToMap(output("out", "a.txt"));
+
+        MockExternalPortProcessorContext mock = mock();
+        DirectFileIoPortProcessor processor = new DirectFileIoPortProcessor();
+        processor.validate(mock, inputs, outputs);
+    }
+
+    /**
+     * validate - input contains output (currently OK).
+     */
+    @Test
+    public void validate_input_contain_output() {
+        Map<String, ExternalInputInfo> inputs = resolveToMap(input("x", "a.txt"));
+        Map<String, ExternalOutputInfo> outputs = resolveToMap(output("x/contain", "a.txt"));
+
+        MockExternalPortProcessorContext mock = mock();
+        DirectFileIoPortProcessor processor = new DirectFileIoPortProcessor();
+        processor.validate(mock, inputs, outputs);
+    }
+
+    /**
+     * validate - output contains input.
+     */
+    @Test(expected = DiagnosticException.class)
+    public void validate_output_contain_input() {
+        Map<String, ExternalInputInfo> inputs = resolveToMap(input("x/contain", "a.txt"));
+        Map<String, ExternalOutputInfo> outputs = resolveToMap(output("x", "a.txt"));
+
+        MockExternalPortProcessorContext mock = mock();
+        DirectFileIoPortProcessor processor = new DirectFileIoPortProcessor();
+        processor.validate(mock, inputs, outputs);
+    }
+
+    /**
+     * validate - output contains output.
+     */
+    @Test(expected = DiagnosticException.class)
+    public void validate_output_contain_output() {
+        Map<String, ExternalInputInfo> inputs = resolveToMap(input("in", "a.txt"));
+        Map<String, ExternalOutputInfo> outputs = resolveToMap(output("x", "a.txt"), output("x/contain", "a.txt"));
+
+        MockExternalPortProcessorContext mock = mock();
+        DirectFileIoPortProcessor processor = new DirectFileIoPortProcessor();
+        processor.validate(mock, inputs, outputs);
+    }
+
+    /**
      * process - simple case.
      * @throws Exception if failed
      */
     @Test
     public void process() throws Exception {
-        List<ExternalInputReference> inputs = resolve(input("a", "b"));
-        List<ExternalOutputReference> outputs = resolve(output("c", "*.bin"));
+        List<ExternalInputReference> inputs = resolve(input("in", "a.bin"));
+        List<ExternalOutputReference> outputs = resolve(output("out", "a.bin"));
 
         MockExternalPortProcessorContext mock = mock();
         DirectFileIoPortProcessor processor = new DirectFileIoPortProcessor();
@@ -212,17 +580,155 @@ public class DirectFileIoPortProcessorTest {
         values.put(200, "B");
         values.put(300, "C");
 
-        prepare("a/b", values);
+        prepare("in/a.bin", values);
         run(mock, classes, Phase.PROLOGUE);
         assertThat(collect(inputs.get(0)), is(values));
 
         prepare(outputs.get(0), values);
         run(mock, classes, Phase.EPILOGUE);
-        assertThat(collect("c", null, "bin"), is(values));
+        assertThat(collect("out/a.bin"), is(values));
+    }
+
+    /**
+     * process - w/ wildcard.
+     * @throws Exception if failed
+     */
+    @Test
+    public void process_wildcard() throws Exception {
+        List<ExternalInputReference> inputs = resolve(input("in", "*.bin"));
+        List<ExternalOutputReference> outputs = resolve(output("out", "*.bin"));
+
+        MockExternalPortProcessorContext mock = mock();
+        DirectFileIoPortProcessor processor = new DirectFileIoPortProcessor();
+        processor.process(mock, inputs, outputs);
+
+        checkTasks(mock.getTasks(), 1, 1);
+
+        File classes = javac.compile();
+        Map<Integer, String> values = new LinkedHashMap<>();
+        values.put(100, "A");
+        values.put(200, "B");
+        values.put(300, "C");
+
+        prepare("in/a.bin", values);
+        prepare("in/b.bin", Collections.singletonMap(400, "D"));
+        run(mock, classes, Phase.PROLOGUE);
+
+        Map<Integer, String> valuesPlus = new LinkedHashMap<>();
+        valuesPlus.putAll(values);
+        valuesPlus.put(400, "D");
+        assertThat(collect(inputs.get(0)), is(valuesPlus));
+
+        prepare(outputs.get(0), values);
+        run(mock, classes, Phase.EPILOGUE);
+        assertThat(collect("out", null, ".bin"), is(values));
+    }
+
+    /**
+     * process - w/ properties.
+     * @throws Exception if failed
+     */
+    @Test
+    public void process_property() throws Exception {
+        List<ExternalInputReference> inputs = Collections.emptyList();
+        List<ExternalOutputReference> outputs = resolve(output("out", "{stringValue}.bin"));
+
+        MockExternalPortProcessorContext mock = mock();
+        DirectFileIoPortProcessor processor = new DirectFileIoPortProcessor();
+        processor.process(mock, inputs, outputs);
+
+        checkTasks(mock.getTasks(), 0, 1);
+
+        File classes = javac.compile();
+        Map<Integer, String> values = new LinkedHashMap<>();
+        values.put(100, "A");
+        values.put(200, "B");
+        values.put(300, "A");
+        values.put(400, "B");
+        values.put(500, "A");
+
+        prepare(outputs.get(0), values);
+        run(mock, classes, Phase.EPILOGUE);
+        Map<Integer, String> resultA = collect("out/A.bin");
+        assertThat(resultA.keySet(), hasSize(3));
+        assertThat(resultA, hasEntry(100, "A"));
+        assertThat(resultA, hasEntry(300, "A"));
+        assertThat(resultA, hasEntry(500, "A"));
+
+        Map<Integer, String> resultB = collect("out/B.bin");
+        assertThat(resultB.keySet(), hasSize(2));
+        assertThat(resultB, hasEntry(200, "B"));
+        assertThat(resultB, hasEntry(400, "B"));
+    }
+
+    /**
+     * process - w/ order.
+     * @throws Exception if failed
+     */
+    @Test
+    public void process_order() throws Exception {
+        List<ExternalInputReference> inputs = Collections.emptyList();
+        List<ExternalOutputReference> outputs = resolve(output("out", "a.bin").withOrder("-intValue"));
+
+        MockExternalPortProcessorContext mock = mock();
+        DirectFileIoPortProcessor processor = new DirectFileIoPortProcessor();
+        processor.process(mock, inputs, outputs);
+
+        checkTasks(mock.getTasks(), 0, 1);
+
+        File classes = javac.compile();
+        Map<Integer, String> values = new LinkedHashMap<>();
+        values.put(100, "A");
+        values.put(200, "B");
+        values.put(300, "C");
+        values.put(400, "D");
+        values.put(500, "E");
+
+        prepare(outputs.get(0), values);
+        run(mock, classes, Phase.EPILOGUE);
+        Map<Integer, String> resultA = collect("out/a.bin");
+        assertThat(resultA.keySet(), contains(500, 400, 300, 200, 100));
+    }
+
+    /**
+     * process - w/ delete patterns.
+     * @throws Exception if failed
+     */
+    @Test
+    public void process_delete() throws Exception {
+        List<ExternalInputReference> inputs = Collections.emptyList();
+        List<ExternalOutputReference> outputs = resolve(output("out", "a.bin").withDeletePatterns("*.bin"));
+
+        MockExternalPortProcessorContext mock = mock();
+        DirectFileIoPortProcessor processor = new DirectFileIoPortProcessor();
+        processor.process(mock, inputs, outputs);
+
+        checkTasks(mock.getTasks(), 0, 1);
+
+        File classes = javac.compile();
+        Map<Integer, String> values = new LinkedHashMap<>();
+        values.put(100, "A");
+        values.put(200, "B");
+        values.put(300, "C");
+
+        prepare(outputs.get(0), values);
+        prepare("out/b.bin", Collections.singletonMap(0, "?"));
+        prepare("out/a.binx", Collections.singletonMap(0, "?"));
+        run(mock, classes, Phase.EPILOGUE);
+        assertThat(collect("out", null, ".bin"), is(values));
+
+        assertThat(directio.file("out/a.bin").exists(), is(true));
+        assertThat(directio.file("out/b.bin").exists(), is(false));
+        assertThat(directio.file("out/a.binx").exists(), is(true));
     }
 
     private void prepare(String resource, Map<Integer, String> values) throws IOException {
         prepare(directio.file(resource), values);
+    }
+
+    private Map<Integer, String> collect(String resource) throws IOException {
+        File file = directio.file(resource);
+        return collect(Arrays.asList(file));
     }
 
     private Map<Integer, String> collect(String directory, String prefix, String suffix) throws IOException {
