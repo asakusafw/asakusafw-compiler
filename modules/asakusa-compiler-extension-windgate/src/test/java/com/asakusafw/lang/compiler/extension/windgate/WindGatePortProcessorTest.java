@@ -28,6 +28,7 @@ import com.asakusafw.lang.compiler.api.reference.TaskReference;
 import com.asakusafw.lang.compiler.api.reference.TaskReference.Phase;
 import com.asakusafw.lang.compiler.api.testing.MockExternalPortProcessorContext;
 import com.asakusafw.lang.compiler.common.DiagnosticException;
+import com.asakusafw.lang.compiler.common.Location;
 import com.asakusafw.lang.compiler.model.description.ValueDescription;
 import com.asakusafw.lang.compiler.model.info.ExternalInputInfo;
 import com.asakusafw.lang.compiler.model.info.ExternalOutputInfo;
@@ -200,7 +201,50 @@ public class WindGatePortProcessorTest {
      * @throws Exception if failed
      */
     @Test
-    public void process_multiple() throws Exception {
+    public void process_many_process() throws Exception {
+        InputDesc in0 = new InputDesc(String.class, "p", script("r", "id", "p0"));
+        InputDesc in1 = new InputDesc(String.class, "p", script("r", "id", "p1"));
+        OutputDesc out0 = new OutputDesc(String.class, "p", script("r", "id", "p0"));
+        OutputDesc out1 = new OutputDesc(String.class, "p", script("r", "id", "p1"));
+        MockExternalPortProcessorContext context = context();
+        WindGatePortProcessor proc = new WindGatePortProcessor();
+        proc.process(context, inputs(in0, in1), outputs(out0, out1));
+
+        GateScript importScript = loadScript(context, WindGatePortProcessor.getImportScriptLocation("p"));
+        assertThat(importScript.getProcesses(), hasSize(2));
+
+        GateScript exportScript = loadScript(context, WindGatePortProcessor.getExportScriptLocation("p"));
+        assertThat(exportScript.getProcesses(), hasSize(2));
+
+        assertThat(context.getOutputFile(WindGatePortProcessor.getImportScriptLocation("p")).exists(), is(true));
+        assertThat(context.getOutputFile(WindGatePortProcessor.getExportScriptLocation("p")).exists(), is(true));
+
+        assertThat(context.getTasks().getTasks(Phase.IMPORT), hasSize(1));
+        assertThat(context.getTasks().getTasks(Phase.EXPORT), hasSize(1));
+        assertThat(context.getTasks().getTasks(Phase.FINALIZE), hasSize(1));
+
+        checkTask(context.getTasks().getImportTaskContainer(), "p", WindGatePortProcessor.OPT_BEGIN);
+        checkTask(context.getTasks().getExportTaskContainer(), "p", WindGatePortProcessor.OPT_END);
+
+        checkFinalize(context.getTasks().getFinalizeTaskContainer(), "p");
+    }
+
+    private GateScript loadScript(MockExternalPortProcessorContext context, Location location) throws IOException {
+        File file = context.getOutputFile(location);
+        Properties properties = new Properties();
+        try (InputStream input = new FileInputStream(file)) {
+            properties.load(input);
+        }
+        GateScript script = GateScript.loadFrom("testing", properties , context.getClassLoader());
+        return script;
+    }
+
+    /**
+     * processes output.
+     * @throws Exception if failed
+     */
+    @Test
+    public void process_many_profile() throws Exception {
         InputDesc in0 = new InputDesc(String.class, "p0", script("r", "id", "p0"));
         InputDesc in1 = new InputDesc(String.class, "p1", script("r", "id", "p1"));
         OutputDesc out0 = new OutputDesc(String.class, "p1", script("r", "id", "p1"));

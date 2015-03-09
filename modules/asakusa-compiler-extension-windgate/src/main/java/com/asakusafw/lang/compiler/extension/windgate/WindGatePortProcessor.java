@@ -236,7 +236,6 @@ public class WindGatePortProcessor
                     "WindGate importer must have only one input path: {0}",
                     reference));
         }
-        String profileName = model.getProfileName();
         Class<?> dataModelType;
         try {
             dataModelType = reference.getDataModelClass().resolve(context.getClassLoader());
@@ -250,7 +249,7 @@ public class WindGatePortProcessor
         DriverScript drain = new DriverScript(
                 Constants.HADOOP_FILE_RESOURCE_NAME,
                 Collections.singletonMap(FileProcess.FILE.key(), location));
-        return createProcessScript(profileName, dataModelType, source, drain);
+        return createProcessScript(reference.getName(), dataModelType, source, drain);
     }
 
     private ProcessScript<?> toProcessScript(
@@ -262,7 +261,6 @@ public class WindGatePortProcessor
             }
             locations.append(path);
         }
-        String profileName = model.getProfileName();
         Class<?> dataModelType;
         try {
             dataModelType = reference.getDataModelClass().resolve(context.getClassLoader());
@@ -275,7 +273,7 @@ public class WindGatePortProcessor
                 Constants.HADOOP_FILE_RESOURCE_NAME,
                 Collections.singletonMap(FileProcess.FILE.key(), locations.toString()));
         DriverScript drain = model.getDriverScript();
-        return createProcessScript(profileName, dataModelType, source, drain);
+        return createProcessScript(reference.getName(), dataModelType, source, drain);
     }
 
     static Location getImportScriptLocation(String profileName) {
@@ -295,16 +293,16 @@ public class WindGatePortProcessor
     }
 
     private ProcessScript<?> createProcessScript(
-            String profileName,
+            String processName,
             Class<?> dataModelType,
             DriverScript source,
             DriverScript drain) {
-        assert profileName != null;
+        assert processName != null;
         assert dataModelType != null;
         assert source != null;
         assert drain != null;
         return new ProcessScript<>(
-                profileName,
+                processName,
                 Constants.DEFAULT_PROCESS_NAME,
                 dataModelType,
                 source,
