@@ -43,7 +43,7 @@ public class JobflowPackager {
     /**
      * The batch element location of jobflow libraries.
      */
-    static final Location JOBFLOW_LIBRARIES = Location.of("jobflow"); //$NON-NLS-1$
+    static final Location JOBFLOW_LIBRARIES = Location.of("lib"); //$NON-NLS-1$
 
     /**
      * The file name pattern of jobflow libraries.

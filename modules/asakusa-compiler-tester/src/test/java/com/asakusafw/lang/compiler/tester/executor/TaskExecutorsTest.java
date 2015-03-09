@@ -19,6 +19,7 @@ import org.junit.rules.TemporaryFolder;
 import com.asakusafw.lang.compiler.api.reference.CommandToken;
 import com.asakusafw.lang.compiler.common.Location;
 import com.asakusafw.lang.compiler.common.testing.FileEditor;
+import com.asakusafw.lang.compiler.core.basic.JobflowPackager;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.info.BatchInfo;
 import com.asakusafw.lang.compiler.model.info.JobflowInfo;
@@ -119,7 +120,7 @@ public class TaskExecutorsTest {
         File home = folder.newFolder();
         File batchapps = new File(home, TesterContext.DEFAULT_BATCHAPPS_PATH);
         File application = new File(batchapps, "BID");
-        FileEditor.put(new File(application, "jobflow/jobflow-FID.jar"), "Hello, world!");
+        FileEditor.put(new File(application, JobflowPackager.getLibraryLocation("FID").toPath()), "Hello, world!");
 
         Context context = context(home);
         File file = TaskExecutors.getJobflowLibrary(context);
