@@ -37,6 +37,7 @@ import com.asakusafw.lang.compiler.model.info.ExternalInputInfo;
 import com.asakusafw.lang.compiler.model.info.ExternalOutputInfo;
 import com.asakusafw.lang.compiler.packaging.ByteArrayItem;
 import com.asakusafw.lang.compiler.packaging.ResourceItem;
+import com.asakusafw.lang.compiler.tester.CompilerProfile.Edit;
 import com.asakusafw.lang.compiler.tester.executor.DummyTaskExecutor;
 import com.asakusafw.lang.compiler.tester.executor.JobflowExecutor;
 
@@ -153,6 +154,25 @@ public class CompilerProfileTest {
 
         assertThat("still exists", file.isFile(), is(true));
         assertThat("still exists", new File(folder.getRoot(), "EXTRA").isFile(), is(true));
+    }
+
+    /**
+     * w/ edit.
+     * @throws Exception if failed
+     */
+    @Test
+    public void edit() throws Exception {
+        CompilerProfile profile = newProfile();
+        profile.apply(new Edit() {
+            @Override
+            public void perform(CompilerProfile p) throws IOException {
+                p.withEnvironmentVariables(Collections.singletonMap("a", "A"));
+            }
+        });
+        try (CompilerTester compiler = profile.build()) {
+            Map<String, String> env = compiler.getTesterContext().getEnvironmentVariables();
+            assertThat(env, hasEntry("a", "A"));
+        }
     }
 
     private CompilerProfile newProfile(CompilerParticipant... participants) {
