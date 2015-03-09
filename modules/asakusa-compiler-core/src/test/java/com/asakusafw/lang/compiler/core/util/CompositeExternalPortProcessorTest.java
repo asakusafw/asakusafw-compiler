@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -111,6 +112,51 @@ public class CompositeExternalPortProcessorTest extends CompilerTestRoot {
     }
 
     /**
+     * validate.
+     * @throws Exception if failed
+     */
+    @Test
+    public void validate() throws Exception {
+        ExternalPortProcessor composite = CompositeExternalPortProcessor.composite(Arrays.asList(a, b));
+        ExternalPortProcessor.Context context = context();
+        Map<String, ExternalInputInfo> inputs = prepInputMap(context, composite, new DummyInA(), new DummyInB());
+        Map<String, ExternalOutputInfo> outputs = prepOutputMap(context, composite, new DummyOutA(), new DummyOutB());
+        composite.validate(context, inputs, outputs);
+        assertThat(a.validated, is(true));
+        assertThat(b.validated, is(true));
+    }
+
+    /**
+     * validate.
+     * @throws Exception if failed
+     */
+    @Test
+    public void validate_absent() throws Exception {
+        ExternalPortProcessor composite = CompositeExternalPortProcessor.composite(Arrays.asList(a, b));
+        ExternalPortProcessor.Context context = context();
+        Map<String, ExternalInputInfo> inputs = prepInputMap(context, composite, new DummyInA());
+        Map<String, ExternalOutputInfo> outputs = prepOutputMap(context, composite, new DummyOutA());
+        composite.validate(context, inputs, outputs);
+        assertThat(a.validated, is(true));
+        assertThat(b.validated, is(false));
+    }
+
+    /**
+     * validate.
+     * @throws Exception if failed
+     */
+    @Test
+    public void validate_sparse() throws Exception {
+        ExternalPortProcessor composite = CompositeExternalPortProcessor.composite(Arrays.asList(a, b));
+        ExternalPortProcessor.Context context = context();
+        Map<String, ExternalInputInfo> inputs = prepInputMap(context, composite, new DummyInA());
+        Map<String, ExternalOutputInfo> outputs = prepOutputMap(context, composite, new DummyOutB());
+        composite.validate(context, inputs, outputs);
+        assertThat(a.validated, is(true));
+        assertThat(b.validated, is(true));
+    }
+
+    /**
      * process.
      * @throws Exception if failed
      */
@@ -153,6 +199,30 @@ public class CompositeExternalPortProcessorTest extends CompilerTestRoot {
         composite.process(context, inputs, outputs);
         assertThat(a.worked, is(true));
         assertThat(b.worked, is(true));
+    }
+
+    private Map<String, ExternalInputInfo> prepInputMap(
+            ExternalPortProcessor.Context context,
+            ExternalPortProcessor processor,
+            Object... objects) {
+        List<ExternalInputReference> ports = prepInputs(context, processor, objects);
+        Map<String, ExternalInputInfo> results = new LinkedHashMap<>();
+        for (ExternalInputReference port : ports) {
+            results.put(port.getName(), port);
+        }
+        return results;
+    }
+
+    private Map<String, ExternalOutputInfo> prepOutputMap(
+            ExternalPortProcessor.Context context,
+            ExternalPortProcessor processor,
+            Object... objects) {
+        List<ExternalOutputReference> ports = prepOutputs(context, processor, objects);
+        Map<String, ExternalOutputInfo> results = new LinkedHashMap<>();
+        for (ExternalOutputReference port : ports) {
+            results.put(port.getName(), port);
+        }
+        return results;
     }
 
     private List<ExternalInputReference> prepInputs(
@@ -229,6 +299,8 @@ public class CompositeExternalPortProcessorTest extends CompilerTestRoot {
 
         private final Class<?> supportedOutputClass;
 
+        boolean validated;
+
         boolean worked;
 
         public DummyProcessor(String moduleName, Class<?> input, Class<?> output) {
@@ -265,7 +337,7 @@ public class CompositeExternalPortProcessorTest extends CompilerTestRoot {
         public void validate(
                 AnalyzeContext context,
                 Map<String, ExternalInputInfo> inputs, Map<String, ExternalOutputInfo> outputs) {
-            return;
+            this.validated = true;
         }
 
         @Override
