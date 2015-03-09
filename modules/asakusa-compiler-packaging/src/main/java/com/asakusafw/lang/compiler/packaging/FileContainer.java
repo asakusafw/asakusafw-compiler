@@ -73,6 +73,18 @@ public class FileContainer implements ResourceContainer, ResourceRepository {
     }
 
     /**
+     * Adds a new resource with contents from the content provider.
+     * @param location the resource path (relative from the container root)
+     * @param contents the the callback object for preparing resource contents
+     * @throws IOException if failed to accept the resource by I/O error
+     */
+    public void addResource(Location location, ContentProvider contents) throws IOException {
+        try (OutputStream output = addResource(location)) {
+            contents.writeTo(output);
+        }
+    }
+
+    /**
      * Creates a {@link ResourceSink} for create resources into this container.
      * @return the created sink
      */

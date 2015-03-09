@@ -24,9 +24,11 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.Set;
 import java.util.TreeMap;
 
 import org.junit.Rule;
@@ -141,6 +143,46 @@ public class FileRepositoryTest {
         assertThat(repo.toString(), repo, is(new FileRepository(a)));
         assertThat(repo.hashCode(), is(new FileRepository(a).hashCode()));
         assertThat(repo, is(not(new FileRepository(b))));
+    }
+
+    /**
+     * visits all.
+     * @throws Exception if failed
+     */
+    @Test
+    public void visit_all() throws Exception {
+        FileRepository repository = new FileRepository(open("structured.zip"));
+        final Set<String> locations = new HashSet<>();
+        repository.accept(new FileVisitor() {
+            @Override
+            public boolean process(Location location, File file) throws IOException {
+                if (file.isFile()) {
+                    locations.add(location.toPath());
+                }
+                return true;
+            }
+        });
+        assertThat(locations, containsInAnyOrder("a.txt", "a/b.txt", "a/b/c.txt"));
+    }
+
+    /**
+     * visits flat.
+     * @throws Exception if failed
+     */
+    @Test
+    public void visit_flat() throws Exception {
+        FileRepository repository = new FileRepository(open("structured.zip"));
+        final Set<String> locations = new HashSet<>();
+        repository.accept(new FileVisitor() {
+            @Override
+            public boolean process(Location location, File file) throws IOException {
+                if (file.isFile()) {
+                    locations.add(location.toPath());
+                }
+                return false;
+            }
+        });
+        assertThat(locations, containsInAnyOrder("a.txt"));
     }
 
     private File open(String name) {

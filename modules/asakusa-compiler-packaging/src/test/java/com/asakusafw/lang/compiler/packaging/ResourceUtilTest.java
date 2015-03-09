@@ -80,6 +80,24 @@ public class ResourceUtilTest extends ResourceTestRoot {
     }
 
     /**
+     * item from a class.
+     * @throws Exception if failed
+     */
+    @Test
+    public void item_class() throws Exception {
+        File lib = deployer.copy(local("hello.jar"), "lib.jar");
+        try (URLClassLoader loader = loader(lib)) {
+            Class<?> aClass = loader.loadClass("com.example.Hello");
+            UrlItem item = ResourceUtil.toItem(aClass);
+
+            assertThat(item.getLocation(), is(Location.of("com/example/Hello.class")));
+
+            // can open?
+            item.openResource().close();
+        }
+    }
+
+    /**
      * repository from directory.
      * @throws Exception if failed
      */
@@ -105,6 +123,27 @@ public class ResourceUtilTest extends ResourceTestRoot {
         ResourceRepository repository = ResourceUtil.toRepository(file);
 
         Map<String, String> items = dump(repository);
+        assertThat(items.keySet(), hasSize(3));
+        assertThat(items, hasEntry("a.txt", "aaa"));
+        assertThat(items, hasEntry("b.txt", "bbb"));
+        assertThat(items, hasEntry("c.txt", "ccc"));
+    }
+
+    /**
+     * copies repository into sink.
+     * @throws Exception if failed
+     */
+    @Test
+    public void copy_to_sink() throws Exception {
+        File file = deployer.copy(local("files.zip"), "files.zip");
+        ResourceRepository source = ResourceUtil.toRepository(file);
+
+        File target = deployer.newFolder();
+        try (ResourceSink sink = new FileSink(target)) {
+            ResourceUtil.copy(source, sink);
+        }
+
+        Map<String, String> items = dump(new FileRepository(target));
         assertThat(items.keySet(), hasSize(3));
         assertThat(items, hasEntry("a.txt", "aaa"));
         assertThat(items, hasEntry("b.txt", "bbb"));
@@ -155,6 +194,38 @@ public class ResourceUtilTest extends ResourceTestRoot {
             Set<File> results = ResourceUtil.findLibrariesByResource(loader, Location.of("a.txt"));
             assertThat(results, containsInAnyOrder(a, b, c));
         }
+    }
+
+    /**
+     * delete file.
+     * @throws Exception if failed
+     */
+    @Test
+    public void delete_file() throws Exception {
+        File file = deployer.copy(local("files.zip"), "files.zip");
+
+        assertThat(file.exists(), is(true));
+
+        assertThat(ResourceUtil.delete(file), is(true));
+        assertThat(file.exists(), is(false));
+
+        assertThat(ResourceUtil.delete(file), is(false));
+    }
+
+    /**
+     * delete directory.
+     * @throws Exception if failed
+     */
+    @Test
+    public void delete_directory() throws Exception {
+        File file = deployer.extract(local("files.zip"), "files.zip");
+
+        assertThat(file.exists(), is(true));
+
+        assertThat(ResourceUtil.delete(file), is(true));
+        assertThat(file.exists(), is(false));
+
+        assertThat(ResourceUtil.delete(file), is(false));
     }
 
     private String local(String name) {
