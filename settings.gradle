@@ -1,4 +1,4 @@
-// include ''
+include 'asakusa-bridge-redirector'
 
 rootProject.children.each { project ->
     project.projectDir = new File(settingsDir, "modules/${project.name}")
