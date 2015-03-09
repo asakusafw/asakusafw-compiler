@@ -17,6 +17,7 @@ include 'asakusa-compiler-extension-externalio'
 include 'asakusa-compiler-extension-directio'
 include 'asakusa-compiler-extension-windgate'
 include 'asakusa-compiler-extension-yaess'
+include 'asakusa-compiler-extension-cleanup'
 
 // utilities
 include 'asakusa-compiler-javac'

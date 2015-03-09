@@ -63,7 +63,7 @@ subprojects {
         }
         ext.useHadoopInTest = {
             dependencies {
-                testRuntime "org.apache.hadoop:hadoop-core:1.2.1"
+                testCompile "org.apache.hadoop:hadoop-core:1.2.1"
             }
         }
         dependencies {

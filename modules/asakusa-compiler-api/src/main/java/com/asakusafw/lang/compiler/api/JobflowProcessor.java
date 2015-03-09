@@ -43,6 +43,12 @@ public interface JobflowProcessor {
         CompilerOptions getOptions();
 
         /**
+         * Returns the target batch ID.
+         * @return the target batch ID
+         */
+        String getBatchId();
+
+        /**
          * Returns the class loader to obtain the target application classes.
          * @return the class loader
          */

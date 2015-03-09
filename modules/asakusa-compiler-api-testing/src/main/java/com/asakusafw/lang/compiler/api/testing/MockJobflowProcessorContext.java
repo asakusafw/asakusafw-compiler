@@ -31,6 +31,8 @@ public class MockJobflowProcessorContext extends AbstractJobflowProcessorContext
      */
     public static final String EXTERNAL_INPUT_BASE = "extenal/input/"; //$NON-NLS-1$
 
+    private static final String DEFAULT_BATCH_ID = "mockbatch"; //$NON-NLS-1$
+
     private final CompilerOptions options;
 
     private final ClassLoader classLoader;
@@ -39,11 +41,14 @@ public class MockJobflowProcessorContext extends AbstractJobflowProcessorContext
 
     private final BasicResourceContainer resources;
 
+    private String batchId = DEFAULT_BATCH_ID;
+
     /**
      * Creates a new instance w/ using {@link MockDataModelLoader}.
      * @param options the compiler options
      * @param classLoader the target application loader
      * @param outputDirectory the build output directory
+     * @see #withBatchId(String)
      * @see #registerExtension(Class, Object)
      */
     public MockJobflowProcessorContext(
@@ -59,6 +64,7 @@ public class MockJobflowProcessorContext extends AbstractJobflowProcessorContext
      * @param classLoader the target application loader
      * @param dataModelLoader the data model loader
      * @param outputDirectory the build output directory
+     * @see #withBatchId(String)
      * @see #registerExtension(Class, Object)
      */
     public MockJobflowProcessorContext(
@@ -75,6 +81,21 @@ public class MockJobflowProcessorContext extends AbstractJobflowProcessorContext
     @Override
     public CompilerOptions getOptions() {
         return options;
+    }
+
+    @Override
+    public String getBatchId() {
+        return batchId;
+    }
+
+    /**
+     * Sets the current batch ID.
+     * @param newValue the new value
+     * @return this
+     */
+    public MockJobflowProcessorContext withBatchId(String newValue) {
+        this.batchId = newValue;
+        return this;
     }
 
     @Override

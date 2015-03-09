@@ -66,6 +66,11 @@ public class JobflowProcessorAdapter implements JobflowProcessor.Context {
     }
 
     @Override
+    public String getBatchId() {
+        return batchId;
+    }
+
+    @Override
     public ClassLoader getClassLoader() {
         return delegate.getProject().getClassLoader();
     }
