@@ -20,6 +20,7 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.io.File;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -85,18 +86,83 @@ public class CopyStageEmitterTest {
                 Collections.<String, String>emptyMap(),
                 javac.compile());
         assertThat("exit status code", status, is(0));
-        assertThat(collect("output"), contains("Hello, world!"));
+
+        assertThat(collect(CopyStageInfo.getOutputPath(base.toString(), "out")), contains("Hello, world!"));
+    }
+
+    /**
+     * multiple files.
+     * @throws Exception if failed
+     */
+    @Test
+    public void multiple() throws Exception {
+        FileEditor.put(new File(folder.getRoot(), "input/test0.txt"), "Hello0");
+        FileEditor.put(new File(folder.getRoot(), "input/test1.txt"), "Hello1");
+        FileEditor.put(new File(folder.getRoot(), "input/test2.txt"), "Hello2");
+
+        Path root = new Path(folder.getRoot().toURI());
+        Path base = new Path(root, "output");
+        ClassDescription client = new ClassDescription("com.example.StageClient");
+        CopyStageInfo info = new CopyStageInfo(
+                new StageInfo("simple", "simple", "simple"),
+                Arrays.asList(new CopyStageInfo.Operation[] {
+                        new CopyStageInfo.Operation(
+                                "out0",
+                                new SourceInfo(
+                                        new Path(root, "input/test0.txt").toString(),
+                                        classOf(Text.class),
+                                        classOf(TextInputFormat.class),
+                                        Collections.<String, String>emptyMap()),
+                                classOf(TextOutputFormat.class),
+                                Collections.<String, String>emptyMap()),
+                        new CopyStageInfo.Operation(
+                                "out1",
+                                new SourceInfo(
+                                        new Path(root, "input/test1.txt").toString(),
+                                        classOf(Text.class),
+                                        classOf(TextInputFormat.class),
+                                        Collections.<String, String>emptyMap()),
+                                classOf(TextOutputFormat.class),
+                                Collections.<String, String>emptyMap()),
+                        new CopyStageInfo.Operation(
+                                "out2",
+                                new SourceInfo(
+                                        new Path(root, "input/test2.txt").toString(),
+                                        classOf(Text.class),
+                                        classOf(TextInputFormat.class),
+                                        Collections.<String, String>emptyMap()),
+                                classOf(TextOutputFormat.class),
+                                Collections.<String, String>emptyMap()),
+                }),
+                base.toString());
+        CopyStageEmitter.emit(client, info, javac);
+        int status = MapReduceRunner.execute(
+                new Configuration(),
+                client,
+                "testing",
+                Collections.<String, String>emptyMap(),
+                javac.compile());
+        assertThat("exit status code", status, is(0));
+
+        assertThat(collect(CopyStageInfo.getOutputPath(base.toString(), "out0")), contains("Hello0"));
+        assertThat(collect(CopyStageInfo.getOutputPath(base.toString(), "out1")), contains("Hello1"));
+        assertThat(collect(CopyStageInfo.getOutputPath(base.toString(), "out2")), contains("Hello2"));
     }
 
     private List<String> collect(String path) {
+        int index = path.lastIndexOf('/');
+        assertThat(path, endsWith("*"));
+        assertThat(index, is(greaterThan(0)));
+
+        File directory = new File(URI.create(path.substring(0, index)));
+        String prefix = path.substring(index + 1, path.length() - 1);
         List<String> results = new ArrayList<>();
-        File directory = new File(folder.getRoot(), path);
         for (File file : directory.listFiles()) {
             if (file.isFile() == false) {
                 continue;
             }
             String name = file.getName();
-            if (name.startsWith(".") || name.startsWith("_")) {
+            if (name.startsWith(prefix) == false) {
                 continue;
             }
             results.addAll(FileEditor.get(file));
