@@ -1,3 +1,7 @@
+// core
+include 'asakusa-bridge-runtime'
+
+// tools
 include 'asakusa-bridge-redirector'
 
 rootProject.children.each { project ->

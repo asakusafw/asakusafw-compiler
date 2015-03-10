@@ -1,0 +1,10 @@
+description 'Asakusa runtime resource broker API'
+
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'eclipse'
+
+useSLF4J()
+
+dependencies {
+}
