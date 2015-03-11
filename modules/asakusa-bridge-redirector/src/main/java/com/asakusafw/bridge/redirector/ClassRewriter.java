@@ -71,7 +71,7 @@ public class ClassRewriter {
                 Type type = Type.getObjectType(owner);
                 Type target = rule.redirect(type);
                 if (LOG.isDebugEnabled() && type.equals(target) == false) {
-                    LOG.debug("rewrite: ({} => {}).{}{}", new Object[] {
+                    LOG.debug("rewrite invocation: ({} => {}).{}{}", new Object[] {
                             type,
                             target,
                             name,

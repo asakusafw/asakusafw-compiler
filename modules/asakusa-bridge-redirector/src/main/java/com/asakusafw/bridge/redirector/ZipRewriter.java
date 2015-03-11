@@ -39,15 +39,22 @@ public class ZipRewriter {
             if (entry == null) {
                 break;
             }
-            output.putNextEntry(entry);
+            ZipEntry next = new ZipEntry(entry.getName());
+            next.setTime(next.getTime());
+            next.setMethod(entry.getMethod());
+            if (entry.getExtra() != null) {
+                next.setExtra(entry.getExtra());
+            }
+            next.setComment(entry.getComment());
+            output.putNextEntry(next);
             if (entry.isDirectory()) {
                 continue;
             }
             if (isTarget(entry)) {
-                LOG.debug("rewrite: {}", entry.getName());
+                LOG.debug("rewrite class: {}", entry.getName());
                 classRewriter.rewrite(input, output);
             } else {
-                LOG.debug("   copy: {}", entry.getName());
+                LOG.debug("    copy file: {}", entry.getName());
                 Util.copy(input, output);
             }
         }
