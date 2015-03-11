@@ -26,7 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * CLI for API redirector.
+ * CLI for API invocation redirector.
  *
  * <h3> Program Arguments </h3>
  * <dl>
@@ -92,8 +92,8 @@ public final class Cli {
             process(configuration);
         } catch (Exception e) {
             LOG.error(MessageFormat.format(
-                    "error occurred while compiling batch classes: {0}",
-                    (Object) args), e);
+                    "error occurred while redirecting API invocations: {0}",
+                    Arrays.toString(args)), e);
             return 1;
         }
         return 0;
@@ -114,19 +114,8 @@ public final class Cli {
     }
 
     private static File parseFile(CommandLine cmd, Option opt, boolean mandatory) {
-        String value = cmd.getOptionValue(opt.getLongOpt());
-        if (value != null) {
-            value = value.trim();
-            if (value.isEmpty()) {
-                value = null;
-            }
-        }
+        String value = parseOpt(cmd, opt, mandatory);
         if (value == null) {
-            if (mandatory) {
-                throw new IllegalArgumentException(MessageFormat.format(
-                        "option \"--{0}\" is mandatory",
-                        opt.getLongOpt()));
-            }
             return null;
         }
         return new File(value);
@@ -140,9 +129,36 @@ public final class Cli {
             assert entry.getValue() instanceof String;
             String source = (String) entry.getKey();
             String destination = (String) entry.getValue();
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("--{}: {} => {}", new Object[] {
+                        opt.getLongOpt(),
+                        source,
+                        destination
+                });
+            }
             rule.add(source, destination);
         }
         return rule;
+    }
+
+    private static String parseOpt(CommandLine cmd, Option opt, boolean mandatory) {
+        String value = cmd.getOptionValue(opt.getLongOpt());
+        if (value != null) {
+            value = value.trim();
+            if (value.isEmpty()) {
+                value = null;
+            }
+        }
+        LOG.debug("--{}: {}", opt.getLongOpt(), value); //$NON-NLS-1$
+        if (value == null) {
+            if (mandatory) {
+                throw new IllegalArgumentException(MessageFormat.format(
+                        "option \"--{0}\" is mandatory",
+                        opt.getLongOpt()));
+            }
+            return null;
+        }
+        return value;
     }
 
     static void process(Configuration configuration) throws IOException {
