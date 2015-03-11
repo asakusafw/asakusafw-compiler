@@ -191,7 +191,7 @@ public class BatchCompilerCli {
         } catch (Exception e) {
             LOG.error(MessageFormat.format(
                     "error occurred while compiling batch classes: {0}",
-                    (Object) args), e);
+                    Arrays.toString(args)), e);
             return 1;
         }
         return 0;
