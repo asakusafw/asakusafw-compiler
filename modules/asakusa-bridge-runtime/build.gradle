@@ -7,4 +7,5 @@ apply plugin: 'eclipse'
 useSLF4J()
 
 dependencies {
+    compile "com.asakusafw:asakusa-runtime:${asakusafwVersion}"
 }
