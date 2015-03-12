@@ -64,7 +64,8 @@ public class StageInfo {
             String batchId,
             String flowId,
             String stageId,
-            String executionId, Map<String, String> batchArguments) {
+            String executionId,
+            Map<String, String> batchArguments) {
         this.userName = userName;
         this.batchId = batchId;
         this.flowId = flowId;
@@ -73,6 +74,27 @@ public class StageInfo {
         this.batchArguments = Collections.unmodifiableMap(new LinkedHashMap<>(batchArguments));
         this.variables = new VariableTable();
         this.variables.defineVariables(toMap(userName, batchId, flowId, stageId, executionId));
+    }
+
+    /**
+     * Creates a new instance.
+     * @param userName the current user name
+     * @param batchId the current batch ID
+     * @param flowId the current flow ID
+     * @param stageId the current stage ID (nullable)
+     * @param executionId the current execution ID
+     * @param serializedBatchArguments the serialized batch arguments
+     */
+    public StageInfo(
+            String userName,
+            String batchId,
+            String flowId,
+            String stageId,
+            String executionId,
+            String serializedBatchArguments) {
+        this(userName,
+                batchId, flowId, stageId, executionId,
+                deserializeVariableTable(serializedBatchArguments));
     }
 
     private static Map<String, String> toMap(
@@ -172,12 +194,7 @@ public class StageInfo {
         String stageId = map.get(StageConstants.VAR_STAGE_ID);
         String executionId = map.get(StageConstants.VAR_EXECUTION_ID);
         String serialBatchArgs = map.get(KEY_BATCH_ARGUMENTS);
-        Map<String, String> arguments = new LinkedHashMap<>();
-        if (serialBatchArgs != null) {
-            VariableTable table = new VariableTable();
-            table.defineVariables(serialBatchArgs);
-            arguments.putAll(table.getVariables());
-        }
+        Map<String, String> arguments = deserializeVariableTable(serialBatchArgs);
         return new StageInfo(userName, batchId, flowId, stageId, executionId, arguments);
     }
 
@@ -246,6 +263,16 @@ public class StageInfo {
         }
         results.add(buf.toString());
         return results;
+    }
+
+    private static Map<String, String> deserializeVariableTable(String serialized) {
+        Map<String, String> arguments = new LinkedHashMap<>();
+        if (serialized != null) {
+            VariableTable table = new VariableTable();
+            table.defineVariables(serialized);
+            arguments.putAll(table.getVariables());
+        }
+        return arguments;
     }
 
     @Override

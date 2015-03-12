@@ -20,8 +20,6 @@ import static org.junit.Assert.*;
 
 import java.io.IOException;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import com.asakusafw.bridge.broker.ResourceBroker.Initializer;
@@ -34,11 +32,7 @@ public class ResourceBrokerTest {
     /**
      * setup/cleanup the test case.
      */
-    @Before
-    @After
-    public void clean() {
-        ResourceBroker.closeAll();
-    }
+    public final ResourceBrokerContext brokerContext = new ResourceBrokerContext();
 
     /**
      * simple case.

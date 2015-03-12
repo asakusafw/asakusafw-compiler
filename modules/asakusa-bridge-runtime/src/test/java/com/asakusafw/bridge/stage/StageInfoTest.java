@@ -43,6 +43,20 @@ public class StageInfoTest {
     }
 
     /**
+     * w/ serialized batch arguments.
+     */
+    @Test
+    public void serialized_batch_args() {
+        StageInfo info = new StageInfo("u", "a", "b", "c", "d", "e=f");
+        assertThat(info.toString(), info.getUserName(), is("u"));
+        assertThat(info.toString(), info.getBatchId(), is("a"));
+        assertThat(info.toString(), info.getFlowId(), is("b"));
+        assertThat(info.toString(), info.getStageId(), is("c"));
+        assertThat(info.toString(), info.getExecutionId(), is("d"));
+        assertThat(info.toString(), info.getBatchArguments(), is(kvs("e", "f")));
+    }
+
+    /**
      * check equality.
      */
     @Test
