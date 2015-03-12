@@ -2,6 +2,9 @@
 include 'asakusa-bridge-runtime'
 include 'asakusa-bridge-directio-runtime'
 
+// legacy adapter
+include 'asakusa-bridge-adapter'
+
 // tools
 include 'asakusa-bridge-redirector'
 
