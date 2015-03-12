@@ -57,6 +57,20 @@ public class StageInfoTest {
     }
 
     /**
+     * w/ nulls.
+     */
+    @Test
+    public void nulls() {
+        StageInfo info = new StageInfo(null, null, null, null, null, (String) null);
+        assertThat(info.toString(), info.getUserName(), is(nullValue()));
+        assertThat(info.toString(), info.getBatchId(), is(nullValue()));
+        assertThat(info.toString(), info.getFlowId(), is(nullValue()));
+        assertThat(info.toString(), info.getStageId(), is(nullValue()));
+        assertThat(info.toString(), info.getExecutionId(), is(nullValue()));
+        assertThat(info.toString(), info.getBatchArguments().entrySet(), is(empty()));
+    }
+
+    /**
      * check equality.
      */
     @Test

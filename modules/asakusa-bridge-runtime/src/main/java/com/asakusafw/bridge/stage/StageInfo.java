@@ -78,12 +78,12 @@ public class StageInfo {
 
     /**
      * Creates a new instance.
-     * @param userName the current user name
-     * @param batchId the current batch ID
-     * @param flowId the current flow ID
+     * @param userName the current user name (nullable)
+     * @param batchId the current batch ID (nullable)
+     * @param flowId the current flow ID (nullable)
      * @param stageId the current stage ID (nullable)
-     * @param executionId the current execution ID
-     * @param serializedBatchArguments the serialized batch arguments
+     * @param executionId the current execution ID (nullable)
+     * @param serializedBatchArguments the serialized batch arguments (nullable)
      */
     public StageInfo(
             String userName,
@@ -100,12 +100,19 @@ public class StageInfo {
     private static Map<String, String> toMap(
             String userName, String batchId, String flowId, String stageId, String executionId) {
         Map<String, String> results = new LinkedHashMap<>();
-        results.put(StageConstants.VAR_USER, userName);
-        results.put(StageConstants.VAR_BATCH_ID, batchId);
-        results.put(StageConstants.VAR_FLOW_ID, flowId);
-        results.put(StageConstants.VAR_STAGE_ID, stageId);
-        results.put(StageConstants.VAR_EXECUTION_ID, executionId);
+        put(results, StageConstants.VAR_USER, userName);
+        put(results, StageConstants.VAR_BATCH_ID, batchId);
+        put(results, StageConstants.VAR_FLOW_ID, flowId);
+        put(results, StageConstants.VAR_STAGE_ID, stageId);
+        put(results, StageConstants.VAR_EXECUTION_ID, executionId);
         return results;
+    }
+
+    private static void put(Map<String, String> map, String key, String value) {
+        if (value == null) {
+            return;
+        }
+        map.put(key, value);
     }
 
     /**
