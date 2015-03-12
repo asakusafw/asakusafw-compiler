@@ -5,6 +5,7 @@ apply plugin: 'maven'
 apply plugin: 'eclipse'
 
 useSLF4J()
+useHadoop()
 
 dependencies {
     compile "com.asakusafw:asakusa-runtime:${asakusafwVersion}"
