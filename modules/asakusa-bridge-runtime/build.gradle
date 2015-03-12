@@ -1,4 +1,4 @@
-description 'Asakusa runtime resource broker API'
+description 'Asakusa bridge runtime APIs'
 
 apply plugin: 'java'
 apply plugin: 'maven'

@@ -1,5 +1,6 @@
-// core
+// runtime
 include 'asakusa-bridge-runtime'
+include 'asakusa-bridge-directio-runtime'
 
 // tools
 include 'asakusa-bridge-redirector'

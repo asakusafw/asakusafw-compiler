@@ -1,0 +1,14 @@
+description 'Asakusa Direct I/O bridge API'
+
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'eclipse'
+
+useSLF4J()
+useHadoop()
+
+dependencies {
+    compile project(':asakusa-bridge-runtime')
+    compile "com.asakusafw:asakusa-runtime:${asakusafwVersion}"
+    compile "com.asakusafw.sandbox:asakusa-directio-runtime-ext:${asakusafwVersion}"
+}
