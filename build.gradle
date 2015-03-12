@@ -3,7 +3,7 @@ description 'Asakusa Framework Compiler Project'
 allprojects {
     group 'com.asakusafw.lang.compiler'
     version '0.1-SNAPSHOT'
-    ext.asakusafwVersion = '0.7.2-hadoop1'
+    ext.asakusafwVersion = '0.7.3-RC1-hadoop1'
 }
 
 subprojects {
