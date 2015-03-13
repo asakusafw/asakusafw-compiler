@@ -2,12 +2,17 @@ package com.asakusafw.lang.compiler.cli;
 
 import java.util.regex.Pattern;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.asakusafw.lang.compiler.common.Predicate;
 
 /**
  * Predicate of class names.
  */
 public class ClassNamePredicate implements Predicate<Class<?>> {
+
+    static final Logger LOG = LoggerFactory.getLogger(ClassNamePredicate.class);
 
     private final Pattern pattern;
 
@@ -37,7 +42,9 @@ public class ClassNamePredicate implements Predicate<Class<?>> {
             if (next < 0) {
                 break;
             }
-            buf.append(Pattern.quote(pattern.substring(start, next)));
+            if (start < next) {
+                buf.append(Pattern.quote(pattern.substring(start, next)));
+            }
             buf.append(".*"); //$NON-NLS-1$
             start = next + 1;
         }
@@ -50,6 +57,14 @@ public class ClassNamePredicate implements Predicate<Class<?>> {
     @Override
     public boolean apply(Class<?> argument) {
         String name = argument.getName();
-        return pattern.matcher(name).matches();
+        boolean match = pattern.matcher(name).matches();
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("match({}, /{}/): {}", new Object[] { //$NON-NLS-1$
+                    name,
+                    pattern,
+                    match
+            });
+        }
+        return match;
     }
 }
