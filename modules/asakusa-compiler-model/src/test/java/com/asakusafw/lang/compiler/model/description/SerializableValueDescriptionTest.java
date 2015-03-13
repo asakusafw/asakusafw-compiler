@@ -59,6 +59,8 @@ public class SerializableValueDescriptionTest {
         SerializableValueDescription.of(new Object());
     }
 
+    // equality may not be stable
+
     @SuppressWarnings("javadoc")
     public static final class SerializableWithArray implements Serializable {
 

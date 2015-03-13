@@ -20,9 +20,6 @@ import org.junit.Test;
 
 import com.asakusafw.lang.compiler.common.DiagnosticException;
 import com.asakusafw.lang.compiler.common.testing.FileDeployer;
-import com.asakusafw.lang.compiler.javac.BasicJavaCompilerSupport;
-import com.asakusafw.lang.compiler.javac.JavaCompilerSupport;
-import com.asakusafw.lang.compiler.javac.JavaSourceExtension;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 
 /**

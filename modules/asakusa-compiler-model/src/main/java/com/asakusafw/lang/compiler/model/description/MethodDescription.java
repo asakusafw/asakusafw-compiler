@@ -86,14 +86,16 @@ public class MethodDescription implements Description {
             }
             NoSuchMethodException exception;
             try {
+                // first, we search for public/inherited methods
                 return decl.getMethod(name, params.toArray(new Class[params.size()]));
             } catch (NoSuchMethodException e) {
                 exception = e;
             }
             try {
+                // then, we search for non-public methods
                 return decl.getDeclaredMethod(name, params.toArray(new Class[params.size()]));
             } catch (NoSuchMethodException e) {
-                // throws the first occurred
+                // raise the first exception instead of the second one for non-public methods
                 throw exception;
             }
         } catch (ClassNotFoundException e) {

@@ -1,8 +1,8 @@
 package com.asakusafw.lang.compiler.planning;
 
 import static com.asakusafw.lang.compiler.model.description.Descriptions.*;
-import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 import org.junit.Test;
 

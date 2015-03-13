@@ -1,6 +1,6 @@
 package com.asakusafw.lang.compiler.model.description;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import org.junit.Test;
@@ -13,7 +13,7 @@ import com.asakusafw.lang.compiler.model.description.TypeDescription.TypeKind;
 public class ArrayTypeDescriptionTest {
 
     /**
-     * simple case.
+     * for primitive arrays.
      * @throws Exception if failed
      */
     @Test
@@ -25,7 +25,7 @@ public class ArrayTypeDescriptionTest {
     }
 
     /**
-     * simple case.
+     * for reference arrays.
      * @throws Exception if failed
      */
     @Test
@@ -36,11 +36,28 @@ public class ArrayTypeDescriptionTest {
     }
 
     /**
-     * simple case.
+     * for scalar type.
      * @throws Exception if failed
      */
     @Test(expected = IllegalArgumentException.class)
     public void of_scalar() throws Exception {
         ArrayTypeDescription.of(int.class);
+    }
+
+    /**
+     * test equalities.
+     * @throws Exception if failed
+     */
+    @Test
+    public void equality() throws Exception {
+        ArrayTypeDescription d0 = ArrayTypeDescription.of(int[].class);
+        ArrayTypeDescription d1 = ArrayTypeDescription.of(int[].class);
+        ArrayTypeDescription d2 = ArrayTypeDescription.of(long[].class);
+        ArrayTypeDescription d3 = ArrayTypeDescription.of(int[][].class);
+
+        assertThat(d1.toString(), d1, is(d0));
+        assertThat(d1.toString(), d1.hashCode(), is(d0.hashCode()));
+        assertThat(d1.toString(), d2, is(not(d0)));
+        assertThat(d1.toString(), d3, is(not(d0)));
     }
 }

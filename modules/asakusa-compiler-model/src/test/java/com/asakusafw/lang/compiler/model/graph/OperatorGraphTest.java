@@ -63,7 +63,7 @@ public class OperatorGraphTest {
     public void contain() {
         MockOperators operators = new MockOperators()
                 .operator("a")
-                .operator("b").connect("a.*", "b.*");
+                .operator("b").connect("a", "b");
 
         OperatorGraph graph = new OperatorGraph(operators.all());
         assertThat(graph.contains(operators.get("a")), is(true));

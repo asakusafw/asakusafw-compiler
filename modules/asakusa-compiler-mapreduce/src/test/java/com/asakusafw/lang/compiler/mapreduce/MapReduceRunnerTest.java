@@ -1,7 +1,7 @@
 package com.asakusafw.lang.compiler.mapreduce;
 
-import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 import java.io.File;
 import java.util.ArrayList;

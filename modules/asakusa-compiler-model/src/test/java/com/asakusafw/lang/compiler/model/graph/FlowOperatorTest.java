@@ -22,8 +22,8 @@ public class FlowOperatorTest {
             .input("in")
             .operator("body", "in", "out")
             .output("out")
-            .connect("in.*", "body.*")
-            .connect("body.*", "out.*");
+            .connect("in", "body")
+            .connect("body", "out");
         OperatorGraph graph = operators.toGraph();
 
         FlowOperator operator = FlowOperator.builder(classOf(FlowOperatorTest.class), graph)
@@ -50,8 +50,8 @@ public class FlowOperatorTest {
             .input("in")
             .operator("body", "in", "out")
             .output("out")
-            .connect("in.*", "body.*")
-            .connect("body.*", "out.*");
+            .connect("in", "body")
+            .connect("body", "out");
         OperatorGraph graph = operators.toGraph();
 
         FlowOperator operator = FlowOperator.builder(classOf(FlowOperatorTest.class), graph)
@@ -74,7 +74,7 @@ public class FlowOperatorTest {
             .assertOperator("in", OperatorKind.INPUT)
             .assertOperator("body", OperatorKind.USER)
             .assertOperator("out", OperatorKind.OUTPUT)
-            .assertConnected("in.*", "body.*")
-            .assertConnected("body.*", "out.*");
+            .assertConnected("in", "body")
+            .assertConnected("body", "out");
     }
 }

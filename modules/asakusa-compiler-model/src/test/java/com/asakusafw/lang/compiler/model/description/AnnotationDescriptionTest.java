@@ -1,8 +1,10 @@
 package com.asakusafw.lang.compiler.model.description;
 
+import static com.asakusafw.lang.compiler.model.description.Descriptions.*;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
+import java.util.Collections;
 import java.util.Map;
 
 import org.junit.Rule;
@@ -54,5 +56,30 @@ public class AnnotationDescriptionTest {
         assertThat(resolved.hashCode(), is(resolved.hashCode()));
         assertThat(resolved, equalTo(resolved));
         assertThat(resolved.toString(), is(resolved.toString()));
+    }
+
+    /**
+     * test equalities.
+     * @throws Exception if failed
+     */
+    @Test
+    public void equality() throws Exception {
+        AnnotationDescription d0 = new AnnotationDescription(
+                new ClassDescription("fake"),
+                Collections.singletonMap("value", valueOf(100)));
+        AnnotationDescription d1 = new AnnotationDescription(
+                new ClassDescription("fake"),
+                Collections.singletonMap("value", valueOf(100)));
+        AnnotationDescription d2 = new AnnotationDescription(
+                new ClassDescription("other"),
+                Collections.singletonMap("value", valueOf(100)));
+        AnnotationDescription d3 = new AnnotationDescription(
+                new ClassDescription("fake"),
+                Collections.singletonMap("value", valueOf(200)));
+
+        assertThat(d1.toString(), d1, is(d0));
+        assertThat(d1.toString(), d1.hashCode(), is(d0.hashCode()));
+        assertThat(d1.toString(), d2, is(not(d0)));
+        assertThat(d1.toString(), d3, is(not(d0)));
     }
 }

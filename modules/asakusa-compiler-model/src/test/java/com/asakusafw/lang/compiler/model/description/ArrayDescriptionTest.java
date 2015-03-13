@@ -62,4 +62,21 @@ public class ArrayDescriptionTest {
     public void of_scalar() throws Exception {
         ArrayDescription.of("invalid");
     }
+
+    /**
+     * test equalities.
+     * @throws Exception if failed
+     */
+    @Test
+    public void equality() throws Exception {
+        ArrayDescription d0 = ArrayDescription.of(new String[] { "a", "b", "c" });
+        ArrayDescription d1 = ArrayDescription.of(new String[] { "a", "b", "c" });
+        ArrayDescription d2 = ArrayDescription.of(new String[] { "a", "b" });
+        ArrayDescription d3 = ArrayDescription.of(new CharSequence[] { "a", "b", "c" });
+
+        assertThat(d1.toString(), d1, is(d0));
+        assertThat(d1.toString(), d1.hashCode(), is(d0.hashCode()));
+        assertThat(d1.toString(), d2, is(not(d0)));
+        assertThat(d1.toString(), d3, is(not(d0)));
+    }
 }

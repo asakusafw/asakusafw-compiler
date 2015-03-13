@@ -3,7 +3,6 @@ package com.asakusafw.lang.compiler.planning.basic;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.asakusafw.lang.compiler.model.testing.MockOperators;
@@ -204,22 +203,6 @@ public class BasicPlanTest {
 
         BasicPlan plan = new BasicPlan();
         plan.addElement(mock.getMarkers("begin"), mock.getMarkers("end", "orphan"));
-    }
-
-    /**
-     * body contains a plan marker.
-     */
-    @Ignore("retracted: it is too strict")
-    @Test(expected = RuntimeException.class)
-    public void invalid_body_plan_marker() {
-        MockOperators mock = new MockOperators()
-            .marker("begin", PlanMarker.BEGIN)
-            .operator("a").connect("begin", "a")
-            .marker("invalid", PlanMarker.CHECKPOINT).connect("a", "invalid")
-            .marker("end", PlanMarker.END).connect("invalid", "end");
-
-        BasicPlan plan = new BasicPlan();
-        plan.addElement(mock.getMarkers("begin"), mock.getMarkers("end"));
     }
 
     /**

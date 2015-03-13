@@ -1,7 +1,7 @@
 package com.asakusafw.lang.compiler.analyzer;
 
-import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 import java.util.Arrays;
 import java.util.Collections;

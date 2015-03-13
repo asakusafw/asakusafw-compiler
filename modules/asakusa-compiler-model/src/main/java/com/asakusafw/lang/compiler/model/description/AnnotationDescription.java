@@ -108,6 +108,36 @@ public class AnnotationDescription implements ValueDescription {
     }
 
     @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + declaringClass.hashCode();
+        result = prime * result + elements.hashCode();
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        AnnotationDescription other = (AnnotationDescription) obj;
+        if (!declaringClass.equals(other.declaringClass)) {
+            return false;
+        }
+        if (!elements.equals(other.elements)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
     public String toString() {
         return MessageFormat.format(
                 "Annotation({0})", //$NON-NLS-1$

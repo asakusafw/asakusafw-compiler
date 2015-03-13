@@ -1,7 +1,7 @@
 package com.asakusafw.lang.compiler.analyzer;
 
-import static org.junit.Assert.*;
 import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 import java.lang.reflect.Method;
 import java.text.MessageFormat;

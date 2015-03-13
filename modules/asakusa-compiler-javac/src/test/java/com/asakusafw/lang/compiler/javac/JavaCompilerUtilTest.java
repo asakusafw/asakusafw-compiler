@@ -1,7 +1,7 @@
 package com.asakusafw.lang.compiler.javac;
 
-import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,7 +20,6 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import com.asakusafw.lang.compiler.common.testing.FileDeployer;
-import com.asakusafw.lang.compiler.javac.JavaCompilerUtil;
 
 /**
  * Test for {@link JavaCompilerUtil}.

@@ -110,13 +110,13 @@ public class OperatorsTest {
         MockOperators mock = new MockOperators()
             .operator("a0")
             .operator("a1")
-            .operator("b0").connect("a0.*", "b0.*").connect("a1.*", "b0.*")
+            .operator("b0").connect("a0", "b0").connect("a1", "b0")
             .operator("b1")
-            .operator("c0").connect("b0.*", "c0.*").connect("b1.*", "c0.*")
-            .operator("d0").connect("c0.*", "d0.*")
-            .operator("d1").connect("c0.*", "d1.*")
-            .operator("e0").connect("d0.*", "e0.*")
-            .operator("e1").connect("d0.*", "e1.*").connect("d1.*", "e1.*");
+            .operator("c0").connect("b0", "c0").connect("b1", "c0")
+            .operator("d0").connect("c0", "d0")
+            .operator("d1").connect("c0", "d1")
+            .operator("e0").connect("d0", "e0")
+            .operator("e1").connect("d0", "e1").connect("d1", "e1");
         assertThat(
                 Operators.getTransitiveSuccessors(mock.get("a0").getOutputs()),
                 is(mock.getAsSet("b0", "c0", "d0", "d1", "e0", "e1")));
@@ -130,13 +130,13 @@ public class OperatorsTest {
         MockOperators mock = new MockOperators()
             .operator("a0")
             .operator("a1")
-            .operator("b0").connect("b0.*", "a0.*").connect("b0.*", "a1.*")
+            .operator("b0").connect("b0", "a0").connect("b0", "a1")
             .operator("b1")
-            .operator("c0").connect("c0.*", "b0.*").connect("c0.*", "b1.*")
-            .operator("d0").connect("d0.*", "c0.*")
-            .operator("d1").connect("d1.*", "c0.*")
-            .operator("e0").connect("e0.*", "d0.*")
-            .operator("e1").connect("e1.*", "d0.*").connect("e1.*", "d1.*");
+            .operator("c0").connect("c0", "b0").connect("c0", "b1")
+            .operator("d0").connect("d0", "c0")
+            .operator("d1").connect("d1", "c0")
+            .operator("e0").connect("e0", "d0")
+            .operator("e1").connect("e1", "d0").connect("e1", "d1");
         assertThat(
                 Operators.getTransitivePredecessors(mock.get("a0").getInputs()),
                 is(mock.getAsSet("b0", "c0", "d0", "d1", "e0", "e1")));
@@ -150,13 +150,13 @@ public class OperatorsTest {
         MockOperators mock = new MockOperators()
             .operator("a0")
             .operator("a1")
-            .operator("b0").connect("a0.*", "b0.*").connect("a1.*", "b0.*")
+            .operator("b0").connect("a0", "b0").connect("a1", "b0")
             .operator("b1")
-            .operator("c0").connect("b0.*", "c0.*").connect("b1.*", "c0.*")
-            .operator("d0").connect("c0.*", "d0.*")
-            .operator("d1").connect("c0.*", "d1.*")
-            .operator("e0").connect("d0.*", "e0.*")
-            .operator("e1").connect("d0.*", "e1.*").connect("d1.*", "e1.*");
+            .operator("c0").connect("b0", "c0").connect("b1", "c0")
+            .operator("d0").connect("c0", "d0")
+            .operator("d1").connect("c0", "d1")
+            .operator("e0").connect("d0", "e0")
+            .operator("e1").connect("d0", "e1").connect("d1", "e1");
         assertThat(
                 Operators.getTransitiveConnected(mock.getAsSet("a0")),
                 is(mock.all()));
@@ -169,11 +169,11 @@ public class OperatorsTest {
     public void findNearestReachableSuccessors() {
         MockOperators mock = new MockOperators()
             .operator("m0")
-            .operator("a").connect("m0.*", "a.*")
-            .operator("b").connect("a.*", "b.*")
-            .marker("m1").connect("b.*", "m1.*")
-            .operator("c").connect("m1.*", "c.*")
-            .marker("m2").connect("c.*", "m2.*");
+            .operator("a").connect("m0", "a")
+            .operator("b").connect("a", "b")
+            .marker("m1").connect("b", "m1")
+            .operator("c").connect("m1", "c")
+            .marker("m2").connect("c", "m2");
 
         assertThat(
                 Operators.findNearestReachableSuccessors(mock.get("a").getOutputs(), MARKERS),
@@ -187,15 +187,15 @@ public class OperatorsTest {
     public void findNearestReachableSuccessors_complex() {
         MockOperators mock = new MockOperators()
             .operator("m0")
-            .operator("a", "in", "o0,o1").connect("m0.*", "a.*")
-            .operator("b").connect("a.o0", "b.*")
-            .operator("c").connect("b.*", "c.*")
-            .marker("m1").connect("c.*", "m1.*")
-            .operator("d").connect("m1.*", "d.*")
-            .operator("e").connect("d.*", "e.*").connect("c.*", "e.*")
-            .marker("m2").connect("e.*", "m2.*")
-            .marker("m3").connect("d.*", "m3.*")
-            .marker("m4").connect("d.*", "m4.*").connect("a.o1", "m4.*");
+            .operator("a", "in", "o0,o1").connect("m0", "a")
+            .operator("b").connect("a.o0", "b")
+            .operator("c").connect("b", "c")
+            .marker("m1").connect("c", "m1")
+            .operator("d").connect("m1", "d")
+            .operator("e").connect("d", "e").connect("c", "e")
+            .marker("m2").connect("e", "m2")
+            .marker("m3").connect("d", "m3")
+            .marker("m4").connect("d", "m4").connect("a.o1", "m4");
 
         assertThat(
                 Operators.findNearestReachableSuccessors(mock.get("a").getOutputs(), MARKERS),
@@ -209,11 +209,11 @@ public class OperatorsTest {
     public void findNearestReachablePredecessors() {
         MockOperators mock = new MockOperators()
             .operator("m0")
-            .operator("a").connect("a.*", "m0.*")
-            .operator("b").connect("b.*", "a.*")
-            .marker("m1").connect("m1.*", "b.*")
-            .operator("c").connect("c.*", "m1.*")
-            .marker("m2").connect("m2.*", "c.*");
+            .operator("a").connect("a", "m0")
+            .operator("b").connect("b", "a")
+            .marker("m1").connect("m1", "b")
+            .operator("c").connect("c", "m1")
+            .marker("m2").connect("m2", "c");
 
         assertThat(
                 Operators.findNearestReachablePredecessors(mock.get("a").getInputs(), MARKERS),
@@ -227,15 +227,15 @@ public class OperatorsTest {
     public void findNearestReachablePredecessors_complex() {
         MockOperators mock = new MockOperators()
             .operator("m0")
-            .operator("a", "i0,i1", "out").connect("a.*", "m0.*")
-            .operator("b").connect("b.*", "a.i0")
-            .operator("c").connect("c.*", "b.*")
-            .marker("m1").connect("m1.*", "c.*")
-            .operator("d").connect("d.*", "m1.*")
-            .operator("e").connect("e.*", "d.*").connect("e.*", "c.*")
-            .marker("m2").connect("m2.*", "e.*")
-            .marker("m3").connect("m3.*", "d.*")
-            .marker("m4").connect("m4.*", "d.*").connect("m4.*", "a.i1");
+            .operator("a", "i0,i1", "out").connect("a", "m0")
+            .operator("b").connect("b", "a.i0")
+            .operator("c").connect("c", "b")
+            .marker("m1").connect("m1", "c")
+            .operator("d").connect("d", "m1")
+            .operator("e").connect("e", "d").connect("e", "c")
+            .marker("m2").connect("m2", "e")
+            .marker("m3").connect("m3", "d")
+            .marker("m4").connect("m4", "d").connect("m4", "a.i1");
 
         assertThat(
                 Operators.findNearestReachablePredecessors(mock.get("a").getInputs(), MARKERS),
@@ -249,11 +249,11 @@ public class OperatorsTest {
     public void collectUntilNearestReachableSuccessors_exclusive() {
         MockOperators mock = new MockOperators()
             .operator("m0")
-            .operator("a").connect("m0.*", "a.*")
-            .operator("b").connect("a.*", "b.*")
-            .marker("m1").connect("b.*", "m1.*")
-            .operator("c").connect("m1.*", "c.*")
-            .marker("m2").connect("c.*", "m2.*");
+            .operator("a").connect("m0", "a")
+            .operator("b").connect("a", "b")
+            .marker("m1").connect("b", "m1")
+            .operator("c").connect("m1", "c")
+            .marker("m2").connect("c", "m2");
 
         assertThat(
                 Operators.collectUntilNearestReachableSuccessors(mock.get("a").getOutputs(), MARKERS, false),
@@ -267,11 +267,11 @@ public class OperatorsTest {
     public void collectUntilNearestReachableSuccessors_inclusive() {
         MockOperators mock = new MockOperators()
             .operator("m0")
-            .operator("a").connect("m0.*", "a.*")
-            .operator("b").connect("a.*", "b.*")
-            .marker("m1").connect("b.*", "m1.*")
-            .operator("c").connect("m1.*", "c.*")
-            .marker("m2").connect("c.*", "m2.*");
+            .operator("a").connect("m0", "a")
+            .operator("b").connect("a", "b")
+            .marker("m1").connect("b", "m1")
+            .operator("c").connect("m1", "c")
+            .marker("m2").connect("c", "m2");
 
         assertThat(
                 Operators.collectUntilNearestReachableSuccessors(mock.get("a").getOutputs(), MARKERS, true),
@@ -285,15 +285,15 @@ public class OperatorsTest {
     public void collectUntilNearestReachableSuccessors_complex() {
         MockOperators mock = new MockOperators()
             .operator("m0")
-            .operator("a", "in", "o0,o1").connect("m0.*", "a.*")
-            .operator("b").connect("a.o0", "b.*")
-            .operator("c").connect("b.*", "c.*")
-            .marker("m1").connect("c.*", "m1.*")
-            .operator("d").connect("m1.*", "d.*")
-            .operator("e").connect("d.*", "e.*").connect("c.*", "e.*")
-            .marker("m2").connect("e.*", "m2.*")
-            .marker("m3").connect("d.*", "m3.*")
-            .marker("m4").connect("d.*", "m4.*").connect("a.o1", "m4.*");
+            .operator("a", "in", "o0,o1").connect("m0", "a")
+            .operator("b").connect("a.o0", "b")
+            .operator("c").connect("b", "c")
+            .marker("m1").connect("c", "m1")
+            .operator("d").connect("m1", "d")
+            .operator("e").connect("d", "e").connect("c", "e")
+            .marker("m2").connect("e", "m2")
+            .marker("m3").connect("d", "m3")
+            .marker("m4").connect("d", "m4").connect("a.o1", "m4");
 
         assertThat(
                 Operators.collectUntilNearestReachableSuccessors(mock.get("a").getOutputs(), MARKERS, false),
@@ -307,11 +307,11 @@ public class OperatorsTest {
     public void collectUntilNearestReachablePredecessors_exclusive() {
         MockOperators mock = new MockOperators()
             .operator("m0")
-            .operator("a").connect("a.*", "m0.*")
-            .operator("b").connect("b.*", "a.*")
-            .marker("m1").connect("m1.*", "b.*")
-            .operator("c").connect("c.*", "m1.*")
-            .marker("m2").connect("m2.*", "c.*");
+            .operator("a").connect("a", "m0")
+            .operator("b").connect("b", "a")
+            .marker("m1").connect("m1", "b")
+            .operator("c").connect("c", "m1")
+            .marker("m2").connect("m2", "c");
 
         assertThat(
                 Operators.collectUntilNearestReachablePredecessors(mock.get("a").getInputs(), MARKERS, false),
@@ -325,11 +325,11 @@ public class OperatorsTest {
     public void collectUntilNearestReachablePredecessors_inclusive() {
         MockOperators mock = new MockOperators()
             .operator("m0")
-            .operator("a").connect("a.*", "m0.*")
-            .operator("b").connect("b.*", "a.*")
-            .marker("m1").connect("m1.*", "b.*")
-            .operator("c").connect("c.*", "m1.*")
-            .marker("m2").connect("m2.*", "c.*");
+            .operator("a").connect("a", "m0")
+            .operator("b").connect("b", "a")
+            .marker("m1").connect("m1", "b")
+            .operator("c").connect("c", "m1")
+            .marker("m2").connect("m2", "c");
 
         assertThat(
                 Operators.collectUntilNearestReachablePredecessors(mock.get("a").getInputs(), MARKERS, true),
@@ -343,15 +343,15 @@ public class OperatorsTest {
     public void collectUntilNearestReachablePredecessors_complex() {
         MockOperators mock = new MockOperators()
             .operator("m0")
-            .operator("a", "i0,i1", "out").connect("a.*", "m0.*")
-            .operator("b").connect("b.*", "a.i0")
-            .operator("c").connect("c.*", "b.*")
-            .marker("m1").connect("m1.*", "c.*")
-            .operator("d").connect("d.*", "m1.*")
-            .operator("e").connect("e.*", "d.*").connect("e.*", "c.*")
-            .marker("m2").connect("m2.*", "e.*")
-            .marker("m3").connect("m3.*", "d.*")
-            .marker("m4").connect("m4.*", "d.*").connect("m4.*", "a.i1");
+            .operator("a", "i0,i1", "out").connect("a", "m0")
+            .operator("b").connect("b", "a.i0")
+            .operator("c").connect("c", "b")
+            .marker("m1").connect("m1", "c")
+            .operator("d").connect("d", "m1")
+            .operator("e").connect("e", "d").connect("e", "c")
+            .marker("m2").connect("m2", "e")
+            .marker("m3").connect("m3", "d")
+            .marker("m4").connect("m4", "d").connect("m4", "a.i1");
 
         assertThat(
                 Operators.collectUntilNearestReachablePredecessors(mock.get("a").getInputs(), MARKERS, false),
@@ -368,10 +368,10 @@ public class OperatorsTest {
             .operator("b")
             .operator("c");
         Operators.connectAll(
-                mock.getOutput("a.*"),
-                Arrays.asList(mock.getInput("b.*"), mock.getInput("c.*")));
-        mock.assertConnected("a.*", "b.*")
-            .assertConnected("a.*", "c.*");
+                mock.getOutput("a"),
+                Arrays.asList(mock.getInput("b"), mock.getInput("c")));
+        mock.assertConnected("a", "b")
+            .assertConnected("a", "c");
     }
 
     /**
@@ -384,10 +384,10 @@ public class OperatorsTest {
             .operator("b")
             .operator("c");
         Operators.connectAll(
-                Arrays.asList(mock.getOutput("a.*"), mock.getOutput("b.*")),
-                mock.getInput("c.*"));
-        mock.assertConnected("a.*", "c.*")
-            .assertConnected("b.*", "c.*");
+                Arrays.asList(mock.getOutput("a"), mock.getOutput("b")),
+                mock.getInput("c"));
+        mock.assertConnected("a", "c")
+            .assertConnected("b", "c");
     }
 
     /**
@@ -401,12 +401,12 @@ public class OperatorsTest {
             .operator("c")
             .operator("d");
         Operators.connectAll(
-                Arrays.asList(mock.getOutput("a.*"), mock.getOutput("b.*")),
-                Arrays.asList(mock.getInput("c.*"), mock.getInput("d.*")));
-        mock.assertConnected("a.*", "c.*")
-            .assertConnected("b.*", "c.*")
-            .assertConnected("a.*", "d.*")
-            .assertConnected("b.*", "d.*");
+                Arrays.asList(mock.getOutput("a"), mock.getOutput("b")),
+                Arrays.asList(mock.getInput("c"), mock.getInput("d")));
+        mock.assertConnected("a", "c")
+            .assertConnected("b", "c")
+            .assertConnected("a", "d")
+            .assertConnected("b", "d");
     }
 
     /**
@@ -416,15 +416,15 @@ public class OperatorsTest {
     public void insert_output() {
         MockOperators mock = new MockOperators()
             .operator("a")
-            .operator("b").connect("a.*", "b.*")
-            .operator("c").connect("a.*", "c.*")
+            .operator("b").connect("a", "b")
+            .operator("c").connect("a", "c")
             .operator("x");
-        Operators.insert(mock.get("x"), mock.getOutput("a.*"));
-        mock.assertConnected("a.*", "x.*")
-            .assertConnected("a.*", "b.*", false)
-            .assertConnected("a.*", "c.*", false)
-            .assertConnected("x.*", "b.*")
-            .assertConnected("x.*", "c.*");
+        Operators.insert(mock.get("x"), mock.getOutput("a"));
+        mock.assertConnected("a", "x")
+            .assertConnected("a", "b", false)
+            .assertConnected("a", "c", false)
+            .assertConnected("x", "b")
+            .assertConnected("x", "c");
     }
 
     /**
@@ -435,14 +435,14 @@ public class OperatorsTest {
         MockOperators mock = new MockOperators()
             .operator("a")
             .operator("b")
-            .operator("c").connect("a.*", "c.*").connect("b.*", "c.*")
+            .operator("c").connect("a", "c").connect("b", "c")
             .operator("x");
-        Operators.insert(mock.get("x"), mock.getInput("c.*"));
-        mock.assertConnected("x.*", "c.*")
-            .assertConnected("a.*", "c.*", false)
-            .assertConnected("b.*", "c.*", false)
-            .assertConnected("a.*", "x.*")
-            .assertConnected("b.*", "x.*");
+        Operators.insert(mock.get("x"), mock.getInput("c"));
+        mock.assertConnected("x", "c")
+            .assertConnected("a", "c", false)
+            .assertConnected("b", "c", false)
+            .assertConnected("a", "x")
+            .assertConnected("b", "x");
     }
 
     /**
@@ -453,18 +453,18 @@ public class OperatorsTest {
         MockOperators mock = new MockOperators()
             .operator("a")
             .operator("b")
-            .operator("c").connect("a.*", "c.*").connect("b.*", "c.*")
-            .operator("d").connect("a.*", "d.*").connect("b.*", "d.*")
+            .operator("c").connect("a", "c").connect("b", "c")
+            .operator("d").connect("a", "d").connect("b", "d")
             .operator("x");
-        Operators.insert(mock.get("x"), mock.getOutput("a.*"), mock.getInput("c.*"));
-        mock.assertConnected("a.*", "c.*", false)
-            .assertConnected("a.*", "d.*")
-            .assertConnected("b.*", "c.*")
-            .assertConnected("b.*", "d.*")
-            .assertConnected("a.*", "x.*")
-            .assertConnected("b.*", "x.*", false)
-            .assertConnected("x.*", "c.*")
-            .assertConnected("x.*", "d.*", false);
+        Operators.insert(mock.get("x"), mock.getOutput("a"), mock.getInput("c"));
+        mock.assertConnected("a", "c", false)
+            .assertConnected("a", "d")
+            .assertConnected("b", "c")
+            .assertConnected("b", "d")
+            .assertConnected("a", "x")
+            .assertConnected("b", "x", false)
+            .assertConnected("x", "c")
+            .assertConnected("x", "d", false);
     }
 
     /**
@@ -475,18 +475,18 @@ public class OperatorsTest {
         MockOperators mock = new MockOperators()
             .operator("a")
             .operator("b")
-            .operator("x").connect("a.*", "x.*").connect("b.*", "x.*")
-            .operator("c").connect("x.*", "c.*")
-            .operator("d").connect("x.*", "d.*");
+            .operator("x").connect("a", "x").connect("b", "x")
+            .operator("c").connect("x", "c")
+            .operator("d").connect("x", "d");
         Operators.remove(mock.get("x"));
-        mock.assertConnected("a.*", "x.*", false)
-            .assertConnected("b.*", "x.*", false)
-            .assertConnected("x.*", "c.*", false)
-            .assertConnected("x.*", "d.*", false)
-            .assertConnected("a.*", "c.*")
-            .assertConnected("a.*", "d.*")
-            .assertConnected("b.*", "c.*")
-            .assertConnected("b.*", "d.*");
+        mock.assertConnected("a", "x", false)
+            .assertConnected("b", "x", false)
+            .assertConnected("x", "c", false)
+            .assertConnected("x", "d", false)
+            .assertConnected("a", "c")
+            .assertConnected("a", "d")
+            .assertConnected("b", "c")
+            .assertConnected("b", "d");
     }
 
     /**
@@ -497,22 +497,22 @@ public class OperatorsTest {
         MockOperators mock = new MockOperators()
             .operator("a")
             .operator("b")
-            .operator("x").connect("a.*", "x.*").connect("b.*", "x.*")
-            .operator("c").connect("x.*", "c.*")
-            .operator("d").connect("x.*", "d.*")
+            .operator("x").connect("a", "x").connect("b", "x")
+            .operator("c").connect("x", "c")
+            .operator("d").connect("x", "d")
             .operator("y");
         Operators.replace(mock.get("x"), mock.get("y"));
-        mock.assertConnected("a.*", "x.*", false)
-            .assertConnected("b.*", "x.*", false)
-            .assertConnected("x.*", "c.*", false)
-            .assertConnected("x.*", "d.*", false)
-            .assertConnected("a.*", "y.*")
-            .assertConnected("b.*", "y.*")
-            .assertConnected("y.*", "c.*")
-            .assertConnected("y.*", "d.*")
-            .assertConnected("a.*", "c.*", false)
-            .assertConnected("a.*", "d.*", false)
-            .assertConnected("b.*", "c.*", false)
-            .assertConnected("b.*", "d.*", false);
+        mock.assertConnected("a", "x", false)
+            .assertConnected("b", "x", false)
+            .assertConnected("x", "c", false)
+            .assertConnected("x", "d", false)
+            .assertConnected("a", "y")
+            .assertConnected("b", "y")
+            .assertConnected("y", "c")
+            .assertConnected("y", "d")
+            .assertConnected("a", "c", false)
+            .assertConnected("a", "d", false)
+            .assertConnected("b", "c", false)
+            .assertConnected("b", "d", false);
     }
 }

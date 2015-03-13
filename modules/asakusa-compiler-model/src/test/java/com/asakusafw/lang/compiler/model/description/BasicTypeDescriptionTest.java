@@ -1,6 +1,6 @@
 package com.asakusafw.lang.compiler.model.description;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import org.junit.Test;
@@ -43,5 +43,16 @@ public class BasicTypeDescriptionTest {
     @Test(expected = IllegalArgumentException.class)
     public void of_reference() throws Exception {
         BasicTypeDescription.of(String.class);
+    }
+
+    /**
+     * using keyword.
+     * @throws Exception if failed
+     */
+    @Test
+    public void keyword() throws Exception {
+        assertThat(new BasicTypeDescription(BasicTypeKind.of("int")), is(BasicTypeDescription.of(int.class)));
+        assertThat(new BasicTypeDescription(BasicTypeKind.of("double")), is(BasicTypeDescription.of(double.class)));
+        assertThat(new BasicTypeDescription(BasicTypeKind.of("boolean")), is(BasicTypeDescription.of(boolean.class)));
     }
 }
