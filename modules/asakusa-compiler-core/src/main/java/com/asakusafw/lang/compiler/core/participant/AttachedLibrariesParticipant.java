@@ -34,7 +34,7 @@ public class AttachedLibrariesParticipant extends AbstractCompilerParticipant {
 
     @Override
     public void afterBatch(Context context, Batch batch, BatchReference reference) {
-        LOG.debug("attaching project libraries into batch: {}", batch.getBatchId());
+        LOG.debug("attaching project libraries into batch: {}", batch.getBatchId()); //$NON-NLS-1$
         FileContainer output = context.getOutput();
         Locator locator = new Locator();
         for (ResourceRepository repository : context.getProject().getAttachedLibraries()) {
@@ -43,7 +43,7 @@ public class AttachedLibrariesParticipant extends AbstractCompilerParticipant {
                     Location source = cursor.getLocation();
                     Location destination = locator.getLocation(source);
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug("deploying attached library: {}@{} -> {}@{}", new Object[] {
+                        LOG.debug("deploying attached library: {}@{} -> {}@{}", new Object[] { //$NON-NLS-1$
                                 source,
                                 repository,
                                 destination,
@@ -92,13 +92,13 @@ public class AttachedLibrariesParticipant extends AbstractCompilerParticipant {
                 suffix = name.substring(dotAt);
             }
             for (int i = 0; i <= 9999; i++) {
-                String rename = String.format("%s_%d%s", prefix, i, suffix);
+                String rename = String.format("%s_%d%s", prefix, i, suffix); //$NON-NLS-1$
                 if (saw.contains(rename)) {
                     continue;
                 }
                 return rename;
             }
-            return String.format("%s_%s%s", prefix, UUID.randomUUID(), suffix);
+            return String.format("%s_%s%s", prefix, UUID.randomUUID(), suffix); //$NON-NLS-1$
         }
     }
 }

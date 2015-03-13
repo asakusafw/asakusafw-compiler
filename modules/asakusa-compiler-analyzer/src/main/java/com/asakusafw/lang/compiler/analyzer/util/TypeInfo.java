@@ -108,7 +108,7 @@ public final class TypeInfo {
         buf.append('<');
         for (Class<?> c : getErasedTypeArguments()) {
             buf.append(c.getName());
-            buf.append(", ");
+            buf.append(", "); //$NON-NLS-1$
         }
         buf.delete(buf.length() - 2, buf.length());
         buf.append('>');

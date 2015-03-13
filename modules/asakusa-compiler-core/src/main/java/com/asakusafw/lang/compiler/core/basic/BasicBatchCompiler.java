@@ -6,6 +6,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.asakusafw.lang.compiler.api.BatchProcessor;
 import com.asakusafw.lang.compiler.api.basic.BasicBatchReference;
 import com.asakusafw.lang.compiler.api.basic.BasicJobflowReference;
@@ -31,6 +34,8 @@ import com.asakusafw.utils.graph.Graphs;
  */
 public class BasicBatchCompiler implements BatchCompiler {
 
+    static final Logger LOG = LoggerFactory.getLogger(BasicBatchCompiler.class);
+
     private final JobflowCompiler jobflowCompiler;
 
     private final JobflowPackager jobflowPackager = new JobflowPackager();
@@ -52,6 +57,7 @@ public class BasicBatchCompiler implements BatchCompiler {
 
     @Override
     public void compile(Context context, Batch batch) {
+        LOG.debug("start batch compiler: {}={}", batch.getBatchId(), batch.getDescriptionClass()); //$NON-NLS-1$
         before(context, batch);
         JobflowContainer container = new JobflowContainer();
         for (BatchElement element : sort(batch.getElements())) {

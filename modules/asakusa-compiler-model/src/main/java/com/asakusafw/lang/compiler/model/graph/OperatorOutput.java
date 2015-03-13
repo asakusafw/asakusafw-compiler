@@ -120,7 +120,7 @@ public class OperatorOutput implements OperatorPort {
     @Override
     public String toString() {
         return MessageFormat.format(
-                "Output({0})",
+                "Output({0})", //$NON-NLS-1$
                 name);
     }
 }

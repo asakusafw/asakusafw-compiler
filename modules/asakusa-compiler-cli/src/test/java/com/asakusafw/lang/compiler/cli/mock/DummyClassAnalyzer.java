@@ -35,6 +35,16 @@ import com.asakusafw.lang.compiler.model.info.JobflowInfo;
 public class DummyClassAnalyzer implements ClassAnalyzer {
 
     @Override
+    public boolean isBatchClass(Context context, Class<?> aClass) {
+        return BatchAdapter.isBatch(aClass);
+    }
+
+    @Override
+    public boolean isJobflowClass(Context context, Class<?> aClass) {
+        return JobflowAdapter.isJobflow(aClass);
+    }
+
+    @Override
     public Batch analyzeBatch(Context context, Class<?> batchClass) {
         BatchInfo info = BatchAdapter.analyzeInfo(batchClass);
         Batch result = new Batch(info);

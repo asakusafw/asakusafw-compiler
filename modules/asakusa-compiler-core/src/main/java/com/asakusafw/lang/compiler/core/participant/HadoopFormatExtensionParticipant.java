@@ -43,7 +43,7 @@ public class HadoopFormatExtensionParticipant extends AbstractCompilerParticipan
 
     @Override
     public void beforeJobflow(Context context, BatchInfo batch, Jobflow jobflow) {
-        LOG.debug("enabling {}", HadoopFormatExtension.class.getName());
+        LOG.debug("enabling {}", HadoopFormatExtension.class.getName()); //$NON-NLS-1$
         HadoopFormatExtension defaults = HadoopFormatExtension.DEFAULT;
         ClassDescription input = getFormat(context, KEY_INPUT_FORMAT, defaults.getInputFormat());
         ClassDescription output = getFormat(context, KEY_OUTPUT_FORMAT, defaults.getOutputFormat());

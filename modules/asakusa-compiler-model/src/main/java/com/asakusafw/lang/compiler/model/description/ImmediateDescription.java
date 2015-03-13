@@ -49,7 +49,7 @@ public class ImmediateDescription implements ValueDescription {
             type = Descriptions.classOf(String.class);
         } else {
             throw new IllegalArgumentException(MessageFormat.format(
-                    "immediate value must be either boxed value or String: {0}",
+                    "immediate value must be either boxed value or String: {0}", //$NON-NLS-1$
                     aClass.getName()));
         }
         return new ImmediateDescription(type, value);

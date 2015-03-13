@@ -26,7 +26,7 @@ public abstract class MockExporterDescription implements ExporterDescription {
     public ExternalOutputInfo toInfo() {
         return new ExternalOutputInfo.Basic(
                 Descriptions.classOf(getClass()),
-                "dummy",
+                "dummy", //$NON-NLS-1$
                 Descriptions.classOf(getModelType()));
     }
 

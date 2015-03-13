@@ -24,7 +24,7 @@ import java.util.zip.ZipInputStream;
  */
 public final class FileEditor {
 
-    private static final Charset ENCODING = Charset.forName("UTF-8");
+    private static final Charset ENCODING = Charset.forName("UTF-8"); //$NON-NLS-1$
 
     private FileEditor() {
         return;

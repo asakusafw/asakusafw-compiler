@@ -53,14 +53,14 @@ public class UnknownValueDescription implements ValueDescription {
     @Override
     public Object resolve(ClassLoader classLoader) throws ReflectiveOperationException {
         throw new ReflectiveOperationException(MessageFormat.format(
-                "cannot resolve unknown value: {0}",
+                "cannot resolve unknown value: {0}", //$NON-NLS-1$
                 this));
     }
 
     @Override
     public String toString() {
         return MessageFormat.format(
-                "Unknown(type={0}, label={1})",
+                "Unknown(type={0}, label={1})", //$NON-NLS-1$
                 valueType,
                 label);
     }

@@ -46,7 +46,7 @@ public class FileContainerRepository {
      */
     public FileContainer newContainer(String prefix) throws IOException {
         for (int i = 0; i < ATTEMPT_LIMIT; i++) {
-            String name = String.format("%s-%08x", prefix, random.nextInt());
+            String name = String.format("%s-%08x", prefix, random.nextInt()); //$NON-NLS-1$
             File result = new File(root, name);
             if (result.mkdirs()) {
                 assert result.isDirectory();

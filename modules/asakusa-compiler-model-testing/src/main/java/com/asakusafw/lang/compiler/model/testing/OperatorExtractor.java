@@ -52,7 +52,7 @@ public final class OperatorExtractor {
             return method;
         }
         throw new AssertionError(MessageFormat.format(
-                "missing @{0} {1}#{2}()",
+                "missing @{0} {1}#{2}()", //$NON-NLS-1$
                 annotationType.getSimpleName(),
                 operatorClass.getSimpleName(),
                 methodName));

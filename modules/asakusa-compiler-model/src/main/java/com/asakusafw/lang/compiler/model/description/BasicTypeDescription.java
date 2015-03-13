@@ -28,7 +28,7 @@ public class BasicTypeDescription extends ReifiableTypeDescription {
     public static BasicTypeDescription of(Class<?> aClass) {
         if (aClass.isPrimitive() == false) {
             throw new IllegalArgumentException(MessageFormat.format(
-                    "must be basic type: {0}",
+                    "must be basic type: {0}", //$NON-NLS-1$
                     aClass.getName()));
         }
         BasicTypeDescription.BasicTypeKind kind = BasicTypeDescription.BasicTypeKind.of(aClass);

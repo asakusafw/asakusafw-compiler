@@ -6,6 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.asakusafw.lang.compiler.analyzer.adapter.BatchAdapter;
 import com.asakusafw.lang.compiler.common.BasicDiagnostic;
 import com.asakusafw.lang.compiler.common.Diagnostic;
@@ -25,6 +28,8 @@ import com.asakusafw.vocabulary.flow.FlowDescription;
  * Analyzes a <em>batch class</em> described as <em>Asakusa Batch DSL</em>.
  */
 public class BatchAnalyzer {
+
+    static final Logger LOG = LoggerFactory.getLogger(BatchAnalyzer.class);
 
     private final JobflowAnalyzer elementAnalyzer;
 
@@ -52,6 +57,7 @@ public class BatchAnalyzer {
      * @return the related complete graph model object
      */
     private Batch analyze(BatchAdapter adapter) {
+        LOG.debug("analyzing batch class: {}", adapter.getDescription().getName()); //$NON-NLS-1$
         Graph<Class<?>> jobflowGraph = toJobflowGraph(adapter);
         List<Diagnostic> diagnostics = new ArrayList<>();
         Map<Class<?>, Jobflow> jobflowMap = new HashMap<>();
@@ -127,7 +133,7 @@ public class BatchAnalyzer {
 
     private static void raise(List<Diagnostic> diagnostics, Class<?> atClass, String message) {
         String decorated = MessageFormat.format(
-                "{0} ({1})",
+                "{0} ({1})", //$NON-NLS-1$
                 message,
                 atClass.getName());
         diagnostics.add(new BasicDiagnostic(Diagnostic.Level.ERROR, decorated, null));

@@ -47,7 +47,7 @@ public final class MockOperators {
             classOf(Deprecated.class),
             Collections.<String, ValueDescription>emptyMap());
 
-    private static final String KEY_ARGUMENT = "ID";
+    private static final String KEY_ARGUMENT = "ID"; //$NON-NLS-1$
 
     private final Map<String, Operator> operators = new HashMap<>();
 
@@ -97,7 +97,7 @@ public final class MockOperators {
      * @return this
      */
     public MockOperators operator(String id) {
-        return operator(id, "in", "out", EMPTY_CONSTRAINTS);
+        return operator(id, "in", "out", EMPTY_CONSTRAINTS); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
     /**
@@ -107,7 +107,7 @@ public final class MockOperators {
      * @return this
      */
     public MockOperators operator(String id, OperatorConstraint... constraints) {
-        return operator(id, "in", "out", constraints);
+        return operator(id, "in", "out", constraints); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
     /**
@@ -124,10 +124,10 @@ public final class MockOperators {
                 new MethodDescription(
                         classOf(MockOperators.class), id, Collections.<ReifiableTypeDescription>emptyList()),
                 classOf(MockOperators.class));
-        for (String name : inputNames.split(",")) {
+        for (String name : inputNames.split(",")) { //$NON-NLS-1$
             builder.input(name, TYPE);
         }
-        for (String name : outputNames.split(",")) {
+        for (String name : outputNames.split(",")) { //$NON-NLS-1$
             builder.output(name, TYPE);
         }
         builder.constraint(constraints);
@@ -235,7 +235,7 @@ public final class MockOperators {
     public MockOperators assertConnected(String upstream, String downstream, boolean connected) {
         OperatorOutput from = upstream(upstream);
         OperatorInput to = downstream(downstream);
-        assertThat(String.format("%s->%s", upstream, downstream), to.isConnected(from), is(connected));
+        assertThat(String.format("%s->%s", upstream, downstream), to.isConnected(from), is(connected)); //$NON-NLS-1$
         return this;
     }
 
@@ -243,7 +243,7 @@ public final class MockOperators {
         String[] pair = pair(expression);
         Operator operator = get(pair[0]);
         OperatorOutput port;
-        if (pair[1].equals("*")) {
+        if (pair[1].equals("*")) { //$NON-NLS-1$
             assertThat(operator.getOutputs(), hasSize(1));
             port = operator.getOutputs().get(0);
         } else {
@@ -257,7 +257,7 @@ public final class MockOperators {
         String[] pair = pair(expression);
         Operator operator = get(pair[0]);
         OperatorInput port;
-        if (pair[1].equals("*")) {
+        if (pair[1].equals("*")) { //$NON-NLS-1$
             assertThat(operator.getInputs(), hasSize(1));
             port = operator.getInputs().get(0);
         } else {
@@ -270,7 +270,7 @@ public final class MockOperators {
     private String[] pair(String pair) {
         int index = pair.indexOf('.');
         if (index < 0) {
-            return new String[] { pair, "*" };
+            return new String[] { pair, "*" }; //$NON-NLS-1$
         }
         assertThat(index, is(greaterThan(0)));
         return new String[] { pair.substring(0, index), pair.substring(index + 1) };

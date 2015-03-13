@@ -4,6 +4,9 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.asakusafw.lang.compiler.analyzer.adapter.JobflowAdapter;
 import com.asakusafw.lang.compiler.common.BasicDiagnostic;
 import com.asakusafw.lang.compiler.common.Diagnostic;
@@ -19,6 +22,8 @@ import com.asakusafw.vocabulary.flow.graph.FlowGraph;
  * Analyzes a <em>jobflow class</em> described as <em>Asakusa Flow DSL</em>.
  */
 public class JobflowAnalyzer {
+
+    static final Logger LOG = LoggerFactory.getLogger(JobflowAnalyzer.class);
 
     private final FlowGraphAnalyzer elementAnalyzer;
 
@@ -46,6 +51,7 @@ public class JobflowAnalyzer {
      * @return the related complete graph model object
      */
     public Jobflow analyze(JobflowAdapter adapter) {
+        LOG.debug("analyzing jobflow class: {}", adapter.getDescription().getName()); //$NON-NLS-1$
         FlowGraph flowGraph = toFlowGraph(adapter);
         FlowGraphVerifier.verify(flowGraph);
         OperatorGraph graph = elementAnalyzer.analyze(flowGraph);

@@ -81,8 +81,8 @@ public class ResourceItemRepository implements ResourceRepository {
     @Override
     public String toString() {
         return MessageFormat.format(
-                "Repository({0}items)", //$NON-NLS-1$
-                items.size());
+                "Items{0}", //$NON-NLS-1$
+                items);
     }
 
     static class ItemCursor implements Cursor {

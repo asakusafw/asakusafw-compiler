@@ -29,7 +29,7 @@ public class JavaSourceExtensionParticipant extends AbstractCompilerParticipant 
 
     @Override
     public void beforeJobflow(Context context, BatchInfo batch, Jobflow jobflow) {
-        LOG.debug("enabling {}", JavaSourceExtension.class.getName());
+        LOG.debug("enabling {}", JavaSourceExtension.class.getName()); //$NON-NLS-1$
         List<File> classPath = JavaCompilerUtil.getLibraries(context.getProject().getClassLoader());
         File sourcePath = createTemporaryOutput(context, jobflow);
         BasicJavaCompilerSupport extension = new BasicJavaCompilerSupport(

@@ -26,7 +26,7 @@ public class ArrayTypeDescription extends ReifiableTypeDescription {
     public static ArrayTypeDescription of(Class<?> arrayType) {
         if (arrayType.isArray() == false) {
             throw new IllegalArgumentException(MessageFormat.format(
-                    "must be an array: {0}",
+                    "must be an array: {0}", //$NON-NLS-1$
                     arrayType.getName()));
         }
         ReifiableTypeDescription component = ReifiableTypeDescription.of(arrayType.getComponentType());
@@ -82,7 +82,7 @@ public class ArrayTypeDescription extends ReifiableTypeDescription {
     @Override
     public String toString() {
         return MessageFormat.format(
-                "ArrayType({0})",
+                "ArrayType({0})", //$NON-NLS-1$
                 componentType);
     }
 }

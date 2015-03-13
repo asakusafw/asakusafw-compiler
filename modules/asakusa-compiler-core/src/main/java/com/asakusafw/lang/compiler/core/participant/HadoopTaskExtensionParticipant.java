@@ -19,7 +19,7 @@ public class HadoopTaskExtensionParticipant extends AbstractCompilerParticipant 
 
     @Override
     public void beforeJobflow(Context context, BatchInfo batch, Jobflow jobflow) {
-        LOG.debug("enabling {}", HadoopTaskExtension.class.getName());
+        LOG.debug("enabling {}", HadoopTaskExtension.class.getName()); //$NON-NLS-1$
         BasicHadoopTaskExtension extension = new BasicHadoopTaskExtension(context.getTaskContainerMap());
         context.registerExtension(HadoopTaskExtension.class, extension);
     }

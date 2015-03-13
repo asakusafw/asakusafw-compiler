@@ -109,28 +109,28 @@ public final class MapReduceStageEmitter {
         List<Statement> statements = new ArrayList<>();
         if (inputs.isEmpty()) {
             statements.add(new TypeBuilder(f, importer.toType(Collections.class))
-                    .method("emptyList")
+                    .method("emptyList") //$NON-NLS-1$
                     .toReturnStatement());
         } else {
-            SimpleName results = f.newSimpleName("results");
-            SimpleName attributes = f.newSimpleName("attributes");
+            SimpleName results = f.newSimpleName("results"); //$NON-NLS-1$
+            SimpleName attributes = f.newSimpleName("attributes"); //$NON-NLS-1$
             statements.add(newList(StageInput.class, results));
             statements.add(newMap(String.class, String.class, attributes));
             boolean dirty = false;
             for (MapReduceStageInfo.Input input : inputs) {
                 if (dirty) {
                     statements.add(new ExpressionBuilder(f, attributes)
-                        .method("clear")
+                        .method("clear") //$NON-NLS-1$
                         .toStatement());
                 }
                 for (Map.Entry<String, String> entry : input.attributes.entrySet()) {
                     statements.add(new ExpressionBuilder(f, attributes)
-                        .method("put", literal(entry.getKey()), literal(entry.getValue()))
+                        .method("put", literal(entry.getKey()), literal(entry.getValue())) //$NON-NLS-1$
                         .toStatement());
                     dirty = true;
                 }
                 statements.add(new ExpressionBuilder(f, results)
-                    .method("add", new TypeBuilder(f, importer.toType(StageInput.class))
+                    .method("add", new TypeBuilder(f, importer.toType(StageInput.class)) //$NON-NLS-1$
                         .newObject(
                                 literal(input.path),
                                 literal(input.formatClass),
@@ -148,8 +148,8 @@ public final class MapReduceStageEmitter {
         if (outputs.isEmpty()) {
             return Collections.emptyList();
         }
-        SimpleName results = f.newSimpleName("results");
-        SimpleName attributes = f.newSimpleName("attributes");
+        SimpleName results = f.newSimpleName("results"); //$NON-NLS-1$
+        SimpleName attributes = f.newSimpleName("attributes"); //$NON-NLS-1$
         List<Statement> statements = new ArrayList<>();
         statements.add(newList(StageOutput.class, results));
         statements.add(newMap(String.class, String.class, attributes));
@@ -157,17 +157,17 @@ public final class MapReduceStageEmitter {
         for (MapReduceStageInfo.Output output : outputs) {
             if (dirty) {
                 statements.add(new ExpressionBuilder(f, attributes)
-                    .method("clear")
+                    .method("clear") //$NON-NLS-1$
                     .toStatement());
             }
             for (Map.Entry<String, String> entry : output.attributes.entrySet()) {
                 statements.add(new ExpressionBuilder(f, attributes)
-                    .method("put", literal(entry.getKey()), literal(entry.getValue()))
+                    .method("put", literal(entry.getKey()), literal(entry.getValue())) //$NON-NLS-1$
                     .toStatement());
                 dirty = true;
             }
             statements.add(new ExpressionBuilder(f, results)
-                .method("add", new TypeBuilder(f, importer.toType(StageOutput.class))
+                .method("add", new TypeBuilder(f, importer.toType(StageOutput.class)) //$NON-NLS-1$
                     .newObject(
                             literal(output.name),
                             literal(output.keyClass),
@@ -189,12 +189,12 @@ public final class MapReduceStageEmitter {
         if (resources.isEmpty()) {
             return Collections.emptyList();
         }
-        SimpleName results = f.newSimpleName("results");
+        SimpleName results = f.newSimpleName("results"); //$NON-NLS-1$
         List<Statement> statements = new ArrayList<>();
         statements.add(newList(StageResource.class, results));
         for (MapReduceStageInfo.Resource resource : resources) {
             statements.add(new ExpressionBuilder(f, results)
-                .method("add", new TypeBuilder(f, importer.toType(StageResource.class))
+                .method("add", new TypeBuilder(f, importer.toType(StageResource.class)) //$NON-NLS-1$
                     .newObject(literal(resource.path), literal(resource.name))
                     .toExpression())
                 .toStatement());

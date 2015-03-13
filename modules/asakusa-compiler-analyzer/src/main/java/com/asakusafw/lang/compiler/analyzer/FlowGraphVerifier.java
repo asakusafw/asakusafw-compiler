@@ -7,6 +7,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.asakusafw.lang.compiler.common.BasicDiagnostic;
 import com.asakusafw.lang.compiler.common.Diagnostic;
 import com.asakusafw.lang.compiler.common.DiagnosticException;
@@ -25,6 +28,8 @@ import com.asakusafw.vocabulary.flow.graph.FlowPartDescription;
  */
 public final class FlowGraphVerifier {
 
+    static final Logger LOG = LoggerFactory.getLogger(FlowGraphVerifier.class);
+
     private final Context context;
 
     private FlowGraphVerifier(Context context) {
@@ -42,6 +47,7 @@ public final class FlowGraphVerifier {
     }
 
     private void verifyGraph(FlowGraph graph) {
+        LOG.debug("verifying flow graph: {}", graph.getDescription().getName()); //$NON-NLS-1$
         context.push(graph);
         try {
             Graph<FlowElement> dependencies = FlowElementUtil.toDependencyGraph(graph);
@@ -121,7 +127,7 @@ public final class FlowGraphVerifier {
         void error(String message) {
             assert stack.isEmpty() == false;
             errors.add(new BasicDiagnostic(Diagnostic.Level.ERROR, MessageFormat.format(
-                    "{0} ({1})",
+                    "{0} ({1})", //$NON-NLS-1$
                     message,
                     peek().getDescription().getName())));
         }

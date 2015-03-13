@@ -26,7 +26,6 @@ import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.asakusafw.lang.compiler.analyzer.adapter.BatchAdapter;
 import com.asakusafw.lang.compiler.api.BatchProcessor;
 import com.asakusafw.lang.compiler.api.CompilerOptions;
 import com.asakusafw.lang.compiler.api.DataModelProcessor;
@@ -142,13 +141,6 @@ public class BatchCompilerCli {
 
     static final Logger LOG = LoggerFactory.getLogger(BatchCompilerCli.class);
 
-    static final Predicate<Class<?>> BATCH_CLASS = new Predicate<Class<?>>() {
-        @Override
-        public boolean apply(Class<?> argument) {
-            return BatchAdapter.isBatch(argument);
-        }
-    };
-
     /**
      * The program entry.
      * @param args application arguments
@@ -235,7 +227,7 @@ public class BatchCompilerCli {
                     "required argument was not set: --{0}",
                     option.getLongOpt()));
         }
-        LOG.debug("--{}: {}", option.getLongOpt(), value);
+        LOG.debug("--{}: {}", option.getLongOpt(), value); //$NON-NLS-1$
         return value;
     }
 
@@ -330,15 +322,30 @@ public class BatchCompilerCli {
     static boolean process(Configuration configuration) throws IOException {
         CompilerOptions options = loadOptions(configuration);
         FileContainerRepository temporary = loadTemporary(configuration);
-        try {
-            try (ProjectRepository project = loadProject(configuration)) {
-                ToolRepository tools = loadTools(project.getClassLoader(), configuration);
-                CompilerContext context = new CompilerContext.Basic(options, project, tools, temporary);
-                return process(context, configuration);
-            }
+        try (ProjectRepository project = loadProject(configuration)) {
+            ToolRepository tools = loadTools(project.getClassLoader(), configuration);
+            CompilerContext context = new CompilerContext.Basic(options, project, tools, temporary);
+            report(context);
+            return process(context, configuration);
         } finally {
             temporary.reset();
         }
+    }
+
+    private static void report(CompilerContext context) {
+        if (LOG.isDebugEnabled() == false) {
+            return;
+        }
+        LOG.debug("project info:"); //$NON-NLS-1$
+        LOG.debug("   project: {}", context.getProject().getProjectContents()); //$NON-NLS-1$
+        LOG.debug("  embedded: {}", context.getProject().getEmbeddedContents()); //$NON-NLS-1$
+        LOG.debug("  attached: {}", context.getProject().getAttachedLibraries()); //$NON-NLS-1$
+        LOG.debug("tools info:"); //$NON-NLS-1$
+        LOG.debug("   data model: {}", context.getTools().getDataModelProcessor()); //$NON-NLS-1$
+        LOG.debug("     external: {}", context.getTools().getExternalPortProcessor()); //$NON-NLS-1$
+        LOG.debug("        batch: {}", context.getTools().getBatchProcessor()); //$NON-NLS-1$
+        LOG.debug("      jobflow: {}", context.getTools().getJobflowProcessor()); //$NON-NLS-1$
+        LOG.debug("  participant: {}", context.getTools().getParticipant()); //$NON-NLS-1$
     }
 
     private static CompilerOptions loadOptions(Configuration configuration) {
@@ -349,7 +356,7 @@ public class BatchCompilerCli {
     }
 
     private static FileContainerRepository loadTemporary(Configuration configuration) throws IOException {
-        File temporary = File.createTempFile("asakusa", ".tmp");
+        File temporary = File.createTempFile("asakusa", ".tmp"); //$NON-NLS-1$ //$NON-NLS-2$
         if (temporary.delete() == false || temporary.mkdirs() == false) {
             throw new IOException("failed to create a compiler temporary working directory");
         }
@@ -423,13 +430,15 @@ public class BatchCompilerCli {
     }
 
     private static boolean process(CompilerContext root, Configuration configuration) throws IOException {
-        Predicate<? super Class<?>> predicate = BATCH_CLASS;
-        for (Predicate<? super Class<?>> p : configuration.sourcePredicate) {
-            predicate = Predicates.and(predicate, p);
-        }
         ClassLoader classLoader = root.getProject().getClassLoader();
         ClassAnalyzer analyzer = newInstance(classLoader, ClassAnalyzer.class, configuration.classAnalyzer.get());
         BatchCompiler compiler = newInstance(classLoader, BatchCompiler.class, configuration.batchCompiler.get());
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("engines info:"); //$NON-NLS-1$
+            LOG.debug("  analyzer: {}", analyzer.getClass().getName()); //$NON-NLS-1$
+            LOG.debug("  compiler: {}", compiler.getClass().getName()); //$NON-NLS-1$
+        }
+        Predicate<? super Class<?>> predicate = loadPredicate(root, configuration, analyzer);
         boolean sawError = false;
         for (Class<?> aClass : root.getProject().getProjectClasses(predicate)) {
             if (LOG.isInfoEnabled()) {
@@ -441,7 +450,7 @@ public class BatchCompilerCli {
                 Batch batch = analyzer.analyzeBatch(new ClassAnalyzer.Context(root), aClass);
                 File output = new File(configuration.output.get(), batch.getBatchId());
                 if (output.exists()) {
-                    LOG.debug("cleaning output target: {}", output);
+                    LOG.debug("cleaning output target: {}", output); //$NON-NLS-1$
                     if (ResourceUtil.delete(output) == false) {
                         throw new IOException(MessageFormat.format(
                                 "failed to delete output target: {0}",
@@ -477,15 +486,30 @@ public class BatchCompilerCli {
         return sawError == false;
     }
 
+    private static Predicate<? super Class<?>> loadPredicate(
+            CompilerContext root, Configuration configuration, final ClassAnalyzer analyzer) {
+        final ClassAnalyzer.Context context = new ClassAnalyzer.Context(root);
+        Predicate<Class<?>> predicate = new Predicate<Class<?>>() {
+            @Override
+            public boolean apply(Class<?> argument) {
+                return analyzer.isBatchClass(context, argument);
+            }
+        };
+        for (Predicate<? super Class<?>> p : configuration.sourcePredicate) {
+            predicate = Predicates.and(predicate, p);
+        }
+        return predicate;
+    }
+
     private static class Opts {
 
-        private static final String ARG_CLASS_PATTERN = "class-name-pattern";
+        private static final String ARG_CLASS_PATTERN = "class-name-pattern"; //$NON-NLS-1$
 
-        private static final String ARG_CLASS = "class-name";
+        private static final String ARG_CLASS = "class-name"; //$NON-NLS-1$
 
-        private static final String ARG_CLASSES = "class-name1[,class-name2[,..]]";
+        private static final String ARG_CLASSES = "class-name1[,class-name2[,..]]"; //$NON-NLS-1$
 
-        private static final String ARG_LIBRARIES = files("/path/to/lib1", "/path/to/lib2");
+        private static final String ARG_LIBRARIES = files("/path/to/lib1", "/path/to/lib2"); //$NON-NLS-1$ //$NON-NLS-2$
 
         final Option classAnalyzer = optional("classAnalyzer", 1) //$NON-NLS-1$
                 .withDescription("custom class analyzer class")
@@ -497,7 +521,7 @@ public class BatchCompilerCli {
 
         final Option output = required("output", 1) //$NON-NLS-1$
                 .withDescription("output directory")
-                .withArgumentDescription("/path/to/output");
+                .withArgumentDescription("/path/to/output"); //$NON-NLS-1$
 
         final Option external = optional("external", 1) //$NON-NLS-1$
                 .withDescription("external library paths")
@@ -545,11 +569,11 @@ public class BatchCompilerCli {
 
         final Option runtimeWorkingDirectory = optional("runtimeWorkingDirectory", 1) //$NON-NLS-1$
                 .withDescription("custom runtime working directory path")
-                .withArgumentDescription("path/to/working");
+                .withArgumentDescription("path/to/working"); //$NON-NLS-1$
 
         final Option properties = properties("P", "property") //$NON-NLS-1$ //$NON-NLS-2$
                 .withDescription("compiler property")
-                .withArgumentDescription("key=value");
+                .withArgumentDescription("key=value"); //$NON-NLS-1$
 
         final Option failOnError = optional("failOnError", 0) //$NON-NLS-1$
                 .withDescription("whether fails on compilation errors or not");

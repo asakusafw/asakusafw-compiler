@@ -42,7 +42,7 @@ public class AnnotationDescription implements ValueDescription {
             Class<? extends Annotation> declaring = annotation.annotationType();
             if (declaring.isAnnotation() == false) {
                 throw new IllegalArgumentException(MessageFormat.format(
-                        "must be an annotation: {0}",
+                        "must be an annotation: {0}", //$NON-NLS-1$
                         annotation));
             }
             Map<String, ValueDescription> elements = new LinkedHashMap<>();
@@ -63,7 +63,7 @@ public class AnnotationDescription implements ValueDescription {
             return new AnnotationDescription(Descriptions.classOf(declaring), elements);
         } catch (ReflectiveOperationException e) {
             throw new IllegalArgumentException(MessageFormat.format(
-                    "failed to analyze annotation: {0}",
+                    "failed to analyze annotation: {0}", //$NON-NLS-1$
                     annotation), e);
         }
     }
@@ -110,7 +110,7 @@ public class AnnotationDescription implements ValueDescription {
     @Override
     public String toString() {
         return MessageFormat.format(
-                "Annotation({0})",
+                "Annotation({0})", //$NON-NLS-1$
                 declaringClass.getName());
     }
 
@@ -134,18 +134,18 @@ public class AnnotationDescription implements ValueDescription {
                     return value;
                 }
                 switch (name) {
-                case "annotationType":
+                case "annotationType": //$NON-NLS-1$
                     return annotationType;
-                case "hashCode":
+                case "hashCode": //$NON-NLS-1$
                     return System.identityHashCode(proxy);
-                case "toString":
+                case "toString": //$NON-NLS-1$
                     return annotationType.getName();
                 default:
                     break;
                 }
             } else if (args.length == 1) {
                 switch (name) {
-                case "equals":
+                case "equals": //$NON-NLS-1$
                     if (method.getParameterTypes()[0] == Object.class) {
                         return proxy == args[0];
                     }

@@ -156,7 +156,7 @@ public final class MarkerOperator extends Operator {
          */
         public <T> Builder attribute(Class<T> attributeType, T attributeValue) {
             if (attributeValue == null) {
-                throw new IllegalArgumentException("attribute value must not be null");
+                throw new IllegalArgumentException("attribute value must not be null"); //$NON-NLS-1$
             } else {
                 owner.attributes.put(attributeType, attributeValue);
             }

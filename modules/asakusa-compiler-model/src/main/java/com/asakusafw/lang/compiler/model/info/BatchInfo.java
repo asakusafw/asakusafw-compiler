@@ -119,16 +119,16 @@ public interface BatchInfo extends DescriptionInfo {
         @Override
         public String toString() {
             StringBuilder buf = new StringBuilder();
-            buf.append("Parameter(");
+            buf.append("Parameter("); //$NON-NLS-1$
             buf.append(key);
             if (mandatory) {
                 buf.append("[*]"); //$NON-NLS-1$
             }
             if (comment != null) {
-                buf.append(":");
+                buf.append(":"); //$NON-NLS-1$
                 buf.append(comment);
             }
-            buf.append(")");
+            buf.append(")"); //$NON-NLS-1$
             return buf.toString();
         }
     }

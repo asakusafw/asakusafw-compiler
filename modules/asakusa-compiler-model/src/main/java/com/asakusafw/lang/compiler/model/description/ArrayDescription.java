@@ -36,7 +36,7 @@ public class ArrayDescription implements ValueDescription {
         Class<?> arrayType = array.getClass();
         if (arrayType.isArray() == false) {
             throw new IllegalArgumentException(MessageFormat.format(
-                    "must be an array: {0}",
+                    "must be an array: {0}", //$NON-NLS-1$
                     array));
         }
         List<ValueDescription> elements = new ArrayList<>();
@@ -108,7 +108,7 @@ public class ArrayDescription implements ValueDescription {
     @Override
     public String toString() {
         return MessageFormat.format(
-                "Array(type={0}, size={1})",
+                "Array(type={0}, size={1})", //$NON-NLS-1$
                 arrayType,
                 elements.size());
     }

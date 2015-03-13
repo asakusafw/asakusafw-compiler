@@ -13,6 +13,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.asakusafw.lang.compiler.common.BasicDiagnostic;
 import com.asakusafw.lang.compiler.common.Diagnostic;
 import com.asakusafw.lang.compiler.common.Diagnostic.Level;
@@ -69,6 +72,8 @@ import com.asakusafw.vocabulary.operator.Restructure;
  */
 public final class FlowGraphAnalyzer {
 
+    static final Logger LOG = LoggerFactory.getLogger(FlowGraphAnalyzer.class);
+
     private static final Map<Class<?>, CoreOperator.CoreOperatorKind> CORE_OPERATOR_KINDS;
     static {
         Map<Class<?>, CoreOperatorKind> map = new HashMap<>();
@@ -102,6 +107,7 @@ public final class FlowGraphAnalyzer {
     }
 
     private OperatorGraph analyze0(Context parent, FlowGraph graph) {
+        LOG.debug("analyzing flow graph: {}", graph.getDescription().getName()); //$NON-NLS-1$
         Context context = new Context(parent);
         Graph<FlowElement> dependencies = FlowElementUtil.toDependencyGraph(graph);
         Set<Set<FlowElement>> circuits = Graphs.findCircuit(dependencies);

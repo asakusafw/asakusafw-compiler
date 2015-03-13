@@ -80,7 +80,7 @@ public final class JavaCompilerUtil {
 
     private static File toFile(URL url) {
         String protocol = url.getProtocol();
-        if (protocol == null || protocol.equals("file") == false) {
+        if (protocol == null || protocol.equals("file") == false) { //$NON-NLS-1$
             LOG.debug("unsupported library URL: {}", url); //$NON-NLS-1$
             return null;
         }

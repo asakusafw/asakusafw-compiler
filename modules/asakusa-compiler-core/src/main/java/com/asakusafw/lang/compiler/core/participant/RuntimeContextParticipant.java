@@ -30,7 +30,7 @@ public class RuntimeContextParticipant extends AbstractCompilerParticipant {
 
     @Override
     public void afterJobflow(Context context, BatchInfo batch, Jobflow jobflow) {
-        LOG.debug("injecting application info: {}/{}", batch.getBatchId(), jobflow.getFlowId());
+        LOG.debug("injecting application info: {}/{}", batch.getBatchId(), jobflow.getFlowId()); //$NON-NLS-1$
         Properties properties = new Properties();
         properties.setProperty(RuntimeContext.KEY_BATCH_ID, batch.getBatchId());
         properties.setProperty(RuntimeContext.KEY_FLOW_ID, jobflow.getFlowId());

@@ -4,6 +4,8 @@ import com.asakusafw.lang.compiler.analyzer.BatchAnalyzer;
 import com.asakusafw.lang.compiler.analyzer.ExternalPortAnalyzer;
 import com.asakusafw.lang.compiler.analyzer.FlowGraphAnalyzer;
 import com.asakusafw.lang.compiler.analyzer.JobflowAnalyzer;
+import com.asakusafw.lang.compiler.analyzer.adapter.BatchAdapter;
+import com.asakusafw.lang.compiler.analyzer.adapter.JobflowAdapter;
 import com.asakusafw.lang.compiler.core.AnalyzerContext;
 import com.asakusafw.lang.compiler.core.ClassAnalyzer;
 import com.asakusafw.lang.compiler.core.adapter.ExternalPortAnalyzerAdapter;
@@ -16,6 +18,16 @@ import com.asakusafw.lang.compiler.model.graph.Jobflow;
 public class BasicClassAnalyzer implements ClassAnalyzer {
 
     @Override
+    public boolean isBatchClass(Context context, Class<?> aClass) {
+        return BatchAdapter.isBatch(aClass);
+    }
+
+    @Override
+    public boolean isJobflowClass(Context context, Class<?> aClass) {
+        return JobflowAdapter.isJobflow(aClass);
+    }
+
+    @Override
     public Batch analyzeBatch(Context context, Class<?> batchClass) {
         return createBatchAnalyzer(context).analyze(batchClass);
     }
@@ -25,34 +37,19 @@ public class BasicClassAnalyzer implements ClassAnalyzer {
         return createJobflowAnalyzer(context).analyze(jobflowClass);
     }
 
-    /**
-     * Returns a new sub-analyzer for batches.
-     * @param context the current context
-     * @return the created sub-analyzer
-     */
-    public BatchAnalyzer createBatchAnalyzer(AnalyzerContext context) {
+    BatchAnalyzer createBatchAnalyzer(AnalyzerContext context) {
         return new BatchAnalyzer(createJobflowAnalyzer(context));
     }
 
-    /**
-     * Returns a new sub-analyzer for jobflows.
-     * @param context the current context
-     * @return the created sub-analyzer
-     */
-    public JobflowAnalyzer createJobflowAnalyzer(AnalyzerContext context) {
+    JobflowAnalyzer createJobflowAnalyzer(AnalyzerContext context) {
         return new JobflowAnalyzer(createFlowGraphAnalyzer(context));
     }
 
-    /**
-     * Returns a new sub-analyzer for flow-graphs.
-     * @param context the current context
-     * @return the created sub-analyzer
-     */
-    public FlowGraphAnalyzer createFlowGraphAnalyzer(AnalyzerContext context) {
+    FlowGraphAnalyzer createFlowGraphAnalyzer(AnalyzerContext context) {
         return new FlowGraphAnalyzer(createExternalPortAnalyzer(context));
     }
 
-    private ExternalPortAnalyzer createExternalPortAnalyzer(AnalyzerContext context) {
+    ExternalPortAnalyzer createExternalPortAnalyzer(AnalyzerContext context) {
         return new ExternalPortAnalyzerAdapter(context);
     }
 }

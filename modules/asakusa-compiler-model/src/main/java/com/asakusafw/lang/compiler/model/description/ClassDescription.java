@@ -24,7 +24,7 @@ public class ClassDescription extends ReifiableTypeDescription {
      */
     public static ClassDescription of(Class<?> aClass) {
         if (aClass.isArray() || aClass.isPrimitive()) {
-            throw new IllegalArgumentException("must be class or interface type");
+            throw new IllegalArgumentException("must be class or interface type"); //$NON-NLS-1$
         }
         return new ClassDescription(aClass.getName());
     }

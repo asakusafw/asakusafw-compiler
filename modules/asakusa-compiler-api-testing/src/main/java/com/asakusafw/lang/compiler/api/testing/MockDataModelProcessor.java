@@ -77,7 +77,7 @@ public class MockDataModelProcessor implements DataModelProcessor {
             if (name.size() < 3) {
                 continue;
             }
-            if (name.get(0).equals("get") == false || name.get(name.size() - 1).equals("option") == false) {
+            if (name.get(0).equals("get") == false || name.get(name.size() - 1).equals("option") == false) { //$NON-NLS-1$ //$NON-NLS-2$
                 continue;
             }
             PropertyName pName = new PropertyName(name.subList(1, name.size() - 1));

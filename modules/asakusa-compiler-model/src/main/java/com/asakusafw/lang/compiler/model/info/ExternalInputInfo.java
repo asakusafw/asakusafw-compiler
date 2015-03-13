@@ -131,7 +131,7 @@ public interface ExternalInputInfo extends ExternalPortInfo {
         @Override
         public String toString() {
             return MessageFormat.format(
-                    "ExternalInput(module={0}, description={1})",
+                    "ExternalInput(module={0}, description={1})", //$NON-NLS-1$
                     moduleName,
                     descriptionClass);
         }

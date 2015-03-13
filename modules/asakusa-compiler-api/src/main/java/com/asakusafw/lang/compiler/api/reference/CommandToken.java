@@ -109,9 +109,9 @@ public class CommandToken {
     @Override
     public String toString() {
         if (image == null) {
-            return String.format("$%s", tokenKind);
+            return String.format("$%s", tokenKind); //$NON-NLS-1$
         } else {
-            return String.format("'%s'", image);
+            return String.format("'%s'", image); //$NON-NLS-1$
         }
     }
 

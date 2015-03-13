@@ -83,7 +83,7 @@ public class DiagnosticException extends RuntimeException {
             return diagnostic.getMessage();
         } else {
             return MessageFormat.format(
-                    "{0}, ...and {1} more",
+                    "{0}, ...and {1} more", //$NON-NLS-1$
                     diagnostic.getMessage(),
                     diagnostics.size() - 1);
         }

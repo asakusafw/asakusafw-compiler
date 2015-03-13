@@ -95,7 +95,7 @@ public class ZipRepository implements ResourceRepository {
     @Override
     public String toString() {
         return MessageFormat.format(
-                "Zip({0})",
+                "Zip({0})", //$NON-NLS-1$
                 archive);
     }
 

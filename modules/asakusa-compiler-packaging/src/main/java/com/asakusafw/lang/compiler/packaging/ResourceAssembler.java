@@ -192,10 +192,10 @@ public class ResourceAssembler {
             while (cursor.next()) {
                 Location location = cursor.getLocation();
                 if (predicate.apply(location)) {
-                    LOG.debug("include: {} ({})", location, repository);
+                    LOG.debug("include: {} ({})", location, repository); //$NON-NLS-1$
                     return true;
                 } else {
-                    LOG.debug("exclude: {} ({})", location, repository);
+                    LOG.debug("exclude: {} ({})", location, repository); //$NON-NLS-1$
                     continue;
                 }
             }

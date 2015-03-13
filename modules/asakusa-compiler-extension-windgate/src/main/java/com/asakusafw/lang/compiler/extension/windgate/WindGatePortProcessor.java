@@ -124,6 +124,7 @@ public class WindGatePortProcessor
             Context context,
             List<ExternalInputReference> inputs,
             List<ExternalOutputReference> outputs) throws IOException {
+        LOG.debug("processing WindGate ports: {}/{}", context.getBatchId(), context.getFlowId()); //$NON-NLS-1$
         Map<String, GateScript> importers = toImporterScripts(context, inputs);
         Map<String, GateScript> exporters = toExporterScripts(context, outputs);
         for (Map.Entry<String, GateScript> entry : importers.entrySet()) {
@@ -147,6 +148,7 @@ public class WindGatePortProcessor
     private void registerTasks(Context context, String profileName, boolean doImport, boolean doExport) {
         boolean doBoth = doImport & doExport;
         if (doImport) {
+            LOG.debug("registering WindGate import: {}", profileName); //$NON-NLS-1$
             context.addTask(TaskReference.Phase.IMPORT, new CommandTaskReference(
                     getModuleName(),
                     profileName,
@@ -163,6 +165,7 @@ public class WindGatePortProcessor
                     Collections.<TaskReference>emptyList()));
         }
         if (doExport) {
+            LOG.debug("registering WindGate export: {}", profileName); //$NON-NLS-1$
             context.addTask(TaskReference.Phase.EXPORT, new CommandTaskReference(
                     getModuleName(),
                     profileName,
@@ -178,6 +181,7 @@ public class WindGatePortProcessor
                     }),
                     Collections.<TaskReference>emptyList()));
         }
+        LOG.debug("registering WindGate finalize: {}", profileName); //$NON-NLS-1$
         context.addTask(TaskReference.Phase.FINALIZE, new CommandTaskReference(
                 getModuleName(),
                 profileName,
@@ -196,12 +200,13 @@ public class WindGatePortProcessor
         return String.format("classpath:%s", location.toPath()); //$NON-NLS-1$
     }
 
-    private Map<String, GateScript> toImporterScripts(Context context, List<ExternalInputReference> inputs) {
+    private Map<String, GateScript> toImporterScripts(Context context, List<ExternalInputReference> ports) {
         Map<String, List<ProcessScript<?>>> processes = new LinkedHashMap<>();
-        for (ExternalInputReference input : inputs) {
-            DescriptionModel model = restore(input);
+        for (ExternalInputReference port : ports) {
+            LOG.debug("processing WindGate input: {}={}", port.getName(), port.getDescriptionClass()); //$NON-NLS-1$
+            DescriptionModel model = restore(port);
             String profileName = model.getProfileName();
-            ProcessScript<?> process = toProcessScript(context, input, model);
+            ProcessScript<?> process = toProcessScript(context, port, model);
             List<ProcessScript<?>> list = processes.get(profileName);
             if (list == null) {
                 list = new ArrayList<>();
@@ -212,12 +217,13 @@ public class WindGatePortProcessor
         return toGateScripts(processes);
     }
 
-    private Map<String, GateScript> toExporterScripts(Context context, List<ExternalOutputReference> outputs) {
+    private Map<String, GateScript> toExporterScripts(Context context, List<ExternalOutputReference> ports) {
         Map<String, List<ProcessScript<?>>> processes = new LinkedHashMap<>();
-        for (ExternalOutputReference output : outputs) {
-            DescriptionModel model = restore(output);
+        for (ExternalOutputReference port : ports) {
+            LOG.debug("processing WindGate output: {}={}", port.getName(), port.getDescriptionClass()); //$NON-NLS-1$
+            DescriptionModel model = restore(port);
             String profileName = model.getProfileName();
-            ProcessScript<?> process = toProcessScript(context, output, model);
+            ProcessScript<?> process = toProcessScript(context, port, model);
             List<ProcessScript<?>> list = processes.get(profileName);
             if (list == null) {
                 list = new ArrayList<>();

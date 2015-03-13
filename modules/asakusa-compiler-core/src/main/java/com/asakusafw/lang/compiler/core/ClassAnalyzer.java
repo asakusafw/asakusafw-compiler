@@ -10,6 +10,22 @@ import com.asakusafw.lang.compiler.model.graph.Jobflow;
 public interface ClassAnalyzer {
 
     /**
+     * Returns whether the target class represents a batch or not.
+     * @param context the current context
+     * @param aClass the target class
+     * @return {@code true} if the target class represents a batch, otherwise {@code false}
+     */
+    boolean isBatchClass(Context context, Class<?> aClass);
+
+    /**
+     * Returns whether the target class represents a jobflow or not.
+     * @param context the current context
+     * @param aClass the target class
+     * @return {@code true} if the target class represents a jobflow, otherwise {@code false}
+     */
+    boolean isJobflowClass(Context context, Class<?> aClass);
+
+    /**
      * Analyzes batch class.
      * @param context the current context
      * @param batchClass the target batch class

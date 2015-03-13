@@ -244,7 +244,7 @@ public final class CompilerProfile {
     }
 
     private File newTemporaryFolder(List<File> temporaryFiles) throws IOException {
-        File temporary = File.createTempFile("asakusa", ".tmp");
+        File temporary = File.createTempFile("asakusa", ".tmp"); //$NON-NLS-1$ //$NON-NLS-2$
         if (temporary.delete() == false || temporary.mkdirs() == false) {
             throw new IOException("failed to create a compiler temporary working directory");
         }

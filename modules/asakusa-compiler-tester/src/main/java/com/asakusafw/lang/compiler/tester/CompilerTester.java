@@ -245,7 +245,7 @@ public class CompilerTester implements Closeable {
     private FileContainer createBatchOutput(BatchInfo batch) throws IOException {
         File output = new File(testerContext.getBatchApplicationHome(), batch.getBatchId());
         if (output.exists()) {
-            LOG.debug("cleaning output target: {}", output);
+            LOG.debug("cleaning output target: {}", output); //$NON-NLS-1$
             if (ResourceUtil.delete(output) == false) {
                 throw new IOException(MessageFormat.format(
                         "failed to delete output target: {0}",

@@ -28,7 +28,7 @@ import com.asakusafw.lang.compiler.model.info.ExternalOutputInfo;
  */
 public class MockExternalPortProcessor implements ExternalPortProcessor {
 
-    private static Location DEFAULT_INPUT_PREFIX = Location.of("mock/input");
+    private static Location DEFAULT_INPUT_PREFIX = Location.of("mock/input"); //$NON-NLS-1$
 
     private final Location inputPrefix;
 

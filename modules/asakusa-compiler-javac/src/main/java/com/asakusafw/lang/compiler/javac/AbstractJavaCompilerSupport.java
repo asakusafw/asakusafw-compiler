@@ -168,6 +168,7 @@ public abstract class AbstractJavaCompilerSupport implements JavaCompilerSupport
 
             CompilationTask task;
             try {
+                LOG.debug("javac options: {}", arguments); //$NON-NLS-1$
                 task = compiler.getTask(
                         pw,
                         fileManager,
@@ -232,26 +233,25 @@ public abstract class AbstractJavaCompilerSupport implements JavaCompilerSupport
         if (LOG.isInfoEnabled()) {
             JavaFileObject source = diagnostic.getSource();
             try (Scanner scanner = new Scanner(source.openReader(true))) {
-                LOG.info("== {}:{}", source.toUri(), diagnostic.getLineNumber());
+                LOG.info("== {}:{}", source.toUri(), diagnostic.getLineNumber()); //$NON-NLS-1$
                 int lineNumber = 1;
                 while (scanner.hasNextLine()) {
                     if (lineNumber == diagnostic.getLineNumber()) {
-                        LOG.info("// >>>");
+                        LOG.info("// >>>"); //$NON-NLS-1$
                         LOG.info(scanner.nextLine());
-                        LOG.info("// <<<");
+                        LOG.info("// <<<"); //$NON-NLS-1$
                     } else {
                         LOG.info(scanner.nextLine());
                     }
                     lineNumber++;
                 }
-                LOG.info("==", source.toUri(), diagnostic.getLineNumber());
-                LOG.info("message: {}", diagnostic.getMessage(null));
+                LOG.info("==", source.toUri(), diagnostic.getLineNumber()); //$NON-NLS-1$
+                LOG.info("message: {}", diagnostic.getMessage(null)); //$NON-NLS-1$
             } catch (IOException e) {
                 LOG.warn(MessageFormat.format(
                         "exception occurred while inspecting compile error: {0}",
                         source.toUri()), e);
             }
-
         }
     }
 }

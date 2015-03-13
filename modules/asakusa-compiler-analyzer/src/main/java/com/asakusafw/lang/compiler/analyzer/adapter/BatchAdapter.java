@@ -25,6 +25,9 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.asakusafw.lang.compiler.common.BasicDiagnostic;
 import com.asakusafw.lang.compiler.common.Diagnostic;
 import com.asakusafw.lang.compiler.common.DiagnosticException;
@@ -36,6 +39,8 @@ import com.asakusafw.vocabulary.batch.BatchDescription;
  * A DSL adapter for batches.
  */
 public class BatchAdapter {
+
+    static final Logger LOG = LoggerFactory.getLogger(BatchAdapter.class);
 
     private static final Pattern PATTERN_ID = Pattern.compile(
             "[A-Za-z_][0-9A-Za-z_]*(\\.[A-Za-z_][0-9A-Za-z_]*)*"); //$NON-NLS-1$
@@ -202,9 +207,13 @@ public class BatchAdapter {
      * @throws DiagnosticException if the target class is not a valid <em>batch class</em>
      */
     public static BatchAdapter analyze(Class<?> aClass) {
+        LOG.debug("analyzing batch info: {}", aClass.getName()); //$NON-NLS-1$
         BatchInfo info = analyzeInfo(aClass);
+        LOG.debug("batch info: {}", info); //$NON-NLS-1$
         Constructor<? extends BatchDescription> constructor = detectConstructor(aClass);
-        return new BatchAdapter(info, constructor);
+        BatchAdapter adapter = new BatchAdapter(info, constructor);
+        LOG.debug("batch adapter: {}", adapter); //$NON-NLS-1$
+        return adapter;
     }
 
     private static Constructor<? extends BatchDescription> detectConstructor(Class<?> aClass) {
@@ -239,7 +248,7 @@ public class BatchAdapter {
 
     private static void raise(List<Diagnostic> diagnostics, Class<?> atClass, String message) {
         String decorated = MessageFormat.format(
-                "{0} ({1})",
+                "{0} ({1})", //$NON-NLS-1$
                 message,
                 atClass.getName());
         diagnostics.add(new BasicDiagnostic(Diagnostic.Level.ERROR, decorated, null));

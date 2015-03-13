@@ -27,6 +27,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.asakusafw.lang.compiler.analyzer.util.TypeInfo;
 import com.asakusafw.lang.compiler.common.BasicDiagnostic;
 import com.asakusafw.lang.compiler.common.Diagnostic;
@@ -43,6 +46,8 @@ import com.asakusafw.vocabulary.flow.Out;
  * A DSL adapter for jobflows.
  */
 public class JobflowAdapter {
+
+    static final Logger LOG = LoggerFactory.getLogger(JobflowAdapter.class);
 
     private static final Pattern PATTERN_ID = Pattern.compile("[A-Za-z_][0-9A-Za-z_]*"); //$NON-NLS-1$
 
@@ -167,10 +172,14 @@ public class JobflowAdapter {
      * @throws DiagnosticException if the target class is not a valid <em>jobflow class</em>
      */
     public static JobflowAdapter analyze(Class<?> aClass) {
+        LOG.debug("analyzing jobflow info: {}", aClass.getName()); //$NON-NLS-1$
         JobflowInfo info = analyzeInfo(aClass);
+        LOG.debug("jobflow info: {}", info); //$NON-NLS-1$
         Constructor<? extends FlowDescription> constructor = detectConstructor(aClass);
         List<JobflowAdapter.Parameter> parameters = analyzeParameters(constructor);
-        return new JobflowAdapter(info, constructor, parameters);
+        JobflowAdapter adapter = new JobflowAdapter(info, constructor, parameters);
+        LOG.debug("jobflow adapter: {}", adapter); //$NON-NLS-1$
+        return adapter;
     }
 
     @SuppressWarnings("unchecked")
@@ -361,7 +370,7 @@ public class JobflowAdapter {
 
     private static void raise(List<Diagnostic> diagnostics, Class<?> atClass, String message) {
         String decorated = MessageFormat.format(
-                "{0} ({1})",
+                "{0} ({1})", //$NON-NLS-1$
                 message,
                 atClass.getName());
         diagnostics.add(new BasicDiagnostic(Diagnostic.Level.ERROR, decorated, null));

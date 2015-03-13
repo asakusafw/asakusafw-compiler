@@ -45,7 +45,7 @@ public class SerializableValueDescription implements ValueDescription {
             bytes = buffer.toByteArray();
         } catch (IOException e) {
             throw new IllegalArgumentException(MessageFormat.format(
-                    "failed to serialize a value: {0}",
+                    "failed to serialize a value: {0}", //$NON-NLS-1$
                     value));
         }
         return new SerializableValueDescription(ReifiableTypeDescription.of(type), bytes);
@@ -76,7 +76,7 @@ public class SerializableValueDescription implements ValueDescription {
             return input.readObject();
         } catch (IOException e) {
             throw new ReflectiveOperationException(MessageFormat.format(
-                    "failed to deserialize a value: {0}",
+                    "failed to deserialize a value: {0}", //$NON-NLS-1$
                     this), e);
         }
     }
@@ -114,7 +114,7 @@ public class SerializableValueDescription implements ValueDescription {
     @Override
     public String toString() {
         return MessageFormat.format(
-                "Serialized({0})",
+                "Serialized({0})", //$NON-NLS-1$
                 valueType);
     }
 
@@ -130,7 +130,7 @@ public class SerializableValueDescription implements ValueDescription {
         @Override
         protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
             String name = desc.getName();
-            if (name.startsWith("[")) {
+            if (name.startsWith("[")) { //$NON-NLS-1$
                 return resolveClassDesc(desc);
             }
             try {

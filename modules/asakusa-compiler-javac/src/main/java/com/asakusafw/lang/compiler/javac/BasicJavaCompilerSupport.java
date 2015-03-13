@@ -107,7 +107,7 @@ public class BasicJavaCompilerSupport extends AbstractJavaCompilerSupport {
 
     private boolean isCompileRequired(File file) {
         String name = file.getName();
-        if (name.startsWith(".")) {
+        if (name.startsWith(".")) { //$NON-NLS-1$
             return false;
         }
         if (file.isDirectory()) {
@@ -187,7 +187,7 @@ public class BasicJavaCompilerSupport extends AbstractJavaCompilerSupport {
     private void collectSourceFiles(List<File> sink, File file) {
         String name = file.getName();
         // skip "dot" files
-        if (name.startsWith(".")) {
+        if (name.startsWith(".")) { //$NON-NLS-1$
             return;
         }
         if (file.isDirectory()) {

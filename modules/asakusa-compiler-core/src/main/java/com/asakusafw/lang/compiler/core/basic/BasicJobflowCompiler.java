@@ -27,6 +27,7 @@ public class BasicJobflowCompiler implements JobflowCompiler {
 
     @Override
     public void compile(Context context, BatchInfo batch, Jobflow jobflow) {
+        LOG.debug("start jobflow compiler: {}={}", jobflow.getFlowId(), jobflow.getDescriptionClass()); //$NON-NLS-1$
         before(context, batch, jobflow);
         runOperatorGraphProcessor(context, batch, jobflow);
         runExternalPortProcessor(context, batch, jobflow);

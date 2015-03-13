@@ -27,6 +27,9 @@ import java.util.NavigableMap;
 import java.util.Set;
 import java.util.TreeMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.asakusafw.lang.compiler.api.ExternalPortProcessor;
 import com.asakusafw.lang.compiler.api.reference.DataModelReference;
 import com.asakusafw.lang.compiler.api.reference.ExternalInputReference;
@@ -67,6 +70,8 @@ import com.asakusafw.vocabulary.directio.DirectFileOutputDescription;
  */
 public class DirectFileIoPortProcessor
         extends AbstractExternalPortProcessor<DirectFileInputDescription, DirectFileOutputDescription> {
+
+    static final Logger LOG = LoggerFactory.getLogger(DirectFileIoPortProcessor.class);
 
     private static final String MODULE_NAME = "directio"; //$NON-NLS-1$
 
@@ -416,17 +421,19 @@ public class DirectFileIoPortProcessor
             Context context,
             List<ExternalInputReference> inputs,
             List<ExternalOutputReference> outputs) throws IOException {
+        LOG.debug("processing Direct file I/O ports: {}/{}", context.getBatchId(), context.getFlowId()); //$NON-NLS-1$
         processInputs(context, inputs);
         processOutputs(context, outputs);
     }
 
-    private void processInputs(Context context, List<ExternalInputReference> inputs) throws IOException {
-        if (inputs.isEmpty()) {
+    private void processInputs(Context context, List<ExternalInputReference> ports) throws IOException {
+        if (ports.isEmpty()) {
             return;
         }
         List<CopyStageInfo.Operation> operations = new ArrayList<>();
-        for (ExternalInputReference input : inputs) {
-            CopyStageInfo.Operation operation = processInput(context, input);
+        for (ExternalInputReference port : ports) {
+            LOG.debug("processing Direct file input: {}={}", port.getName(), port.getDescriptionClass()); //$NON-NLS-1$
+            CopyStageInfo.Operation operation = processInput(context, port);
             operations.add(operation);
         }
         String stageId = Naming.getStageId(getModuleName(), PHASE_INPUT);
@@ -439,13 +446,14 @@ public class DirectFileIoPortProcessor
         registerJob(context, PHASE_INPUT, clientClass);
     }
 
-    private void processOutputs(Context context, List<ExternalOutputReference> outputs) throws IOException {
-        if (outputs.isEmpty()) {
+    private void processOutputs(Context context, List<ExternalOutputReference> ports) throws IOException {
+        if (ports.isEmpty()) {
             return;
         }
         List<OutputStageInfo.Operation> operations = new ArrayList<>();
-        for (ExternalOutputReference output : outputs) {
-            OutputStageInfo.Operation operation = processOutput(context, output);
+        for (ExternalOutputReference port : ports) {
+            LOG.debug("processing Direct file output: {}={}", port.getName(), port.getDescriptionClass()); //$NON-NLS-1$
+            OutputStageInfo.Operation operation = processOutput(context, port);
             operations.add(operation);
         }
         OutputStageInfo info = new OutputStageInfo(
@@ -511,6 +519,7 @@ public class DirectFileIoPortProcessor
     }
 
     private void registerJob(Context context, Phase phase, ClassDescription clientClass) {
+        LOG.debug("registering Direct file I/O job: {}->{}", phase, clientClass); //$NON-NLS-1$
         context.addTask(phase, new HadoopTaskReference(
                 getModuleName(),
                 clientClass,

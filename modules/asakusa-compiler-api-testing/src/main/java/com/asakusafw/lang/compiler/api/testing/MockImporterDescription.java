@@ -51,7 +51,7 @@ public abstract class MockImporterDescription implements ImporterDescription {
     public ExternalInputInfo toInfo() {
         return new ExternalInputInfo.Basic(
                 Descriptions.classOf(getClass()),
-                "dummy",
+                "dummy", //$NON-NLS-1$
                 Descriptions.classOf(getModelType()),
                 ExternalInputInfo.DataSize.valueOf(getDataSize().name()));
     }

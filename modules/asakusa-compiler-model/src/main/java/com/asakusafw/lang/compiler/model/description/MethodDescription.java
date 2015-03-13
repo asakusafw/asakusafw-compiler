@@ -138,7 +138,7 @@ public class MethodDescription implements Description {
     @Override
     public String toString() {
         return MessageFormat.format(
-                "Method({0}#{1})",
+                "Method({0}#{1})", //$NON-NLS-1$
                 declaringClass.getName(),
                 name);
     }

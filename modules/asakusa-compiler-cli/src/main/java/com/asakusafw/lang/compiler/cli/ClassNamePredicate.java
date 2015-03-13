@@ -38,7 +38,7 @@ public class ClassNamePredicate implements Predicate<Class<?>> {
                 break;
             }
             buf.append(Pattern.quote(pattern.substring(start, next)));
-            buf.append(".*");
+            buf.append(".*"); //$NON-NLS-1$
             start = next + 1;
         }
         if (start < pattern.length()) {

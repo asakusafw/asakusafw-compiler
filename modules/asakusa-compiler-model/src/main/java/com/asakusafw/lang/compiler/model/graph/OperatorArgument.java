@@ -44,7 +44,7 @@ public class OperatorArgument implements OperatorProperty {
     @Override
     public String toString() {
         return MessageFormat.format(
-                "Argument(name={0}, value={1})",
+                "Argument(name={0}, value={1})", //$NON-NLS-1$
                 name,
                 value);
     }
