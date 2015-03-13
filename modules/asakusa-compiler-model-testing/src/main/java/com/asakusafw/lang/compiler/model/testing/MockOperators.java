@@ -39,7 +39,7 @@ import com.asakusafw.lang.compiler.model.graph.UserOperator;
  */
 public final class MockOperators {
 
-    private static final TypeDescription TYPE = Descriptions.typeOf(String.class);
+    private static final TypeDescription DEFAULT_DATA_TYPE = Descriptions.typeOf(String.class);
 
     private static final OperatorConstraint[] EMPTY_CONSTRAINTS = new OperatorConstraint[0];
 
@@ -49,13 +49,23 @@ public final class MockOperators {
 
     private static final String KEY_ARGUMENT = "ID"; //$NON-NLS-1$
 
+    private final TypeDescription commonDataType;
+
     private final Map<String, Operator> operators = new HashMap<>();
 
     /**
      * Creates a new instance.
      */
     public MockOperators() {
-        return;
+        this(DEFAULT_DATA_TYPE);
+    }
+
+    /**
+     * Creates a new instance.
+     * @param commonDataType the common data type
+     */
+    public MockOperators(TypeDescription commonDataType) {
+        this.commonDataType = commonDataType;
     }
 
     /**
@@ -63,6 +73,16 @@ public final class MockOperators {
      * @param operators operators which are created on other {@link MockOperators}
      */
     public MockOperators(Collection<? extends Operator> operators) {
+        this(DEFAULT_DATA_TYPE, operators);
+    }
+
+    /**
+     * Creates a new instance.
+     * @param commonDataType the common data type
+     * @param operators operators which are created on other {@link MockOperators}
+     */
+    public MockOperators(TypeDescription commonDataType, Collection<? extends Operator> operators) {
+        this(commonDataType);
         for (Operator operator : operators) {
             String id = id0(operator);
             if (id != null) {
@@ -77,7 +97,7 @@ public final class MockOperators {
      * @return this
      */
     public MockOperators input(String id) {
-        operators.put(id, ExternalInput.newInstance(id, TYPE));
+        operators.put(id, ExternalInput.newInstance(id, commonDataType));
         return this;
     }
 
@@ -87,7 +107,7 @@ public final class MockOperators {
      * @return this
      */
     public MockOperators output(String id) {
-        operators.put(id, ExternalOutput.newInstance(id, TYPE));
+        operators.put(id, ExternalOutput.newInstance(id, commonDataType));
         return this;
     }
 
@@ -125,10 +145,10 @@ public final class MockOperators {
                         classOf(MockOperators.class), id, Collections.<ReifiableTypeDescription>emptyList()),
                 classOf(MockOperators.class));
         for (String name : inputNames.split(",")) { //$NON-NLS-1$
-            builder.input(name, TYPE);
+            builder.input(name, commonDataType);
         }
         for (String name : outputNames.split(",")) { //$NON-NLS-1$
-            builder.output(name, TYPE);
+            builder.output(name, commonDataType);
         }
         builder.constraint(constraints);
         builder.argument(KEY_ARGUMENT, valueOf(id));
@@ -158,7 +178,7 @@ public final class MockOperators {
      * @return this
      */
     public MockOperators marker(String id) {
-        MarkerOperator operator = MarkerOperator.builder(TYPE)
+        MarkerOperator operator = MarkerOperator.builder(commonDataType)
                 .attribute(String.class, id)
                 .build();
         return bless(id, operator);
@@ -172,7 +192,7 @@ public final class MockOperators {
      * @return this
      */
     public <T extends Enum<T>> MockOperators marker(String id, T constant) {
-        MarkerOperator operator = MarkerOperator.builder(TYPE)
+        MarkerOperator operator = MarkerOperator.builder(commonDataType)
                 .attribute(String.class, id)
                 .attribute(constant.getDeclaringClass(), constant)
                 .build();

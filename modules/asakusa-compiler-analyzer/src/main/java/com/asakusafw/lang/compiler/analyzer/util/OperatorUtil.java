@@ -1,8 +1,15 @@
 package com.asakusafw.lang.compiler.analyzer.util;
 
 import java.text.MessageFormat;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
+import com.asakusafw.lang.compiler.model.description.TypeDescription;
+import com.asakusafw.lang.compiler.model.graph.FlowOperator;
 import com.asakusafw.lang.compiler.model.graph.Operator;
+import com.asakusafw.lang.compiler.model.graph.OperatorGraph;
+import com.asakusafw.lang.compiler.model.graph.OperatorPort;
 
 /**
  * Generic operator utilities.
@@ -35,4 +42,28 @@ public final class OperatorUtil {
         }
     }
 
+    /**
+     * Collects data types which directly used in the specified operators.
+     * Note that, the result does not contain data types occurred in some flow operators.
+     * @param operators the target operators
+     * @return the data types occurred in the operators
+     * @see FlowOperator
+     * @see OperatorGraph#getOperators()
+     */
+    public static Set<TypeDescription> collectDataTypes(Collection<? extends Operator> operators) {
+        Set<TypeDescription> results = new HashSet<>();
+        for (Operator operator : operators) {
+            collectDataTypes(results, operator);
+        }
+        return results;
+    }
+
+    private static void collectDataTypes(Collection<? super TypeDescription> results, Operator operator) {
+        for (OperatorPort port : operator.getInputs()) {
+            results.add(port.getDataType());
+        }
+        for (OperatorPort port : operator.getOutputs()) {
+            results.add(port.getDataType());
+        }
+    }
 }
