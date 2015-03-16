@@ -55,4 +55,11 @@ public class BasicResourceContainer implements ResourceContainer {
         }
         return new FileOutputStream(file);
     }
+
+    @Override
+    public String toString() {
+        return MessageFormat.format(
+                "Resource({0})", //$NON-NLS-1$
+                basePath);
+    }
 }

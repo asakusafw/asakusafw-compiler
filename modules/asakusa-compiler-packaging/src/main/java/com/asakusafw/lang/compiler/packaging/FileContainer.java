@@ -109,7 +109,7 @@ public class FileContainer implements ResourceContainer, ResourceRepository {
     @Override
     public String toString() {
         return MessageFormat.format(
-                "Container({0})", //$NON-NLS-1$
+                "Resource({0})", //$NON-NLS-1$
                 basePath);
     }
 }

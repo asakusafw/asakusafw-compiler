@@ -6,6 +6,9 @@ import java.util.Collection;
 import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.asakusafw.lang.compiler.common.Location;
 import com.asakusafw.lang.compiler.common.Predicate;
 import com.asakusafw.lang.compiler.common.ResourceContainer;
@@ -19,6 +22,8 @@ import com.asakusafw.lang.compiler.packaging.ZipSink;
  * Creates jobflow packages.
  */
 public class JobflowPackager {
+
+    static final Logger LOG = LoggerFactory.getLogger(JobflowPackager.class);
 
     /**
      * The location of manifest file in package.
@@ -76,6 +81,7 @@ public class JobflowPackager {
             ResourceContainer batchOutput,
             ResourceRepository jobflowOutput,
             Collection<? extends ResourceRepository> jobflowEmbedded) throws IOException {
+        LOG.debug("building jobflow package: {}->{}", flowId, batchOutput);
         ResourceRepository result = assemble(jobflowOutput, jobflowEmbedded);
         Location location = getLibraryLocation(flowId);
         try (ResourceSink sink = new ZipSink(new JarOutputStream(batchOutput.addResource(location)))) {
