@@ -1,9 +1,0 @@
-description 'Asakusa DSL Compiler models'
-
-apply plugin: 'java'
-apply plugin: 'maven'
-apply plugin: 'eclipse'
-
-dependencies {
-    compile project(':asakusa-compiler-common')
-}

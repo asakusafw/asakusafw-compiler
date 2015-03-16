@@ -1,0 +1,12 @@
+description 'Testing Utilities for Java Compiler Support'
+
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'eclipse'
+
+useSLF4J()
+useJUnit()
+
+dependencies {
+    compile project(':asakusa-compiler-javac')
+}

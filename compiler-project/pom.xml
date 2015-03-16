@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<name>Asakusa DSL Compiler</name>
+	<groupId>com.asakusafw.lang.compiler</groupId>
+	<artifactId>compiler-project</artifactId>
+	<parent>
+		<groupId>com.asakusafw.lang.compiler</groupId>
+		<artifactId>root</artifactId>
+		<version>0.1-SNAPSHOT</version>
+	</parent>
+
+	<packaging>pom</packaging>
+
+	<modules>
+		<!-- core -->
+		<module>asakusa-compiler-common</module>
+		<module>asakusa-compiler-model</module>
+		<module>asakusa-compiler-api</module>
+		<module>asakusa-compiler-plan</module>
+		<module>asakusa-compiler-packaging</module>
+
+		<!-- DSL driver -->
+		<module>asakusa-compiler-analyzer</module>
+
+		<!-- control -->
+		<module>asakusa-compiler-core</module>
+		<module>asakusa-compiler-cli</module>
+
+		<!-- utilities -->
+		<module>asakusa-compiler-javac</module>
+		<module>asakusa-compiler-hadoop</module>
+		<module>asakusa-compiler-mapreduce</module>
+
+		<!-- extensions -->
+		<module>asakusa-compiler-extension-externalio</module>
+		<module>asakusa-compiler-extension-directio</module>
+		<module>asakusa-compiler-extension-windgate</module>
+		<module>asakusa-compiler-extension-yaess</module>
+		<module>asakusa-compiler-extension-cleanup</module>
+
+		<!-- testing utilities -->
+		<module>asakusa-compiler-common-testing</module>
+		<module>asakusa-compiler-model-testing</module>
+		<module>asakusa-compiler-javac-testing</module>
+		<module>asakusa-compiler-api-testing</module>
+		<module>asakusa-compiler-tester</module>
+	</modules>
+</project>

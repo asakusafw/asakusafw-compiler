@@ -1,0 +1,17 @@
+description 'Hadoop MapReduce Support for Asakusa DSL Compiler'
+
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'eclipse'
+
+useHadoop()
+
+dependencies {
+    compile project(':asakusa-compiler-javac')
+    compile "com.asakusafw:java-dom:${asakusafwVersion}"
+    compile "com.asakusafw:asakusa-runtime:${asakusafwVersion}"
+    compile "com.asakusafw:asakusa-runtime-inprocess:${asakusafwVersion}"
+
+    testCompile project(':asakusa-compiler-common-testing')
+    testCompile project(':asakusa-compiler-javac-testing')
+}

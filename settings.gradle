@@ -32,6 +32,6 @@ include 'asakusa-compiler-api-testing'
 include 'asakusa-compiler-tester'
 
 rootProject.children.each { project ->
-    project.projectDir = new File(settingsDir, "modules/${project.name}")
+    project.projectDir = new File(settingsDir, "compiler-project/${project.name}")
     assert project.projectDir.isDirectory()
 }
