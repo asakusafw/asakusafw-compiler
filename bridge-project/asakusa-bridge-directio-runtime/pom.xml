@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<name>Asakusa Direct I/O Bridge API</name>
+	<groupId>com.asakusafw.bridge</groupId>
+	<artifactId>asakusa-bridge-directio-runtime</artifactId>
+	<parent>
+		<artifactId>bridge-project</artifactId>
+		<groupId>com.asakusafw.bridge</groupId>
+		<version>0.1-SNAPSHOT</version>
+	</parent>
+
+	<description>Asakusa Direct I/O Bridge API</description>
+
+	<packaging>jar</packaging>
+
+	<dependencies>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>asakusa-bridge-runtime</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>${asakusafw.groupId}</groupId>
+			<artifactId>asakusa-runtime</artifactId>
+			<version>${asakusafw.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>${asakusafw.groupId}.sandbox</groupId>
+			<artifactId>asakusa-directio-runtime-ext</artifactId>
+			<version>${asakusafw.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.hadoop</groupId>
+			<artifactId>hadoop-core</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hamcrest</groupId>
+			<artifactId>hamcrest-library</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+</project>

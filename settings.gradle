@@ -9,6 +9,6 @@ include 'asakusa-bridge-adapter'
 include 'asakusa-bridge-redirector'
 
 rootProject.children.each { project ->
-    project.projectDir = new File(settingsDir, "modules/${project.name}")
+    project.projectDir = new File(settingsDir, "bridge-project/${project.name}")
     assert project.projectDir.isDirectory()
 }
