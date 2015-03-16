@@ -51,10 +51,10 @@ public class ZipRewriter {
                 continue;
             }
             if (isTarget(entry)) {
-                LOG.debug("rewrite class: {}", entry.getName());
+                LOG.debug("rewrite class: {}", entry.getName()); //$NON-NLS-1$
                 classRewriter.rewrite(input, output);
             } else {
-                LOG.debug("    copy file: {}", entry.getName());
+                LOG.debug("    copy file: {}", entry.getName()); //$NON-NLS-1$
                 Util.copy(input, output);
             }
         }

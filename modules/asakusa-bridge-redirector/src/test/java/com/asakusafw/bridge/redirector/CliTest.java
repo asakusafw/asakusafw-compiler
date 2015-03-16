@@ -57,6 +57,7 @@ public class CliTest {
         assertThat(conf.output, is(nullValue()));
         assertThat(conf.rule, redirect(MockCallee0.class, MockCallee2.class));
         assertThat(conf.rule, redirect(MockCallee1.class, MockCallee1.class));
+        assertThat(conf.overwrite, is(false));
     }
 
     /**
@@ -75,12 +76,14 @@ public class CliTest {
                 "--output", output,
                 "--rule", rule(MockCallee0.class, MockCallee2.class),
                 "--rule", rule(MockCallee1.class, MockCallee3.class),
+                "--overwrite",
         }));
 
         assertThat(conf.input, is(input));
         assertThat(conf.output, is(output));
         assertThat(conf.rule, redirect(MockCallee0.class, MockCallee2.class));
         assertThat(conf.rule, redirect(MockCallee1.class, MockCallee3.class));
+        assertThat(conf.overwrite, is(true));
     }
 
     /**
@@ -134,6 +137,7 @@ public class CliTest {
                 "--output", output,
                 "--rule", rule(MockCallee0.class, MockCallee2.class),
                 "--rule", rule(MockCallee1.class, MockCallee3.class),
+                "--overwrite",
         }));
         assertThat(status, is(0));
 
@@ -143,6 +147,31 @@ public class CliTest {
         assertThat(apply(input), is("0:0:1"));
         assertThat(apply(output), is("0:2:3"));
         assertThat(dump(output), hasEntry("a.bin", new byte[] { 1, 2, 3 }));
+    }
+
+    /**
+     * executes w/ overwrite.
+     * @throws Exception if failed
+     */
+    @Test
+    public void execute_overwrite() throws Exception {
+        Map<String, byte[]> contents = new LinkedHashMap<>();
+        contents.put("a.bin", new byte[] { 1, 2, 3 });
+        addClass(contents, MockCaller.class);
+
+        File input = save(contents);
+        int status = Cli.execute(strings(new Object[] {
+                "--input", input,
+                "--rule", rule(MockCallee0.class, MockCallee2.class),
+                "--overwrite",
+        }));
+        assertThat(status, is(0));
+
+        File escape = new File(input.getParentFile(), input.getName() + ".bak");
+        assertThat(escape.isFile(), is(false));
+
+        assertThat(apply(input), is("0:2:1"));
+        assertThat(dump(input), hasEntry("a.bin", new byte[] { 1, 2, 3 }));
     }
 
     /**

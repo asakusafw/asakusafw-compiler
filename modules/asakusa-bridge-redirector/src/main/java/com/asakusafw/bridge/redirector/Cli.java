@@ -39,6 +39,9 @@ import org.slf4j.LoggerFactory;
  *
  * <dt><code>-R, --redirect &lt;source-class&gt;/&lt;destination-class&gt;</code></dt>
  * <dd>individual redirection rule</dd>
+ *
+ * <dt><code>--overwrite</code></dt>
+ * <dd>do not create '.bak' files</dd>
  * </dl>
  */
 public final class Cli {
@@ -110,6 +113,7 @@ public final class Cli {
         results.input = parseFile(cmd, opts.input, true);
         results.output = parseFile(cmd, opts.output, false);
         results.rule = parseRules(cmd, opts.rule);
+        results.overwrite = cmd.hasOption(opts.overwrite.getLongOpt());
         return results;
     }
 
@@ -130,7 +134,7 @@ public final class Cli {
             String source = (String) entry.getKey();
             String destination = (String) entry.getValue();
             if (LOG.isDebugEnabled()) {
-                LOG.debug("--{}: {} => {}", new Object[] {
+                LOG.debug("--{}: {} => {}", new Object[] { //$NON-NLS-1$
                         opt.getLongOpt(),
                         source,
                         destination
@@ -162,7 +166,7 @@ public final class Cli {
     }
 
     static void process(Configuration configuration) throws IOException {
-        File temporary = File.createTempFile("asakusa", "-redirect.jar");
+        File temporary = File.createTempFile("asakusa", "-redirect.jar"); //$NON-NLS-1$ //$NON-NLS-2$
         try {
             rewriteToFile(configuration.rule, configuration.input, temporary);
 
@@ -172,7 +176,7 @@ public final class Cli {
             } else {
                 destination = configuration.output;
             }
-            moveFile(temporary, destination);
+            moveFile(temporary, destination, configuration.overwrite);
         } finally {
             if (deleteFile(temporary) == false) {
                 LOG.warn(MessageFormat.format(
@@ -183,6 +187,7 @@ public final class Cli {
     }
 
     private static void rewriteToFile(RedirectRule rule, File input, File output) throws IOException {
+        LOG.debug("analyzing file: {}->{}", input, output); //$NON-NLS-1$
         if (input.exists() == false) {
             throw new FileNotFoundException(input.getPath());
         }
@@ -193,8 +198,10 @@ public final class Cli {
         }
     }
 
-    private static void moveFile(File source, File destination) throws IOException {
-        escapeFile(destination);
+    private static void moveFile(File source, File destination, boolean overwrite) throws IOException {
+        if (overwrite == false) {
+            escapeFile(destination);
+        }
         try (InputStream input = new FileInputStream(source)) {
             try (OutputStream output = createFile(destination)) {
                 Util.copy(input, output);
@@ -226,6 +233,7 @@ public final class Cli {
             return;
         }
         File escape = new File(file.getParentFile(), file.getName() + BACKUP_EXTENSION);
+        LOG.debug("creating backup file: {}->{}", file, escape); //$NON-NLS-1$
         if (deleteFile(escape) == false) {
             throw new IOException(MessageFormat.format(
                     "failed to delete {0} file: {1}",
@@ -254,6 +262,9 @@ public final class Cli {
                 .withValueSeparator(RULE_VALUE_SEPARATOR)
                 .withDescription("individual redirection rule")
                 .withArgumentDescription("source-class/destination-class");
+
+        final Option overwrite = optional("overwrite", 0) //$NON-NLS-1$
+                .withDescription("do not create '.bak' files");
 
         final Options options = new Options();
 
@@ -292,5 +303,7 @@ public final class Cli {
         File output;
 
         RedirectRule rule;
+
+        boolean overwrite;
     }
 }
