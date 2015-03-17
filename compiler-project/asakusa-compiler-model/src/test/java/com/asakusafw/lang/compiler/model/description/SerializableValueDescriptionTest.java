@@ -66,7 +66,7 @@ public class SerializableValueDescriptionTest {
     }
 
     /**
-     * simple case.
+     * non-serializable objects.
      * @throws Exception if failed
      */
     @Test(expected = IllegalArgumentException.class)
@@ -74,7 +74,22 @@ public class SerializableValueDescriptionTest {
         SerializableValueDescription.of(new Object());
     }
 
-    // equality may not be stable
+    /**
+     * test equalities.
+     * @throws Exception if failed
+     */
+    @Test
+    public void equality() throws Exception {
+        SerializableValueDescription d0 = SerializableValueDescription.of(new SerializableWithArray(1, 2, 3));
+        SerializableValueDescription d1 = new SerializableValueDescription(d0.getValueType(), d0.getSerialized());
+        SerializableValueDescription d2 = SerializableValueDescription.of(new SerializableWithArray(2, 3, 4));
+        SerializableValueDescription d3 = SerializableValueDescription.of(new int[] { 1, 2, 3 });
+
+        assertThat(d1.toString(), d1, is(d0));
+        assertThat(d1.toString(), d1.hashCode(), is(d0.hashCode()));
+        assertThat(d1.toString(), d2, is(not(d0)));
+        assertThat(d1.toString(), d3, is(not(d0)));
+    }
 
     @SuppressWarnings("javadoc")
     public static final class SerializableWithArray implements Serializable {
