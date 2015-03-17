@@ -65,11 +65,7 @@ public final class FileEditor {
      */
     public static boolean newFile(File file) {
         File parent = file.getAbsoluteFile().getParentFile();
-        if (parent.mkdirs() == false && parent.isDirectory() == false) {
-            throw new IOError(new IOException(MessageFormat.format(
-                    "failed to create a folder: {0}",
-                    parent)));
-        }
+        mkdir(parent);
         try {
             return file.createNewFile();
         } catch (IOException e) {
@@ -84,11 +80,7 @@ public final class FileEditor {
      */
     public static OutputStream create(File file) {
         File parent = file.getAbsoluteFile().getParentFile();
-        if (parent.mkdirs() == false && parent.isDirectory() == false) {
-            throw new IOError(new IOException(MessageFormat.format(
-                    "failed to create a folder: {0}",
-                    parent)));
-        }
+        mkdir(parent);
         try {
             return new FileOutputStream(file);
         } catch (IOException e) {
@@ -209,11 +201,7 @@ public final class FileEditor {
         if (source.isDirectory() == false) {
             return;
         }
-        if (destination.mkdirs() == false && destination.isDirectory() == false) {
-            throw new IOError(new IOException(MessageFormat.format(
-                    "failed to create a directory: {0}",
-                    destination)));
-        }
+        mkdir(destination);
         for (File file : source.listFiles()) {
             File target = new File(destination, file.getName());
             if (file.isDirectory()) {
@@ -238,13 +226,21 @@ public final class FileEditor {
                 }
                 File target = new File(destination, entry.getName());
                 if (entry.isDirectory()) {
-                    target.mkdirs();
+                    mkdir(target);
                 } else {
                     copy(input, target);
                 }
             }
         } catch (IOException e) {
             throw new IOError(e);
+        }
+    }
+
+    private static void mkdir(File file) {
+        if (file.mkdirs() == false && file.isDirectory() == false) {
+            throw new IOError(new IOException(MessageFormat.format(
+                    "failed to create directory: {0}",
+                    file)));
         }
     }
 
@@ -262,7 +258,7 @@ public final class FileEditor {
                 }
                 File target = new File(destination, entry.getName());
                 if (entry.isDirectory()) {
-                    target.mkdirs();
+                    mkdir(target);
                 } else {
                     copy(source, target);
                 }

@@ -41,8 +41,12 @@ public class SerializableValueDescription implements ValueDescription {
      * @param serialized the serialized object
      */
     public SerializableValueDescription(ReifiableTypeDescription valueType, byte[] serialized) {
+        this(valueType, serialized, true);
+    }
+
+    private SerializableValueDescription(ReifiableTypeDescription valueType, byte[] serialized, boolean copy) {
         this.valueType = valueType;
-        this.serialized = serialized;
+        this.serialized = copy ? serialized.clone() : serialized;
     }
 
     /**
@@ -63,7 +67,7 @@ public class SerializableValueDescription implements ValueDescription {
                     "failed to serialize a value: {0}", //$NON-NLS-1$
                     value));
         }
-        return new SerializableValueDescription(ReifiableTypeDescription.of(type), bytes);
+        return new SerializableValueDescription(ReifiableTypeDescription.of(type), bytes, false);
     }
 
     @Override

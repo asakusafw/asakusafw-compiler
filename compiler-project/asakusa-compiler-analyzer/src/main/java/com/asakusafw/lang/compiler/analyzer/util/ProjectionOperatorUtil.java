@@ -170,7 +170,6 @@ public final class ProjectionOperatorUtil {
                             element.source)));
                 }
             } else {
-                assert element.source != null && element.destination != null;
                 if (element.source.getType().equals(element.destination.getType()) == false) {
                     diagnostics.add(new BasicDiagnostic(Diagnostic.Level.ERROR, MessageFormat.format(
                             "inconsistent type in property mapping ({0}): {1} <=> {2}",

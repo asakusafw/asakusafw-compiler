@@ -188,7 +188,7 @@ public interface ExternalInputInfo extends ExternalPortInfo {
                 return false;
             }
             if (contents == null) {
-                if (contents != null) {
+                if (other.contents != null) {
                     return false;
                 }
             } else if (!contents.equals(other.contents)) {

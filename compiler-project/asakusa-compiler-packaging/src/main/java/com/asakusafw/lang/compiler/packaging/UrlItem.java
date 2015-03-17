@@ -32,6 +32,8 @@ public class UrlItem implements ResourceItem {
 
     private final URL url;
 
+    private final String label;
+
     /**
      * Creates a new instance.
      * @param location the file location
@@ -40,6 +42,7 @@ public class UrlItem implements ResourceItem {
     public UrlItem(Location location, URL url) {
         this.location = location;
         this.url = url;
+        this.label = url.toExternalForm();
     }
 
     @Override
@@ -72,7 +75,7 @@ public class UrlItem implements ResourceItem {
         final int prime = 31;
         int result = 1;
         result = prime * result + location.hashCode();
-        result = prime * result + url.hashCode();
+        result = prime * result + label.hashCode();
         return result;
     }
 
@@ -91,7 +94,7 @@ public class UrlItem implements ResourceItem {
         if (!location.equals(other.location)) {
             return false;
         }
-        if (!url.equals(other.url)) {
+        if (!label.equals(other.label)) {
             return false;
         }
         return true;
@@ -102,6 +105,6 @@ public class UrlItem implements ResourceItem {
         return MessageFormat.format(
                 "UrlItem({0}=>{1})", //$NON-NLS-1$
                 location,
-                url);
+                label);
     }
 }
