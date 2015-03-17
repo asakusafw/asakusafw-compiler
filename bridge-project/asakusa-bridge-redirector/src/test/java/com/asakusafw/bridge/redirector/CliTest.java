@@ -199,6 +199,34 @@ public class CliTest {
         assertThat(status, is(not(0)));
     }
 
+    /**
+     * executes w/ missing input.
+     * @throws Exception if failed
+     */
+    @Test
+    public void execute_missing() throws Exception {
+        File file = new File(temporary.newFolder(), "missing.zip");
+        int status = Cli.execute(strings(new Object[] {
+                "--input", file,
+                "--rule", rule(MockCallee0.class, MockCallee2.class),
+        }));
+        assertThat(status, is(not(0)));
+    }
+
+    /**
+     * executes w/ not a zip input.
+     * @throws Exception if failed
+     */
+    @Test
+    public void execute_not_zip() throws Exception {
+        File file = temporary.newFile();
+        int status = Cli.execute(strings(new Object[] {
+                "--input", file,
+                "--rule", rule(MockCallee0.class, MockCallee2.class),
+        }));
+        assertThat(status, is(not(0)));
+    }
+
     private String apply(File file) throws IOException {
         Map<String, byte[]> contents = dump(file);
         String name = VolatileClassLoader.toPath(MockCaller.class);

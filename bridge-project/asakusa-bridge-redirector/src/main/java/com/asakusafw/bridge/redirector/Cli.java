@@ -27,6 +27,8 @@ import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Properties;
+import java.util.zip.ZipException;
+import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
@@ -181,6 +183,7 @@ public final class Cli {
     }
 
     static void process(Configuration configuration) throws IOException {
+        checkInput(configuration.input);
         File temporary = File.createTempFile("asakusa", "-redirect.jar"); //$NON-NLS-1$ //$NON-NLS-2$
         try {
             rewriteToFile(configuration.rule, configuration.input, temporary);
@@ -198,6 +201,21 @@ public final class Cli {
                         "failed to delete file: {0}",
                         temporary));
             }
+        }
+    }
+
+    private static void checkInput(File input) throws IOException {
+        LOG.debug("checking input file: {}", input); //$NON-NLS-1$
+        if (input.exists() == false) {
+            throw new FileNotFoundException(input.getPath());
+        }
+        try {
+            ZipFile zip = new ZipFile(input);
+            zip.close();
+        } catch (ZipException e) {
+            throw new IOException(MessageFormat.format(
+                    "invalid input file: {0}",
+                    input.getPath()), e);
         }
     }
 
