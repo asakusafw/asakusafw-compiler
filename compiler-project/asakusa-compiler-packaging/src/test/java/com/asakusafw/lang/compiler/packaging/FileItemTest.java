@@ -45,6 +45,8 @@ public class FileItemTest extends ResourceTestRoot {
         FileItem item = item(base, "test.txt", "Hello, world!");
         assertThat(item.toString(), item, hasLocation("test.txt"));
         assertThat(item.toString(), item, hasContents("Hello, world!"));
+
+
     }
 
     /**

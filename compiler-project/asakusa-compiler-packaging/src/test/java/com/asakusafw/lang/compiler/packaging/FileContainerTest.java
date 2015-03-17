@@ -162,6 +162,23 @@ public class FileContainerTest extends ResourceTestRoot {
         assertThat(locations, containsInAnyOrder("a.txt", "a/b.txt", "a/b/c.txt"));
     }
 
+    /**
+     * equality.
+     * @throws Exception if failed
+     */
+    @Test
+    public void equality() throws Exception {
+        File a = deployer.getFile("a");
+        File b = deployer.getFile("b");
+        a.mkdirs();
+        b.mkdirs();
+
+        FileContainer repo = new FileContainer(a);
+        assertThat(repo.toString(), repo, is(new FileContainer(a)));
+        assertThat(repo.hashCode(), is(new FileContainer(a).hashCode()));
+        assertThat(repo, is(not(new FileContainer(b))));
+    }
+
     private File open(String name) {
         String path = "ResourceRepository.files/" + name;
         return deployer.extract(path, name);

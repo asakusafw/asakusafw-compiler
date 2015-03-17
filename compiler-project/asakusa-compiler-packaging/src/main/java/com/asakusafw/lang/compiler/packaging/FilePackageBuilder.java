@@ -17,7 +17,6 @@ package com.asakusafw.lang.compiler.packaging;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -93,11 +92,7 @@ public class FilePackageBuilder {
      * @throws IOException if failed to build the package
      */
     public void build(File destination) throws IOException {
-        if (destination.mkdirs() == false && destination.isDirectory() == false) {
-            throw new IOException(MessageFormat.format(
-                    "failed to create package: {0}",
-                    destination));
-        }
+        ResourceUtil.mkdir(destination);
         if (isEmpty()) {
             return;
         }

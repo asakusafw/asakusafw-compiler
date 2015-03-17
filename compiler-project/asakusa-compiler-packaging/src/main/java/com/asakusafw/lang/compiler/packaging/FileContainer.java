@@ -16,7 +16,6 @@
 package com.asakusafw.lang.compiler.packaging;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -66,13 +65,7 @@ public class FileContainer implements ResourceContainer, ResourceRepository {
                     "generating file already exists: {0}",
                     file));
         }
-        File parent = file.getParentFile();
-        if (parent.mkdirs() == false && parent.isDirectory() == false) {
-            throw new IOException(MessageFormat.format(
-                    "failed to prepare a parent directory: {0}",
-                    file));
-        }
-        return new FileOutputStream(file);
+        return ResourceUtil.create(file);
     }
 
     /**
@@ -119,6 +112,32 @@ public class FileContainer implements ResourceContainer, ResourceRepository {
      */
     public void accept(FileVisitor visitor) throws IOException {
         ResourceUtil.visit(visitor, basePath);
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + basePath.hashCode();
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        FileContainer other = (FileContainer) obj;
+        if (!basePath.equals(other.basePath)) {
+            return false;
+        }
+        return true;
     }
 
     @Override

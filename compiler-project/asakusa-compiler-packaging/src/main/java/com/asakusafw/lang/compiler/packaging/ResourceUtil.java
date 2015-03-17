@@ -274,9 +274,24 @@ public final class ResourceUtil {
             }
         }
         if (deleted && file.delete() == false) {
-            LOG.debug("failed to delete file: {}", file);
+            LOG.warn(MessageFormat.format(
+                    "failed to delete file: {0}",
+                    file));
         }
         return deleted;
+    }
+
+    /**
+     * Creates a new directory.
+     * @param path the target path
+     * @throws IOException if failed to create a directory
+     */
+    static void mkdir(File path) throws IOException {
+        if (path.mkdirs() == false && path.isDirectory() == false) {
+            throw new IOException(MessageFormat.format(
+                    "failed to create directory: {0}",
+                    path));
+        }
     }
 
     /**
@@ -296,12 +311,7 @@ public final class ResourceUtil {
      * @throws IOException if failed to create the file by I/O error
      */
     static OutputStream create(File file) throws IOException {
-        File parent = file.getParentFile();
-        if (parent.mkdirs() == false && parent.isDirectory() == false) {
-            LOG.warn(MessageFormat.format(
-                    "failed to create directory: {0}",
-                    parent));
-        }
+        mkdir(file.getAbsoluteFile().getParentFile());
         return new FileOutputStream(file);
     }
 

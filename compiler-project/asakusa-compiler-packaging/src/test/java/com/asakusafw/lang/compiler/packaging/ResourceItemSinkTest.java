@@ -77,9 +77,9 @@ public class ResourceItemSinkTest extends ResourceTestRoot {
     @Test
     public void callback() throws Exception {
         try (ResourceItemSink sink = new ResourceItemSink()) {
-            sink.add(Location.of("a.txt"), callback("A"));
-            sink.add(Location.of("b.txt"), callback("B"));
-            sink.add(Location.of("c.txt"), callback("C"));
+            sink.add(Location.of("a.txt"), provider("A"));
+            sink.add(Location.of("b.txt"), provider("B"));
+            sink.add(Location.of("c.txt"), provider("C"));
 
             assertThat(sink.getItems(), hasSize(3));
             assertThat(sink.find(Location.of("a.txt")), hasContents("A"));

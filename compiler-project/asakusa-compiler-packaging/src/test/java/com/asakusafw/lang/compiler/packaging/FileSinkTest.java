@@ -95,9 +95,9 @@ public class FileSinkTest extends ResourceTestRoot {
     public void callback() throws Exception {
         File base = folder.newFolder();
         try (FileSink sink = new FileSink(base)) {
-            sink.add(Location.of("a.txt"), callback("A"));
-            sink.add(Location.of("b.txt"), callback("B"));
-            sink.add(Location.of("c.txt"), callback("C"));
+            sink.add(Location.of("a.txt"), provider("A"));
+            sink.add(Location.of("b.txt"), provider("B"));
+            sink.add(Location.of("c.txt"), provider("C"));
         }
         Map<String, String> items = dump(new FileRepository(base));
         assertThat(items.keySet(), hasSize(3));

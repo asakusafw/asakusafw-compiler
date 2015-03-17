@@ -42,6 +42,20 @@ public abstract class ResourceTestRoot {
     static final Charset ENCODING = Charset.forName("UTF-8");
 
     /**
+     * Creates a {@link ContentProvider} for the contents.
+     * @param contents the target contents
+     * @return the content provider
+     */
+    public static ContentProvider provider(final String contents) {
+        return new ContentProvider() {
+            @Override
+            public void writeTo(OutputStream output) throws IOException {
+                output.write(contents.getBytes(ENCODING));
+            }
+        };
+    }
+
+    /**
      * Creates a {@link ByteArrayItem}.
      * @param path the item path
      * @param contents initial contents
@@ -121,6 +135,13 @@ public abstract class ResourceTestRoot {
         }
     }
 
+    static byte[] dump(ContentProvider provider) throws IOException {
+        try (ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+            provider.writeTo(output);
+            return output.toByteArray();
+        }
+    }
+
     /**
      * Dumps all items in the target resource repository.
      * @param repository the target repository
@@ -167,20 +188,6 @@ public abstract class ResourceTestRoot {
     }
 
     /**
-     * Creates a callback object for writing the contents.
-     * @param contents the target contents
-     * @return the callback object
-     */
-    public static ContentProvider callback(final String contents) {
-        return new ContentProvider() {
-            @Override
-            public void writeTo(OutputStream output) throws IOException {
-                output.write(contents.getBytes(ENCODING));
-            }
-        };
-    }
-
-    /**
      * Returns a matcher whether the item is on the specified location or not.
      * @param path the expected path
      * @return the matcher
@@ -203,7 +210,14 @@ public abstract class ResourceTestRoot {
         return new FeatureMatcher<ResourceItem, String>(is(value), "has contents", "hasContents") {
             @Override
             protected String featureValueOf(ResourceItem actual) {
-                return contents(actual);
+                String contents = contents(actual);
+                try {
+                    String provider = new String(dump(actual), ENCODING);
+                    assertThat(provider, is(contents));
+                } catch (IOException e) {
+                    throw new AssertionError(e);
+                }
+                return contents;
             }
         };
     }

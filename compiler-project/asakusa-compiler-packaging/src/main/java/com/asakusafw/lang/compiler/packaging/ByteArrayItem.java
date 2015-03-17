@@ -16,7 +16,6 @@
 package com.asakusafw.lang.compiler.packaging;
 
 import java.io.ByteArrayInputStream;
-import java.io.DataOutput;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -64,15 +63,6 @@ public class ByteArrayItem implements ResourceItem {
 
     @Override
     public void writeTo(OutputStream output) throws IOException {
-        output.write(contents);
-    }
-
-    /**
-     * Writes the resource contents into the target output.
-     * @param output the target output
-     * @throws IOException if error occurred while writing the resource contents
-     */
-    public void writeTo(DataOutput output) throws IOException {
         output.write(contents);
     }
 
