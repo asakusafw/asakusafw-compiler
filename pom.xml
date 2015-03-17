@@ -331,6 +331,34 @@ encoding/<project>=UTF-8
 					</configuration>
 				</plugin>
 				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-javadoc-plugin</artifactId>
+					<version>2.10.1</version>
+					<configuration>
+						<encoding>UTF-8</encoding>
+						<charset>UTF-8</charset>
+						<docencoding>UTF-8</docencoding>
+						<locale>en_US</locale>
+						<show>protected</show>
+						<doctitle>Asakusa Bridge API References (Version ${project.version})</doctitle>
+						<windowtitle>Asakusa Bridge API References (Version ${project.version})</windowtitle>
+					</configuration>
+					<executions>
+						<execution>
+							<id>non-aggregate</id>
+							<goals>
+								<goal>javadoc</goal>
+							</goals>
+						</execution>
+						<execution>
+							<id>aggregate</id>
+							<goals>
+								<goal>aggregate</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>findbugs-maven-plugin</artifactId>
 					<version>3.0.0</version>
@@ -372,12 +400,15 @@ encoding/<project>=UTF-8
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.8.1</version>
+				<version>2.10.1</version>
 				<configuration>
 					<encoding>UTF-8</encoding>
 					<charset>UTF-8</charset>
 					<docencoding>UTF-8</docencoding>
-					<locale>en</locale>
+					<locale>en_US</locale>
+					<show>protected</show>
+					<doctitle>Asakusa Bridge API References (Version ${project.version})</doctitle>
+					<windowtitle>Asakusa Bridge API References (Version ${project.version})</windowtitle>
 				</configuration>
 				<reportSets>
 					<reportSet>
