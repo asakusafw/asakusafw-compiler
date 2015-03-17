@@ -37,6 +37,7 @@ import org.junit.Test;
 import com.asakusafw.lang.compiler.common.Location;
 import com.asakusafw.lang.compiler.common.Predicate;
 import com.asakusafw.lang.compiler.common.testing.FileDeployer;
+import com.asakusafw.lang.compiler.packaging.FileRepository;
 import com.asakusafw.lang.compiler.packaging.ResourceRepository;
 import com.asakusafw.lang.compiler.packaging.ZipRepository;
 
@@ -133,6 +134,24 @@ public class ProjectRepositoryTest {
                 .embed(deployer.extract("example.jar", "example"))
                 .build()) {
             assertThat(repo.getClassLoader(), hasClass("com.example.Hello"));
+            assertThat(locations(repo.getProjectContents()), is(empty()));
+            assertThat(locations(repo.getEmbeddedContents()), hasItem("com/example/Hello.class"));
+            assertThat(locations(repo.getAttachedLibraries()), is(empty()));
+            assertThat(repo.getProjectClasses(ANY), is(empty()));
+        }
+    }
+
+    /**
+     * embed.
+     * @throws Exception if failed
+     */
+    @Test
+    public void embed_repo() throws Exception {
+        try (ProjectRepository repo = ProjectRepository.builder(getClass().getClassLoader())
+                .embed(new FileRepository(deployer.extract("example.jar", "example.jar")))
+                .build()) {
+            assertThat("embed(ResourceRepository) does not change class loaders",
+                    repo.getClassLoader(), not(hasClass("com.example.Hello")));
             assertThat(locations(repo.getProjectContents()), is(empty()));
             assertThat(locations(repo.getEmbeddedContents()), hasItem("com/example/Hello.class"));
             assertThat(locations(repo.getAttachedLibraries()), is(empty()));
