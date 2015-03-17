@@ -204,7 +204,7 @@ public final class TypeInfo {
         assert target != null;
         assert context != null;
         assert target.isAssignableFrom(context.raw);
-        for (Iterator<GenericContext> iter = context.getSuperInterfaces(); iter.hasNext(); ) {
+        for (Iterator<GenericContext> iter = context.getSuperInterfaces(); iter.hasNext();) {
             GenericContext intf = iter.next();
             if (target == intf.raw) {
                 return intf.getTypeArguments();

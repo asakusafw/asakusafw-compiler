@@ -41,7 +41,7 @@ import com.asakusafw.utils.java.model.util.Models;
  * Emits a stage client for copying datasets.
  * @see CleanupStageInfo
  */
-public class CleanupStageEmitter {
+public final class CleanupStageEmitter {
 
     private final ModelFactory f = Models.getModelFactory();
 

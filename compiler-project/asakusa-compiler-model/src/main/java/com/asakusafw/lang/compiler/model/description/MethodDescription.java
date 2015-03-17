@@ -79,7 +79,7 @@ public class MethodDescription implements Description {
     }
 
     /**
-     * Returns the erased parameter types
+     * Returns the erased parameter types.
      * @return the erased parameter types
      */
     public List<ReifiableTypeDescription> getParameterTypes() {

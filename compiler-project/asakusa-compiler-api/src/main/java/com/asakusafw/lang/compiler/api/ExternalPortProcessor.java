@@ -115,7 +115,7 @@ public interface ExternalPortProcessor {
     /**
      * Represents a context object for {@link ExternalPortProcessor} only for analyzing DSL descriptions.
      */
-    public static interface AnalyzeContext {
+    public interface AnalyzeContext {
 
         /**
          * Returns the class loader to obtain the target application classes.
@@ -133,7 +133,7 @@ public interface ExternalPortProcessor {
     /**
      * Represents a context object for {@link ExternalPortProcessor}.
      */
-    public static interface Context extends AnalyzeContext, ExtensionContainer {
+    public interface Context extends AnalyzeContext, ExtensionContainer {
 
         /**
          * Returns the compiler options.

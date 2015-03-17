@@ -46,7 +46,7 @@ public interface DataModelProcessor {
     /**
      * Represents a context object for {@link DataModelProcessor}.
      */
-    public static interface Context extends ExtensionContainer {
+    public interface Context extends ExtensionContainer {
 
         /**
          * Returns the class loader to obtain the target application classes.

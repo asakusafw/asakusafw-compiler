@@ -261,7 +261,7 @@ public abstract class Operator {
      * @param <TOperator> the operator type
      * @param <TSelf> the actual builder type
      */
-    public static abstract class AbstractBuilder<TOperator extends Operator, TSelf> {
+    public abstract static class AbstractBuilder<TOperator extends Operator, TSelf> {
 
         private final TOperator owner;
 

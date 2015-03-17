@@ -93,7 +93,7 @@ public final class ExternalInput extends ExternalPort {
     }
 
     @Override
-    public final OperatorKind getOperatorKind() {
+    public OperatorKind getOperatorKind() {
         return OperatorKind.INPUT;
     }
 

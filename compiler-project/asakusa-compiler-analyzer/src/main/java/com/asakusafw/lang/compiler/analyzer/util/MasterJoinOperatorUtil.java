@@ -48,6 +48,10 @@ public final class MasterJoinOperatorUtil {
         SUPPORTED = set;
     }
 
+    private MasterJoinOperatorUtil() {
+        return;
+    }
+
     /**
      * Returns whether the target operator is <em>master-join kind</em> or not.
      * @param operator the target operator

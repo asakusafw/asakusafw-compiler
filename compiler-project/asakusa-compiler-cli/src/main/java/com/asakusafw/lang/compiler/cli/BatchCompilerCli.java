@@ -141,7 +141,7 @@ import com.asakusafw.lang.compiler.packaging.ResourceUtil;
  *
  * </dl>
  */
-public class BatchCompilerCli {
+public final class BatchCompilerCli {
 
     static final String CLASS_SEPARATOR = ","; //$NON-NLS-1$
 
@@ -155,6 +155,10 @@ public class BatchCompilerCli {
     public static final String DEFAULT_RUNTIME_WORKING_DIRECTORY = "target/hadoopwork"; //$NON-NLS-1$
 
     static final Logger LOG = LoggerFactory.getLogger(BatchCompilerCli.class);
+
+    private BatchCompilerCli() {
+        return;
+    }
 
     /**
      * The program entry.

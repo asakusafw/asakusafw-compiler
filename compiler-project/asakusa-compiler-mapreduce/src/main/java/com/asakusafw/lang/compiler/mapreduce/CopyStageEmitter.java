@@ -43,7 +43,7 @@ import com.asakusafw.utils.java.model.util.Models;
  * Emits a stage client for copying datasets.
  * @see CopyStageInfo
  */
-public class CopyStageEmitter {
+public final class CopyStageEmitter {
 
     private final CopyStageInfo info;
 
@@ -104,7 +104,7 @@ public class CopyStageEmitter {
                 info.baseOutputPath);
     }
 
-    private static class MapperGenerator {
+    private static final class MapperGenerator {
 
         private final ModelFactory f = Models.getModelFactory();
 

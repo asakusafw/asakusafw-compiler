@@ -44,7 +44,7 @@ public class Location implements Comparable<Location> {
     }
 
     /**
-     * Returns the parent location
+     * Returns the parent location.
      * @return the parent location, or {@code null} if this does not have a parent
      */
     public Location getParent() {
@@ -69,7 +69,7 @@ public class Location implements Comparable<Location> {
     }
 
     /**
-     * Returns a child location
+     * Returns a child location.
      * @param suffix the child location which is relative from this
      * @return the child location
      */

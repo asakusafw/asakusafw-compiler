@@ -125,7 +125,7 @@ public final class ExternalOutput extends ExternalPort {
     }
 
     @Override
-    public final OperatorKind getOperatorKind() {
+    public OperatorKind getOperatorKind() {
         return OperatorKind.OUTPUT;
     }
 

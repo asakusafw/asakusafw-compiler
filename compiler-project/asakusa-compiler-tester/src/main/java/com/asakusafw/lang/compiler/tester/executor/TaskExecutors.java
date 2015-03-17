@@ -37,15 +37,15 @@ import com.asakusafw.runtime.util.VariableTable;
  */
 public final class TaskExecutors {
 
-    static String EXTENSION_LIBRARY = ".jar"; //$NON-NLS-1$
+    static final String EXTENSION_LIBRARY = ".jar"; //$NON-NLS-1$
 
-    static Location LOCATION_CORE_LIBRARIES = Location.of("core/lib"); //$NON-NLS-1$
+    static final Location LOCATION_CORE_LIBRARIES = Location.of("core/lib"); //$NON-NLS-1$
 
-    static Location LOCATION_CORE_CONFIGURATION = Location.of("core/conf/asakusa-resources.xml"); //$NON-NLS-1$
+    static final Location LOCATION_CORE_CONFIGURATION = Location.of("core/conf/asakusa-resources.xml"); //$NON-NLS-1$
 
-    static Location LOCATION_EXTENSION_LIBRARIES = Location.of("ext/lib"); //$NON-NLS-1$
+    static final Location LOCATION_EXTENSION_LIBRARIES = Location.of("ext/lib"); //$NON-NLS-1$
 
-    static Location LOCATION_ATTACHED_LIBRARIES = Location.of("usr/lib"); //$NON-NLS-1$
+    static final Location LOCATION_ATTACHED_LIBRARIES = Location.of("usr/lib"); //$NON-NLS-1$
 
     private TaskExecutors() {
         return;

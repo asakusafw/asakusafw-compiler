@@ -40,7 +40,7 @@ public interface BatchProcessor {
     /**
      * Represents a context object for {@link BatchProcessor}.
      */
-    public static interface Context extends ExtensionContainer {
+    public interface Context extends ExtensionContainer {
 
         /**
          * Returns the compiler options.

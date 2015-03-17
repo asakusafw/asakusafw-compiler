@@ -148,7 +148,8 @@ public interface SubPlan extends AttributeContainer {
         boolean isConnected(Output opposite);
 
         /**
-         * Returns the upstream inputs.
+         * Returns the upstream outputs.
+         * @return the upstream outputs
          */
         @Override
         Set<? extends Output> getOpposites();
@@ -168,6 +169,7 @@ public interface SubPlan extends AttributeContainer {
 
         /**
          * Returns the downstream inputs.
+         * @return the downstream inputs
          */
         @Override
         Set<? extends Input> getOpposites();

@@ -42,17 +42,17 @@ public interface ExternalInputInfo extends ExternalPortInfo {
         UNKNOWN,
 
         /**
-         * tiny data (~10MB)
+         * tiny data (~10MB).
          */
         TINY,
 
         /**
-         * small data (~200MB)
+         * small data (~200MB).
          */
         SMALL,
 
         /**
-         * large data (200MB~)
+         * large data (200MB~).
          */
         LARGE,
     }

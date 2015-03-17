@@ -49,7 +49,7 @@ public interface JobflowProcessor {
     /**
      * Represents a context object for {@link JobflowProcessor}.
      */
-    public static interface Context extends ExtensionContainer {
+    public interface Context extends ExtensionContainer {
 
         /**
          * Returns the compiler options.

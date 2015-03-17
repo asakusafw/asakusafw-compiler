@@ -131,7 +131,7 @@ public class CommandToken {
     }
 
     /**
-     * Represents a token
+     * Represents a token.
      */
     @SuppressWarnings("hiding")
     public static enum TokenKind {
