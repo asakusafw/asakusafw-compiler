@@ -257,4 +257,13 @@ public class BatchAdapter {
     private static boolean isValidIdentifier(String id) {
         return PATTERN_ID.matcher(id).matches();
     }
+
+    @Override
+    public String toString() {
+        return MessageFormat.format(
+                "batch:{0}@{1}({2})", //$NON-NLS-1$
+                info.getBatchId(),
+                info.getDescriptionClass().getName(),
+                info.getComment());
+    }
 }
