@@ -185,7 +185,7 @@ public final class BatchCompilerCli {
         } catch (Exception e) {
             LOG.error(MessageFormat.format(
                     "error occurred while analyzing arguments: {0}",
-                    (Object) args), e);
+                    Arrays.asList(args)), e);
             HelpFormatter formatter = new HelpFormatter();
             formatter.setWidth(Integer.MAX_VALUE);
             formatter.printHelp(
@@ -444,7 +444,7 @@ public final class BatchCompilerCli {
             return resolved.asSubclass(type).newInstance();
         } catch (ReflectiveOperationException e) {
             throw new DiagnosticException(Diagnostic.Level.ERROR, MessageFormat.format(
-                    "failed to instanciate a class: {0}",
+                    "failed to instantiate a class: {0}",
                     aClass.getName()), e);
         }
     }
@@ -490,20 +490,8 @@ public final class BatchCompilerCli {
                 compiler.compile(context, batch);
             } catch (DiagnosticException e) {
                 sawError = true;
-                for (Diagnostic diagnostics : e.getDiagnostics()) {
-                    switch (diagnostics.getLevel()) {
-                    case ERROR:
-                        LOG.error(diagnostics.getMessage());
-                        break;
-                    case WARN:
-                        LOG.warn(diagnostics.getMessage());
-                        break;
-                    case INFO:
-                        LOG.info(diagnostics.getMessage());
-                        break;
-                    default:
-                        throw new AssertionError(diagnostics);
-                    }
+                for (Diagnostic diagnostic : e.getDiagnostics()) {
+                    log(diagnostic);
                 }
                 if (configuration.failOnError.get()) {
                     throw new DiagnosticException(Diagnostic.Level.ERROR, MessageFormat.format(
@@ -513,6 +501,34 @@ public final class BatchCompilerCli {
             }
         }
         return sawError == false;
+    }
+
+    private static void log(Diagnostic diagnostic) {
+        switch (diagnostic.getLevel()) {
+        case ERROR:
+            if (diagnostic.getException() == null) {
+                LOG.error(diagnostic.getMessage());
+            } else {
+                LOG.error(diagnostic.getMessage(), diagnostic.getException());
+            }
+            break;
+        case WARN:
+            if (diagnostic.getException() == null) {
+                LOG.warn(diagnostic.getMessage());
+            } else {
+                LOG.warn(diagnostic.getMessage(), diagnostic.getException());
+            }
+            break;
+        case INFO:
+            if (diagnostic.getException() == null) {
+                LOG.info(diagnostic.getMessage());
+            } else {
+                LOG.info(diagnostic.getMessage(), diagnostic.getException());
+            }
+            break;
+        default:
+            throw new AssertionError(diagnostic);
+        }
     }
 
     private static Predicate<? super Class<?>> loadPredicate(
