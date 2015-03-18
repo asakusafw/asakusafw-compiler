@@ -367,10 +367,24 @@ public final class FlowGraphAnalyzer {
         }
 
         void registerExternalInput(String name, ExternalInputInfo info) {
+            if (inputs.containsKey(name)) {
+                error(MessageFormat.format(
+                        "conflict external input: name={0}, description={1}",
+                        name,
+                        info.getDescriptionClass().getName()));
+                return;
+            }
             inputs.put(name, info);
         }
 
         void registerExternalOutput(String name, ExternalOutputInfo info) {
+            if (outputs.containsKey(name)) {
+                error(MessageFormat.format(
+                        "conflict external output: name={0}, description={1}",
+                        name,
+                        info.getDescriptionClass().getName()));
+                return;
+            }
             outputs.put(name, info);
         }
 

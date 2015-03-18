@@ -434,6 +434,38 @@ public class FlowGraphAnalyzerTest {
         converter.analyze(g);
     }
 
+    /**
+     * external inputs w/ conflict.
+     */
+    @Test(expected = DiagnosticException.class)
+    public void input_conflict() {
+        FlowGraph g = new MockFlowGraph()
+            .add("s0", new InputDescription("conflict", new InputDesc(String.class)))
+            .add("s1", new InputDescription("conflict", new InputDesc(String.class)))
+            .add("d0", new OutputDescription("p", new OutputDesc(String.class)))
+            .connect("s0", "d0")
+            .connect("s1", "d0")
+            .toGraph();
+
+        converter.analyze(g);
+    }
+
+    /**
+     * external outputs w/ conflict.
+     */
+    @Test(expected = DiagnosticException.class)
+    public void output_conflict() {
+        FlowGraph g = new MockFlowGraph()
+            .add("s0", new InputDescription("p", new InputDesc(String.class)))
+            .add("d0", new OutputDescription("conflict", new OutputDesc(String.class)))
+            .add("d1", new OutputDescription("conflict", new OutputDesc(String.class)))
+            .connect("s0", "d0")
+            .connect("s0", "d1")
+            .toGraph();
+
+        converter.analyze(g);
+    }
+
     private static abstract class Mock {
 
         @MockOperator
