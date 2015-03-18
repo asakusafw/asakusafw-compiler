@@ -97,7 +97,7 @@ public final class Cli {
         } catch (Exception e) {
             LOG.error(MessageFormat.format(
                     "error occurred while analyzing arguments: {0}",
-                    (Object) args), e);
+                    Arrays.toString(args)), e);
             HelpFormatter formatter = new HelpFormatter();
             formatter.setWidth(Integer.MAX_VALUE);
             formatter.printHelp(
