@@ -45,6 +45,15 @@ public class DescriptionsTest {
 
     Description description;
 
+    /**
+     * null values.
+     */
+    @Test
+    public void null_value() {
+        ValueDescription desc = Descriptions.valueOf(null);
+        assertThat(desc.getValueKind(), is(ValueKind.IMMEDIATE));
+        assertThat(resolve(desc), is(nullValue()));
+    }
 
     /**
      * immediate values.

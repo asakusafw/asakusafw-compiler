@@ -136,18 +136,19 @@ public class ImmediateDescriptionTest {
     }
 
     /**
-     * {@link ImmediateDescription#of(Object)} with unsupported type.
+     * {@link ImmediateDescription#of(Object)} with null.
      */
-    @Test(expected = IllegalArgumentException.class)
-    public void of_object_unsupported() {
-        ImmediateDescription.of(new Object());
+    @Test
+    public void of_object_null() {
+        ImmediateDescription desc = ImmediateDescription.of((Object) null);
+        assertThat(desc.getValue(), is(nullValue()));
     }
 
     /**
      * {@link ImmediateDescription#of(Object)} with unsupported type.
      */
     @Test(expected = IllegalArgumentException.class)
-    public void of_object_null() {
-        ImmediateDescription.of((Object) null);
+    public void of_object_unsupported() {
+        ImmediateDescription.of(new Object());
     }
 }

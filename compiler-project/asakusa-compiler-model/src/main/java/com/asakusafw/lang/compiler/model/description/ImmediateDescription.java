@@ -24,6 +24,8 @@ import java.util.Map;
  */
 public class ImmediateDescription implements ValueDescription {
 
+    private static final ReifiableTypeDescription NULL_TYPE = ReifiableTypeDescription.of(Object.class);
+
     private static final Map<Class<?>, BasicTypeDescription> BOXED;
     static {
         Map<Class<?>, BasicTypeDescription> map = new HashMap<>();
@@ -54,7 +56,7 @@ public class ImmediateDescription implements ValueDescription {
      */
     public static final ImmediateDescription of(Object value) {
         if (value == null) {
-            throw new IllegalArgumentException();
+            return nullOf(NULL_TYPE);
         }
         Class<?> aClass = value.getClass();
         ReifiableTypeDescription type;
@@ -158,6 +160,15 @@ public class ImmediateDescription implements ValueDescription {
      */
     public static final ImmediateDescription of(String value) {
         return new ImmediateDescription(ReifiableTypeDescription.of(String.class), value);
+    }
+
+    /**
+     * Creates a new instance that represents a {@code null} value.
+     * @param valueType the value type
+     * @return the created instance
+     */
+    public static final ImmediateDescription nullOf(ReifiableTypeDescription valueType) {
+        return new ImmediateDescription(valueType, null);
     }
 
     @Override

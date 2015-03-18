@@ -63,7 +63,6 @@ public class ArrayTypeDescription extends ReifiableTypeDescription {
 
     @Override
     public Class<?> resolve(ClassLoader classLoader) throws ClassNotFoundException {
-        // FIXME performance
         Class<?> component = componentType.resolve(classLoader);
         return Array.newInstance(component, 0).getClass();
     }

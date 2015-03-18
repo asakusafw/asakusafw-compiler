@@ -34,8 +34,7 @@ public final class Descriptions {
      */
     public static ValueDescription valueOf(Object value) {
         if (value == null) {
-            // FIXME for null values?
-            throw new IllegalArgumentException();
+            return ImmediateDescription.of(null);
         }
         Class<?> aClass = value.getClass();
         if (ImmediateDescription.isBoxed(aClass) || value instanceof String) {

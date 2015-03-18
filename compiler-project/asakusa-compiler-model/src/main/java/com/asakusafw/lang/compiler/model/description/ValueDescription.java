@@ -42,17 +42,19 @@ public interface ValueDescription extends Description {
     Object resolve(ClassLoader classLoader) throws ReflectiveOperationException;
 
     /**
-     * Represents a kind of value.
+     * Represents a kind of {@link ValueDescription}.
      */
     public static enum ValueKind {
 
         /**
          * immediate values.
+         * @see ImmediateDescription
          */
         IMMEDIATE,
 
         /**
          * {@code enum} constants.
+         * @see EnumConstantDescription
          */
         ENUM_CONSTANT,
 

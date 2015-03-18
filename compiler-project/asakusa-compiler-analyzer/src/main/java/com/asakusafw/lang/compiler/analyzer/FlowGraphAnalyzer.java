@@ -260,8 +260,7 @@ public final class FlowGraphAnalyzer {
 
     private static ValueDescription convert(java.lang.reflect.Type type, Object value) {
         if (value == null) {
-            // FIXME for nulls
-            return new ImmediateDescription(typeOf(type), null);
+            return ImmediateDescription.nullOf(typeOf(type));
         } else {
             return Descriptions.valueOf(value);
         }

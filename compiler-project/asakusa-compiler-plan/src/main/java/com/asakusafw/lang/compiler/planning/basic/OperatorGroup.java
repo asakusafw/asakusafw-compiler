@@ -420,7 +420,6 @@ final class OperatorGroup {
             Set<BasicSubPlan.BasicInput> downstreams = output.getOpposites();
             for (BasicSubPlan.BasicOutput upstream : upstreams) {
                 for (BasicSubPlan.BasicInput downstream : downstreams) {
-                    // FIXME may be already connected?
                     assert upstream.isConnected(downstream) == false;
                     upstream.connect(downstream);
                 }
