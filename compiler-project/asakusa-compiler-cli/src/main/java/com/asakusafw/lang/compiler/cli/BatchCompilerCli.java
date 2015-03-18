@@ -23,6 +23,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -459,6 +460,7 @@ public final class BatchCompilerCli {
         }
         Predicate<? super Class<?>> predicate = loadPredicate(root, configuration, analyzer);
         boolean sawError = false;
+        Map<String, ClassDescription> sawBatch = new HashMap<>();
         for (Class<?> aClass : root.getProject().getProjectClasses(predicate)) {
             if (LOG.isInfoEnabled()) {
                 LOG.info(MessageFormat.format(
@@ -467,6 +469,14 @@ public final class BatchCompilerCli {
             }
             try {
                 Batch batch = analyzer.analyzeBatch(new ClassAnalyzer.Context(root), aClass);
+                if (sawBatch.containsKey(batch.getBatchId())) {
+                    throw new DiagnosticException(Diagnostic.Level.ERROR, MessageFormat.format(
+                            "conflict batch ID: {0} ({1} <=> {2})",
+                            batch.getBatchId(),
+                            sawBatch.get(batch.getBatchId()),
+                            batch.getDescriptionClass()));
+                }
+                sawBatch.put(batch.getBatchId(), batch.getDescriptionClass());
                 File output = new File(configuration.output.get(), batch.getBatchId());
                 if (output.exists()) {
                     LOG.debug("cleaning output target: {}", output); //$NON-NLS-1$

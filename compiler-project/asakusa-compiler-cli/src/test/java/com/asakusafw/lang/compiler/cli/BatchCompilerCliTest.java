@@ -272,6 +272,31 @@ public class BatchCompilerCliTest {
         assertThat(count.get(), is(1));
     }
 
+    /**
+     * execute w/ conflict batch ID.
+     * @throws Exception if failed
+     */
+    @Test
+    public void execute_conflict_batch() throws Exception {
+        final File output = deployer.newFolder();
+        String[] args = strings(new Object[] {
+                "--explore", files(ResourceUtil.findLibraryByClass(DummyBatch.class)),
+                "--output", output,
+                "--classAnalyzer", classes(DummyClassAnalyzer.class),
+                "--batchCompiler", classes(DelegateBatchCompiler.class),
+                "--include", DummyBatch.class.getName() + "*",
+                "--externalPortProcessors", classes(DummyExternalPortProcessor.class),
+                "--failOnError",
+        });
+        int status = execute(args, new BatchCompiler() {
+            @Override
+            public void compile(Context context, Batch batch) {
+                // do nothing
+            }
+        });
+        assertThat(status, is(not(0)));
+    }
+
     private File prepareLibrary(String id) {
         File base = deployer.newFolder();
         try {
