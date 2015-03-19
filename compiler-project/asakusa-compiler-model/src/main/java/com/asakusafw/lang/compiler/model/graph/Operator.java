@@ -303,7 +303,7 @@ public abstract class Operator {
          * @return this
          */
         public TSelf input(String name, TypeDescription dataType, OperatorOutput... upstreams) {
-            return input(name, dataType, null, upstreams);
+            return input(name, dataType, (Group) null, upstreams);
         }
 
         /**
@@ -313,6 +313,7 @@ public abstract class Operator {
          * @param group the grouping instruction
          * @param upstreams the optional upstream ports to connect to the created input
          * @return this
+         * @see Groups
          */
         public TSelf input(String name, TypeDescription dataType, Group group, OperatorOutput... upstreams) {
             OperatorInput port = new OperatorInput(owner, name, dataType, group);
@@ -331,7 +332,7 @@ public abstract class Operator {
          * @return this
          */
         public TSelf input(String name, OperatorOutput upstream, OperatorOutput... upstreams) {
-            return input(name, null, upstream, upstreams);
+            return input(name, (Group) null, upstream, upstreams);
         }
 
         /**
@@ -341,6 +342,7 @@ public abstract class Operator {
          * @param upstream the mandatory upstream port to connect to the created input
          * @param upstreams the optional upstream ports to connect to the created input
          * @return this
+         * @see Groups
          */
         public TSelf input(String name, Group group, OperatorOutput upstream, OperatorOutput... upstreams) {
             OperatorOutput[] joint = new OperatorOutput[upstreams.length + 1];

@@ -26,12 +26,11 @@ import java.util.Map;
 import org.junit.Test;
 
 import com.asakusafw.lang.compiler.common.DiagnosticException;
-import com.asakusafw.lang.compiler.model.PropertyName;
 import com.asakusafw.lang.compiler.model.description.Descriptions;
 import com.asakusafw.lang.compiler.model.graph.CoreOperator.CoreOperatorKind;
 import com.asakusafw.lang.compiler.model.graph.ExternalInput;
 import com.asakusafw.lang.compiler.model.graph.ExternalOutput;
-import com.asakusafw.lang.compiler.model.graph.Group;
+import com.asakusafw.lang.compiler.model.graph.Groups;
 import com.asakusafw.lang.compiler.model.graph.OperatorConstraint;
 import com.asakusafw.runtime.core.Result;
 import com.asakusafw.vocabulary.external.ExporterDescription;
@@ -370,12 +369,9 @@ public class FlowGraphAnalyzerTest {
             .connected("s0", "o0")
             .connected("o0", "d0");
 
-        assertThat(inspector.getInput("o0").getGroup(), is(new Group(
-                Arrays.asList(PropertyName.of("key")),
-                Arrays.asList(new Group.Ordering[] {
-                        new Group.Ordering(PropertyName.of("sort_a"), Group.Direction.ASCENDANT),
-                        new Group.Ordering(PropertyName.of("sort_b"), Group.Direction.DESCENDANT),
-                }))));
+        assertThat(
+                inspector.getInput("o0").getGroup(),
+                is(Groups.parse(Arrays.asList("key"), Arrays.asList("+sort_a", "-sort_b"))));
     }
 
     /**

@@ -92,6 +92,16 @@ public class GroupsTest {
     }
 
     /**
+     * order w/ 'asc'.
+     */
+    @Test
+    public void order_asc_lower() {
+        Ordering o = Groups.parseOrder("a asc");
+        assertThat(o.getPropertyName(), is(PropertyName.of("a")));
+        assertThat(o.getDirection(), is(Direction.ASCENDANT));
+    }
+
+    /**
      * order w/ 'DESC'.
      */
     @Test
@@ -102,10 +112,38 @@ public class GroupsTest {
     }
 
     /**
+     * order w/ 'desc'.
+     */
+    @Test
+    public void order_desc_lower() {
+        Ordering o = Groups.parseOrder("a desc");
+        assertThat(o.getPropertyName(), is(PropertyName.of("a")));
+        assertThat(o.getDirection(), is(Direction.DESCENDANT));
+    }
+
+    /**
      * order w/ unrecognized symbols.
      */
     @Test(expected = IllegalArgumentException.class)
     public void order_unrecognized() {
         Groups.parseOrder("?a");
+    }
+
+    /**
+     * test for equality.
+     */
+    @Test
+    public void equality() {
+        Group g0 = Groups.parse(Arrays.asList("g0", "g1"), Arrays.asList("+o0", "-o1"));
+        Group g1 = Groups.parse(Arrays.asList("g0", "g1"), Arrays.asList("+o0", "-o1"));
+        Group g2 = Groups.parse(Arrays.asList("g0", "g2"), Arrays.asList("+o0", "-o1"));
+        Group g3 = Groups.parse(Arrays.asList("g0", "g1"), Arrays.asList("-o0", "-o1"));
+        Group g4 = Groups.parse(Arrays.asList("g0", "g1"), Arrays.asList("+o0", "-o2"));
+
+        assertThat(g1.toString(), g1, is(g0));
+        assertThat(g1.toString(), g1.hashCode(), is(g0.hashCode()));
+        assertThat(g2.toString(), g2, is(not(g0)));
+        assertThat(g3.toString(), g3, is(not(g0)));
+        assertThat(g4.toString(), g4, is(not(g0)));
     }
 }

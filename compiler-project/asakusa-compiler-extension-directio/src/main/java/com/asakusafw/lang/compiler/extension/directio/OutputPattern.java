@@ -32,6 +32,8 @@ import com.asakusafw.lang.compiler.api.reference.PropertyReference;
 import com.asakusafw.lang.compiler.model.PropertyName;
 import com.asakusafw.lang.compiler.model.description.Descriptions;
 import com.asakusafw.lang.compiler.model.description.TypeDescription;
+import com.asakusafw.lang.compiler.model.graph.Group;
+import com.asakusafw.lang.compiler.model.graph.Groups;
 import com.asakusafw.runtime.stage.directio.StringTemplate.Format;
 import com.asakusafw.runtime.value.BooleanOption;
 import com.asakusafw.runtime.value.ByteOption;
@@ -98,20 +100,6 @@ public final class OutputPattern {
         CHAR_MAP_META.set('[');
         CHAR_MAP_META.set(']');
     }
-
-    private static final Pattern PATTERN_ORDER = Pattern.compile(
-            "\\s*(" //$NON-NLS-1$
-            + "(\\w+)"                              //  2 - asc //$NON-NLS-1$
-            + "|" + "(\\+\\s*(\\w+))"               //  4 - asc //$NON-NLS-1$ //$NON-NLS-2$
-            + "|" + "(-\\s*(\\w+))"                 //  6 - desc //$NON-NLS-1$ //$NON-NLS-2$
-            + "|" + "((\\w+)\\s+[Aa][Ss][Cc])"      //  8 - asc //$NON-NLS-1$ //$NON-NLS-2$
-            + "|" + "((\\w+)\\s+[Dd][Ee][Ss][Cc])"  // 10 - desc //$NON-NLS-1$ //$NON-NLS-2$
-            + ")\\s*" //$NON-NLS-1$
-            );
-
-    private static final int[] ORDER_GROUP_INDEX = { 2, 4, 6, 8, 10 };
-
-    private static final boolean[] ASC_MAP = { true, true, false, true, false };
 
     private final String resourcePatternString;
 
@@ -322,38 +310,29 @@ public final class OutputPattern {
         Set<PropertyName> saw = new HashSet<>();
         List<CompiledOrder> results = new ArrayList<>();
         for (String order : orders) {
-            boolean asc = false;
-            String name = null;
-            Matcher matcher = PATTERN_ORDER.matcher(order.trim());
-            if (matcher.matches() == false) {
+            Group.Ordering ordering;
+            try {
+                ordering = Groups.parseOrder(order.trim());
+            } catch (IllegalArgumentException e) {
                 throw new IllegalArgumentException(MessageFormat.format(
                         "Invalid order format: {0}",
-                        order));
+                        order), e);
             }
-            for (int i = 0; i < ORDER_GROUP_INDEX.length; i++) {
-                int groupIndex = ORDER_GROUP_INDEX[i];
-                if (matcher.group(groupIndex) != null) {
-                    asc = ASC_MAP[i];
-                    name = matcher.group(groupIndex);
-                    break;
-                }
-            }
-            assert name != null;
-            PropertyReference property = findProperty(dataType, name);
+            PropertyReference property = dataType.findProperty(ordering.getPropertyName());
             if (property == null) {
                 throw new IllegalArgumentException(MessageFormat.format(
                         "Unknown property \"{1}\": {0}",
                         order,
-                        name));
+                        ordering.getPropertyName()));
             }
             if (saw.contains(property.getName())) {
                 throw new IllegalArgumentException(MessageFormat.format(
                         "Duplicate property \"{1}\": {0}",
                         order,
-                        name));
+                        ordering.getPropertyName()));
             }
             saw.add(property.getName());
-            results.add(new CompiledOrder(property, asc));
+            results.add(new CompiledOrder(property, ordering.getDirection() == Group.Direction.ASCENDANT));
         }
         return results;
     }
