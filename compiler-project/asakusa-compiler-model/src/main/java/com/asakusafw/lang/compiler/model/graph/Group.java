@@ -23,6 +23,7 @@ import com.asakusafw.lang.compiler.model.PropertyName;
 /**
  * Dataset grouping information.
  * FIXME accept various expressions
+ * @see Groups
  */
 public class Group {
 
