@@ -87,6 +87,12 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>${asakusafw.groupId}</groupId>
+			<artifactId>asakusa-runtime-inprocess</artifactId>
+			<version>${asakusafw.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
