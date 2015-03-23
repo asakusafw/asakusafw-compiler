@@ -85,6 +85,6 @@ public class HadoopTaskReference extends BasicAttributeContainer implements Task
     public String toString() {
         return MessageFormat.format(
                 "HadoopTask({0})", //$NON-NLS-1$
-                mainClass.getName());
+                mainClass.getClassName());
     }
 }

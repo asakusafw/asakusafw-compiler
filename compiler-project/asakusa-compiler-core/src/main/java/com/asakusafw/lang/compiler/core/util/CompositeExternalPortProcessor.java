@@ -91,7 +91,7 @@ public class CompositeExternalPortProcessor implements ExternalPortProcessor, Co
         } catch (ReflectiveOperationException e) {
             throw new DiagnosticException(Diagnostic.Level.ERROR, MessageFormat.format(
                     "failed to resolve a class: {0}",
-                    info.getDescriptionClass().getName()), e);
+                    info.getDescriptionClass().getClassName()), e);
         }
     }
 

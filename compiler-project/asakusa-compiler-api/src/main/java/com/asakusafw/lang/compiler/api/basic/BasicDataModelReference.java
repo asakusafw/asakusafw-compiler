@@ -69,7 +69,7 @@ public class BasicDataModelReference extends BasicAttributeContainer implements 
     public String toString() {
         return MessageFormat.format(
                 "DataModel({0})", //$NON-NLS-1$
-                declaration.getName());
+                declaration.getClassName());
     }
 
     /**

@@ -116,8 +116,8 @@ public class BasicBatchCompiler implements BatchCompiler {
         } catch (IOException e) {
             throw new DiagnosticException(Diagnostic.Level.ERROR, MessageFormat.format(
                     "error occurred while compiling jobflow: batch={0}, jobflow={1}",
-                    element.getOwner().getDescriptionClass().getName(),
-                    element.getJobflow().getDescriptionClass().getName()), e);
+                    element.getOwner().getDescriptionClass().getClassName(),
+                    element.getJobflow().getDescriptionClass().getClassName()), e);
         }
     }
 
@@ -152,7 +152,7 @@ public class BasicBatchCompiler implements BatchCompiler {
         } catch (IOException e) {
             throw new DiagnosticException(Diagnostic.Level.ERROR, MessageFormat.format(
                     "error occurred while processing jobflow graph (batch={0})",
-                    batch.getDescriptionClass().getName()));
+                    batch.getDescriptionClass().getClassName()));
         }
     }
 

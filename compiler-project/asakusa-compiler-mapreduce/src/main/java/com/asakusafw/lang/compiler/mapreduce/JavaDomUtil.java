@@ -46,7 +46,7 @@ public final class JavaDomUtil {
      * @return the related name
      */
     public static Name getName(ClassDescription aClass) {
-        return Models.toName(F, aClass.getName().replace('$', '.'));
+        return Models.toName(F, aClass.getClassName());
     }
 
     /**

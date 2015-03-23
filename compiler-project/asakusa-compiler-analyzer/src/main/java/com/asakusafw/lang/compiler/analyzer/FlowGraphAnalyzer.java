@@ -370,7 +370,7 @@ public final class FlowGraphAnalyzer {
                 error(MessageFormat.format(
                         "conflict external input: name={0}, description={1}",
                         name,
-                        info.getDescriptionClass().getName()));
+                        info.getDescriptionClass().getClassName()));
                 return;
             }
             inputs.put(name, info);
@@ -381,7 +381,7 @@ public final class FlowGraphAnalyzer {
                 error(MessageFormat.format(
                         "conflict external output: name={0}, description={1}",
                         name,
-                        info.getDescriptionClass().getName()));
+                        info.getDescriptionClass().getClassName()));
                 return;
             }
             outputs.put(name, info);

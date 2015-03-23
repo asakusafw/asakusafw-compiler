@@ -263,7 +263,7 @@ public class BatchAdapter {
         return MessageFormat.format(
                 "batch:{0}@{1}({2})", //$NON-NLS-1$
                 info.getBatchId(),
-                info.getDescriptionClass().getName(),
+                info.getDescriptionClass().getClassName(),
                 info.getComment());
     }
 }

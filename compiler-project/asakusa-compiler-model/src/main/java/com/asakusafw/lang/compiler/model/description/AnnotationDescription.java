@@ -156,7 +156,7 @@ public class AnnotationDescription implements ValueDescription {
     public String toString() {
         return MessageFormat.format(
                 "Annotation({0})", //$NON-NLS-1$
-                declaringClass.getName());
+                declaringClass.getClassName());
     }
 
     private static final class ElementHandler implements InvocationHandler {

@@ -40,6 +40,13 @@
 		<module>asakusa-compiler-extension-yaess</module>
 		<module>asakusa-compiler-extension-cleanup</module>
 
+		<!-- operators -->
+		<module>asakusa-compiler-operator-core</module>
+		<module>asakusa-compiler-operator-builtin</module>
+		<module>asakusa-compiler-operator-dmdl</module>
+		<module>asakusa-compiler-operator-all</module>
+		<module>asakusa-dsl-vocabulary-ext</module>
+
 		<!-- testing utilities -->
 		<module>asakusa-compiler-common-testing</module>
 		<module>asakusa-compiler-model-testing</module>

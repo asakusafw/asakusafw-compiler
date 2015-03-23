@@ -108,14 +108,14 @@ public final class MapReduceRunner {
             if (Tool.class.isAssignableFrom(aClass) == false) {
                 throw new IllegalArgumentException(MessageFormat.format(
                         "MapReduce client class must implement Tool interface: {0}",
-                        client.getName()));
+                        client.getClassName()));
             }
             Tool tool = ReflectionUtils.newInstance(aClass.asSubclass(Tool.class), conf);
             return tool;
         } catch (ReflectiveOperationException e) {
             throw new IllegalArgumentException(MessageFormat.format(
                     "failed to resolve MapReduce client class: {0}",
-                    client.getName()));
+                    client.getClassName()));
         }
     }
 

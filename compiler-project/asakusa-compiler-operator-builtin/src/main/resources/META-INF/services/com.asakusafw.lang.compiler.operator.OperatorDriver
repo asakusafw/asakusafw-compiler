@@ -1,0 +1,14 @@
+com.asakusafw.lang.compiler.operator.builtin.BranchOperatorDriver
+com.asakusafw.lang.compiler.operator.builtin.CoGroupOperatorDriver
+com.asakusafw.lang.compiler.operator.builtin.ConvertOperatorDriver
+com.asakusafw.lang.compiler.operator.builtin.ExtractOperatorDriver
+com.asakusafw.lang.compiler.operator.builtin.FoldOperatorDriver
+com.asakusafw.lang.compiler.operator.builtin.GroupSortOperatorDriver
+com.asakusafw.lang.compiler.operator.builtin.LoggingOperatorDriver
+com.asakusafw.lang.compiler.operator.builtin.MasterBranchOperatorDriver
+com.asakusafw.lang.compiler.operator.builtin.MasterCheckOperatorDriver
+com.asakusafw.lang.compiler.operator.builtin.MasterJoinOperatorDriver
+com.asakusafw.lang.compiler.operator.builtin.MasterJoinUpdateOperatorDriver
+com.asakusafw.lang.compiler.operator.builtin.SplitOperatorDriver
+com.asakusafw.lang.compiler.operator.builtin.SummarizeOperatorDriver
+com.asakusafw.lang.compiler.operator.builtin.UpdateOperatorDriver

@@ -57,7 +57,7 @@ public class BasicJobflowCompiler implements JobflowCompiler {
         } catch (IOException e) {
             throw new DiagnosticException(Diagnostic.Level.ERROR, MessageFormat.format(
                     "error occurred while processing operator graph (jobflow={0})",
-                    jobflow.getDescriptionClass().getName()));
+                    jobflow.getDescriptionClass().getClassName()));
         }
     }
 
@@ -73,7 +73,7 @@ public class BasicJobflowCompiler implements JobflowCompiler {
         } catch (IOException e) {
             throw new DiagnosticException(Diagnostic.Level.ERROR, MessageFormat.format(
                     "error occurred while processing external I/Os (jobflow={0})",
-                    jobflow.getDescriptionClass().getName()));
+                    jobflow.getDescriptionClass().getClassName()));
         }
     }
 

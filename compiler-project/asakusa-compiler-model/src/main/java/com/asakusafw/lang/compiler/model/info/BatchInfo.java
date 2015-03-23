@@ -233,7 +233,7 @@ public interface BatchInfo extends DescriptionInfo {
             return MessageFormat.format(
                     "Batch(id={0}, description={1})", //$NON-NLS-1$
                     batchId,
-                    descriptionClass.getName());
+                    descriptionClass.getClassName());
         }
     }
 }

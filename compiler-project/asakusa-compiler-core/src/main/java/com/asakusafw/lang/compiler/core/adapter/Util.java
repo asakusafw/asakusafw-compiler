@@ -36,7 +36,7 @@ final class Util {
      * @return the file location of the class (relative from the classpath root)
      */
     public static Location toClassFileLocation(ClassDescription description) {
-        String path = description.getName().replace('.', '/') + EXTENSION_CLASS;
+        String path = description.getInternalName() + EXTENSION_CLASS;
         return Location.of(path, '/');
     }
 }

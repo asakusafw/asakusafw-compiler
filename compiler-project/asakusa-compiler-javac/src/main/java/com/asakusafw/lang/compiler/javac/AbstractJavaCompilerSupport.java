@@ -74,7 +74,7 @@ public abstract class AbstractJavaCompilerSupport implements JavaCompilerSupport
     protected abstract OutputStream addResource(Location location) throws IOException;
 
     private Location toLocation(ClassDescription aClass) {
-        Location location = Location.of(aClass.getName(), '.');
+        Location location = Location.of(aClass.getInternalName());
         location = new Location(location.getParent(), location.getName() + JAVA_EXTENSION);
         return location;
     }

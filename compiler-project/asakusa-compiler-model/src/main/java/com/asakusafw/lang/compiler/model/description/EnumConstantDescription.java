@@ -82,7 +82,7 @@ public class EnumConstantDescription implements ValueDescription {
         } catch (IllegalArgumentException e) {
             throw new ReflectiveOperationException(MessageFormat.format(
                     "enum constant is not found: {0}#{1}", //$NON-NLS-1$
-                    declaringClass.getName(),
+                    declaringClass.getClassName(),
                     name), e);
         }
     }
@@ -121,7 +121,7 @@ public class EnumConstantDescription implements ValueDescription {
     public String toString() {
         return MessageFormat.format(
                 "EnumConstant({0}#{1})", //$NON-NLS-1$
-                declaringClass.getName(),
+                declaringClass.getClassName(),
                 name);
     }
 }

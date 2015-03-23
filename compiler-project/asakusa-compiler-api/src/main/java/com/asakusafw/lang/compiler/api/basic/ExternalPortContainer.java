@@ -44,7 +44,7 @@ public class ExternalPortContainer implements ExternalPortReferenceMap {
             throw new IllegalStateException(MessageFormat.format(
                     "external input is already declared in this jobflow: \"{0}\" ({1})",
                     name,
-                    reference.getDescriptionClass().getName()));
+                    reference.getDescriptionClass().getClassName()));
         }
         inputs.put(name, reference);
     }
@@ -59,7 +59,7 @@ public class ExternalPortContainer implements ExternalPortReferenceMap {
             throw new IllegalStateException(MessageFormat.format(
                     "external output is already declared in this jobflow: \"{0}\" ({1})",
                     name,
-                    reference.getDescriptionClass().getName()));
+                    reference.getDescriptionClass().getClassName()));
         }
         outputs.put(name, reference);
     }

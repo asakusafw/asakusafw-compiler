@@ -220,7 +220,7 @@ public class YaessBatchProcessor implements BatchProcessor {
         String stageId = idMap.get(task);
         assert stageId != null;
         Set<String> blockerIds = toStageIds(task.getBlockers(), idMap);
-        String className = task.getMainClass().getName();
+        String className = task.getMainClass().getBinaryName();
         Map<String, String> props = Collections.emptyMap();
         Map<String, String> envs = Collections.emptyMap();
         return new HadoopScript(stageId, blockerIds, className, props, envs);

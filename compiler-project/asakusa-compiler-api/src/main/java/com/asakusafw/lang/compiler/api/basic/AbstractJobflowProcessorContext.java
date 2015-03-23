@@ -63,7 +63,7 @@ public abstract class AbstractJobflowProcessorContext extends BasicExtensionCont
 
     @Override
     public OutputStream addClassFile(ClassDescription aClass) throws IOException {
-        String path = aClass.getName().replace('.', '/') + EXTENSION_CLASS;
+        String path = aClass.getInternalName() + EXTENSION_CLASS;
         return addResourceFile(Location.of(path, '/'));
     }
 

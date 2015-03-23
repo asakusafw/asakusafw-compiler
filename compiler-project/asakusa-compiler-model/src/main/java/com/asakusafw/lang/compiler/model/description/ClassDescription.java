@@ -26,7 +26,7 @@ public class ClassDescription extends ReifiableTypeDescription {
 
     /**
      * Creates a new instance.
-     * @param name the class name
+     * @param name the binary name
      */
     public ClassDescription(String name) {
         this.name = name;
@@ -50,11 +50,35 @@ public class ClassDescription extends ReifiableTypeDescription {
     }
 
     /**
-     * Returns the class name.
-     * @return the class name
+     * Returns the fully qualified class name.
+     * @return the fully qualified class name
+     */
+    public String getClassName() {
+        return name.replace('$', '.');
+    }
+
+    /**
+     * Returns the binary name.
+     * @return the binary name
+     */
+    public String getBinaryName() {
+        return name;
+    }
+
+    /**
+     * Returns the binary name.
+     * @return the binary name
+     */
+    public String getInternalName() {
+        return name.replace('.', '/');
+    }
+
+    /**
+     * Returns the binary name.
+     * @return the binary name
      */
     public String getName() {
-        return name;
+        return getBinaryName();
     }
 
     /**

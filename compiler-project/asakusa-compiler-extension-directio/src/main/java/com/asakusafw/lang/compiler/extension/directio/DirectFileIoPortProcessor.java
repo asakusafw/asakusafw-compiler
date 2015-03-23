@@ -143,7 +143,7 @@ public class DirectFileIoPortProcessor
         }
         context.error(MessageFormat.format(
                 "{0}.{1}() must be set",
-                context.target.getName(),
+                context.target.getClassName(),
                 method));
     }
 
@@ -231,21 +231,21 @@ public class DirectFileIoPortProcessor
             if (pattern.containsTraverse()) {
                 context.error(MessageFormat.format(
                         "base path must not contain wildcards (**) ({0}.getBasePath())",
-                        context.target.getName()));
+                        context.target.getClassName()));
             }
             Set<PatternElementKind> kinds = pattern.getPatternElementKinds();
             for (PatternElementKind kind : kinds) {
                 if (INVALID_BASE_PATH_KIND.contains(kind)) {
                     context.error(MessageFormat.format(
                             "base path must not contain \"{1}\" ({0}.getBasePath())",
-                            context.target.getName(),
+                            context.target.getClassName(),
                             kind.getSymbol()));
                 }
             }
         } catch (IllegalArgumentException e) {
             context.error(MessageFormat.format(
                     "failed to compile base path ({0}.getBasePath()): {1}",
-                    context.target.getName(),
+                    context.target.getClassName(),
                     e.getMessage()));
         }
     }
@@ -256,7 +256,7 @@ public class DirectFileIoPortProcessor
         } catch (IllegalArgumentException e) {
             context.error(MessageFormat.format(
                     "failed to compile input resource pattern ({0}.getResourcePattern()): {1}",
-                    context.target.getName(),
+                    context.target.getClassName(),
                     e.getMessage()));
         }
     }
@@ -269,7 +269,7 @@ public class DirectFileIoPortProcessor
         } catch (IllegalArgumentException e) {
             context.error(MessageFormat.format(
                     "failed to compile output resource pattern ({0}.getResourcePattern()): {1}",
-                    context.target.getName(),
+                    context.target.getClassName(),
                     e.getMessage()));
             resourcePattern = null;
         }
@@ -279,7 +279,7 @@ public class DirectFileIoPortProcessor
         } catch (IllegalArgumentException e) {
             context.error(MessageFormat.format(
                     "failed to compile record order ({0}.getOrder()): {1}",
-                    context.target.getName(),
+                    context.target.getClassName(),
                     e.getMessage()));
             orders = null;
         }
@@ -292,13 +292,13 @@ public class DirectFileIoPortProcessor
                         "output resource pattern with wildcards (*) "
                         + "must not contain any properties ('{'name'}') nor random numbers ([m..n]) "
                         + "({0}.getResourcePattern()): {1}",
-                        context.target.getName()));
+                        context.target.getClassName()));
             }
             if (orders.isEmpty() == false) {
                 context.error(MessageFormat.format(
                         "output resource pattern with wildcards (*) must not contain any orders "
                         + "({0}.getOrder()): {1}",
-                        context.target.getName()));
+                        context.target.getClassName()));
             }
         }
     }
@@ -311,7 +311,7 @@ public class DirectFileIoPortProcessor
             } catch (IllegalArgumentException e) {
                 context.error(MessageFormat.format(
                         "failed to compile delete resource pattern ({0}.getDeletePatterns()@1): {2}",
-                        context.target.getName(),
+                        context.target.getClassName(),
                         index,
                         e.getMessage()));
             }
@@ -325,7 +325,7 @@ public class DirectFileIoPortProcessor
         } catch (ReflectiveOperationException e) {
             context.error(MessageFormat.format(
                     "failed to resolve data model class: {0}",
-                    dataType.getName()), e);
+                    dataType.getClassName()), e);
             return;
         }
         DataFormat<?> formatObject;
@@ -335,22 +335,22 @@ public class DirectFileIoPortProcessor
                 throw new ReflectiveOperationException(MessageFormat.format(
                         "data format must be a subtype of {0}: {1}",
                         DataFormat.class.getName(),
-                        formatClass.getName()));
+                        formatClass.getClassName()));
             }
             formatObject = (DataFormat<?>) resolvedFormatClass.getConstructor().newInstance();
         } catch (ReflectiveOperationException e) {
             context.error(MessageFormat.format(
                     "failed to resolve data format ({0}.getFormatClass()): {1}",
-                    context.target.getName(),
-                    formatClass.getName()), e);
+                    context.target.getClassName(),
+                    formatClass.getClassName()), e);
             return;
         }
         if (formatObject.getSupportedType().isAssignableFrom(resolvedDataType) == false) {
             context.error(MessageFormat.format(
                     "data format must support \"{2}\" ({0}.getFormatClass()): {1}",
-                    context.target.getName(),
-                    formatClass.getName(),
-                    dataType.getName()));
+                    context.target.getClassName(),
+                    formatClass.getClassName(),
+                    dataType.getClassName()));
         }
     }
 
@@ -373,18 +373,18 @@ public class DirectFileIoPortProcessor
                 ResolvedInput other = entry.getValue();
                 c.error(MessageFormat.format(
                         "conflict input/output base paths: {0}[{1}] -> {2}[{3}]",
-                        self.info.getDescriptionClass().getName(),
+                        self.info.getDescriptionClass().getClassName(),
                         self.model.getBasePath(),
-                        other.info.getDescriptionClass().getName(),
+                        other.info.getDescriptionClass().getClassName(),
                         other.model.getBasePath()));
             }
             if (outputPaths.containsKey(path)) {
                 ResolvedOutput other = outputPaths.get(path);
                 c.error(MessageFormat.format(
                         "conflict output/output base paths: {0}[{1}] <-> {2}[{3}]",
-                        self.info.getDescriptionClass().getName(),
+                        self.info.getDescriptionClass().getClassName(),
                         self.model.getBasePath(),
-                        other.info.getDescriptionClass().getName(),
+                        other.info.getDescriptionClass().getClassName(),
                         other.model.getBasePath()));
             } else {
                 outputPaths.put(path, self);
@@ -400,9 +400,9 @@ public class DirectFileIoPortProcessor
                 ResolvedOutput other = entry.getValue();
                 c.error(MessageFormat.format(
                         "conflict input/output base paths: {0}[{1}] -> {2}[{3}]",
-                        self.info.getDescriptionClass().getName(),
+                        self.info.getDescriptionClass().getClassName(),
                         self.model.getBasePath(),
-                        other.info.getDescriptionClass().getName(),
+                        other.info.getDescriptionClass().getClassName(),
                         other.model.getBasePath()));
             }
         }
@@ -489,8 +489,8 @@ public class DirectFileIoPortProcessor
 
     private Map<String, String> getInputAttributes(ResolvedInput resolved) {
         Map<String, String> results = new LinkedHashMap<>();
-        results.put(DirectDataSourceConstants.KEY_DATA_CLASS, resolved.info.getDataModelClass().getName());
-        results.put(DirectDataSourceConstants.KEY_FORMAT_CLASS, resolved.model.getFormatClass().getName());
+        results.put(DirectDataSourceConstants.KEY_DATA_CLASS, resolved.info.getDataModelClass().getBinaryName());
+        results.put(DirectDataSourceConstants.KEY_FORMAT_CLASS, resolved.model.getFormatClass().getBinaryName());
         results.put(DirectDataSourceConstants.KEY_BASE_PATH, resolved.model.getBasePath());
         results.put(DirectDataSourceConstants.KEY_RESOURCE_PATH, resolved.model.getResourcePattern());
         results.put(DirectDataSourceConstants.KEY_OPTIONAL, String.valueOf(resolved.model.isOptional()));

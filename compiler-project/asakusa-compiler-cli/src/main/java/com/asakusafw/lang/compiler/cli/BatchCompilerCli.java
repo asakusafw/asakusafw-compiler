@@ -435,13 +435,13 @@ public final class BatchCompilerCli {
                 throw new DiagnosticException(Diagnostic.Level.ERROR, MessageFormat.format(
                         "{0} must be a subtype of {1}",
                         type.getName(),
-                        aClass.getName()));
+                        aClass.getClassName()));
             }
             return resolved.asSubclass(type).newInstance();
         } catch (ReflectiveOperationException e) {
             throw new DiagnosticException(Diagnostic.Level.ERROR, MessageFormat.format(
                     "failed to instantiate a class: {0}",
-                    aClass.getName()), e);
+                    aClass.getClassName()), e);
         }
     }
 

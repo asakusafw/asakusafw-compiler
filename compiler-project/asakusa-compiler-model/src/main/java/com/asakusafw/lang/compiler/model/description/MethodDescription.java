@@ -156,7 +156,7 @@ public class MethodDescription implements Description {
     public String toString() {
         return MessageFormat.format(
                 "Method({0}#{1})", //$NON-NLS-1$
-                declaringClass.getName(),
+                declaringClass.getClassName(),
                 name);
     }
 }

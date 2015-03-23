@@ -43,7 +43,7 @@ public class BatchTest {
                 Collections.<BatchInfo.Attribute>emptyList());
 
         assertThat(b0.toString(), b0.getBatchId(), is("b0"));
-        assertThat(b0.toString(), b0.getDescriptionClass().getName(), is("B0"));
+        assertThat(b0.toString(), b0.getDescriptionClass().getClassName(), is("B0"));
         assertThat(b0.toString(), b0.getComment(), is(nullValue()));
         assertThat(b0.toString(), b0.getParameters(), hasSize(0));
         assertThat(b0.toString(), b0.getAttributes(), hasSize(0));

@@ -144,7 +144,7 @@ public class OperatorGraphInspector {
                     return false;
                 }
                 ClassDescription desc = ((FlowOperator) argument).getDescriptionClass();
-                if (desc.getName().equals(description.getName()) == false) {
+                if (desc.getBinaryName().equals(description.getName()) == false) {
                     return false;
                 }
                 return true;
@@ -216,7 +216,7 @@ public class OperatorGraphInspector {
                     return false;
                 }
                 MethodDescription method = ((UserOperator) argument).getMethod();
-                if (method.getDeclaringClass().getName().equals(operatorClass.getName()) == false) {
+                if (method.getDeclaringClass().getBinaryName().equals(operatorClass.getName()) == false) {
                     return false;
                 }
                 if (method.getName().equals(methodName) == false) {

@@ -34,7 +34,9 @@ public class ClassDescriptionTest {
     public void simple() {
         ClassDescription desc = new ClassDescription("com.example.Testing");
         assertThat(desc.getTypeKind(), is(TypeKind.CLASS));
-        assertThat(desc.getName(), is("com.example.Testing"));
+        assertThat(desc.getClassName(), is("com.example.Testing"));
+        assertThat(desc.getBinaryName(), is("com.example.Testing"));
+        assertThat(desc.getInternalName(), is("com/example/Testing"));
         assertThat(desc.getSimpleName(), is("Testing"));
     }
 
@@ -45,7 +47,9 @@ public class ClassDescriptionTest {
     @Test
     public void of() throws Exception {
         ClassDescription desc = ClassDescription.of(String.class);
-        assertThat(desc.getName(), is("java.lang.String"));
+        assertThat(desc.getClassName(), is("java.lang.String"));
+        assertThat(desc.getBinaryName(), is("java.lang.String"));
+        assertThat(desc.getInternalName(), is("java/lang/String"));
         assertThat(desc.getSimpleName(), is("String"));
         assertThat(desc.resolve(getClass().getClassLoader()), is((Object) String.class));
     }
@@ -57,7 +61,9 @@ public class ClassDescriptionTest {
     @Test
     public void of_inner() throws Exception {
         ClassDescription desc = ClassDescription.of(Thread.State.class);
-        assertThat(desc.getName(), is("java.lang.Thread$State"));
+        assertThat(desc.getClassName(), is("java.lang.Thread.State"));
+        assertThat(desc.getBinaryName(), is("java.lang.Thread$State"));
+        assertThat(desc.getInternalName(), is("java/lang/Thread$State"));
         assertThat(desc.getSimpleName(), is("State"));
         assertThat(desc.resolve(getClass().getClassLoader()), is((Object) Thread.State.class));
     }

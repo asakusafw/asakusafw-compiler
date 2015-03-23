@@ -80,7 +80,7 @@ public interface JobflowInfo extends DescriptionInfo {
             return MessageFormat.format(
                     "Jobflow(id={0}, description={1})", //$NON-NLS-1$
                     flowId,
-                    descriptionClass.getName());
+                    descriptionClass.getClassName());
         }
     }
 }

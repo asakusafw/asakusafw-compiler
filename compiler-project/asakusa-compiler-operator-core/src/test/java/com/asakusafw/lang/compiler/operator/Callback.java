@@ -1,0 +1,245 @@
+/**
+ * Copyright 2011-2015 Asakusa Framework Team.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.asakusafw.lang.compiler.operator;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+
+import java.util.List;
+import java.util.Set;
+
+import javax.annotation.processing.ProcessingEnvironment;
+import javax.annotation.processing.RoundEnvironment;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.TypeParameterElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
+import javax.lang.model.type.TypeVariable;
+import javax.lang.model.util.Elements;
+import javax.lang.model.util.Types;
+
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+
+/**
+ * Callback from {@link DelegateProcessor}.
+ */
+public abstract class Callback {
+
+    private RuntimeException runtimeException;
+
+    private Error error;
+
+    /**
+     * current compiling environment.
+     */
+    public CompileEnvironment env;
+
+    /**
+     * type utilities.
+     */
+    public Types types;
+
+    /**
+     * element utilities.
+     */
+    public Elements elements;
+
+    /**
+     * The current rounding environment.
+     */
+    public RoundEnvironment round;
+
+    /**
+     * Target annotations.
+     */
+    public Set<? extends TypeElement> annotatios;
+
+    /**
+     * Runs {@link #test()} method.
+     * @param pEnv processing environment
+     * @param rEnv rounding environment
+     * @param annotations target annotations
+     * @throws IllegalArgumentException if some parameters were {@code null}
+     */
+    public void run(ProcessingEnvironment pEnv, RoundEnvironment rEnv, Set<? extends TypeElement> annotations) {
+        this.env = createCompileEnvironment(pEnv);
+        this.round = rEnv;
+        this.types = pEnv.getTypeUtils();
+        this.elements = pEnv.getElementUtils();
+        this.annotatios = annotations;
+        try {
+            test();
+        } catch (RuntimeException e) {
+            this.runtimeException = e;
+        } catch (Error e) {
+            this.error = e;
+        }
+    }
+
+    /**
+     * Creates a compile environment for this processing (for testing).
+     * @param processingEnv current processing environment
+     * @return created environment
+     */
+    protected CompileEnvironment createCompileEnvironment(ProcessingEnvironment processingEnv) {
+        return CompileEnvironment.newInstance(
+                processingEnv,
+                CompileEnvironment.Support.DATA_MODEL_REPOSITORY,
+                CompileEnvironment.Support.OPERATOR_DRIVER);
+    }
+
+    /**
+     * Throws exceptions/errors which are thrown in {@link #test()}.
+     */
+    public void rethrow() {
+        if (runtimeException != null) {
+            throw runtimeException;
+        } else if (error != null) {
+            throw error;
+        }
+    }
+
+    /**
+     * Performs the test.
+     */
+    protected abstract void test();
+
+    /**
+     * Returns the declared type.
+     * @param aClass target raw type
+     * @param arguments type arguments
+     * @return the declared type
+     */
+    public DeclaredType getType(Class<?> aClass, TypeMirror...arguments) {
+        String typeName = aClass.getName();
+        return getType(typeName, arguments);
+    }
+
+    /**
+     * Returns the declared type.
+     * @param typeName target type name
+     * @param arguments type arguments
+     * @return the declared type
+     */
+    public DeclaredType getType(String typeName, TypeMirror... arguments) {
+        TypeElement type = elements.getTypeElement(typeName);
+        assertThat(typeName, type, not(nullValue()));
+        if (arguments.length == 0) {
+            return (DeclaredType) types.erasure(type.asType());
+        } else {
+            return types.getDeclaredType(type, arguments);
+        }
+    }
+
+    /**
+     * Returns the type parameter.
+     * @param typeName target type name
+     * @param name parameter name
+     * @return the type variable
+     */
+    public TypeVariable getTypeVariable(String typeName, String name) {
+        return getTypeVariable(elements.getTypeElement(typeName), name);
+    }
+
+    /**
+     * Returns the type parameter.
+     * @param element type parameter owner
+     * @param name parameter name
+     * @return the type variable
+     */
+    public TypeVariable getTypeVariable(TypeElement element, String name) {
+        return getTypeParameters(name, element.getTypeParameters());
+    }
+
+    /**
+     * Returns the type parameter.
+     * @param element type parameter owner
+     * @param name parameter name
+     * @return the type variable
+     */
+    public TypeVariable getTypeVariable(ExecutableElement element, String name) {
+        return getTypeParameters(name, element.getTypeParameters());
+    }
+
+    private TypeVariable getTypeParameters(String name, List<? extends TypeParameterElement> typeParameters) {
+        for (TypeParameterElement param : typeParameters) {
+            if (param.getSimpleName().contentEquals(name)) {
+                return (TypeVariable) param.asType();
+            }
+        }
+        throw new AssertionError(name);
+    }
+
+    /**
+     * Returns the matcher that compares to the specified type.
+     * @param aClass target raw type
+     * @param arguments type arguments
+     * @return the matcher
+     */
+    public Matcher<TypeMirror> sameType(Class<?> aClass, TypeMirror...arguments) {
+        return sameType(getType(aClass, arguments));
+    }
+
+    /**
+     * Returns the matcher that compares to the specified type.
+     * @param typeName target type name
+     * @param arguments type arguments
+     * @return the matcher
+     */
+    public Matcher<TypeMirror> sameType(String typeName, TypeMirror...arguments) {
+        return sameType(getType(typeName, arguments));
+    }
+
+    /**
+     * Returns the matcher that compares to the specified type.
+     * @param type target type
+     * @return the matcher
+     */
+    public Matcher<TypeMirror> sameType(final TypeMirror type) {
+        return new BaseMatcher<TypeMirror>() {
+            @Override
+            public boolean matches(Object arg) {
+                return env.getProcessingEnvironment().getTypeUtils().isSameType((TypeMirror) arg, type);
+            }
+            @Override
+            public void describeTo(Description desc) {
+                desc.appendValue(type);
+            }
+        };
+    }
+
+    /**
+     * Returns the matcher that compares to the specified type kind.
+     * @param kind target type kind
+     * @return the matcher
+     */
+    public Matcher<TypeMirror> kindOf(final TypeKind kind) {
+        return new BaseMatcher<TypeMirror>() {
+            @Override
+            public boolean matches(Object arg) {
+                return ((TypeMirror) arg).getKind() == kind;
+            }
+            @Override
+            public void describeTo(Description desc) {
+                desc.appendValue(kind);
+            }
+        };
+    }
+}

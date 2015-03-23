@@ -1,0 +1,2 @@
+com.asakusafw.fireworks.compiler.operator.method.OperatorAnnotationProcessor
+com.asakusafw.fireworks.compiler.operator.flowpart.FlowPartAnnotationProcessor

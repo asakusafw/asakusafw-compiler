@@ -362,7 +362,7 @@ public final class MockOperators {
         case OUTPUT:
             return ((ExternalOutput) operator).getName();
         case FLOW:
-            return ((FlowOperator) operator).getDescriptionClass().getName();
+            return ((FlowOperator) operator).getDescriptionClass().getBinaryName();
         case MARKER:
             return ((MarkerOperator) operator).getAttribute(String.class);
         case USER: {

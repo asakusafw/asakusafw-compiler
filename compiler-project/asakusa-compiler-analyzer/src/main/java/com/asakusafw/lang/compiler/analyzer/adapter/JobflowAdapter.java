@@ -403,7 +403,7 @@ public class JobflowAdapter {
         return MessageFormat.format(
                 "jobflow:{0}@{1}{2}", //$NON-NLS-1$
                 info.getFlowId(),
-                info.getDescriptionClass().getName(),
+                info.getDescriptionClass().getClassName(),
                 parameters);
     }
 

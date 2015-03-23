@@ -139,7 +139,7 @@ public final class OutputStageEmitter {
                 + "batch={}, flow={}, class={}", new Object[] { //$NON-NLS-1$
                 stageInfo.meta.getBatchId(),
                 stageInfo.meta.getFlowId(),
-                client.getName(),
+                client.getClassName(),
         });
         return client;
     }
@@ -155,7 +155,7 @@ public final class OutputStageEmitter {
                 + "batch={}, flow={}, class={}", new Object[] { //$NON-NLS-1$
                 stageInfo.meta.getBatchId(),
                 stageInfo.meta.getFlowId(),
-                client.getName(),
+                client.getClassName(),
         });
         return client;
     }
