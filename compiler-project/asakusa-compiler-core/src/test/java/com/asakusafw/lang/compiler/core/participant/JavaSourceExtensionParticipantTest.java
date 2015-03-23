@@ -21,7 +21,6 @@ import static org.junit.Assert.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -30,6 +29,7 @@ import java.util.concurrent.Callable;
 import org.junit.Test;
 
 import com.asakusafw.lang.compiler.api.JobflowProcessor;
+import com.asakusafw.lang.compiler.common.DiagnosticException;
 import com.asakusafw.lang.compiler.core.CompilerTestRoot;
 import com.asakusafw.lang.compiler.core.JobflowCompiler;
 import com.asakusafw.lang.compiler.core.basic.BasicJobflowCompiler;
@@ -51,23 +51,14 @@ public class JavaSourceExtensionParticipantTest extends CompilerTestRoot {
     @Test
     public void simple() throws Exception {
         final ClassDescription aClass = new ClassDescription("com.example.JavaSourceExtension");
-        externalPortProcessors.add(new SimpleExternalPortProcessor());
-        compilerParticipants.add(new JavaSourceExtensionParticipant());
-        jobflowProcessors.add(new JobflowProcessor() {
-            @Override
-            public void process(Context context, Jobflow source) throws IOException {
-                JavaSourceExtension extension = context.getExtension(JavaSourceExtension.class);
-                assertThat(extension, is(notNullValue()));
-                try (Writer writer = extension.addJavaFile(aClass);
-                        PrintWriter pw = new PrintWriter(writer)) {
-                    pw.printf("package com.example;%n");
-                    pw.printf("public class %s implements java.util.concurrent.Callable<String> {%n", aClass.getSimpleName());
-                    pw.printf("    public String call() { return \"a\"; }");
-                    pw.printf("}%n");
-                }
-            }
+        initialize(aClass, new String[] {
+                "package com.example;",
+                String.format(
+                        "public class %s implements java.util.concurrent.Callable<String> {",
+                        aClass.getSimpleName()),
+                "    public String call() { return \"a\"; }",
+                "}",
         });
-
         FileContainer output = container();
         JobflowCompiler.Context context = new JobflowCompiler.Context(context(true), output);
         new BasicJobflowCompiler().compile(
@@ -79,6 +70,65 @@ public class JavaSourceExtensionParticipantTest extends CompilerTestRoot {
             Object result = aClass.resolve(loader).asSubclass(Callable.class).newInstance().call();
             assertThat(result, is((Object) "a"));
         }
+    }
+
+    /**
+     * w/ invalid version
+     * @throws Exception if failed
+     */
+    @Test(expected = DiagnosticException.class)
+    public void invalid_version() throws Exception {
+        final ClassDescription aClass = new ClassDescription("com.example.JavaSourceExtension");
+        initialize(aClass, new String[] {
+                "package com.example;",
+                String.format("public class %s {}", aClass.getSimpleName()),
+        });
+        options.withProperty(JavaSourceExtensionParticipant.KEY_VERSION, "__INVALID__");
+        FileContainer output = container();
+        JobflowCompiler.Context context = new JobflowCompiler.Context(context(true), output);
+        new BasicJobflowCompiler().compile(
+                context,
+                batchInfo("b"),
+                jobflow("testing"));
+    }
+
+    /**
+     * w/ invalid bootclasspath
+     * @throws Exception if failed
+     */
+    @Test(expected = DiagnosticException.class)
+    public void invalid_bootclasspath() throws Exception {
+        final ClassDescription aClass = new ClassDescription("com.example.JavaSourceExtension");
+        initialize(aClass, new String[] {
+                "package com.example;",
+                String.format("public class %s {}", aClass.getSimpleName()),
+        });
+        options.withProperty(JavaSourceExtensionParticipant.KEY_BOOT_CLASSPATH, container().getBasePath().getPath());
+        FileContainer output = container();
+
+        JobflowCompiler.Context context = new JobflowCompiler.Context(context(true), output);
+        new BasicJobflowCompiler().compile(
+                context,
+                batchInfo("b"),
+                jobflow("testing"));
+    }
+
+    private void initialize(final ClassDescription aClass, final String... lines) {
+        externalPortProcessors.add(new SimpleExternalPortProcessor());
+        compilerParticipants.add(new JavaSourceExtensionParticipant());
+        jobflowProcessors.add(new JobflowProcessor() {
+            @Override
+            public void process(Context context, Jobflow source) throws IOException {
+                JavaSourceExtension extension = context.getExtension(JavaSourceExtension.class);
+                assertThat(extension, is(notNullValue()));
+                try (PrintWriter pw = new PrintWriter(extension.addJavaFile(aClass))) {
+                    for (String line : lines) {
+                        pw.println(line);
+                    }
+                }
+            }
+        });
+
     }
 
     private URLClassLoader loader(File path) {

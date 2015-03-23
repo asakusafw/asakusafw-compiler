@@ -79,7 +79,7 @@ public abstract class CompilerTestRoot {
     /**
      * compiler options.
      */
-    public CompilerOptions options = CompilerOptions.builder().build();
+    public CompilerOptions.Builder options = CompilerOptions.builder();
 
     /**
      * embedded libraries.
@@ -126,7 +126,9 @@ public abstract class CompilerTestRoot {
         closeables.add(project);
         ToolRepository tools = tools(defaults, project.getClassLoader());
         try {
-            return new CompilerContext.Basic(options, project, tools, new FileContainerRepository(root.newFolder()));
+            return new CompilerContext.Basic(
+                    options.build(),
+                    project, tools, new FileContainerRepository(root.newFolder()));
         } catch (IOException e) {
             throw new AssertionError(e);
         }

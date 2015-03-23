@@ -23,7 +23,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.Test;
 
-import com.asakusafw.lang.compiler.api.CompilerOptions;
 import com.asakusafw.lang.compiler.api.JobflowProcessor;
 import com.asakusafw.lang.compiler.core.CompilerTestRoot;
 import com.asakusafw.lang.compiler.core.JobflowCompiler;
@@ -75,10 +74,9 @@ public class HadoopFormatExtensionParticipantTest extends CompilerTestRoot {
      */
     @Test
     public void custom() {
-        options = CompilerOptions.builder()
+        options
             .withProperty(HadoopFormatExtensionParticipant.KEY_INPUT_FORMAT, "TestingInput")
-            .withProperty(HadoopFormatExtensionParticipant.KEY_OUTPUT_FORMAT, "TestingOutput")
-            .build();
+            .withProperty(HadoopFormatExtensionParticipant.KEY_OUTPUT_FORMAT, "TestingOutput");
 
         final AtomicBoolean executed = new AtomicBoolean();
         externalPortProcessors.add(new SimpleExternalPortProcessor());
