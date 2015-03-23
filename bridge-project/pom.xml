@@ -17,6 +17,7 @@
 		<module>asakusa-bridge-runtime</module>
 		<module>asakusa-bridge-directio-runtime</module>
 		<module>asakusa-bridge-adapter</module>
+		<module>asakusa-bridge-runtime-all</module>
 		<module>asakusa-bridge-redirector</module>
 	</modules>
 </project>
