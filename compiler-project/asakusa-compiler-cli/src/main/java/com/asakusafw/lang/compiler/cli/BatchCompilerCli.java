@@ -412,23 +412,19 @@ public final class BatchCompilerCli {
         for (ClassDescription aClass : configuration.dataModelProcessors) {
             builder.use(newInstance(classLoader, DataModelProcessor.class, aClass));
         }
-        builder.useDefaults(DataModelProcessor.class);
         for (ClassDescription aClass : configuration.externalPortProcessors) {
             builder.use(newInstance(classLoader, ExternalPortProcessor.class, aClass));
         }
-        builder.useDefaults(ExternalPortProcessor.class);
         for (ClassDescription aClass : configuration.batchProcessors) {
             builder.use(newInstance(classLoader, BatchProcessor.class, aClass));
         }
-        builder.useDefaults(BatchProcessor.class);
         for (ClassDescription aClass : configuration.jobflowProcessors) {
             builder.use(newInstance(classLoader, JobflowProcessor.class, aClass));
         }
-        builder.useDefaults(JobflowProcessor.class);
         for (ClassDescription aClass : configuration.compilerParticipants) {
             builder.use(newInstance(classLoader, CompilerParticipant.class, aClass));
         }
-        builder.useDefaults(CompilerParticipant.class);
+        builder.useDefaults();
         return builder.build();
     }
 

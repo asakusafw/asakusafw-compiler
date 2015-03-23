@@ -122,7 +122,7 @@ public class ToolRepositoryTest {
     }
 
     /**
-     * simple case.
+     * w/ defaults.
      * @throws Exception if failed
      */
     @Test
@@ -140,11 +140,43 @@ public class ToolRepositoryTest {
                     .useDefaults(JobflowProcessor.class)
                     .useDefaults(CompilerParticipant.class)
                     .build();
-                assertThat(tools.getDataModelProcessor(), hasIds("default"));
-                assertThat(tools.getBatchProcessor(), hasIds("default"));
-                assertThat(tools.getJobflowProcessor(), hasIds("default"));
-                assertThat(tools.getExternalPortProcessor(), hasIds("default"));
-                assertThat(tools.getParticipant(), hasIds("default"));
+            assertThat(tools.getDataModelProcessor(), hasIds("default"));
+            assertThat(tools.getBatchProcessor(), hasIds("default"));
+            assertThat(tools.getJobflowProcessor(), hasIds("default"));
+            assertThat(tools.getExternalPortProcessor(), hasIds("default"));
+            assertThat(tools.getParticipant(), hasIds("default"));
+        }
+    }
+    /**
+     * conflict custom/defaults.
+     * @throws Exception if failed
+     */
+    @Test
+    public void defaults_conflict() throws Exception {
+        register(DataModelProcessor.class, DummyDataModelProcessor.class);
+        register(ExternalPortProcessor.class, DummyExternalPortProcessor.class);
+        register(BatchProcessor.class, DummyBatchProcessor.class);
+        register(JobflowProcessor.class, DummyJobflowProcessor.class);
+        register(CompilerParticipant.class, DummyCompilerParticipant.class);
+        try (URLClassLoader loader = loader()) {
+            ToolRepository tools = ToolRepository.builder(loader)
+                    .use(new DummyDataModelProcessor("non-default"))
+                    .use(new DummyExternalPortProcessor("non-default"))
+                    .use(new DummyBatchProcessor("non-default"))
+                    .use(new DummyJobflowProcessor("non-default"))
+                    .use(new DummyCompilerParticipant("non-default"))
+                    .useDefaults()
+                    .build();
+            assertThat(tools.getDataModelProcessor(), hasIds("non-default"));
+            assertThat(tools.getBatchProcessor(), hasIds("non-default"));
+            assertThat(tools.getJobflowProcessor(), hasIds("non-default"));
+            assertThat(tools.getExternalPortProcessor(), hasIds("non-default"));
+            assertThat(tools.getParticipant(), hasIds("non-default"));
+            assertThat(tools.getDataModelProcessor(), not(hasIds("default")));
+            assertThat(tools.getBatchProcessor(), not(hasIds("default")));
+            assertThat(tools.getJobflowProcessor(), not(hasIds("default")));
+            assertThat(tools.getExternalPortProcessor(), not(hasIds("default")));
+            assertThat(tools.getParticipant(), not(hasIds("default")));
         }
     }
 

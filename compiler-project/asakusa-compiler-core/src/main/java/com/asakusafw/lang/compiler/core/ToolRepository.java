@@ -19,6 +19,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -134,7 +135,6 @@ public class ToolRepository {
 
         private static final Set<Class<?>> ALL_TOOLS;
         private static final Set<Class<?>> MANDATORY_TOOLS;
-        private static final Set<Class<?>> SINGLETON_TOOLS;
         static {
             Set<Class<?>> all = new LinkedHashSet<>();
             all.add(DataModelProcessor.class);
@@ -147,11 +147,8 @@ public class ToolRepository {
             mandatory.add(DataModelProcessor.class);
             mandatory.add(ExternalPortProcessor.class);
 
-            Set<Class<?>> singleton = new LinkedHashSet<>();
-
             ALL_TOOLS = Collections.unmodifiableSet(all);
             MANDATORY_TOOLS = Collections.unmodifiableSet(mandatory);
-            SINGLETON_TOOLS = Collections.unmodifiableSet(singleton);
         }
 
         private final ClassLoader serviceClassLoader;
@@ -255,7 +252,16 @@ public class ToolRepository {
 
         private <T> void useDefaults0(Class<T> toolType) {
             List<T> elements = get(toolType);
+            Set<Class<?>> saw = new HashSet<>();
+            // avoid duplication
+            for (T element : elements) {
+                saw.add(element.getClass());
+            }
             for (T service : ServiceLoader.load(toolType, serviceClassLoader)) {
+                if (saw.contains(service.getClass())) {
+                    LOG.debug("filter duplicate tool: {}", service.getClass().getName()); //$NON-NLS-1$
+                    continue;
+                }
                 elements.add(service);
             }
         }
@@ -286,15 +292,6 @@ public class ToolRepository {
                     throw new IllegalStateException(MessageFormat.format(
                             "{0} must be specified",
                             toolType.getSimpleName()));
-                }
-            }
-            for (Class<?> toolType : SINGLETON_TOOLS) {
-                List<?> elements = get(toolType);
-                if (elements.size() >= 2) {
-                    throw new IllegalStateException(MessageFormat.format(
-                            "{0} must be single: {1}",
-                            toolType.getSimpleName(),
-                            elements));
                 }
             }
             return new ToolRepository(
