@@ -132,17 +132,19 @@ public final class PartialDataModelMirror implements DataModelMirror {
         if (name == null) {
             throw new IllegalArgumentException("name must not be null"); //$NON-NLS-1$
         }
-        synchronized (this) {
-            if (properties == null) {
-                List<TypeElement> upperBounds = collectUpperBounds();
-                Set<PropertyMirror> propertySet = collector.collect(environment, type, upperBounds);
-                this.properties = new HashMap<>();
-                for (PropertyMirror property : propertySet) {
-                    properties.put(JavaName.of(property.getName()).toMemberName(), property);
-                }
+        return prepareProperties().get(JavaName.of(name).toMemberName());
+    }
+
+    private synchronized Map<String, PropertyMirror> prepareProperties() {
+        if (properties == null) {
+            List<TypeElement> upperBounds = collectUpperBounds();
+            Set<PropertyMirror> propertySet = collector.collect(environment, type, upperBounds);
+            this.properties = new HashMap<>();
+            for (PropertyMirror property : propertySet) {
+                properties.put(JavaName.of(property.getName()).toMemberName(), property);
             }
         }
-        return properties.get(JavaName.of(name).toMemberName());
+        return properties;
     }
 
     private List<TypeElement> collectUpperBounds() {

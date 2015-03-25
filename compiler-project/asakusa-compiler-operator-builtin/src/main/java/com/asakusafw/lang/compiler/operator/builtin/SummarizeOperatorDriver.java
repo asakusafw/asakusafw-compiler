@@ -76,7 +76,8 @@ public class SummarizeOperatorDriver extends AbstractOperatorDriver {
         if (source.isEqualTo(p0.type())) {
             AnnotationRef shuffle = term.annotation("shuffle"); //$NON-NLS-1$
             if (shuffle == null) {
-                dsl.result().error("The return type is invalid summarized data model (\"term.shuffle\" is not declared?)");
+                dsl.result().error(
+                        "The return type is invalid summarized data model (\"term.shuffle\" is not declared?)");
                 return null;
             }
             KeyRef key = p0.resolveKey(p0.type(), shuffle.get());

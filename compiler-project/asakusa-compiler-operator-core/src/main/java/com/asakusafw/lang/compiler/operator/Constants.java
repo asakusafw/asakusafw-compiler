@@ -26,7 +26,7 @@ public final class Constants {
 
     private static final String BASE = "com.asakusafw.vocabulary."; //$NON-NLS-1$
 
-    private static final ClassDescription classOf(String name) {
+    private static ClassDescription classOf(String name) {
         return new ClassDescription(BASE + name);
     }
 
@@ -53,7 +53,8 @@ public final class Constants {
     /**
      * {@code Result} type name.
      */
-    public static final ClassDescription TYPE_RESULT = new ClassDescription("com.asakusafw.runtime.core.Result"); //$NON-NLS-1$
+    public static final ClassDescription TYPE_RESULT =
+            new ClassDescription("com.asakusafw.runtime.core.Result"); //$NON-NLS-1$
 
     /**
      * {@code Key} type name.
@@ -103,7 +104,8 @@ public final class Constants {
     /**
      * {@code FlowFragmentBuilder} type name.
      */
-    public static final ClassDescription TYPE_ELEMENT_BUILDER = classOf("flow.builder.FlowElementBuilder"); //$NON-NLS-1$
+    public static final ClassDescription TYPE_ELEMENT_BUILDER =
+            classOf("flow.builder.FlowElementBuilder"); //$NON-NLS-1$
 
     /**
      * {@code FlowFragmentEditor} type name.

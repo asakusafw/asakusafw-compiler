@@ -40,7 +40,7 @@ public abstract class EdgeInfo<TSelf> {
     public abstract String getName();
 
     /**
-     * Returns the index where this appears in the target parameters
+     * Returns the index where this appears in the target parameters.
      * @return the parameter index, or {@code -1} if it is not defined
      */
     public Integer getParameterIndex() {

@@ -28,7 +28,7 @@ import com.asakusafw.lang.compiler.operator.util.AnnotationHelper;
 /**
  * Represents {@code Import}/{@code Export} annotation model.
  */
-public class ExternMirror {
+public final class ExternMirror {
 
     private final AnnotationMirror source;
 

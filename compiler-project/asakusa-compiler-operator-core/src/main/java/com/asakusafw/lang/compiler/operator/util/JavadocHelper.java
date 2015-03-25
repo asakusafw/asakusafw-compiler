@@ -191,7 +191,9 @@ public class JavadocHelper {
             if (param.size() < 3) {
                 continue;
             }
-            if (hasName(param.get(0), "<") && hasName(param.get(1), name) && hasName(param.get(2), ">")) { //$NON-NLS-1$ //$NON-NLS-2$
+            if (hasName(param.get(0), "<") //$NON-NLS-1$
+                    && hasName(param.get(1), name)
+                    && hasName(param.get(2), ">")) { //$NON-NLS-1$
                 return param.subList(3, param.size());
             }
         }
