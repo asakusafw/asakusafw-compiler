@@ -5,8 +5,13 @@ import com.asakusafw.runtime.core.Result;
 import com.asakusafw.vocabulary.model.Key;
 import com.asakusafw.vocabulary.operator.*;
 
-public abstract class Simple {
+public abstract class WithSelection {
 
-    @MasterJoin
+    @MasterSelection
+    public LModel selector(List<LModel> left, RModel right) {
+        return null;
+    }
+
+    @MasterJoin(selection = "selector")
     public abstract JModel method(LModel left, RModel right);
 }

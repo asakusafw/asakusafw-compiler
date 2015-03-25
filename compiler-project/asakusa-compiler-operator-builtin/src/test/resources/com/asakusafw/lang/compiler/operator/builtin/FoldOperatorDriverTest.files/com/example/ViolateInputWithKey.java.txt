@@ -6,7 +6,7 @@ import com.asakusafw.vocabulary.model.Key;
 import com.asakusafw.vocabulary.operator.*;
 
 public abstract class ViolateInputWithKey {
-    
+
     @Fold
     public void method(Model aggregate, Model in) {
     }

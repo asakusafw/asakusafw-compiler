@@ -68,7 +68,7 @@ public class MasterJoinUpdateOperatorDriver extends AbstractOperatorDriver {
                     txInput.getType(),
                     Reference.special(String.valueOf(false)));
         }
-        MasterKindOperatorHelper.validateMasterSelection(dsl);
+        dsl.setSupport(MasterKindOperatorHelper.extractMasterSelection(dsl));
         dsl.requireShuffle();
         return dsl.toDescription();
     }

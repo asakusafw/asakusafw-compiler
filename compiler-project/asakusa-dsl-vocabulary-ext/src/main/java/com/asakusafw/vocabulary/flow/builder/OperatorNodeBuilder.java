@@ -139,6 +139,9 @@ public class OperatorNodeBuilder extends FlowElementBuilder {
                 throw new AssertionError(data);
             }
         }
+        for (FlowElementAttribute attribute : attributes) {
+            builder.addAttribute(attribute);
+        }
         return builder.toDescription();
     }
 }

@@ -136,7 +136,7 @@ public final class TypeHelper {
      * @param type target type
      * @return {@code true} if is an operator helper annotation, otherwise {@code false}
      * @throws IllegalArgumentException if some parameters were {@code null}
-     * @see Constants#TYPE_OPERATOR_HELPER
+     * @see Constants#TYPE_ANNOTATION_HELPER
      */
     public static boolean isOperatorHelper(CompileEnvironment environment, TypeMirror type) {
         if (type.getKind() != TypeKind.DECLARED) {
@@ -146,7 +146,7 @@ public final class TypeHelper {
         if (element.getKind() != ElementKind.ANNOTATION_TYPE) {
             return false;
         }
-        DeclaredType operatorHelperType = environment.findDeclaredType(Constants.TYPE_OPERATOR_HELPER);
+        DeclaredType operatorHelperType = environment.findDeclaredType(Constants.TYPE_ANNOTATION_HELPER);
         for (AnnotationMirror metaAnnotation : element.getAnnotationMirrors()) {
             Types types = environment.getProcessingEnvironment().getTypeUtils();
             if (types.isSameType(operatorHelperType, metaAnnotation.getAnnotationType())) {

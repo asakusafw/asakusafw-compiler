@@ -27,6 +27,7 @@ import java.util.Map;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeParameterElement;
+import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
@@ -36,6 +37,7 @@ import javax.tools.Diagnostic;
 
 import com.asakusafw.lang.compiler.model.description.AnnotationDescription;
 import com.asakusafw.lang.compiler.model.description.ArrayDescription;
+import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.description.Descriptions;
 import com.asakusafw.lang.compiler.model.description.EnumConstantDescription;
 import com.asakusafw.lang.compiler.model.description.TypeDescription;
@@ -71,6 +73,38 @@ import com.asakusafw.utils.java.model.util.TypeBuilder;
  * Common helper methods about elements.
  */
 public final class ElementHelper {
+
+    static final ClassDescription TYPE_FACTORY = classOf("operator.OperatorFactory"); //$NON-NLS-1$
+
+    static final ClassDescription TYPE_INFO = classOf("operator.OperatorInfo"); //$NON-NLS-1$
+
+    static final ClassDescription TYPE_KEY = classOf("operator.KeyInfo"); //$NON-NLS-1$
+
+    static final ClassDescription TYPE_HELPER = classOf("flow.graph.OperatorHelper"); //$NON-NLS-1$
+
+    static final ClassDescription TYPE_INFO_INPUT = classOf(TYPE_INFO, "Input"); //$NON-NLS-1$
+
+    static final ClassDescription TYPE_INFO_OUTPUT = classOf(TYPE_INFO, "Output"); //$NON-NLS-1$
+
+    static final ClassDescription TYPE_INFO_PARAMETER = classOf(TYPE_INFO, "Parameter"); //$NON-NLS-1$
+
+    static final ClassDescription TYPE_KEY_GROUP = classOf(TYPE_KEY, "Group"); //$NON-NLS-1$
+
+    static final ClassDescription TYPE_KEY_ORDER = classOf(TYPE_KEY, "Order"); //$NON-NLS-1$
+
+    static final ClassDescription TYPE_KEY_DIRECTION = classOf(TYPE_KEY, "Direction"); //$NON-NLS-1$
+
+    static final ClassDescription TYPE_EDITOR = classOf("flow.builder.FlowElementEditor"); //$NON-NLS-1$
+
+    static final ClassDescription TYPE_ATTRIBUTES = classOf("flow.builder.Attributes"); //$NON-NLS-1$
+
+    private static ClassDescription classOf(String name) {
+        return new ClassDescription("com.asakusafw.vocabulary." + name); //$NON-NLS-1$
+    }
+
+    private static ClassDescription classOf(ClassDescription owner, String name) {
+        return new ClassDescription(owner.getBinaryName() + '$' + name);
+    }
 
     /**
      * Validates {@link OperatorDescription} and raises errors when it is not valid.
@@ -313,33 +347,7 @@ public final class ElementHelper {
             }
             List<Attribute> attributes = new ArrayList<>();
             if (param.getKey() != null) {
-                KeyMirror key = param.getKey();
-                List<AnnotationDescription> groups = new ArrayList<>();
-                for (KeyMirror.Group group : key.getGroup()) {
-                    String name = group.getProperty().getName();
-                    groups.add(new AnnotationDescription(
-                            Constants.TYPE_ANNOTATION_KEY_GROUP,
-                            Collections.singletonMap("expression", Descriptions.valueOf(name))));
-                }
-                List<AnnotationDescription> orders = new ArrayList<>();
-                for (KeyMirror.Order order : key.getOrder()) {
-                    String direction = order.getDirection() == KeyMirror.Direction.ASCENDANT
-                            ? "ASC" //$NON-NLS-1$
-                            : "DESC"; //$NON-NLS-1$
-                    Map<String, ValueDescription> elements = new LinkedHashMap<>();
-                    elements.put("direction", //$NON-NLS-1$
-                            new EnumConstantDescription(Constants.TYPE_ANNOTATION_KEY_DIRECTION, direction));
-                    elements.put("expression", //$NON-NLS-1$
-                            Descriptions.valueOf(order.getProperty().getName()));
-                    orders.add(new AnnotationDescription(Constants.TYPE_ANNOTATION_KEY_ORDER, elements));
-                }
-                Map<String, ValueDescription> elements = new LinkedHashMap<>();
-                elements.put("group", //$NON-NLS-1$
-                        ArrayDescription.elementsOf(Constants.TYPE_ANNOTATION_KEY_GROUP, groups));
-                elements.put("order", //$NON-NLS-1$
-                        ArrayDescription.elementsOf(Constants.TYPE_ANNOTATION_KEY_ORDER, orders));
-                AnnotationDescription description = new AnnotationDescription(Constants.TYPE_ANNOTATION_KEY, elements);
-                attributes.add(DescriptionHelper.resolveAnnotation(imports, description));
+                attributes.add(toParameterKeyInfo(param.getKey(), imports));
             }
             results.add(factory.newFormalParameterDeclaration(
                     attributes,
@@ -349,6 +357,36 @@ public final class ElementHelper {
                     0));
         }
         return results;
+    }
+
+    private static Annotation toParameterKeyInfo(KeyMirror key, ImportBuilder imports) {
+        List<AnnotationDescription> groups = new ArrayList<>();
+        for (KeyMirror.Group group : key.getGroup()) {
+            String name = group.getProperty().getName();
+            groups.add(new AnnotationDescription(
+                    TYPE_KEY_GROUP,
+                    Collections.singletonMap("expression", Descriptions.valueOf(name))));
+        }
+        List<AnnotationDescription> orders = new ArrayList<>();
+        for (KeyMirror.Order order : key.getOrder()) {
+            String direction = order.getDirection() == KeyMirror.Direction.ASCENDANT
+                    ? "ASC" //$NON-NLS-1$
+                    : "DESC"; //$NON-NLS-1$
+            Map<String, ValueDescription> elements = new LinkedHashMap<>();
+            elements.put("direction", //$NON-NLS-1$
+                    new EnumConstantDescription(TYPE_KEY_DIRECTION, direction));
+            elements.put("expression", //$NON-NLS-1$
+                    Descriptions.valueOf(order.getProperty().getName()));
+            orders.add(new AnnotationDescription(TYPE_KEY_ORDER, elements));
+        }
+        Map<String, ValueDescription> elements = new LinkedHashMap<>();
+        elements.put("group", //$NON-NLS-1$
+                ArrayDescription.elementsOf(TYPE_KEY_GROUP, groups));
+        elements.put("order", //$NON-NLS-1$
+                ArrayDescription.elementsOf(TYPE_KEY_ORDER, orders));
+        AnnotationDescription description = new AnnotationDescription(TYPE_KEY, elements);
+        Annotation attribute = DescriptionHelper.resolveAnnotation(imports, description);
+        return attribute;
     }
 
     /**
@@ -441,11 +479,25 @@ public final class ElementHelper {
                     .method("defineAttribute", DescriptionHelper.resolveConstant(imports, attribute)) //$NON-NLS-1$
                     .toStatement());
         }
+        if (element.getDescription().getSupport() != null) {
+            ExecutableElement support = element.getDescription().getSupport();
+            List<Expression> arguments = new ArrayList<>();
+            arguments.add(Models.toLiteral(f, support.getSimpleName().toString()));
+            for (VariableElement param : support.getParameters()) {
+                arguments.add(toLiteral(environment, param.asType(), imports));
+            }
+            Expression expression = new TypeBuilder(f, DescriptionHelper.resolve(imports, TYPE_ATTRIBUTES))
+                .method("support", arguments) //$NON-NLS-1$
+                .toExpression();
+            statements.add(new ExpressionBuilder(f, builderExpression)
+                .method("defineAttribute", expression) //$NON-NLS-1$
+                .toStatement());
+        }
         SimpleName editorVar = f.newSimpleName("$editor$");
         statements.add(new ExpressionBuilder(f, builderExpression)
             .method("resolve")
             .toLocalVariableDeclaration(
-                    DescriptionHelper.resolve(imports, Constants.TYPE_ELEMENT_EDITOR),
+                    DescriptionHelper.resolve(imports, TYPE_EDITOR),
                     editorVar));
         for (Node node : element.getDescription().getOutputs()) {
             Expression type = resolveOutputType(environment, imports, node, element);
@@ -486,7 +538,7 @@ public final class ElementHelper {
             ImportBuilder imports) {
         ModelFactory factory = Models.getModelFactory();
         ExpressionBuilder builder =
-                new TypeBuilder(factory, DescriptionHelper.resolve(imports, Constants.TYPE_ELEMENT_BUILDER))
+                new TypeBuilder(factory, DescriptionHelper.resolve(imports, TYPE_ATTRIBUTES))
                     .method("key"); //$NON-NLS-1$
         for (KeyMirror.Group group : element.getGroup()) {
             builder = builder.method("group", Models.toLiteral(factory, group.getProperty().getName()));
@@ -503,7 +555,7 @@ public final class ElementHelper {
             ExternMirror element,
             ImportBuilder imports) {
         ModelFactory factory = Models.getModelFactory();
-        return new TypeBuilder(factory, DescriptionHelper.resolve(imports, Constants.TYPE_ELEMENT_BUILDER))
+        return new TypeBuilder(factory, DescriptionHelper.resolve(imports, TYPE_ATTRIBUTES))
             .method("extern", //$NON-NLS-1$
                     Models.toLiteral(factory, element.getName()),
                     toLiteral(environment, element.getDescription(), imports))
@@ -535,7 +587,7 @@ public final class ElementHelper {
             OperatorClass element,
             ImportBuilder imports) {
         AnnotationDescription description = new AnnotationDescription(
-                Constants.TYPE_ANNOTATION_FACTORY,
+                TYPE_FACTORY,
                 DescriptionHelper.toDescription(environment, element.getDeclaration()));
         return DescriptionHelper.resolveAnnotation(imports, description);
     }
@@ -563,14 +615,14 @@ public final class ElementHelper {
             if (node.getKind() == OperatorDescription.Node.Kind.INPUT) {
                 putTypeVariable(type, elements);
                 elements.put("position", Descriptions.valueOf(inputs.size() + arguments.size())); //$NON-NLS-1$
-                inputs.add(new AnnotationDescription(Constants.TYPE_ANNOTATION_INPUT_INFO, elements));
+                inputs.add(new AnnotationDescription(TYPE_INFO_INPUT, elements));
             } else if (node.getKind() == OperatorDescription.Node.Kind.DATA) {
                 putTypeVariableIfClass(environment, type, elements);
                 elements.put("position", Descriptions.valueOf(inputs.size() + arguments.size())); //$NON-NLS-1$
-                arguments.add(new AnnotationDescription(Constants.TYPE_ANNOTATION_PARAMETER_INFO, elements));
+                arguments.add(new AnnotationDescription(TYPE_INFO_PARAMETER, elements));
             } else if (node.getKind() == OperatorDescription.Node.Kind.OUTPUT) {
                 putTypeVariable(type, elements);
-                outputs.add(new AnnotationDescription(Constants.TYPE_ANNOTATION_OUTPUT_INFO, elements));
+                outputs.add(new AnnotationDescription(TYPE_INFO_OUTPUT, elements));
             } else {
                 throw new AssertionError(node);
             }
@@ -579,12 +631,12 @@ public final class ElementHelper {
         elements.put("kind", //$NON-NLS-1$
                 DescriptionHelper.toDescription(environment, element.getAnnotation().getAnnotationType()));
         elements.put("input", //$NON-NLS-1$
-                ArrayDescription.elementsOf(Constants.TYPE_ANNOTATION_INPUT_INFO, inputs));
+                ArrayDescription.elementsOf(TYPE_INFO_INPUT, inputs));
         elements.put("output", //$NON-NLS-1$
-                ArrayDescription.elementsOf(Constants.TYPE_ANNOTATION_OUTPUT_INFO, outputs));
+                ArrayDescription.elementsOf(TYPE_INFO_OUTPUT, outputs));
         elements.put("parameter", //$NON-NLS-1$
-                ArrayDescription.elementsOf(Constants.TYPE_ANNOTATION_PARAMETER_INFO, arguments));
-        AnnotationDescription description = new AnnotationDescription(Constants.TYPE_ANNOTATION_INFO, elements);
+                ArrayDescription.elementsOf(TYPE_INFO_PARAMETER, arguments));
+        AnnotationDescription description = new AnnotationDescription(TYPE_INFO, elements);
         return DescriptionHelper.resolveAnnotation(imports, description);
     }
 

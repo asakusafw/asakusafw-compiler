@@ -3,7 +3,7 @@ package com.example;
 import com.asakusafw.vocabulary.operator.*;
 
 public abstract class ViolateReturnModel {
-    
+
     @Convert
     public String method(Model model) {
         return null;

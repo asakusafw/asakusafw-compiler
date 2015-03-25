@@ -290,16 +290,23 @@ public class OperatorMethodAnalyzer {
             if (sawMethods.containsKey(method)) {
                 continue;
             }
-            for (AnnotationMirror annotation : method.getAnnotationMirrors()) {
-                if (TypeHelper.isOperatorHelper(environment, annotation.getAnnotationType())) {
-                    continue;
-                }
+            if (hasOperatorHelper(method)) {
+                continue;
             }
             warn(method, "operator class {0} should not declare public methods except operators: {1}",
                     type.getSimpleName(),
                     method.getSimpleName());
         }
         return results;
+    }
+
+    private boolean hasOperatorHelper(ExecutableElement method) {
+        for (AnnotationMirror annotation : method.getAnnotationMirrors()) {
+            if (TypeHelper.isOperatorHelper(environment, annotation.getAnnotationType())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private String toNameId(Name simpleName) {

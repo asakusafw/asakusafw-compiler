@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.type.TypeMirror;
 
 import com.asakusafw.lang.compiler.model.description.EnumConstantDescription;
@@ -35,6 +36,8 @@ public class OperatorDescription {
     private final List<Node> outputs;
 
     private final List<EnumConstantDescription> attributes;
+
+    private ExecutableElement support;
 
     /**
      * Creates a new instance.
@@ -150,6 +153,24 @@ public class OperatorDescription {
      */
     public List<EnumConstantDescription> getAttributes() {
         return attributes;
+    }
+
+    /**
+     * Returns the support method for this operator.
+     * @return the support method for this operator, or {@code null} if this operator does not have support methods
+     */
+    public ExecutableElement getSupport() {
+        return support;
+    }
+
+    /**
+     * Sets the support method for this operator.
+     * @param newValue the support method
+     * @return this
+     */
+    public OperatorDescription withSupport(ExecutableElement newValue) {
+        this.support = newValue;
+        return this;
     }
 
     /**
@@ -342,7 +363,7 @@ public class OperatorDescription {
 
         @Override
         public Kind getKind() {
-            return Kind.PARAMETER;
+            return Kind.SPECIAL;
         }
 
         /**

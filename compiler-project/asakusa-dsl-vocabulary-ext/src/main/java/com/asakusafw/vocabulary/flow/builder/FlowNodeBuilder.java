@@ -125,6 +125,12 @@ public class FlowNodeBuilder extends FlowElementBuilder {
             }
             dataMap.put(info.getName(), value);
         }
+        if (attributes.isEmpty() == false) {
+            throw new IllegalArgumentException(MessageFormat.format(
+                    "flow-part cannot accept attributes: {0}({1})",
+                    constructor.getDeclaringClass().getName(),
+                    attributes));
+        }
         Object[] constructorArguments = computeConstructoArguments(
                 inputPorts, outputPorts, arguments,
                 inputMap, outputMap, dataMap);

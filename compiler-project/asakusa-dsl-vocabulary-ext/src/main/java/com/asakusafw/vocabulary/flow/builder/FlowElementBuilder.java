@@ -17,6 +17,7 @@ package com.asakusafw.vocabulary.flow.builder;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -199,21 +200,21 @@ public abstract class FlowElementBuilder {
     }
 
     /**
-     * Creates a new {@link KeyInfo} object.
-     * @return the created object
+     * Defines an attribute.
+     * @param attribute the attribute
+     * @throws IllegalArgumentException if some parameters were {@code null}
      */
-    public static KeyInfo key() {
-        return new KeyInfo();
-    }
-
-    /**
-     * Creates a new {@link ExternInfo} object.
-     * @param name the external port name
-     * @param description the external port description class
-     * @return the created object
-     */
-    public static ExternInfo extern(String name, Class<?> description) {
-        return new ExternInfo(name, description);
+    public void defineAttribute(Object attribute) {
+        if (attribute == null) {
+            throw new IllegalArgumentException("attribute must not be null"); //$NON-NLS-1$
+        }
+        if (attribute instanceof FlowElementAttribute) {
+            attrs.add((FlowElementAttribute) attribute);
+        } else {
+            throw new IllegalArgumentException(MessageFormat.format(
+                    "unsupported attribute type: {0}",
+                    attribute.getClass().getName()));
+        }
     }
 
     /**

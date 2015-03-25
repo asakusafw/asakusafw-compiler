@@ -69,24 +69,25 @@ final class MasterKindOperatorHelper {
         }
     }
 
-    public static void validateMasterSelection(DslBuilder dsl) {
+    public static ExecutableElement extractMasterSelection(DslBuilder dsl) {
         String selection = dsl.annotation().string(NAME_SELECTION);
         if (selection == null || selection.equals(NO_SELECTION)) {
-            return;
+            return null;
         }
         ExecutableElement selector = findSelector(dsl, selection);
         if (selector == null) {
-            return;
+            return null;
         }
         validateSelectorDeclaration(dsl, selector);
         if (dsl.sawError()) {
-            return;
+            return null;
         }
         try {
-            checkParameters(dsl.getEnvironment(), selector, selector);
+            checkParameters(dsl.getEnvironment(), dsl.method, selector);
         } catch (ResolveException e) {
             dsl.annotation().error(NAME_SELECTION, e.getMessage());
         }
+        return selector;
     }
 
     private static ExecutableElement findSelector(DslBuilder dsl, String selection) {

@@ -16,6 +16,7 @@
 package com.asakusafw.lang.compiler.operator.method;
 
 import java.text.MessageFormat;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -39,6 +40,7 @@ import org.slf4j.LoggerFactory;
 
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.operator.CompileEnvironment;
+import com.asakusafw.lang.compiler.operator.Constants;
 import com.asakusafw.lang.compiler.operator.OperatorDriver;
 import com.asakusafw.lang.compiler.operator.model.OperatorClass;
 
@@ -51,24 +53,32 @@ public class OperatorAnnotationProcessor implements Processor {
 
     private volatile CompileEnvironment environment;
 
+    /**
+     * Creates a new instance.
+     */
+    public OperatorAnnotationProcessor() {
+        LOG.debug("creating operator annotation processor: {}", this); //$NON-NLS-1$
+    }
+
     @Override
     public void init(ProcessingEnvironment processingEnv) {
+        LOG.debug("initializing operator annotation processor: {}", this); //$NON-NLS-1$
         try {
             this.environment = createCompileEnvironment(processingEnv);
         } catch (RuntimeException e) {
             processingEnv.getMessager().printMessage(
                     Diagnostic.Kind.ERROR,
                     MessageFormat.format(
-                            "Failed to initialize Asakusa Operator Compiler ({0})",
+                            "failed to initialize Asakusa Operator Compiler ({0})",
                             e.toString()));
-            LOG.error("Failed to initialize Asakusa Operator Compiler", e);
+            LOG.error("failed to initialize Asakusa Operator Compiler", e);
         } catch (LinkageError e) {
             processingEnv.getMessager().printMessage(
                     Diagnostic.Kind.ERROR,
                     MessageFormat.format(
-                            "Failed to initialize Asakusa Operator Compiler by linkage error ({0})",
+                            "failed to initialize Asakusa Operator Compiler by linkage error ({0})",
                             e.toString()));
-            LOG.error("Failed to initialize Asakusa Operator Compiler by linkage error", e);
+            LOG.error("failed to initialize Asakusa Operator Compiler by linkage error", e);
             throw e;
         }
     }
@@ -94,7 +104,7 @@ public class OperatorAnnotationProcessor implements Processor {
 
     @Override
     public SourceVersion getSupportedSourceVersion() {
-        return SourceVersion.RELEASE_6;
+        return Constants.getSupportedSourceVersion();
     }
 
     @Override
@@ -137,6 +147,7 @@ public class OperatorAnnotationProcessor implements Processor {
         if (environment == null) {
             return false;
         }
+        LOG.debug("starting operator annotation processor: {}", this); //$NON-NLS-1$
         try {
             if (annotations.isEmpty() == false) {
                 run(annotations, roundEnv);
@@ -145,9 +156,9 @@ public class OperatorAnnotationProcessor implements Processor {
             environment.getProcessingEnvironment().getMessager().printMessage(
                     Diagnostic.Kind.ERROR,
                     MessageFormat.format(
-                            "Failed to compile Asakusa Operators ({0})",
+                            "failed to compile Asakusa Operators ({0})",
                             e.toString()));
-            LOG.error("Failed to compile Asakusa Operators by unknown exception", e);
+            LOG.error("failed to compile Asakusa Operators by unknown exception", e);
         }
         return false;
     }
@@ -162,9 +173,12 @@ public class OperatorAnnotationProcessor implements Processor {
                 analyzer.register(annotation, method);
             }
         }
+        Collection<OperatorClass> operatorClasses = analyzer.resolve();
+        LOG.debug("found {} operator classes", operatorClasses.size()); //$NON-NLS-1$
         OperatorFactoryEmitter factoryEmitter = new OperatorFactoryEmitter(environment);
         OperatorImplementationEmitter implementationEmitter = new OperatorImplementationEmitter(environment);
-        for (OperatorClass aClass : analyzer.resolve()) {
+        for (OperatorClass aClass : operatorClasses) {
+            LOG.debug("emitting support class: {}", aClass.getDeclaration().getQualifiedName()); //$NON-NLS-1$
             factoryEmitter.emit(aClass);
             if (environment.isForceGenerateImplementation()
                     || aClass.getDeclaration().getModifiers().contains(Modifier.ABSTRACT)) {

@@ -68,6 +68,15 @@ final class DslBuilder {
 
     static final ClassDescription TYPE_STRING = Descriptions.classOf(String.class);
 
+    static final ClassDescription TYPE_VOLATILE =
+            new ClassDescription("com.asakusafw.vocabulary.operator.Volatile"); //$NON-NLS-1$
+
+    static final ClassDescription TYPE_STICKY =
+            new ClassDescription("com.asakusafw.vocabulary.operator.Sticky"); //$NON-NLS-1$
+
+    static final ClassDescription TYPE_OBSERVATION_COUNT =
+            new ClassDescription("com.asakusafw.vocabulary.flow.graph.ObservationCount"); //$NON-NLS-1$
+
     private final List<Node> parameters = new ArrayList<>();
 
     private final List<Node> inputs = new ArrayList<>();
@@ -77,6 +86,8 @@ final class DslBuilder {
     private final List<Node> outputs = new ArrayList<>();
 
     private final List<KeyRef> keys = new ArrayList<>();
+
+    private ExecutableElement support;
 
     private final List<EnumConstantDescription> attributes = new ArrayList<>();
 
@@ -147,6 +158,10 @@ final class DslBuilder {
         addAttribute(CONSTANT_SHUFFLE);
     }
 
+    public void setSupport(ExecutableElement newValue) {
+        this.support = newValue;
+    }
+
     public void addAttribute(EnumConstantDescription attribute) {
         attributes.add(attribute);
     }
@@ -189,7 +204,39 @@ final class DslBuilder {
         if (sawError()) {
             return null;
         }
-        return new OperatorDescription(Document.reference(Reference.method()), parameters, outputs, attributes);
+        List<EnumConstantDescription> attrs = new ArrayList<>();
+        attrs.addAll(attributes);
+        attrs.add(computeObservationCount());
+        return new OperatorDescription(Document.reference(Reference.method()), parameters, outputs, attrs)
+            .withSupport(support);
+    }
+
+    private EnumConstantDescription computeObservationCount() {
+        boolean isVolatile = false;
+        boolean isSticky = false;
+        DeclaredType volatileType = environment.findDeclaredType(TYPE_VOLATILE);
+        DeclaredType stickyType = environment.findDeclaredType(TYPE_STICKY);
+        Types types = environment.getProcessingEnvironment().getTypeUtils();
+        for (AnnotationMirror mirror : method.getAnnotationMirrors()) {
+            DeclaredType annotationType = mirror.getAnnotationType();
+            if (isVolatile == false && types.isSameType(annotationType, volatileType)) {
+                isVolatile = true;
+            }
+            if (isSticky == false && types.isSameType(annotationType, stickyType)) {
+                isSticky = true;
+            }
+        }
+        String name;
+        if (isVolatile && isSticky) {
+            name = "EXACTLY_ONCE"; //$NON-NLS-1$
+        } else if (isVolatile) {
+            name = "AT_MOST_ONCE"; //$NON-NLS-1$
+        } else if (isSticky) {
+            name = "AT_LEAST_ONCE"; //$NON-NLS-1$
+        } else {
+            name = "DONT_CARE"; //$NON-NLS-1$
+        }
+        return new EnumConstantDescription(TYPE_OBSERVATION_COUNT, name);
     }
 
     public ElementRef method() {

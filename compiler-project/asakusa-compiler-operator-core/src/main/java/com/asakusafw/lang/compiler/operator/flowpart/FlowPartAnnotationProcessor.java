@@ -16,6 +16,7 @@
 package com.asakusafw.lang.compiler.operator.flowpart;
 
 import java.text.MessageFormat;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 
@@ -47,24 +48,32 @@ public class FlowPartAnnotationProcessor implements Processor {
 
     private volatile CompileEnvironment environment;
 
+    /**
+     * Creates a new instance.
+     */
+    public FlowPartAnnotationProcessor() {
+        LOG.debug("creating operator annotation processor: {}", this); //$NON-NLS-1$
+    }
+
     @Override
     public void init(ProcessingEnvironment processingEnv) {
+        LOG.debug("initializing operator annotation processor: {}", this); //$NON-NLS-1$
         try {
             this.environment = createCompileEnvironment(processingEnv);
         } catch (RuntimeException e) {
             processingEnv.getMessager().printMessage(
                     Diagnostic.Kind.ERROR,
                     MessageFormat.format(
-                            "Failed to initialize Asakusa Operator Compiler ({0})",
+                            "failed to initialize Asakusa Operator Compiler ({0})",
                             e.toString()));
-            LOG.error("Failed to initialize Asakusa Operator Compiler", e);
+            LOG.error("failed to initialize Asakusa Operator Compiler", e);
         } catch (LinkageError e) {
             processingEnv.getMessager().printMessage(
                     Diagnostic.Kind.ERROR,
                     MessageFormat.format(
-                            "Failed to initialize Asakusa Operator Compiler by linkage error ({0})",
+                            "failed to initialize Asakusa Operator Compiler by linkage error ({0})",
                             e.toString()));
-            LOG.error("Failed to initialize Asakusa Operator Compiler by linkage error", e);
+            LOG.error("failed to initialize Asakusa Operator Compiler by linkage error", e);
             throw e;
         }
     }
@@ -93,7 +102,7 @@ public class FlowPartAnnotationProcessor implements Processor {
 
     @Override
     public SourceVersion getSupportedSourceVersion() {
-        return SourceVersion.RELEASE_6;
+        return Constants.getSupportedSourceVersion();
     }
 
     @Override
@@ -107,6 +116,7 @@ public class FlowPartAnnotationProcessor implements Processor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+        LOG.debug("starting operator annotation processor: {}", this); //$NON-NLS-1$
         if (environment == null) {
             return false;
         }
@@ -118,9 +128,9 @@ public class FlowPartAnnotationProcessor implements Processor {
             environment.getProcessingEnvironment().getMessager().printMessage(
                     Diagnostic.Kind.ERROR,
                     MessageFormat.format(
-                            "Failed to compile Asakusa Operators ({0})",
+                            "failed to compile Asakusa Operators ({0})",
                             e.toString()));
-            LOG.error("Failed to compile Asakusa Operators by unknown exception", e);
+            LOG.error("failed to compile Asakusa Operators by unknown exception", e);
         }
         return false;
     }
@@ -135,8 +145,11 @@ public class FlowPartAnnotationProcessor implements Processor {
                 analyzer.register(type);
             }
         }
+        Collection<OperatorClass> operatorClasses = analyzer.resolve();
+        LOG.debug("found {} flow-part classes", operatorClasses.size()); //$NON-NLS-1$
         FlowPartFactoryEmitter emitter = new FlowPartFactoryEmitter(environment);
-        for (OperatorClass aClass : analyzer.resolve()) {
+        for (OperatorClass aClass : operatorClasses) {
+            LOG.debug("emitting support class: {}", aClass.getDeclaration().getQualifiedName()); //$NON-NLS-1$
             emitter.emit(aClass);
         }
     }

@@ -20,6 +20,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.annotation.Generated;
+import javax.lang.model.SourceVersion;
 
 import com.asakusafw.lang.compiler.model.description.AnnotationDescription;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
@@ -37,14 +38,10 @@ public final class Constants {
         return new ClassDescription(BASE + name);
     }
 
-    private static ClassDescription classOf(ClassDescription owner, String name) {
-        return new ClassDescription(owner.getBinaryName() + '$' + name);
-    }
-
     /**
      * {@code OperatorHelper} annotation type name.
      */
-    public static final ClassDescription TYPE_OPERATOR_HELPER = classOf("operator.OperatorHelper"); //$NON-NLS-1$
+    public static final ClassDescription TYPE_ANNOTATION_HELPER = classOf("operator.OperatorHelper"); //$NON-NLS-1$
 
     /**
      * {@code In} type name.
@@ -113,66 +110,10 @@ public final class Constants {
     public static final ClassDescription TYPE_EXPORTER_DESC = classOf("external.ExporterDescription"); //$NON-NLS-1$
 
     /**
-     * {@code FlowFragmentBuilder} type name.
+     * {@code FlowElementBuilder} type name.
      */
     public static final ClassDescription TYPE_ELEMENT_BUILDER =
             classOf("flow.builder.FlowElementBuilder"); //$NON-NLS-1$
-
-    /**
-     * {@code FlowFragmentEditor} type name.
-     */
-    public static final ClassDescription TYPE_ELEMENT_EDITOR = classOf("flow.builder.FlowElementEditor"); //$NON-NLS-1$
-
-    /**
-     * {@code OperatorFactory} type name.
-     */
-    public static final ClassDescription TYPE_ANNOTATION_FACTORY = classOf("operator.OperatorFactory"); //$NON-NLS-1$
-
-    /**
-     * {@code OperatorInfo} type name.
-     */
-    public static final ClassDescription TYPE_ANNOTATION_INFO = classOf("operator.OperatorInfo"); //$NON-NLS-1$
-
-    /**
-     * {@code OperatorInfo.Input} type name.
-     */
-    public static final ClassDescription TYPE_ANNOTATION_INPUT_INFO =
-            classOf(TYPE_ANNOTATION_INFO, "Input"); //$NON-NLS-1$
-
-    /**
-     * {@code OperatorInfo.Output} type name.
-     */
-    public static final ClassDescription TYPE_ANNOTATION_OUTPUT_INFO =
-            classOf(TYPE_ANNOTATION_INFO, "Output"); //$NON-NLS-1$
-
-    /**
-     * {@code OperatorInfo.Parameter} type name.
-     */
-    public static final ClassDescription TYPE_ANNOTATION_PARAMETER_INFO =
-            classOf(TYPE_ANNOTATION_INFO, "Parameter"); //$NON-NLS-1$
-
-    /**
-     * {@code KeyInfo} type name.
-     */
-    public static final ClassDescription TYPE_ANNOTATION_KEY = classOf("operator.KeyInfo"); //$NON-NLS-1$
-
-    /**
-     * {@code KeyInfo.Group} type name.
-     */
-    public static final ClassDescription TYPE_ANNOTATION_KEY_GROUP =
-            classOf(TYPE_ANNOTATION_KEY, "Group"); //$NON-NLS-1$
-
-    /**
-     * {@code KeyInfo.Order} type name.
-     */
-    public static final ClassDescription TYPE_ANNOTATION_KEY_ORDER =
-            classOf(TYPE_ANNOTATION_KEY, "Order"); //$NON-NLS-1$
-
-    /**
-     * {@code KeyInfo.Direction} type name.
-     */
-    public static final ClassDescription TYPE_ANNOTATION_KEY_DIRECTION =
-            classOf(TYPE_ANNOTATION_KEY, "Direction"); //$NON-NLS-1$
 
     /**
      * singleton name of flow-part factory method.
@@ -246,6 +187,14 @@ public final class Constants {
             throw new IllegalArgumentException("originalName must not be null"); //$NON-NLS-1$
         }
         return new ClassDescription(MessageFormat.format(PATTERN_FACTORY_CLASS, originalName));
+    }
+
+    /**
+     * Returns the current supported source version.
+     * @return the supported version
+     */
+    public static SourceVersion getSupportedSourceVersion() {
+        return SourceVersion.latestSupported();
     }
 
     /**

@@ -20,6 +20,8 @@ import static org.junit.Assert.*;
 
 import java.util.Map;
 
+import javax.lang.model.element.ExecutableElement;
+
 import org.junit.Test;
 
 import com.asakusafw.lang.compiler.model.description.Descriptions;
@@ -85,6 +87,25 @@ public class MasterJoinOperatorDriverTest extends OperatorDriverTestRoot {
                 Node orig = outputs.get(defaultName(MasterJoin.class, "missedPort"));
                 assertThat(orig, is(notNullValue()));
                 assertThat(orig.getType(), is(sameType("com.example.RModel")));
+            }
+        });
+    }
+
+    /**
+     * w/ selection.
+     */
+    @Test
+    public void selection() {
+        addDataModel("JModel");
+        addDataModel("LModel");
+        addDataModel("RModel");
+        compile(new Action("com.example.WithSelection") {
+            @Override
+            protected void perform(OperatorElement target) {
+                OperatorDescription description = target.getDescription();
+                ExecutableElement support = description.getSupport();
+                assertThat(support, is(notNullValue()));
+                assertThat(support.getSimpleName().toString(), is("selector"));
             }
         });
     }

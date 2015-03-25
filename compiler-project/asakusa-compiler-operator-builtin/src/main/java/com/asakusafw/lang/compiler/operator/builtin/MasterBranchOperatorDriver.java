@@ -70,7 +70,7 @@ public class MasterBranchOperatorDriver extends AbstractOperatorDriver {
                 }
             }
         }
-        MasterKindOperatorHelper.validateMasterSelection(dsl);
+        dsl.setSupport(MasterKindOperatorHelper.extractMasterSelection(dsl));
         dsl.requireShuffle();
         return dsl.toDescription();
     }
