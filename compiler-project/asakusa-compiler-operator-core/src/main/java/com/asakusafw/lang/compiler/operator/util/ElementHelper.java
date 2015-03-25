@@ -17,7 +17,9 @@ package com.asakusafw.lang.compiler.operator.util;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -25,17 +27,24 @@ import java.util.Map;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeParameterElement;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 
+import com.asakusafw.lang.compiler.model.description.AnnotationDescription;
+import com.asakusafw.lang.compiler.model.description.ArrayDescription;
+import com.asakusafw.lang.compiler.model.description.Descriptions;
 import com.asakusafw.lang.compiler.model.description.EnumConstantDescription;
+import com.asakusafw.lang.compiler.model.description.TypeDescription;
+import com.asakusafw.lang.compiler.model.description.ValueDescription;
 import com.asakusafw.lang.compiler.operator.CompileEnvironment;
 import com.asakusafw.lang.compiler.operator.Constants;
 import com.asakusafw.lang.compiler.operator.model.ExternMirror;
 import com.asakusafw.lang.compiler.operator.model.KeyMirror;
+import com.asakusafw.lang.compiler.operator.model.OperatorClass;
 import com.asakusafw.lang.compiler.operator.model.OperatorDescription;
 import com.asakusafw.lang.compiler.operator.model.OperatorDescription.Node;
 import com.asakusafw.lang.compiler.operator.model.OperatorDescription.ParameterReference;
@@ -43,6 +52,8 @@ import com.asakusafw.lang.compiler.operator.model.OperatorDescription.Reference;
 import com.asakusafw.lang.compiler.operator.model.OperatorDescription.Reference.Kind;
 import com.asakusafw.lang.compiler.operator.model.OperatorElement;
 import com.asakusafw.utils.java.jsr269.bridge.Jsr269;
+import com.asakusafw.utils.java.model.syntax.Annotation;
+import com.asakusafw.utils.java.model.syntax.Attribute;
 import com.asakusafw.utils.java.model.syntax.ClassLiteral;
 import com.asakusafw.utils.java.model.syntax.Expression;
 import com.asakusafw.utils.java.model.syntax.FormalParameterDeclaration;
@@ -300,9 +311,42 @@ public final class ElementHelper {
             default:
                 throw new AssertionError(param.getKind());
             }
+            List<Attribute> attributes = new ArrayList<>();
+            if (param.getKey() != null) {
+                KeyMirror key = param.getKey();
+                List<AnnotationDescription> groups = new ArrayList<>();
+                for (KeyMirror.Group group : key.getGroup()) {
+                    String name = group.getProperty().getName();
+                    groups.add(new AnnotationDescription(
+                            Constants.TYPE_ANNOTATION_KEY_GROUP,
+                            Collections.singletonMap("expression", Descriptions.valueOf(name))));
+                }
+                List<AnnotationDescription> orders = new ArrayList<>();
+                for (KeyMirror.Order order : key.getOrder()) {
+                    String direction = order.getDirection() == KeyMirror.Direction.ASCENDANT
+                            ? "ASC" //$NON-NLS-1$
+                            : "DESC"; //$NON-NLS-1$
+                    Map<String, ValueDescription> elements = new LinkedHashMap<>();
+                    elements.put("direction", //$NON-NLS-1$
+                            new EnumConstantDescription(Constants.TYPE_ANNOTATION_KEY_DIRECTION, direction));
+                    elements.put("expression", //$NON-NLS-1$
+                            Descriptions.valueOf(order.getProperty().getName()));
+                    orders.add(new AnnotationDescription(Constants.TYPE_ANNOTATION_KEY_ORDER, elements));
+                }
+                Map<String, ValueDescription> elements = new LinkedHashMap<>();
+                elements.put("group", //$NON-NLS-1$
+                        ArrayDescription.elementsOf(Constants.TYPE_ANNOTATION_KEY_GROUP, groups));
+                elements.put("order", //$NON-NLS-1$
+                        ArrayDescription.elementsOf(Constants.TYPE_ANNOTATION_KEY_ORDER, orders));
+                AnnotationDescription description = new AnnotationDescription(Constants.TYPE_ANNOTATION_KEY, elements);
+                attributes.add(DescriptionHelper.resolveAnnotation(imports, description));
+            }
             results.add(factory.newFormalParameterDeclaration(
+                    attributes,
                     type,
-                    factory.newSimpleName(param.getName())));
+                    false,
+                    factory.newSimpleName(param.getName()),
+                    0));
         }
         return results;
     }
@@ -442,7 +486,8 @@ public final class ElementHelper {
             ImportBuilder imports) {
         ModelFactory factory = Models.getModelFactory();
         ExpressionBuilder builder =
-                new TypeBuilder(factory, DescriptionHelper.resolve(imports, Constants.TYPE_KEY_INFO)).newObject();
+                new TypeBuilder(factory, DescriptionHelper.resolve(imports, Constants.TYPE_ELEMENT_BUILDER))
+                    .method("key"); //$NON-NLS-1$
         for (KeyMirror.Group group : element.getGroup()) {
             builder = builder.method("group", Models.toLiteral(factory, group.getProperty().getName()));
         }
@@ -458,8 +503,8 @@ public final class ElementHelper {
             ExternMirror element,
             ImportBuilder imports) {
         ModelFactory factory = Models.getModelFactory();
-        return new TypeBuilder(factory, DescriptionHelper.resolve(imports, Constants.TYPE_EXTERN_INFO))
-            .newObject(
+        return new TypeBuilder(factory, DescriptionHelper.resolve(imports, Constants.TYPE_ELEMENT_BUILDER))
+            .method("extern", //$NON-NLS-1$
                     Models.toLiteral(factory, element.getName()),
                     toLiteral(environment, element.getDescription(), imports))
             .toExpression();
@@ -476,5 +521,99 @@ public final class ElementHelper {
 
     private ElementHelper() {
         return;
+    }
+
+    /**
+     * Returns annotation for the operator factory classes.
+     * @param environment current environment
+     * @param element target operator class
+     * @param imports import builder
+     * @return generated syntax model
+     */
+    public static Annotation toAnnotation(
+            CompileEnvironment environment,
+            OperatorClass element,
+            ImportBuilder imports) {
+        AnnotationDescription description = new AnnotationDescription(
+                Constants.TYPE_ANNOTATION_FACTORY,
+                DescriptionHelper.toDescription(environment, element.getDeclaration()));
+        return DescriptionHelper.resolveAnnotation(imports, description);
+    }
+
+    /**
+     * Returns annotation for the operator factory methods.
+     * @param environment current environment
+     * @param element target operator element
+     * @param imports import builder
+     * @return generated syntax model
+     */
+    public static Annotation toAnnotation(
+            CompileEnvironment environment,
+            OperatorElement element,
+            ImportBuilder imports) {
+        List<AnnotationDescription> inputs = new ArrayList<>();
+        List<AnnotationDescription> outputs = new ArrayList<>();
+        List<AnnotationDescription> arguments = new ArrayList<>();
+        for (OperatorDescription.Node node : element.getDescription().getAllNodes()) {
+            TypeMirror type = node.getType();
+            Map<String, ValueDescription> elements = new LinkedHashMap<>();
+            elements.put("name", Descriptions.valueOf(node.getName())); //$NON-NLS-1$
+            elements.put("type", (ValueDescription) DescriptionHelper.toDescription( //$NON-NLS-1$
+                    environment, environment.getErasure(type)));
+            if (node.getKind() == OperatorDescription.Node.Kind.INPUT) {
+                putTypeVariable(type, elements);
+                elements.put("position", Descriptions.valueOf(inputs.size() + arguments.size())); //$NON-NLS-1$
+                inputs.add(new AnnotationDescription(Constants.TYPE_ANNOTATION_INPUT_INFO, elements));
+            } else if (node.getKind() == OperatorDescription.Node.Kind.DATA) {
+                putTypeVariableIfClass(environment, type, elements);
+                elements.put("position", Descriptions.valueOf(inputs.size() + arguments.size())); //$NON-NLS-1$
+                arguments.add(new AnnotationDescription(Constants.TYPE_ANNOTATION_PARAMETER_INFO, elements));
+            } else if (node.getKind() == OperatorDescription.Node.Kind.OUTPUT) {
+                putTypeVariable(type, elements);
+                outputs.add(new AnnotationDescription(Constants.TYPE_ANNOTATION_OUTPUT_INFO, elements));
+            } else {
+                throw new AssertionError(node);
+            }
+        }
+        Map<String, ValueDescription> elements = new LinkedHashMap<>();
+        elements.put("kind", //$NON-NLS-1$
+                DescriptionHelper.toDescription(environment, element.getAnnotation().getAnnotationType()));
+        elements.put("input", //$NON-NLS-1$
+                ArrayDescription.elementsOf(Constants.TYPE_ANNOTATION_INPUT_INFO, inputs));
+        elements.put("output", //$NON-NLS-1$
+                ArrayDescription.elementsOf(Constants.TYPE_ANNOTATION_OUTPUT_INFO, outputs));
+        elements.put("parameter", //$NON-NLS-1$
+                ArrayDescription.elementsOf(Constants.TYPE_ANNOTATION_PARAMETER_INFO, arguments));
+        AnnotationDescription description = new AnnotationDescription(Constants.TYPE_ANNOTATION_INFO, elements);
+        return DescriptionHelper.resolveAnnotation(imports, description);
+    }
+
+    private static void putTypeVariable(TypeMirror type, Map<String, ValueDescription> elements) {
+        if (type.getKind() != TypeKind.TYPEVAR) {
+            return;
+        }
+        putTypeVariable((TypeVariable) type, elements);
+    }
+
+    private static void putTypeVariableIfClass(
+            CompileEnvironment environment, TypeMirror type, Map<String, ValueDescription> elements) {
+        if (type.getKind() != TypeKind.DECLARED) {
+            return;
+        }
+        DeclaredType d = (DeclaredType) type;
+        List<? extends TypeMirror> args = d.getTypeArguments();
+        if (args.size() != 1 || args.get(0).getKind() != TypeKind.TYPEVAR) {
+            return;
+        }
+        TypeDescription erasure = DescriptionHelper.toDescription(environment, environment.getErasure(d));
+        if (erasure.equals(Descriptions.classOf(Class.class)) == false) {
+            return;
+        }
+        putTypeVariable((TypeVariable) args.get(0), elements);
+    }
+
+    private static void putTypeVariable(TypeVariable typeVar, Map<String, ValueDescription> elements) {
+        String var = typeVar.asElement().getSimpleName().toString();
+        elements.put("typeVariable", Descriptions.valueOf(var)); //$NON-NLS-1$
     }
 }

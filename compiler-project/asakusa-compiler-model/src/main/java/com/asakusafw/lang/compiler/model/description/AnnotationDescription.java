@@ -36,6 +36,23 @@ public class AnnotationDescription implements ValueDescription {
     private final Map<String, ValueDescription> elements;
 
     /**
+     * Creates a new instance for marker annotation.
+     * @param declaringClass the declaring annotation type
+     */
+    public AnnotationDescription(ClassDescription declaringClass) {
+        this(declaringClass, Collections.<String, ValueDescription>emptyMap());
+    }
+
+    /**
+     * Creates a new instance for single element annotation.
+     * @param declaringClass the declaring annotation type
+     * @param value value of the single element annotation
+     */
+    public AnnotationDescription(ClassDescription declaringClass, ValueDescription value) {
+        this(declaringClass, Collections.singletonMap("value", value)); //$NON-NLS-1$
+    }
+
+    /**
      * Creates a new instance.
      * @param declaringClass the declaring annotation type
      * @param elements the annotation elements (includes default values)

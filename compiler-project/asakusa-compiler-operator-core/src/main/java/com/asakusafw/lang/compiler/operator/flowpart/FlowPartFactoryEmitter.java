@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.annotation.Generated;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
@@ -172,10 +171,8 @@ public class FlowPartFactoryEmitter {
                         .text(".")
                         .toJavadoc(),
                     new AttributeBuilder(f)
-                        .annotation(
-                                imports.toType(Generated.class),
-                                Models.toLiteral(f, Constants.getGeneratorMessage()))
-                        // FIXME more
+                        .annotation(DescriptionHelper.resolveAnnotation(imports, Constants.getGenetedAnnotation()))
+                        .annotation(ElementHelper.toAnnotation(environment, operatorClass, imports))
                         .Public()
                         .Final()
                         .toAttributes(),
@@ -294,6 +291,7 @@ public class FlowPartFactoryEmitter {
             return f.newMethodDeclaration(
                     generateFactoryMethodComment(element),
                     new AttributeBuilder(f)
+                        .annotation(ElementHelper.toAnnotation(environment, element, imports))
                         .Public()
                         .toAttributes(),
                     ElementHelper.toTypeParameters(environment, decl.getTypeParameters(), imports),

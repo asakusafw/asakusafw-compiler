@@ -57,9 +57,15 @@ public class OperatorCompilerTestRoot {
 
     private final List<JavaFileObject> sources = new ArrayList<>();
 
-    final List<OperatorDriver> operatorDrivers = new ArrayList<>();
+    /**
+     * operator drivers.
+     */
+    public final List<OperatorDriver> operatorDrivers = new ArrayList<>();
 
-    final List<DataModelMirrorRepository> dataModelMirrors = new ArrayList<>();
+    /**
+     * data model mirrors.
+     */
+    public final List<DataModelMirrorRepository> dataModelMirrors = new ArrayList<>();
 
     /**
      * Dumps generated source files.

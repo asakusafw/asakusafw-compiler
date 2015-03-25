@@ -199,6 +199,24 @@ public abstract class FlowElementBuilder {
     }
 
     /**
+     * Creates a new {@link KeyInfo} object.
+     * @return the created object
+     */
+    public static KeyInfo key() {
+        return new KeyInfo();
+    }
+
+    /**
+     * Creates a new {@link ExternInfo} object.
+     * @param name the external port name
+     * @param description the external port description class
+     * @return the created object
+     */
+    public static ExternInfo extern(String name, Class<?> description) {
+        return new ExternInfo(name, description);
+    }
+
+    /**
      * Resolves current operator input/output/arguments.
      * @return the resolved information
      * @throws IllegalStateException if failed to resolve the operator

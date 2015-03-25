@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.operator.model.DataModelMirror;
+import com.asakusafw.lang.compiler.operator.util.DescriptionHelper;
 import com.asakusafw.utils.java.jsr269.bridge.Jsr269;
 import com.asakusafw.utils.java.model.syntax.CompilationUnit;
 import com.asakusafw.utils.java.model.util.Models;
@@ -57,6 +58,8 @@ public class CompileEnvironment {
     private volatile boolean strict = true;
 
     private volatile boolean flowpartExternalIo = false;
+
+    private volatile boolean forceGenerateImplementation = false;
 
     /**
      * Creates a new instance.
@@ -148,7 +151,8 @@ public class CompileEnvironment {
         }
         return new CompileEnvironment(processingEnvironment, operatorDrivers, dataModelMirrors)
             .withStrict(set.contains(Support.STRICT_CHECKING))
-            .withFlowpartExternalIo(set.contains(Support.FLOWPART_EXTERNAL_IO));
+            .withFlowpartExternalIo(set.contains(Support.FLOWPART_EXTERNAL_IO))
+            .withForceGenerateImplementation(set.contains(Support.FORCE_GENERATE_IMPLEMENTATION));
     }
 
     private static <T> List<T> load(Class<T> spi, ClassLoader serviceLoader) {
@@ -241,7 +245,7 @@ public class CompileEnvironment {
         if (annotationType == null) {
             throw new IllegalArgumentException("annotationType must not be null"); //$NON-NLS-1$
         }
-        ClassDescription aClass = new ClassDescription(annotationType.getQualifiedName().toString());
+        ClassDescription aClass = DescriptionHelper.toDescription(this, annotationType);
         for (OperatorDriver driver : operatorDrivers) {
             if (driver.getAnnotationTypeName().equals(aClass)) {
                 return driver;
@@ -326,12 +330,30 @@ public class CompileEnvironment {
     }
 
     /**
-     * Returns whether external I/O declarations are available in flow-parts or not.
+     * Sets whether external I/O declarations are available in flow-parts or not.
      * @param newValue {@code true} iff they are available
      * @return this
      */
     public CompileEnvironment withFlowpartExternalIo(boolean newValue) {
         this.flowpartExternalIo = newValue;
+        return this;
+    }
+
+    /**
+     * Returns whether always generates implementation classes or not.
+     * @return {@code true} if it is available, otherwise {@code false}
+     */
+    public boolean isForceGenerateImplementation() {
+        return forceGenerateImplementation;
+    }
+
+    /**
+     * Sets whether always generates implementation classes or not.
+     * @param newValue {@code true} iff it is available
+     * @return this
+     */
+    public CompileEnvironment withForceGenerateImplementation(boolean newValue) {
+        this.forceGenerateImplementation = newValue;
         return this;
     }
 
@@ -354,6 +376,11 @@ public class CompileEnvironment {
          * Supports strict checking.
          */
         STRICT_CHECKING,
+
+        /**
+         * Always generate implementation classes.
+         */
+        FORCE_GENERATE_IMPLEMENTATION,
 
         /**
          * Supports external I/O ports in flow parts.

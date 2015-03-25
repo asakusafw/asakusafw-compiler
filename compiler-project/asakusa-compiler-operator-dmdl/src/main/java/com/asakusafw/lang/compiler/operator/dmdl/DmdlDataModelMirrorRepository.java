@@ -182,8 +182,9 @@ public class DmdlDataModelMirrorRepository implements DataModelMirrorRepository,
         if (segments.size() <= 2) {
             return null;
         }
-        if (segments.get(0).equals("get") == false //$NON-NLS-1$
-                || segments.get(segments.size() - 1).equals("option") == false) { //$NON-NLS-1$
+        String first = segments.get(0);
+        String last = segments.get(segments.size() - 1);
+        if (first.equals("get") == false || last.equals("option") == false) { //$NON-NLS-1$ //$NON-NLS-2$
             return null;
         }
         name.removeLast();

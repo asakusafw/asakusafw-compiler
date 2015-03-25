@@ -184,10 +184,14 @@ public class OperatorMethodAnalyzer {
                     type.getSimpleName());
             valid = false;
         }
-        if (type.getModifiers().contains(Modifier.ABSTRACT) == false) {
-            error(type, "operator class {0} must be declared as \"abstract\"",
+        if (type.getModifiers().contains(Modifier.FINAL)) {
+            error(type, "operator class {0} must not be declared as \"final\"",
                     type.getSimpleName());
             valid = false;
+        }
+        if (type.getModifiers().contains(Modifier.ABSTRACT) == false) { // optional requirement
+            warn(type, "operator class {0} should be declared as \"abstract\"",
+                    type.getSimpleName());
         }
         if (type.getSuperclass().getKind() != TypeKind.NONE) { // optional requirement
             Types types = environment.getProcessingEnvironment().getTypeUtils();

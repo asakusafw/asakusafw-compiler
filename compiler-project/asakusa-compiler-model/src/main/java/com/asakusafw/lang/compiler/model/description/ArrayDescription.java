@@ -44,6 +44,18 @@ public class ArrayDescription implements ValueDescription {
 
     /**
      * Creates a new instance.
+     * @param elementType the element type
+     * @param elements the array elements
+     * @return the created instance
+     */
+    public static ArrayDescription elementsOf(
+            ReifiableTypeDescription elementType,
+            List<? extends ValueDescription> elements) {
+        return new ArrayDescription(new ArrayTypeDescription(elementType), elements);
+    }
+
+    /**
+     * Creates a new instance.
      * @param array the array object
      * @return the created instance
      */

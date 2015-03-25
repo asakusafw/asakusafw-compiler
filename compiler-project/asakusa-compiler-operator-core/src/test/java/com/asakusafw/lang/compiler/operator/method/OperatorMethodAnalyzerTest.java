@@ -93,6 +93,14 @@ public class OperatorMethodAnalyzerTest extends OperatorCompilerTestRoot {
     }
 
     /**
+     * must be abstract.
+     */
+    @Test
+    public void violate_no_final() {
+        violate("com.example.ViolateNoFinal");
+    }
+
+    /**
      * must be no type parameters.
      */
     @Test

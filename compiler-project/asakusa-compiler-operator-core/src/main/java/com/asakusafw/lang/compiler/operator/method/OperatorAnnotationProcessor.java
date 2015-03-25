@@ -29,6 +29,7 @@ import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.ElementFilter;
 import javax.tools.Diagnostic;
@@ -82,7 +83,8 @@ public class OperatorAnnotationProcessor implements Processor {
                 processingEnv,
                 CompileEnvironment.Support.DATA_MODEL_REPOSITORY,
                 CompileEnvironment.Support.OPERATOR_DRIVER,
-                CompileEnvironment.Support.STRICT_CHECKING);
+                CompileEnvironment.Support.STRICT_CHECKING,
+                CompileEnvironment.Support.FORCE_GENERATE_IMPLEMENTATION);
     }
 
     @Override
@@ -164,7 +166,10 @@ public class OperatorAnnotationProcessor implements Processor {
         OperatorImplementationEmitter implementationEmitter = new OperatorImplementationEmitter(environment);
         for (OperatorClass aClass : analyzer.resolve()) {
             factoryEmitter.emit(aClass);
-            implementationEmitter.emit(aClass);
+            if (environment.isForceGenerateImplementation()
+                    || aClass.getDeclaration().getModifiers().contains(Modifier.ABSTRACT)) {
+                implementationEmitter.emit(aClass);
+            }
         }
     }
 }

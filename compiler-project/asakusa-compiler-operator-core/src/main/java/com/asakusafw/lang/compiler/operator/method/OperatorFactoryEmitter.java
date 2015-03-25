@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.annotation.Generated;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeParameterElement;
@@ -166,10 +165,7 @@ public class OperatorFactoryEmitter {
                         .text(".")
                         .toJavadoc(),
                     new AttributeBuilder(f)
-                        .annotation(
-                                imports.toType(Generated.class),
-                                Models.toLiteral(f, Constants.getGeneratorMessage()))
-                        // FIXME more
+                        .annotation(DescriptionHelper.resolveAnnotation(imports, Constants.getGenetedAnnotation()))
                         .Public()
                         .Final()
                         .toAttributes(),
@@ -292,6 +288,7 @@ public class OperatorFactoryEmitter {
             return f.newMethodDeclaration(
                     generateFactoryMethodComment(element),
                     new AttributeBuilder(f)
+                        .annotation(ElementHelper.toAnnotation(environment, element, imports))
                         .Public()
                         .toAttributes(),
                     ElementHelper.toTypeParameters(environment, element.getDeclaration().getTypeParameters(), imports),

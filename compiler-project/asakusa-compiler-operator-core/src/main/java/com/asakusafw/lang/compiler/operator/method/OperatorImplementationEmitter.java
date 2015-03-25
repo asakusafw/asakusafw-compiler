@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.annotation.Generated;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.PackageElement;
@@ -41,6 +40,7 @@ import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.operator.CompileEnvironment;
 import com.asakusafw.lang.compiler.operator.Constants;
 import com.asakusafw.lang.compiler.operator.model.OperatorClass;
+import com.asakusafw.lang.compiler.operator.util.DescriptionHelper;
 import com.asakusafw.utils.java.jsr269.bridge.Jsr269;
 import com.asakusafw.utils.java.model.syntax.ArrayType;
 import com.asakusafw.utils.java.model.syntax.Attribute;
@@ -161,10 +161,7 @@ public class OperatorImplementationEmitter {
                         .text(".")
                         .toJavadoc(),
                     new AttributeBuilder(f)
-                        .annotation(
-                                imports.toType(Generated.class),
-                                Models.toLiteral(f, Constants.getGeneratorMessage()))
-                        // FIXME more
+                        .annotation(DescriptionHelper.resolveAnnotation(imports, Constants.getGenetedAnnotation()))
                         .Public()
                         .Final()
                         .toAttributes(),

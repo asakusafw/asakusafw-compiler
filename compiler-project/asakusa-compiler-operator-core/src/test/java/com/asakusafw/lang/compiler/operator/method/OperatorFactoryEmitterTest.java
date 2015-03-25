@@ -28,6 +28,7 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
 import javax.lang.model.util.ElementFilter;
 
 import org.junit.Test;
@@ -37,10 +38,10 @@ import com.asakusafw.lang.compiler.model.description.Descriptions;
 import com.asakusafw.lang.compiler.operator.Callback;
 import com.asakusafw.lang.compiler.operator.CompileEnvironment;
 import com.asakusafw.lang.compiler.operator.Constants;
-import com.asakusafw.lang.compiler.operator.DataModelMirrorRepository;
 import com.asakusafw.lang.compiler.operator.MockSource;
 import com.asakusafw.lang.compiler.operator.OperatorCompilerTestRoot;
-import com.asakusafw.lang.compiler.operator.OperatorDriver;
+import com.asakusafw.lang.compiler.operator.StringDataModelMirrorRepository;
+import com.asakusafw.lang.compiler.operator.model.KeyMirror;
 import com.asakusafw.lang.compiler.operator.model.OperatorClass;
 import com.asakusafw.lang.compiler.operator.model.OperatorDescription;
 import com.asakusafw.lang.compiler.operator.model.OperatorDescription.Document;
@@ -209,6 +210,41 @@ public class OperatorFactoryEmitterTest extends OperatorCompilerTestRoot {
         assertThat(getParameters(info).size(), is(1));
     }
 
+    /**
+     * With key.
+     */
+    @Test
+    public void key() {
+        add(new StringDataModelMirrorRepository());
+        Object factory = compile(new Action("com.example.WithKey", "method") {
+            @Override
+            protected OperatorDescription analyze(ExecutableElement element) {
+                VariableElement param = element.getParameters().get(0);
+                AnnotationMirror mirror = param.getAnnotationMirrors().get(0);
+                List<Node> parameters = new ArrayList<>();
+                parameters.add(new Node(
+                        Kind.INPUT,
+                        "in",
+                        new ReferenceDocument(new ParameterReference(0)),
+                        env.findDeclaredType(Descriptions.classOf(String.class)),
+                        new ParameterReference(0))
+                        .withKey(KeyMirror.parse(env, mirror, param, env.findDataModel(param.asType()))));
+                List<Node> outputs = new ArrayList<>();
+                return new OperatorDescription(new ReferenceDocument(new MethodReference()), parameters, outputs);
+            }
+        });
+        MockSource<String> source = MockSource.of(String.class);
+        invoke(factory, "method", source);
+
+        FlowElement info = getOppositeNode(source);
+        assertThat(info.getInputPorts().size(), is(1));
+        assertThat(info.getOutputPorts().size(), is(0));
+        assertThat(getParameters(info).size(), is(0));
+        FlowElementPortDescription port = info.getInputPorts().get(0).getDescription();
+        assertThat(port.getName(), is("in"));
+        assertThat(port.getDataType(), is((Object) String.class));
+    }
+
     private FlowElement getOppositeNode(Source<?> source) {
         FlowElementOutput output = source.toOutputPort();
         assertThat(output.getConnected().isEmpty(), is(false));
@@ -236,7 +272,7 @@ public class OperatorFactoryEmitterTest extends OperatorCompilerTestRoot {
         return create(classLoader, implClass);
     }
 
-    private abstract static class Action extends Callback {
+    private abstract class Action extends Callback {
 
         final String className;
 
@@ -252,10 +288,7 @@ public class OperatorFactoryEmitterTest extends OperatorCompilerTestRoot {
 
         @Override
         protected CompileEnvironment createCompileEnvironment(ProcessingEnvironment processingEnv) {
-            return new CompileEnvironment(
-                    processingEnv,
-                    Collections.<OperatorDriver>emptyList(),
-                    Collections.<DataModelMirrorRepository>emptyList());
+            return new CompileEnvironment(processingEnv, operatorDrivers, dataModelMirrors);
         }
 
         @Override
