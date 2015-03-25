@@ -455,7 +455,7 @@ public final class BatchCompilerCli {
             LOG.debug("  compiler: {}", compiler.getClass().getName()); //$NON-NLS-1$
         }
         Predicate<? super Class<?>> predicate = loadPredicate(root, configuration, analyzer);
-        boolean sawError = false;
+        Map<Class<?>, DiagnosticException> errors = new LinkedHashMap<>();
         Map<String, ClassDescription> sawBatch = new HashMap<>();
         for (Class<?> aClass : root.getProject().getProjectClasses(predicate)) {
             if (LOG.isInfoEnabled()) {
@@ -485,7 +485,7 @@ public final class BatchCompilerCli {
                 BatchCompiler.Context context = new BatchCompiler.Context(root, new FileContainer(output));
                 compiler.compile(context, batch);
             } catch (DiagnosticException e) {
-                sawError = true;
+                errors.put(aClass, e);
                 for (Diagnostic diagnostic : e.getDiagnostics()) {
                     log(diagnostic);
                 }
@@ -496,7 +496,15 @@ public final class BatchCompilerCli {
                 }
             }
         }
-        return sawError == false;
+        if (errors.isEmpty() == false) {
+            for (Map.Entry<Class<?>, DiagnosticException> entry : errors.entrySet()) {
+                LOG.error(MessageFormat.format(
+                        "error occurred while compiling batch: {0}",
+                        entry.getKey().getName()), entry.getValue());
+            }
+            return false;
+        }
+        return true;
     }
 
     private static void log(Diagnostic diagnostic) {
