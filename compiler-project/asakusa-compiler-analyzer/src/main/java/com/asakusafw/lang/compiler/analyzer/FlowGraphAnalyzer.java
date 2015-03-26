@@ -224,7 +224,7 @@ public final class FlowGraphAnalyzer {
                     declaration.getName()));
             return null;
         }
-        AnnotationDescription annotation = getOperatorAnnotation(method, declaration.getAnnotationType());
+        Annotation annotation = getOperatorAnnotation(method, declaration.getAnnotationType());
         if (annotation == null) {
             context.error(MessageFormat.format(
                     "failed to resolve operator annotation: [{0}]{1}#{2}()",
@@ -234,28 +234,26 @@ public final class FlowGraphAnalyzer {
             return null;
         }
         return convert(description, UserOperator.builder(
-                annotation,
+                AnnotationDescription.of(annotation),
                 MethodDescription.of(method),
                 Descriptions.classOf(declaration.getImplementing())));
     }
 
-    private AnnotationDescription getOperatorAnnotation(Method method, Class<? extends Annotation> annotationType) {
+    private Annotation getOperatorAnnotation(Method method, Class<? extends Annotation> annotationType) {
         Annotation annotation = method.getAnnotation(annotationType);
-        if (annotation == null) {
-            Collection<Class<? extends Annotation>> aliases = OPERATOR_ANNOTATION_ALIASES.get(annotationType);
-            if (aliases != null) {
-                for (Class<? extends Annotation> alias : aliases) {
-                    annotation = method.getAnnotation(alias);
-                    if (annotation != null) {
-                        break;
-                    }
+        if (annotation != null) {
+            return annotation;
+        }
+        Collection<Class<? extends Annotation>> aliases = OPERATOR_ANNOTATION_ALIASES.get(annotationType);
+        if (aliases != null) {
+            for (Class<? extends Annotation> alias : aliases) {
+                Annotation origin = method.getAnnotation(alias);
+                if (origin != null) {
+                    return origin;
                 }
             }
         }
-        if (annotation == null) {
-            return null;
-        }
-        return AnnotationDescription.of(annotation);
+        return null;
     }
 
     private Operator convert(PseudElementDescription description) {
