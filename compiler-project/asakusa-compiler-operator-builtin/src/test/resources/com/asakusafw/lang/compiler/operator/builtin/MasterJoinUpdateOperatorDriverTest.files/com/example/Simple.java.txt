@@ -6,6 +6,6 @@ import com.asakusafw.vocabulary.operator.*;
 public abstract class Simple {
 
     @MasterJoinUpdate
-    public void method(@Key(group = "id") Side side, @Key(group = "content") Model model) {
+    public void method(@Key(group = "id") Side side, @Key(group = "key") Model model) {
     }
 }

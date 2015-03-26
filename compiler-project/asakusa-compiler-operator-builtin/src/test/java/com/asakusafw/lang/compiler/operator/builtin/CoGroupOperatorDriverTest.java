@@ -202,4 +202,28 @@ public class CoGroupOperatorDriverTest extends OperatorDriverTestRoot {
     public void violate_output_inferable() {
         violate("com.example.ViolateOutputInferable");
     }
+
+    /**
+     * Violates each group has the same type.
+     */
+    @Test
+    public void violate_key_with_same_type() {
+        violate("com.example.ViolateKeyWithSameType");
+    }
+
+    /**
+     * Violates each group has same number of properties.
+     */
+    @Test
+    public void violate_key_group_not_larger() {
+        violate("com.example.ViolateKeyGroupNotLarger");
+    }
+
+    /**
+     * Violates each group has same number of properties.
+     */
+    @Test
+    public void violate_key_group_not_smaller() {
+        violate("com.example.ViolateKeyGroupNotSmaller");
+    }
 }

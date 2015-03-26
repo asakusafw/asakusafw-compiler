@@ -70,7 +70,7 @@ public class FoldOperatorDriver extends AbstractOperatorDriver {
         for (ElementRef p : dsl.parameters(2)) {
             TypeRef type = p.type();
             if (type.isBasic()) {
-                dsl.consumeArgument(p);
+                dsl.consumeGenericParameter(p);
             } else {
                 p.error("Rest of this operator's parameters must be basic type");
             }

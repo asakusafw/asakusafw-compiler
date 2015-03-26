@@ -61,7 +61,7 @@ public class UpdateOperatorDriver extends AbstractOperatorDriver {
                     p.error("This operator must not have multiple data model type parameters");
                 }
             } else if (type.isBasic()) {
-                dsl.consumeArgument(p);
+                dsl.consumeGenericParameter(p);
             } else {
                 p.error("This operator's parameters must be either data model type or basic type");
             }

@@ -65,7 +65,7 @@ public class CoGroupOperatorDriver extends AbstractOperatorDriver {
                     p.error("Output Result element must be a data model type");
                 }
             } else if (type.isBasic()) {
-                dsl.consumeArgument(p);
+                dsl.consumeGenericParameter(p);
             } else {
                 p.error("This operator's parameters must be one of List, Result, or basic type");
             }

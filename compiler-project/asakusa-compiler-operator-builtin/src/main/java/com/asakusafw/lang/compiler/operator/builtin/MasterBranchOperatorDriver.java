@@ -52,7 +52,7 @@ public class MasterBranchOperatorDriver extends AbstractOperatorDriver {
         MasterKindOperatorHelper.consumeMaster(dsl);
         MasterKindOperatorHelper.consumeTx(dsl);
         for (ElementRef p : dsl.parameters(2)) {
-            dsl.consumeArgument(p);
+            dsl.consumeGenericParameter(p);
         }
         if (dsl.getInputs().isEmpty() == false && enumResult) {
             List<ElementRef> constants = dsl.result().type().enumConstants();

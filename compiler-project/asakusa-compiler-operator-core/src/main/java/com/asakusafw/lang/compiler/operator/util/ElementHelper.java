@@ -610,8 +610,8 @@ public final class ElementHelper {
             TypeMirror type = node.getType();
             Map<String, ValueDescription> elements = new LinkedHashMap<>();
             elements.put("name", Descriptions.valueOf(node.getName())); //$NON-NLS-1$
-            elements.put("type", (ValueDescription) DescriptionHelper.toDescription( //$NON-NLS-1$
-                    environment, environment.getErasure(type)));
+            elements.put("type", //$NON-NLS-1$
+                    (ValueDescription) DescriptionHelper.toDescription(environment, environment.getErasure(type)));
             if (node.getKind() == OperatorDescription.Node.Kind.INPUT) {
                 putTypeVariable(type, elements);
                 elements.put("position", Descriptions.valueOf(inputs.size() + arguments.size())); //$NON-NLS-1$

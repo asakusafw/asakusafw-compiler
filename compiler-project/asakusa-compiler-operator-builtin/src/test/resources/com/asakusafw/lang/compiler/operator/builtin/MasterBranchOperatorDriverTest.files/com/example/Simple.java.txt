@@ -6,7 +6,7 @@ import com.asakusafw.vocabulary.operator.*;
 public abstract class Simple {
 
     @MasterBranch
-    public Select method(@Key(group = "id") Side side, @Key(group = "content") Model model) {
+    public Select method(@Key(group = "id") Side side, @Key(group = "key") Model model) {
         return Select.values()[0];
     }
 

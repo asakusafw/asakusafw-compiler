@@ -15,6 +15,7 @@
  */
 package com.asakusafw.lang.compiler.operator.builtin;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -85,7 +86,7 @@ final class DslBuilder {
 
     private final List<Node> outputs = new ArrayList<>();
 
-    private final List<KeyRef> keys = new ArrayList<>();
+    private final List<KeyRef> mainKeys = new ArrayList<>();
 
     private ExecutableElement support;
 
@@ -135,11 +136,9 @@ final class DslBuilder {
         inputs.add(node);
         if (key != null) {
             node.withKey(key.getModel());
-            keys.add(key);
+            mainKeys.add(key);
         }
         parameters.add(node);
-
-        // FIXME validate keys
     }
 
     public void addArgument(Document document, String name, TypeMirror type, Reference reference) {
@@ -200,6 +199,7 @@ final class DslBuilder {
         if (outputs.isEmpty()) {
             methodRef.error("Operator method must have at least one output parameter");
         }
+        validateMainKeys();
 
         if (sawError()) {
             return null;
@@ -209,6 +209,54 @@ final class DslBuilder {
         attrs.add(computeObservationCount());
         return new OperatorDescription(Document.reference(Reference.method()), parameters, outputs, attrs)
             .withSupport(support);
+    }
+
+    private void validateMainKeys() {
+        if (mainKeys.size() <= 1) {
+            return;
+        }
+        KeyRef first = mainKeys.get(0);
+        for (int i = 1, n = mainKeys.size(); i < n; i++) {
+            KeyRef target = mainKeys.get(i);
+            validateMainKey(first, target);
+        }
+    }
+
+    private void validateMainKey(KeyRef first, KeyRef target) {
+        List<KeyMirror.Group> as = first.getModel().getGroup();
+        List<KeyMirror.Group> bs = target.getModel().getGroup();
+        Types types = environment.getProcessingEnvironment().getTypeUtils();
+        for (int i = 0, n = Math.min(as.size(), bs.size()); i < n; i++) {
+            KeyMirror.Group a = as.get(i);
+            KeyMirror.Group b = bs.get(i);
+            if (types.isSameType(a.getProperty().getType(), b.getProperty().getType()) == false) {
+                target.error(b.getSource(), MessageFormat.format(
+                        "inconsistent group property type: \"{0}.{1}\" <> \"{2}.{3}\"",
+                        first.getOwner().getSimpleName(),
+                        a.getProperty().getName(),
+                        target.getOwner().getSimpleName(),
+                        b.getProperty().getName()));
+            }
+        }
+        if (as.size() < bs.size()) {
+            for (int i = as.size(), n = bs.size(); i < n; i++) {
+                KeyMirror.Group b = bs.get(i);
+                first.error(MessageFormat.format(
+                        "missing group property for \"{0}.{1}\" at \"{2}\"",
+                        target.getOwner().getSimpleName(),
+                        b.getProperty().getName(),
+                        first.getOwner().getSimpleName()));
+            }
+        } else if (as.size() > bs.size()) {
+            for (int i = bs.size(), n = as.size(); i < n; i++) {
+                KeyMirror.Group a = as.get(i);
+                target.error(MessageFormat.format(
+                        "missing group property for \"{0}.{1}\" at \"{2}\"",
+                        first.getOwner().getSimpleName(),
+                        a.getProperty().getName(),
+                        target.getOwner().getSimpleName()));
+            }
+        }
     }
 
     private EnumConstantDescription computeObservationCount() {
@@ -277,11 +325,11 @@ final class DslBuilder {
         return annotationRef;
     }
 
-    public void consumeArgument(ElementRef parameter) {
+    public void consumeGenericParameter(ElementRef parameter) {
         if (parameter.type().isBasic()) {
             addArgument(parameter.document(), parameter.name(), parameter.type().mirror(), parameter.reference());
         } else {
-            parameter.error("Value parameter must be primitive type or java.lang.String type");
+            parameter.error("value parameter must be primitive type or java.lang.String type");
         }
     }
 
@@ -754,7 +802,7 @@ final class DslBuilder {
         }
     }
 
-    static class KeyRef {
+    class KeyRef {
 
         private final Element owner;
 
@@ -771,6 +819,18 @@ final class DslBuilder {
 
         public KeyMirror getModel() {
             return model;
+        }
+
+        public void error(String message) {
+            errorSink.set(true);
+            Messager messager = environment.getProcessingEnvironment().getMessager();
+            messager.printMessage(Diagnostic.Kind.ERROR, message, owner, model.getSource());
+        }
+
+        public void error(AnnotationValue value, String message) {
+            errorSink.set(true);
+            Messager messager = environment.getProcessingEnvironment().getMessager();
+            messager.printMessage(Diagnostic.Kind.ERROR, message, owner, model.getSource(), value);
         }
     }
 }

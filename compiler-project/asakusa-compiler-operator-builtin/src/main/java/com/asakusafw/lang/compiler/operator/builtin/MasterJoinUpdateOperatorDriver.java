@@ -53,7 +53,7 @@ public class MasterJoinUpdateOperatorDriver extends AbstractOperatorDriver {
         MasterKindOperatorHelper.consumeMaster(dsl);
         MasterKindOperatorHelper.consumeTx(dsl);
         for (ElementRef p : dsl.parameters(2)) {
-            dsl.consumeArgument(p);
+            dsl.consumeGenericParameter(p);
         }
         if (dsl.getInputs().isEmpty() == false) {
             Node txInput = dsl.getInputs().get(dsl.getInputs().size() - 1);
