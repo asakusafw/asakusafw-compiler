@@ -17,7 +17,6 @@ package com.asakusafw.vocabulary.flow.builder;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -26,7 +25,6 @@ import java.util.Map;
 import com.asakusafw.vocabulary.flow.FlowDescription;
 import com.asakusafw.vocabulary.flow.Source;
 import com.asakusafw.vocabulary.flow.graph.FlowElement;
-import com.asakusafw.vocabulary.flow.graph.FlowElementAttribute;
 import com.asakusafw.vocabulary.flow.graph.FlowElementDescription;
 import com.asakusafw.vocabulary.flow.graph.FlowElementInput;
 import com.asakusafw.vocabulary.flow.graph.FlowElementOutput;
@@ -43,7 +41,7 @@ public abstract class FlowElementBuilder {
 
     private final List<DataInfo> args = new ArrayList<>();
 
-    private final List<FlowElementAttribute> attrs = new ArrayList<>();
+    private final List<AttributeInfo> attrs = new ArrayList<>();
 
     private final Map<String, FlowElementOutput> inputMapping = new HashMap<>();
 
@@ -208,13 +206,7 @@ public abstract class FlowElementBuilder {
         if (attribute == null) {
             throw new IllegalArgumentException("attribute must not be null"); //$NON-NLS-1$
         }
-        if (attribute instanceof FlowElementAttribute) {
-            attrs.add((FlowElementAttribute) attribute);
-        } else {
-            throw new IllegalArgumentException(MessageFormat.format(
-                    "unsupported attribute type: {0}",
-                    attribute.getClass().getName()));
-        }
+        attrs.add(new AttributeInfo(attribute));
     }
 
     /**
@@ -246,5 +238,5 @@ public abstract class FlowElementBuilder {
             List<PortInfo> inputPorts,
             List<PortInfo> outputPorts,
             List<DataInfo> arguments,
-            List<FlowElementAttribute> attributes);
+            List<AttributeInfo> attributes);
 }

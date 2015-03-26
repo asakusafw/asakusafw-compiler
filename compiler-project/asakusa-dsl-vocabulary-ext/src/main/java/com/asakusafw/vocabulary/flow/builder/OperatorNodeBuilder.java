@@ -90,7 +90,7 @@ public class OperatorNodeBuilder extends FlowElementBuilder {
             List<PortInfo> inputPorts,
             List<PortInfo> outputPorts,
             List<DataInfo> arguments,
-            List<FlowElementAttribute> attributes) {
+            List<AttributeInfo> attributes) {
         OperatorDescription.Builder builder = new OperatorDescription.Builder(annotationType);
         builder.declare(method.getDeclaringClass(), implementationClass, method.getName());
         for (Class<?> type : method.getParameterTypes()) {
@@ -139,8 +139,8 @@ public class OperatorNodeBuilder extends FlowElementBuilder {
                 throw new AssertionError(data);
             }
         }
-        for (FlowElementAttribute attribute : attributes) {
-            builder.addAttribute(attribute);
+        for (AttributeInfo attribute : attributes) {
+            builder.addAttribute(attribute.getAdapter(FlowElementAttribute.class));
         }
         return builder.toDescription();
     }

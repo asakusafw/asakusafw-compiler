@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.asakusafw.vocabulary.flow.FlowDescription;
-import com.asakusafw.vocabulary.flow.graph.FlowElementAttribute;
 import com.asakusafw.vocabulary.flow.graph.FlowElementDescription;
 import com.asakusafw.vocabulary.flow.graph.FlowIn;
 import com.asakusafw.vocabulary.flow.graph.FlowOut;
@@ -73,7 +72,7 @@ public class FlowNodeBuilder extends FlowElementBuilder {
             List<PortInfo> inputPorts,
             List<PortInfo> outputPorts,
             List<DataInfo> arguments,
-            List<FlowElementAttribute> attributes) {
+            List<AttributeInfo> attributes) {
         FlowPartDescription.Builder builder = new FlowPartDescription.Builder(constructor.getDeclaringClass());
         Map<String, FlowIn<?>> inputMap = new LinkedHashMap<>();
         Map<String, FlowOut<?>> outputMap = new LinkedHashMap<>();
