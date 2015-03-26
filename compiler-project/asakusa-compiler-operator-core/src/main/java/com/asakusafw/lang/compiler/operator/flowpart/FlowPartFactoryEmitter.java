@@ -99,9 +99,15 @@ public class FlowPartFactoryEmitter {
         if (operatorClass.getElements().size() >= 2) {
             throw new IllegalArgumentException();
         }
+        ClassDescription key = Constants.getFactoryClass(operatorClass.getDeclaration().getQualifiedName());
+        if (environment.isResourceGenerated(key)) {
+            LOG.debug("class is already generated: {}", key.getClassName()); //$NON-NLS-1$
+            return;
+        }
         CompilationUnit unit = Generator.generate(environment, operatorClass);
         try {
             environment.emit(unit, operatorClass.getDeclaration());
+            environment.setResourceGenerated(key);
         } catch (IOException e) {
             environment.getProcessingEnvironment().getMessager().printMessage(Diagnostic.Kind.ERROR,
                     MessageFormat.format(

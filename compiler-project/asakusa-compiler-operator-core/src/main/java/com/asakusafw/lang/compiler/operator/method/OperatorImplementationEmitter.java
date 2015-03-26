@@ -92,9 +92,15 @@ public class OperatorImplementationEmitter {
         if (operatorClass == null) {
             throw new IllegalArgumentException("operatorClass must not be null"); //$NON-NLS-1$
         }
+        ClassDescription key = Constants.getImplementationClass(operatorClass.getDeclaration().getQualifiedName());
+        if (environment.isResourceGenerated(key)) {
+            LOG.debug("class is already generated: {}", key.getClassName()); //$NON-NLS-1$
+            return;
+        }
         CompilationUnit unit = Generator.generate(environment, operatorClass);
         try {
             environment.emit(unit, operatorClass.getDeclaration());
+            environment.setResourceGenerated(key);
         } catch (IOException e) {
             environment.getProcessingEnvironment().getMessager().printMessage(Diagnostic.Kind.ERROR,
                     MessageFormat.format(

@@ -20,6 +20,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
@@ -55,7 +56,11 @@ public class CompileEnvironment {
 
     private final List<DataModelMirrorRepository> dataModelMirrors;
 
+    private final Set<String> generatedResourceKeys = new HashSet<>();
+
     private volatile boolean strict = true;
+
+    private volatile boolean forceRegenerateResources = false;
 
     private volatile boolean flowpartExternalIo = false;
 
@@ -152,6 +157,7 @@ public class CompileEnvironment {
         return new CompileEnvironment(processingEnvironment, operatorDrivers, dataModelMirrors)
             .withStrict(set.contains(Support.STRICT_CHECKING))
             .withFlowpartExternalIo(set.contains(Support.FLOWPART_EXTERNAL_IO))
+            .withForceRegenerateResources(set.contains(Support.FORCE_REGENERATE_RESOURCES))
             .withForceGenerateImplementation(set.contains(Support.FORCE_GENERATE_IMPLEMENTATION));
     }
 
@@ -304,6 +310,32 @@ public class CompileEnvironment {
     }
 
     /**
+     * Sets the target resources is generated.
+     * @param key the target resource key
+     */
+    public void setResourceGenerated(ClassDescription key) {
+        if (key == null) {
+            throw new IllegalArgumentException("key must not be null"); //$NON-NLS-1$
+        }
+        generatedResourceKeys.add(key.getInternalName());
+    }
+
+    /**
+     * Returns whether the target resources is generated or not.
+     * @param key the target resource key
+     * @return {@code true} if it is already generated, otherwise {@code false}
+     */
+    public boolean isResourceGenerated(ClassDescription key) {
+        if (key == null) {
+            throw new IllegalArgumentException("key must not be null"); //$NON-NLS-1$
+        }
+        if (forceRegenerateResources) {
+            return false;
+        }
+        return generatedResourceKeys.contains(key.getInternalName());
+    }
+
+    /**
      * Returns whether strict checking is available.
      * @return {@code true} if it is available, otherwise {@code false}
      */
@@ -358,6 +390,24 @@ public class CompileEnvironment {
     }
 
     /**
+     * Returns whether always re-generates resources or not.
+     * @return {@code true} if it is available, otherwise {@code false}
+     */
+    public boolean isForceRegenerateResources() {
+        return forceRegenerateResources;
+    }
+
+    /**
+     * Sets whether always re-generates resources.
+     * @param newValue {@code true} iff it is available
+     * @return this
+     */
+    public CompileEnvironment withForceRegenerateResources(boolean newValue) {
+        this.forceRegenerateResources = newValue;
+        return this;
+    }
+
+    /**
      * Represents kind of supported features in {@link CompileEnvironment}.
      */
     public enum Support {
@@ -376,6 +426,11 @@ public class CompileEnvironment {
          * Supports strict checking.
          */
         STRICT_CHECKING,
+
+        /**
+         * Forcibly regenerates resources.
+         */
+        FORCE_REGENERATE_RESOURCES,
 
         /**
          * Always generate implementation classes.
