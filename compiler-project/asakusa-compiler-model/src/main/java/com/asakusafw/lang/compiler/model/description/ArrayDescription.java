@@ -18,6 +18,7 @@ package com.asakusafw.lang.compiler.model.description;
 import java.lang.reflect.Array;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -52,6 +53,18 @@ public class ArrayDescription implements ValueDescription {
             ReifiableTypeDescription elementType,
             List<? extends ValueDescription> elements) {
         return new ArrayDescription(new ArrayTypeDescription(elementType), elements);
+    }
+
+    /**
+     * Creates a new instance.
+     * @param elementType the element type
+     * @param elements the array elements
+     * @return the created instance
+     */
+    public static ArrayDescription elementsOf(
+            ReifiableTypeDescription elementType,
+            ValueDescription... elements) {
+        return elementsOf(elementType, Arrays.asList(elements));
     }
 
     /**

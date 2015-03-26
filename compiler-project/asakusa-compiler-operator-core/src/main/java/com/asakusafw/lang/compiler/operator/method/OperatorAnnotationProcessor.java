@@ -15,7 +15,6 @@
  */
 package com.asakusafw.lang.compiler.operator.method;
 
-import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -23,9 +22,7 @@ import java.util.Set;
 
 import javax.annotation.processing.Completion;
 import javax.annotation.processing.ProcessingEnvironment;
-import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
-import javax.lang.model.SourceVersion;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -33,61 +30,24 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.ElementFilter;
-import javax.tools.Diagnostic;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
+import com.asakusafw.lang.compiler.operator.AbstractOperatorAnnotationProcessor;
 import com.asakusafw.lang.compiler.operator.CompileEnvironment;
-import com.asakusafw.lang.compiler.operator.Constants;
 import com.asakusafw.lang.compiler.operator.OperatorDriver;
 import com.asakusafw.lang.compiler.operator.model.OperatorClass;
 
 /**
  * Processes Asakusa Operator Annotations.
  */
-public class OperatorAnnotationProcessor implements Processor {
+public class OperatorAnnotationProcessor extends AbstractOperatorAnnotationProcessor {
 
     static final Logger LOG = LoggerFactory.getLogger(OperatorAnnotationProcessor.class);
 
-    private volatile CompileEnvironment environment;
-
-    /**
-     * Creates a new instance.
-     */
-    public OperatorAnnotationProcessor() {
-        LOG.debug("creating operator annotation processor: {}", this); //$NON-NLS-1$
-    }
-
     @Override
-    public void init(ProcessingEnvironment processingEnv) {
-        LOG.debug("initializing operator annotation processor: {}", this); //$NON-NLS-1$
-        try {
-            this.environment = createCompileEnvironment(processingEnv);
-        } catch (RuntimeException e) {
-            processingEnv.getMessager().printMessage(
-                    Diagnostic.Kind.ERROR,
-                    MessageFormat.format(
-                            "failed to initialize Asakusa Operator Compiler ({0})",
-                            e.toString()));
-            LOG.error("failed to initialize Asakusa Operator Compiler", e);
-        } catch (LinkageError e) {
-            processingEnv.getMessager().printMessage(
-                    Diagnostic.Kind.ERROR,
-                    MessageFormat.format(
-                            "failed to initialize Asakusa Operator Compiler by linkage error ({0})",
-                            e.toString()));
-            LOG.error("failed to initialize Asakusa Operator Compiler by linkage error", e);
-            throw e;
-        }
-    }
-
-    /**
-     * Creates a compile environment for this processing (for testing).
-     * @param processingEnv current processing environment
-     * @return created environment
-     */
     protected CompileEnvironment createCompileEnvironment(ProcessingEnvironment processingEnv) {
         return CompileEnvironment.newInstance(
                 processingEnv,
@@ -95,16 +55,6 @@ public class OperatorAnnotationProcessor implements Processor {
                 CompileEnvironment.Support.OPERATOR_DRIVER,
                 CompileEnvironment.Support.STRICT_CHECKING,
                 CompileEnvironment.Support.FORCE_GENERATE_IMPLEMENTATION);
-    }
-
-    @Override
-    public Set<String> getSupportedOptions() {
-        return Collections.emptySet();
-    }
-
-    @Override
-    public SourceVersion getSupportedSourceVersion() {
-        return Constants.getSupportedSourceVersion();
     }
 
     @Override
@@ -143,27 +93,7 @@ public class OperatorAnnotationProcessor implements Processor {
     }
 
     @Override
-    public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        if (environment == null) {
-            return false;
-        }
-        LOG.debug("starting operator annotation processor: {}", this); //$NON-NLS-1$
-        try {
-            if (annotations.isEmpty() == false) {
-                run(annotations, roundEnv);
-            }
-        } catch (RuntimeException e) {
-            environment.getProcessingEnvironment().getMessager().printMessage(
-                    Diagnostic.Kind.ERROR,
-                    MessageFormat.format(
-                            "failed to compile Asakusa Operators ({0})",
-                            e.toString()));
-            LOG.error("failed to compile Asakusa Operators by unknown exception", e);
-        }
-        return false;
-    }
-
-    private void run(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+    protected void run(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         assert annotations != null;
         assert roundEnv != null;
         OperatorMethodAnalyzer analyzer = new OperatorMethodAnalyzer(environment);

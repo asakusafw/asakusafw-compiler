@@ -15,26 +15,19 @@
  */
 package com.asakusafw.lang.compiler.operator.flowpart;
 
-import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 
-import javax.annotation.processing.Completion;
 import javax.annotation.processing.ProcessingEnvironment;
-import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
-import javax.lang.model.SourceVersion;
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.ElementFilter;
-import javax.tools.Diagnostic;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.asakusafw.lang.compiler.operator.AbstractOperatorAnnotationProcessor;
 import com.asakusafw.lang.compiler.operator.CompileEnvironment;
 import com.asakusafw.lang.compiler.operator.Constants;
 import com.asakusafw.lang.compiler.operator.model.OperatorClass;
@@ -42,47 +35,11 @@ import com.asakusafw.lang.compiler.operator.model.OperatorClass;
 /**
  * Process flow-part operators.
  */
-public class FlowPartAnnotationProcessor implements Processor {
+public class FlowPartAnnotationProcessor extends AbstractOperatorAnnotationProcessor {
 
     static final Logger LOG = LoggerFactory.getLogger(FlowPartAnnotationProcessor.class);
 
-    private volatile CompileEnvironment environment;
-
-    /**
-     * Creates a new instance.
-     */
-    public FlowPartAnnotationProcessor() {
-        LOG.debug("creating operator annotation processor: {}", this); //$NON-NLS-1$
-    }
-
     @Override
-    public void init(ProcessingEnvironment processingEnv) {
-        LOG.debug("initializing operator annotation processor: {}", this); //$NON-NLS-1$
-        try {
-            this.environment = createCompileEnvironment(processingEnv);
-        } catch (RuntimeException e) {
-            processingEnv.getMessager().printMessage(
-                    Diagnostic.Kind.ERROR,
-                    MessageFormat.format(
-                            "failed to initialize Asakusa Operator Compiler ({0})",
-                            e.toString()));
-            LOG.error("failed to initialize Asakusa Operator Compiler", e);
-        } catch (LinkageError e) {
-            processingEnv.getMessager().printMessage(
-                    Diagnostic.Kind.ERROR,
-                    MessageFormat.format(
-                            "failed to initialize Asakusa Operator Compiler by linkage error ({0})",
-                            e.toString()));
-            LOG.error("failed to initialize Asakusa Operator Compiler by linkage error", e);
-            throw e;
-        }
-    }
-
-    /**
-     * Creates a compile environment for this processing (for testing).
-     * @param processingEnv current processing environment
-     * @return created environment
-     */
     protected CompileEnvironment createCompileEnvironment(ProcessingEnvironment processingEnv) {
         return CompileEnvironment.newInstance(
                 processingEnv,
@@ -91,51 +48,12 @@ public class FlowPartAnnotationProcessor implements Processor {
     }
 
     @Override
-    public Set<String> getSupportedOptions() {
-        return Collections.emptySet();
-    }
-
-    @Override
     public Set<String> getSupportedAnnotationTypes() {
         return Collections.singleton(Constants.TYPE_FLOW_PART.getClassName());
     }
 
     @Override
-    public SourceVersion getSupportedSourceVersion() {
-        return Constants.getSupportedSourceVersion();
-    }
-
-    @Override
-    public Iterable<? extends Completion> getCompletions(
-            Element element,
-            AnnotationMirror annotation,
-            ExecutableElement member,
-            String userText) {
-        return Collections.emptyList();
-    }
-
-    @Override
-    public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        LOG.debug("starting operator annotation processor: {}", this); //$NON-NLS-1$
-        if (environment == null) {
-            return false;
-        }
-        try {
-            if (annotations.isEmpty() == false) {
-                run(annotations, roundEnv);
-            }
-        } catch (RuntimeException e) {
-            environment.getProcessingEnvironment().getMessager().printMessage(
-                    Diagnostic.Kind.ERROR,
-                    MessageFormat.format(
-                            "failed to compile Asakusa Operators ({0})",
-                            e.toString()));
-            LOG.error("failed to compile Asakusa Operators by unknown exception", e);
-        }
-        return false;
-    }
-
-    private void run(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+    protected void run(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         assert annotations != null;
         assert roundEnv != null;
         FlowPartAnalyzer analyzer = new FlowPartAnalyzer(environment);

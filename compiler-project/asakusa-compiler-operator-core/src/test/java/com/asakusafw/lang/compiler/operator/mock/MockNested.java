@@ -13,7 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.asakusafw.lang.compiler.operator.mock;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 /**
- * Asakusa Operator DSL Compiler Core APIs.
+ * Mock marker annotation.
  */
-package com.asakusafw.lang.compiler.operator;
+@Retention(RetentionPolicy.RUNTIME)
+public @interface MockNested {
+
+    /**
+     * value.
+     */
+    MockSingleElement[] value();
+}

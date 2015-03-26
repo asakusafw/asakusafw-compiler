@@ -18,6 +18,8 @@ package com.asakusafw.lang.compiler.operator;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
+import java.io.IOError;
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
@@ -71,6 +73,25 @@ public abstract class Callback {
      */
     public Set<? extends TypeElement> annotatios;
 
+    private final boolean oneshot;
+
+    private int count = 0;
+
+    /**
+     * Creates a new instance.
+     */
+    public Callback() {
+        this(true);
+    }
+
+    /**
+     * Creates a new instance.
+     * @param oneshot one shot execution
+     */
+    public Callback(boolean oneshot) {
+        this.oneshot = oneshot;
+    }
+
     /**
      * Runs {@link #test()} method.
      * @param pEnv processing environment
@@ -85,7 +106,11 @@ public abstract class Callback {
         this.elements = pEnv.getElementUtils();
         this.annotatios = annotations;
         try {
-            test();
+            if (count++ == 0 || oneshot == false) {
+                test();
+            }
+        } catch (IOException e) {
+            this.error = new IOError(e);
         } catch (RuntimeException e) {
             this.runtimeException = e;
         } catch (Error e) {
@@ -118,8 +143,9 @@ public abstract class Callback {
 
     /**
      * Performs the test.
+     * @throws IOException if compilation was failed
      */
-    protected abstract void test();
+    protected abstract void test() throws IOException;
 
     /**
      * Returns the declared type.
