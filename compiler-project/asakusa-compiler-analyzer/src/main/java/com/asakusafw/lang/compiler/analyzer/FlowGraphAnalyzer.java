@@ -77,7 +77,9 @@ import com.asakusafw.vocabulary.flow.graph.OutputDescription;
 import com.asakusafw.vocabulary.flow.graph.ShuffleKey;
 import com.asakusafw.vocabulary.flow.util.PseudElementDescription;
 import com.asakusafw.vocabulary.operator.Checkpoint;
+import com.asakusafw.vocabulary.operator.CoGroup;
 import com.asakusafw.vocabulary.operator.Extend;
+import com.asakusafw.vocabulary.operator.GroupSort;
 import com.asakusafw.vocabulary.operator.Project;
 import com.asakusafw.vocabulary.operator.Restructure;
 
@@ -97,6 +99,13 @@ public final class FlowGraphAnalyzer {
         map.put(Extend.class, CoreOperator.CoreOperatorKind.EXTEND);
         map.put(Restructure.class, CoreOperator.CoreOperatorKind.RESTRUCTURE);
         CORE_OPERATOR_KINDS = map;
+    }
+
+    private static final Map<Class<?>, Collection<Class<? extends Annotation>>> OPERATOR_ANNOTATION_ALIASES;
+    static {
+        Map<Class<?>, Collection<Class<? extends Annotation>>> map = new HashMap<>();
+        map.put(CoGroup.class, Arrays.<Class<? extends Annotation>>asList(GroupSort.class));
+        OPERATOR_ANNOTATION_ALIASES = map;
     }
 
     private final ExternalPortAnalyzer ioAnalyzer;
@@ -215,7 +224,7 @@ public final class FlowGraphAnalyzer {
                     declaration.getName()));
             return null;
         }
-        Annotation annotation = method.getAnnotation(declaration.getAnnotationType());
+        AnnotationDescription annotation = getOperatorAnnotation(method, declaration.getAnnotationType());
         if (annotation == null) {
             context.error(MessageFormat.format(
                     "failed to resolve operator annotation: [{0}]{1}#{2}()",
@@ -225,9 +234,28 @@ public final class FlowGraphAnalyzer {
             return null;
         }
         return convert(description, UserOperator.builder(
-                AnnotationDescription.of(annotation),
+                annotation,
                 MethodDescription.of(method),
                 Descriptions.classOf(declaration.getImplementing())));
+    }
+
+    private AnnotationDescription getOperatorAnnotation(Method method, Class<? extends Annotation> annotationType) {
+        Annotation annotation = method.getAnnotation(annotationType);
+        if (annotation == null) {
+            Collection<Class<? extends Annotation>> aliases = OPERATOR_ANNOTATION_ALIASES.get(annotationType);
+            if (aliases != null) {
+                for (Class<? extends Annotation> alias : aliases) {
+                    annotation = method.getAnnotation(alias);
+                    if (annotation != null) {
+                        break;
+                    }
+                }
+            }
+        }
+        if (annotation == null) {
+            return null;
+        }
+        return AnnotationDescription.of(annotation);
     }
 
     private Operator convert(PseudElementDescription description) {
