@@ -175,6 +175,10 @@ final class ResourceSessionEntity implements ResourceSession {
             return;
         }
 
+        public ResourceSessionEntity getEntity() {
+            return ResourceSessionEntity.this;
+        }
+
         @Override
         public <T> T find(Class<T> type) {
             return ResourceSessionEntity.this.find(type);

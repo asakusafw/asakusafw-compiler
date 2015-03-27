@@ -39,14 +39,15 @@ final class ResourceSessionContainer {
      * @return the created session, or {@code null} if this already has another session in the scope
      * @throws IllegalStateException if there are active sessions with different scope
      */
-    public synchronized ResourceSessionEntity create(Scope scope) {
+    public synchronized ResourceSessionEntity.Reference create(Scope scope) {
         Store s = prepare(scope);
         ResourceSessionEntity conflict = s.find();
         if (conflict != null) {
             return null;
         }
-        ResourceSessionEntity result = new ResourceSessionEntity();
-        s.put(result);
+        ResourceSessionEntity entity = new ResourceSessionEntity();
+        ResourceSessionEntity.Reference result = entity.newReference();
+        s.put(entity);
         return result;
     }
 
@@ -59,10 +60,12 @@ final class ResourceSessionContainer {
      * @throws IOException if error occurred while initializing the new session
      * @throws IllegalStateException if there are active sessions with different scope
      */
-    public synchronized ResourceSessionEntity.Reference getReference(
+    public synchronized ResourceSessionEntity.Reference create(
             Scope scope, Initializer initializer, boolean orGet) throws IOException {
-        ResourceSessionEntity entity = create(scope);
-        if (entity != null) {
+        Store s = prepare(scope);
+        ResourceSessionEntity conflict = s.find();
+        if (conflict == null) {
+            ResourceSessionEntity entity = new ResourceSessionEntity();
             boolean success = false;
             try {
                 initializer.accept(entity);
@@ -72,14 +75,20 @@ final class ResourceSessionContainer {
                     entity.close();
                 }
             }
-        } else {
-            if (orGet) {
-                entity = find();
-            } else {
-                return null;
+            ResourceSessionEntity.Reference result = entity.newReference();
+            s.put(entity);
+            return result;
+        } else if (orGet) {
+            synchronized (conflict) {
+                if (conflict.closed == false) {
+                    return conflict.newReference();
+                }
             }
+            // retry
+            return create(scope, initializer, orGet);
+        } else {
+            return null;
         }
-        return entity.newReference();
     }
 
     /**
@@ -216,7 +225,7 @@ final class ResourceSessionContainer {
         @Override
         public ResourceSessionEntity find() {
             ResourceSessionEntity entity = entities.get(Thread.currentThread());
-            return entity;
+            return entity == null || entity.closed ? null : entity;
         }
 
         @Override

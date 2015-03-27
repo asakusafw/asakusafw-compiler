@@ -34,32 +34,35 @@ public class ResourceSessionContainerTest {
 
     /**
      * simple case.
+     * @throws Exception if failed
      */
     @Test
-    public void simple() {
+    public void simple() throws Exception {
         ResourceSessionContainer container = new ResourceSessionContainer();
-        try (ResourceSessionEntity entity = container.create(Scope.VM)) {
+        try (ResourceSessionEntity.Reference session = container.create(Scope.VM)) {
             assertThat(container.create(Scope.VM), is(nullValue()));
-            assertThat(container.find(), is(sameInstance(entity)));
+            assertThat(container.find(), is(sameInstance(session.getEntity())));
         }
     }
 
     /**
      * missing session.
+     * @throws Exception if failed
      */
     @Test
-    public void miss() {
+    public void miss() throws Exception {
         ResourceSessionContainer container = new ResourceSessionContainer();
         assertThat(container.find(), is(nullValue()));
     }
 
     /**
      * isolated by thread.
+     * @throws Exception if failed
      */
     @Test
-    public void isolate_vm() {
+    public void isolate_vm() throws Exception {
         ResourceSessionContainer container = new ResourceSessionContainer();
-        try (ResourceSessionEntity entity = container.create(Scope.VM)) {
+        try (ResourceSession session = container.create(Scope.VM)) {
             boolean created = createConcurrent(container, Scope.VM);
             assertThat(created, is(false));
         }
@@ -67,11 +70,12 @@ public class ResourceSessionContainerTest {
 
     /**
      * isolated by thread.
+     * @throws Exception if failed
      */
     @Test
-    public void isolate_thread() {
+    public void isolate_thread() throws Exception {
         ResourceSessionContainer container = new ResourceSessionContainer();
-        try (ResourceSessionEntity entity = container.create(Scope.THREAD)) {
+        try (ResourceSession entity = container.create(Scope.THREAD)) {
             boolean created = createConcurrent(container, Scope.THREAD);
             assertThat(created, is(true));
         }
@@ -79,20 +83,22 @@ public class ResourceSessionContainerTest {
 
     /**
      * inconsistent scope w/ active sessions.
+     * @throws Exception if failed
      */
     @Test(expected = IllegalStateException.class)
-    public void inconsistent_scope() {
+    public void inconsistent_scope() throws Exception {
         ResourceSessionContainer container = new ResourceSessionContainer();
-        try (ResourceSessionEntity entity = container.create(Scope.VM)) {
+        try (ResourceSession session = container.create(Scope.VM)) {
             container.create(Scope.THREAD);
         }
     }
 
     /**
      * inconsistent scope w/o any active sessions.
+     * @throws Exception if failed
      */
     @Test
-    public void inconsistent_scope_empty() {
+    public void inconsistent_scope_empty() throws Exception {
         ResourceSessionContainer container = new ResourceSessionContainer();
         container.create(Scope.VM).close();
         container.create(Scope.THREAD).close();
@@ -106,11 +112,11 @@ public class ResourceSessionContainerTest {
             Future<Boolean> future = executor.submit(new Callable<Boolean>() {
                 @Override
                 public Boolean call() throws Exception {
-                    ResourceSessionEntity entity = container.create(scope);
-                    if (entity == null) {
+                    ResourceSession session = container.create(scope);
+                    if (session == null) {
                         return false;
                     } else {
-                        entity.close();
+                        session.close();
                         return true;
                     }
                 }

@@ -149,7 +149,7 @@ public final class ResourceBroker {
 
     private static ResourceSession start(Scope scope, Initializer initializer, boolean strict) throws IOException {
         LOG.debug("starting session: {} (strict={})", scope, strict);
-        ResourceSession reference = CONTAINER.getReference(scope, initializer, strict == false);
+        ResourceSession reference = CONTAINER.create(scope, initializer, strict == false);
         if (reference == null) {
             throw new IllegalStateException(MessageFormat.format(
                     "another session already exists in scope: {0}",
