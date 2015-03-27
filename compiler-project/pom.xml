@@ -16,6 +16,7 @@
 	<modules>
 		<!-- core -->
 		<module>asakusa-compiler-common</module>
+		<module>asakusa-compiler-description</module>
 		<module>asakusa-compiler-model</module>
 		<module>asakusa-compiler-api</module>
 		<module>asakusa-compiler-plan</module>

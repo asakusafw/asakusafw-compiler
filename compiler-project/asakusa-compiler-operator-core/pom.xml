@@ -34,7 +34,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>asakusa-compiler-model</artifactId>
+			<artifactId>asakusa-compiler-description</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
