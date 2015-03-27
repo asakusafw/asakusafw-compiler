@@ -96,7 +96,7 @@ try (ModelInput&lt;Hoge&gt; input = DirectIo.open(...)) {
 
     private static Configuration getHadoopConfiguration() {
         ResourceConfiguration asakusa = ResourceBroker.find(ResourceConfiguration.class);
-        if (asakusa != null && asakusa instanceof Configurable) {
+        if (asakusa instanceof Configurable) {
             Configuration conf = ((Configurable) asakusa).getConf();
             if (conf != null) {
                 return conf;
