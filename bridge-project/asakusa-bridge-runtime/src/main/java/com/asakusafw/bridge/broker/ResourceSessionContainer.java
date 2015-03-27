@@ -15,6 +15,7 @@
  */
 package com.asakusafw.bridge.broker;
 
+import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.Iterator;
 import java.util.Map;
@@ -23,6 +24,7 @@ import java.util.WeakHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.asakusafw.bridge.broker.ResourceBroker.Initializer;
 import com.asakusafw.bridge.broker.ResourceBroker.Scope;
 
 final class ResourceSessionContainer {
@@ -46,6 +48,38 @@ final class ResourceSessionContainer {
         ResourceSessionEntity result = new ResourceSessionEntity();
         s.put(result);
         return result;
+    }
+
+    /**
+     * Creates a new session and returns the its first reference.
+     * @param scope the session scope
+     * @param initializer the session initializer
+     * @param orGet {@code true} to return a reference of existing session
+     * @return the created session, or {@code null} if this already has another session in the scope
+     * @throws IOException if error occurred while initializing the new session
+     * @throws IllegalStateException if there are active sessions with different scope
+     */
+    public synchronized ResourceSessionEntity.Reference getReference(
+            Scope scope, Initializer initializer, boolean orGet) throws IOException {
+        ResourceSessionEntity entity = create(scope);
+        if (entity != null) {
+            boolean success = false;
+            try {
+                initializer.accept(entity);
+                success = true;
+            } finally {
+                if (success == false) {
+                    entity.close();
+                }
+            }
+        } else {
+            if (orGet) {
+                entity = find();
+            } else {
+                return null;
+            }
+        }
+        return entity.newReference();
     }
 
     /**

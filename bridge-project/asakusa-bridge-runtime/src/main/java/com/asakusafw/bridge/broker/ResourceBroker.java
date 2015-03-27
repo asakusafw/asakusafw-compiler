@@ -149,26 +149,13 @@ public final class ResourceBroker {
 
     private static ResourceSession start(Scope scope, Initializer initializer, boolean strict) throws IOException {
         LOG.debug("starting session: {} (strict={})", scope, strict);
-        ResourceSessionEntity entity = CONTAINER.create(scope);
-        if (entity == null) {
-            if (strict) {
-                throw new IllegalStateException(MessageFormat.format(
-                        "another session already exists in scope: {0}",
-                        scope));
-            }
-            entity = getCurrentSession();
-        } else {
-            boolean success = false;
-            try {
-                initializer.accept(entity);
-                success = true;
-            } finally {
-                if (success == false) {
-                    entity.close();
-                }
-            }
+        ResourceSession reference = CONTAINER.getReference(scope, initializer, strict == false);
+        if (reference == null) {
+            throw new IllegalStateException(MessageFormat.format(
+                    "another session already exists in scope: {0}",
+                    scope));
         }
-        return entity.newReference();
+        return reference;
     }
 
     private static ResourceSessionEntity getCurrentSession() {

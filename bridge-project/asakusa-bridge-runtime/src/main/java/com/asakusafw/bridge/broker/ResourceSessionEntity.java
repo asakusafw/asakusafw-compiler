@@ -127,7 +127,7 @@ final class ResourceSessionEntity implements ResourceSession {
         }
     }
 
-    synchronized ResourceSession newReference() {
+    synchronized ResourceSessionEntity.Reference newReference() {
         if (closed) {
             throw new IllegalStateException();
         }
@@ -169,7 +169,7 @@ final class ResourceSessionEntity implements ResourceSession {
         closed = true;
     }
 
-    private final class Reference implements ResourceSession {
+    public final class Reference implements ResourceSession {
 
         Reference() {
             return;
