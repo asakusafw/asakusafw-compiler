@@ -71,8 +71,8 @@ public class ResourceSessionContainerTest {
     @Test
     public void isolate_thread() {
         ResourceSessionContainer container = new ResourceSessionContainer();
-        try (ResourceSessionEntity entity = container.create(Scope.THEAD)) {
-            boolean created = createConcurrent(container, Scope.THEAD);
+        try (ResourceSessionEntity entity = container.create(Scope.THREAD)) {
+            boolean created = createConcurrent(container, Scope.THREAD);
             assertThat(created, is(true));
         }
     }
@@ -84,7 +84,7 @@ public class ResourceSessionContainerTest {
     public void inconsistent_scope() {
         ResourceSessionContainer container = new ResourceSessionContainer();
         try (ResourceSessionEntity entity = container.create(Scope.VM)) {
-            container.create(Scope.THEAD);
+            container.create(Scope.THREAD);
         }
     }
 
@@ -95,9 +95,9 @@ public class ResourceSessionContainerTest {
     public void inconsistent_scope_empty() {
         ResourceSessionContainer container = new ResourceSessionContainer();
         container.create(Scope.VM).close();
-        container.create(Scope.THEAD).close();
+        container.create(Scope.THREAD).close();
         container.create(Scope.VM).close();
-        container.create(Scope.THEAD).close();
+        container.create(Scope.THREAD).close();
     }
 
     private boolean createConcurrent(final ResourceSessionContainer container, final Scope scope) {

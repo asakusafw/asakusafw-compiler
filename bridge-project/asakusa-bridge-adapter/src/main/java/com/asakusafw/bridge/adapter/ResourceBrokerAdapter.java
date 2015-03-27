@@ -35,7 +35,7 @@ public class ResourceBrokerAdapter implements RuntimeResource {
 
     @Override
     public void setup(final ResourceConfiguration configuration) throws IOException, InterruptedException {
-        current = ResourceBroker.attach(Scope.THEAD, new Initializer() {
+        current = ResourceBroker.attach(Scope.THREAD, new Initializer() {
             @Override
             public void accept(ResourceSession session) throws IOException {
                 StageInfo info = new StageInfo(

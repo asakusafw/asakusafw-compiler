@@ -86,7 +86,7 @@ final class ResourceSessionContainer {
         switch (scope) {
         case VM:
             return new VmStore();
-        case THEAD:
+        case THREAD:
             return new ThreadStore();
         default:
             throw new AssertionError(scope);
@@ -152,7 +152,7 @@ final class ResourceSessionContainer {
 
         @Override
         public Scope getScope() {
-            return Scope.THEAD;
+            return Scope.THREAD;
         }
 
         @Override

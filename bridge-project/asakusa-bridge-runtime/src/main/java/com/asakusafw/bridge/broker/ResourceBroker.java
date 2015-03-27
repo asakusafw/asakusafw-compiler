@@ -192,7 +192,7 @@ public final class ResourceBroker {
         /**
          * Resources are visible in the current thread.
          */
-        THEAD,
+        THREAD,
     }
 
     /**
