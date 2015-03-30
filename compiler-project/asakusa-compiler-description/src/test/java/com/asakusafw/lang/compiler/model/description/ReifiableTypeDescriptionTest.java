@@ -36,7 +36,7 @@ public class ReifiableTypeDescriptionTest {
     public void of_basic() throws Exception {
         ReifiableTypeDescription desc = ReifiableTypeDescription.of(int.class);
         assertThat(desc.getValueKind(), is((Object) ValueKind.TYPE));
-        assertThat(desc.getValueType().resolve(getClass().getClassLoader()), is((Object) Class.class));
+        assertThat(desc.getValueType().getErasure().resolve(getClass().getClassLoader()), is((Object) Class.class));
         assertThat(desc.getTypeKind(), is(TypeKind.BASIC));
         assertThat(desc.resolve(getClass().getClassLoader()), is((Object) int.class));
     }

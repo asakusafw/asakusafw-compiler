@@ -31,7 +31,7 @@ import java.util.Arrays;
  */
 public class SerializableValueDescription implements ValueDescription {
 
-    private final ReifiableTypeDescription valueType;
+    private final TypeDescription valueType;
 
     private final byte[] serialized;
 
@@ -40,11 +40,11 @@ public class SerializableValueDescription implements ValueDescription {
      * @param valueType the original value type
      * @param serialized the serialized object
      */
-    public SerializableValueDescription(ReifiableTypeDescription valueType, byte[] serialized) {
+    public SerializableValueDescription(TypeDescription valueType, byte[] serialized) {
         this(valueType, serialized, true);
     }
 
-    private SerializableValueDescription(ReifiableTypeDescription valueType, byte[] serialized, boolean copy) {
+    private SerializableValueDescription(TypeDescription valueType, byte[] serialized, boolean copy) {
         this.valueType = valueType;
         this.serialized = copy ? serialized.clone() : serialized;
     }
@@ -76,7 +76,7 @@ public class SerializableValueDescription implements ValueDescription {
     }
 
     @Override
-    public ReifiableTypeDescription getValueType() {
+    public TypeDescription getValueType() {
         return valueType;
     }
 

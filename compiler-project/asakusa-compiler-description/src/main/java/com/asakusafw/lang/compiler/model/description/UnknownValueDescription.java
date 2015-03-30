@@ -23,7 +23,7 @@ import java.text.MessageFormat;
  */
 public class UnknownValueDescription implements ValueDescription {
 
-    private final ReifiableTypeDescription valueType;
+    private final TypeDescription valueType;
 
     private final String label;
 
@@ -32,7 +32,7 @@ public class UnknownValueDescription implements ValueDescription {
      * @param valueType the original value type
      * @param label a value label
      */
-    public UnknownValueDescription(ReifiableTypeDescription valueType, String label) {
+    public UnknownValueDescription(TypeDescription valueType, String label) {
         this.valueType = valueType;
         this.label = label;
     }
@@ -53,7 +53,7 @@ public class UnknownValueDescription implements ValueDescription {
     }
 
     @Override
-    public ReifiableTypeDescription getValueType() {
+    public TypeDescription getValueType() {
         return valueType;
     }
 

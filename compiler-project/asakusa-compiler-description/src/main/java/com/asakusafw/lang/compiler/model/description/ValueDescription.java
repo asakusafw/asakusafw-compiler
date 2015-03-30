@@ -31,7 +31,7 @@ public interface ValueDescription extends Description {
      * Returns the value type.
      * @return the value type
      */
-    ReifiableTypeDescription getValueType();
+    TypeDescription getValueType();
 
     /**
      * Resolves this value.

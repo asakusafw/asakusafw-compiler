@@ -106,7 +106,7 @@ public class AnnotationDescription implements ValueDescription {
     }
 
     @Override
-    public ReifiableTypeDescription getValueType() {
+    public ClassDescription getValueType() {
         return getDeclaringClass();
     }
 

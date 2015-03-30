@@ -27,6 +27,12 @@ public interface TypeDescription extends Description {
     TypeKind getTypeKind();
 
     /**
+     * Returns the erasure of this type.
+     * @return the erasure type
+     */
+    ReifiableTypeDescription getErasure();
+
+    /**
      * Represents a kind of {@link TypeDescription}.
      */
     public static enum TypeKind {

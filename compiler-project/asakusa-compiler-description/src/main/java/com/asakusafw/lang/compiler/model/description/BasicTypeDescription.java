@@ -55,6 +55,11 @@ public class BasicTypeDescription extends ReifiableTypeDescription {
         return TypeKind.BASIC;
     }
 
+    @Override
+    public BasicTypeDescription getErasure() {
+        return this;
+    }
+
     /**
      * Returns the basic type kind.
      * @return the basic type kind

@@ -40,7 +40,7 @@ public class SerializableValueDescriptionTest {
     public void simple() throws Exception {
         SerializableValueDescription desc = SerializableValueDescription.of(new StringBuilder("testing"));
         assertThat(desc.getValueKind(), is(ValueKind.SERIALIZABLE));
-        assertThat(desc.getValueType().resolve(getClass().getClassLoader()), is((Object) StringBuilder.class));
+        assertThat(desc.getValueType().getErasure().resolve(getClass().getClassLoader()), is((Object) StringBuilder.class));
         try (ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(desc.getSerialized()))) {
             Object read = in.readObject();
             assertThat(read, is(instanceOf(StringBuilder.class)));
@@ -59,7 +59,7 @@ public class SerializableValueDescriptionTest {
     public void custom() throws Exception {
         SerializableValueDescription desc = SerializableValueDescription.of(new SerializableWithArray(1, 2, 3));
         assertThat(desc.getValueKind(), is(ValueKind.SERIALIZABLE));
-        assertThat(desc.getValueType().resolve(getClass().getClassLoader()), is((Object) SerializableWithArray.class));
+        assertThat(desc.getValueType().getErasure().resolve(getClass().getClassLoader()), is((Object) SerializableWithArray.class));
         Object read = desc.resolve(getClass().getClassLoader());
         assertThat(read, is(instanceOf(SerializableWithArray.class)));
         assertThat(read, is(equalTo((Object) new SerializableWithArray(1, 2, 3))));

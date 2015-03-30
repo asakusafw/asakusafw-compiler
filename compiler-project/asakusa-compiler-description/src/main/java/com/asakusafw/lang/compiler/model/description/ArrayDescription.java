@@ -93,7 +93,7 @@ public class ArrayDescription implements ValueDescription {
     }
 
     @Override
-    public ReifiableTypeDescription getValueType() {
+    public ArrayTypeDescription getValueType() {
         return arrayType;
     }
 
@@ -107,7 +107,7 @@ public class ArrayDescription implements ValueDescription {
 
     @Override
     public Object resolve(ClassLoader classLoader) throws ReflectiveOperationException {
-        Class<?> type = arrayType.getComponentType().resolve(classLoader);
+        Class<?> type = arrayType.getComponentType().getErasure().resolve(classLoader);
         Object array = Array.newInstance(type, elements.size());
         for (int i = 0, n = elements.size(); i < n; i++) {
             Array.set(array, i, elements.get(i).resolve(classLoader));

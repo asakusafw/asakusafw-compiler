@@ -35,7 +35,7 @@ public class ImmediateDescription implements ValueDescription {
         BOXED = map;
     }
 
-    private final ReifiableTypeDescription valueType;
+    private final TypeDescription valueType;
 
     private final Object value;
 
@@ -44,7 +44,7 @@ public class ImmediateDescription implements ValueDescription {
      * @param valueType the value type
      * @param value the value
      */
-    public ImmediateDescription(ReifiableTypeDescription valueType, Object value) {
+    public ImmediateDescription(TypeDescription valueType, Object value) {
         this.valueType = valueType;
         this.value = value;
     }
@@ -177,7 +177,7 @@ public class ImmediateDescription implements ValueDescription {
     }
 
     @Override
-    public ReifiableTypeDescription getValueType() {
+    public TypeDescription getValueType() {
         return valueType;
     }
 

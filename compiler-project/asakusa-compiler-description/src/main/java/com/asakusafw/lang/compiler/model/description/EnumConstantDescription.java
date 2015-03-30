@@ -53,7 +53,7 @@ public class EnumConstantDescription implements ValueDescription {
     }
 
     @Override
-    public ReifiableTypeDescription getValueType() {
+    public ClassDescription getValueType() {
         return getDeclaringClass();
     }
 

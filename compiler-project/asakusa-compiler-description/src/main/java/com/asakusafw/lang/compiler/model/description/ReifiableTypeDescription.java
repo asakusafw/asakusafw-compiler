@@ -26,7 +26,7 @@ public abstract class ReifiableTypeDescription implements TypeDescription, Value
     }
 
     @Override
-    public final ReifiableTypeDescription getValueType() {
+    public final TypeDescription getValueType() {
         return of(Class.class);
     }
 

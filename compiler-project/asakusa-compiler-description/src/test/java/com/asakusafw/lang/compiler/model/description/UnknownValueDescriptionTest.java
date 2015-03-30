@@ -35,7 +35,7 @@ public class UnknownValueDescriptionTest {
     public void simple() throws Exception {
         UnknownValueDescription desc = UnknownValueDescription.of(this);
         assertThat(desc.getValueKind(), is(ValueKind.UNKNOWN));
-        assertThat(desc.getValueType().resolve(getClass().getClassLoader()), is((Object) getClass()));
+        assertThat(desc.getValueType().getErasure().resolve(getClass().getClassLoader()), is((Object) getClass()));
         assertThat(desc.getLabel(), is(notNullValue()));
         try {
             desc.resolve(getClass().getClassLoader());

@@ -31,7 +31,7 @@ public class ImmediateDescriptionTest {
     @Test
     public void of_boolean() {
         ImmediateDescription desc = ImmediateDescription.of(true);
-        assertThat(desc.getValueType(), is(ReifiableTypeDescription.of(boolean.class)));
+        assertThat(desc.getValueType(), is((TypeDescription) ReifiableTypeDescription.of(boolean.class)));
         assertThat(desc.getValue(), is((Object) true));
     }
 
@@ -41,7 +41,7 @@ public class ImmediateDescriptionTest {
     @Test
     public void of_byte() {
         ImmediateDescription desc = ImmediateDescription.of((byte) 100);
-        assertThat(desc.getValueType(), is(ReifiableTypeDescription.of(byte.class)));
+        assertThat(desc.getValueType(), is((TypeDescription) ReifiableTypeDescription.of(byte.class)));
         assertThat(desc.getValue(), is((Object) (byte) 100));
     }
 
@@ -51,7 +51,7 @@ public class ImmediateDescriptionTest {
     @Test
     public void of_short() {
         ImmediateDescription desc = ImmediateDescription.of((short) 100);
-        assertThat(desc.getValueType(), is(ReifiableTypeDescription.of(short.class)));
+        assertThat(desc.getValueType(), is((TypeDescription) ReifiableTypeDescription.of(short.class)));
         assertThat(desc.getValue(), is((Object) (short) 100));
     }
 
@@ -61,7 +61,7 @@ public class ImmediateDescriptionTest {
     @Test
     public void of_int() {
         ImmediateDescription desc = ImmediateDescription.of(100);
-        assertThat(desc.getValueType(), is(ReifiableTypeDescription.of(int.class)));
+        assertThat(desc.getValueType(), is((TypeDescription) ReifiableTypeDescription.of(int.class)));
         assertThat(desc.getValue(), is((Object) 100));
     }
 
@@ -71,7 +71,7 @@ public class ImmediateDescriptionTest {
     @Test
     public void of_long() {
         ImmediateDescription desc = ImmediateDescription.of(100L);
-        assertThat(desc.getValueType(), is(ReifiableTypeDescription.of(long.class)));
+        assertThat(desc.getValueType(), is((TypeDescription) ReifiableTypeDescription.of(long.class)));
         assertThat(desc.getValue(), is((Object) 100L));
     }
 
@@ -81,7 +81,7 @@ public class ImmediateDescriptionTest {
     @Test
     public void of_float() {
         ImmediateDescription desc = ImmediateDescription.of(100.f);
-        assertThat(desc.getValueType(), is(ReifiableTypeDescription.of(float.class)));
+        assertThat(desc.getValueType(), is((TypeDescription) ReifiableTypeDescription.of(float.class)));
         assertThat(desc.getValue(), is((Object) 100.f));
     }
 
@@ -91,7 +91,7 @@ public class ImmediateDescriptionTest {
     @Test
     public void of_double() {
         ImmediateDescription desc = ImmediateDescription.of(100.d);
-        assertThat(desc.getValueType(), is(ReifiableTypeDescription.of(double.class)));
+        assertThat(desc.getValueType(), is((TypeDescription) ReifiableTypeDescription.of(double.class)));
         assertThat(desc.getValue(), is((Object) 100.d));
     }
 
@@ -101,7 +101,7 @@ public class ImmediateDescriptionTest {
     @Test
     public void of_char() {
         ImmediateDescription desc = ImmediateDescription.of('A');
-        assertThat(desc.getValueType(), is(ReifiableTypeDescription.of(char.class)));
+        assertThat(desc.getValueType(), is((TypeDescription) ReifiableTypeDescription.of(char.class)));
         assertThat(desc.getValue(), is((Object) 'A'));
     }
 
@@ -111,7 +111,7 @@ public class ImmediateDescriptionTest {
     @Test
     public void of_string() {
         ImmediateDescription desc = ImmediateDescription.of("testing");
-        assertThat(desc.getValueType(), is(ReifiableTypeDescription.of(String.class)));
+        assertThat(desc.getValueType(), is((TypeDescription) ReifiableTypeDescription.of(String.class)));
         assertThat(desc.getValue(), is((Object) "testing"));
     }
 
@@ -121,7 +121,7 @@ public class ImmediateDescriptionTest {
     @Test
     public void of_object_primitive() {
         ImmediateDescription desc = ImmediateDescription.of((Object) 100);
-        assertThat(desc.getValueType(), is(ReifiableTypeDescription.of(int.class)));
+        assertThat(desc.getValueType(), is((TypeDescription) ReifiableTypeDescription.of(int.class)));
         assertThat(desc.getValue(), is((Object) 100));
     }
 
@@ -131,7 +131,7 @@ public class ImmediateDescriptionTest {
     @Test
     public void of_object_string() {
         ImmediateDescription desc = ImmediateDescription.of((Object) "testing");
-        assertThat(desc.getValueType(), is(ReifiableTypeDescription.of(String.class)));
+        assertThat(desc.getValueType(), is((TypeDescription) ReifiableTypeDescription.of(String.class)));
         assertThat(desc.getValue(), is((Object) "testing"));
     }
 

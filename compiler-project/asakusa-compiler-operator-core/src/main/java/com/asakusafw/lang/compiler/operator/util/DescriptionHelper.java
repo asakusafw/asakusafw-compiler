@@ -124,7 +124,7 @@ public final class DescriptionHelper {
             CompileEnvironment environment,
             javax.lang.model.type.ArrayType type) {
         TypeDescription element = toDescription(environment, type.getComponentType());
-        return new ArrayTypeDescription((ReifiableTypeDescription) element);
+        return new ArrayTypeDescription(element);
     }
 
     /**

@@ -49,6 +49,11 @@ public class ClassDescription extends ReifiableTypeDescription {
         return TypeKind.CLASS;
     }
 
+    @Override
+    public ClassDescription getErasure() {
+        return this;
+    }
+
     /**
      * Returns the fully qualified class name.
      * @return the fully qualified class name

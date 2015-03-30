@@ -23,13 +23,13 @@ import java.text.MessageFormat;
  */
 public class ArrayTypeDescription extends ReifiableTypeDescription {
 
-    private final ReifiableTypeDescription componentType;
+    private final TypeDescription componentType;
 
     /**
      * Creates a new instance.
      * @param componentType the component type
      */
-    public ArrayTypeDescription(ReifiableTypeDescription componentType) {
+    public ArrayTypeDescription(TypeDescription componentType) {
         this.componentType = componentType;
     }
 
@@ -53,17 +53,26 @@ public class ArrayTypeDescription extends ReifiableTypeDescription {
         return TypeKind.ARRAY;
     }
 
+    @Override
+    public ArrayTypeDescription getErasure() {
+        ReifiableTypeDescription erased = componentType.getErasure();
+        if (erased.equals(componentType)) {
+            return this;
+        }
+        return new ArrayTypeDescription(erased);
+    }
+
     /**
      * Returns the component type.
      * @return the component type
      */
-    public ReifiableTypeDescription getComponentType() {
+    public TypeDescription getComponentType() {
         return componentType;
     }
 
     @Override
     public Class<?> resolve(ClassLoader classLoader) throws ClassNotFoundException {
-        Class<?> component = componentType.resolve(classLoader);
+        Class<?> component = componentType.getErasure().resolve(classLoader);
         return Array.newInstance(component, 0).getClass();
     }
 
