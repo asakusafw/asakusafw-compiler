@@ -30,6 +30,8 @@ import com.asakusafw.lang.compiler.planning.PlanDetail;
 import com.asakusafw.lang.compiler.planning.PlanMarker;
 import com.asakusafw.lang.compiler.planning.PlanMarkers;
 import com.asakusafw.lang.compiler.planning.Planning;
+import com.asakusafw.utils.graph.Graph;
+import com.asakusafw.utils.graph.Graphs;
 
 /**
  * Generates a primitive plan.
@@ -87,6 +89,7 @@ public final class PrimitivePlanner {
     }
 
     private PlanDetail plan() {
+        validateGraph();
         Set<Set<MarkerOperator>> inputCandidates = collectInputCandidates();
         Map<Operator, Set<MarkerOperator>> broadcastConsumers = collectBroadcastConsumers();
         PlanBuilder builder = PlanBuilder.from(operators);
@@ -109,11 +112,26 @@ public final class PrimitivePlanner {
                     finalInput.addAll(inputCandidate);
                     finalInput.addAll(broadcasts);
                 }
+                assert finalInput.contains(output) == false;
                 // then builds a new primitive sub-plan
                 builder.add(finalInput, Collections.singleton(output));
             }
         }
         return builder.build();
+    }
+
+    private void validateGraph() {
+        Graph<Operator> g = Graphs.newInstance();
+        for (Operator operator : operators) {
+            g.addNode(operator);
+            g.addEdges(operator, Operators.getPredecessors(operator));
+        }
+        Set<Set<Operator>> circuits = Graphs.findCircuit(g);
+        if (circuits.isEmpty() == false) {
+            throw new IllegalArgumentException(MessageFormat.format(
+                    "operator graph must not have any circuits: {0}",
+                    circuits));
+        }
     }
 
     /**
