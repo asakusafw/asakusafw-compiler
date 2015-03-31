@@ -234,6 +234,7 @@ public final class BatchCompilerCli {
         results.runtimeWorkingDirectory.set(parse(cmd, opts.runtimeWorkingDirectory));
         results.properties.putAll(parseProperties(cmd, opts.properties));
         results.failOnError.set(cmd.hasOption(opts.failOnError.getLongOpt()));
+        results.keepTemporaryFiles.set(cmd.hasOption(opts.keepTemporaryFiles.getLongOpt()));
         return results;
     }
 
@@ -348,7 +349,9 @@ public final class BatchCompilerCli {
             report(context);
             return process(context, configuration);
         } finally {
-            temporary.reset();
+            if (configuration.keepTemporaryFiles.get() == false) {
+                temporary.reset();
+            }
         }
     }
 
@@ -627,6 +630,9 @@ public final class BatchCompilerCli {
         final Option failOnError = optional("failOnError", 0) //$NON-NLS-1$
                 .withDescription("whether fails on compilation errors or not");
 
+        final Option keepTemporaryFiles = optional("keepTemporaryFiles", 0) //$NON-NLS-1$
+                .withDescription("whether keeps temporary files or not");
+
         final Options options = new Options();
 
         Opts() {
@@ -699,6 +705,8 @@ public final class BatchCompilerCli {
         final Map<String, String> properties = new LinkedHashMap<>();
 
         final ValueHolder<Boolean> failOnError = new ValueHolder<>(Boolean.FALSE);
+
+        final ValueHolder<Boolean> keepTemporaryFiles = new ValueHolder<>(Boolean.FALSE);
 
         Configuration() {
             return;
