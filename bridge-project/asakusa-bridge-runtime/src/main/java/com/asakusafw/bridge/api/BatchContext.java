@@ -19,6 +19,7 @@ import java.text.MessageFormat;
 
 import com.asakusafw.bridge.broker.ResourceBroker;
 import com.asakusafw.bridge.stage.StageInfo;
+import com.asakusafw.runtime.stage.StageConstants;
 
 /**
  * Provides contextual information of the running batch.
@@ -30,6 +31,7 @@ import com.asakusafw.bridge.stage.StageInfo;
  * <p>
  * This API requires that {@link StageInfo} object has been registered to {@link ResourceBroker}.
  * </p>
+ * @see com.asakusafw.runtime.core.BatchContext
  */
 public final class BatchContext {
 
@@ -52,8 +54,27 @@ public final class BatchContext {
         if (info == null) {
             throw new IllegalStateException(MessageFormat.format(
                     "required resource has not been prepared yet: {0}",
-                    StageInfo.class));
+                    StageInfo.class.getName()));
+        }
+        String reserved = getReserved(name, info);
+        if (reserved != null) {
+            return reserved;
         }
         return info.getBatchArguments().get(name);
+    }
+
+    private static String getReserved(String name, StageInfo info) {
+        switch (name) {
+        case StageConstants.VAR_USER:
+            return info.getUserName();
+        case StageConstants.VAR_BATCH_ID:
+            return info.getBatchId();
+        case StageConstants.VAR_FLOW_ID:
+            return info.getFlowId();
+        case StageConstants.VAR_EXECUTION_ID:
+            return info.getExecutionId();
+        default:
+            return null;
+        }
     }
 }

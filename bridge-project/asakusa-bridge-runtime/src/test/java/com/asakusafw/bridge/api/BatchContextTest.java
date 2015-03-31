@@ -50,6 +50,18 @@ public class BatchContextTest {
     }
 
     /**
+     * reserved variables.
+     */
+    @Test
+    public void reserved() {
+        ResourceBroker.put(StageInfo.class, info("a", "Hello, world!"));
+        assertThat(BatchContext.get("user"), is("u"));
+        assertThat(BatchContext.get("batch_id"), is("b"));
+        assertThat(BatchContext.get("flow_id"), is("f"));
+        assertThat(BatchContext.get("execution_id"), is("e"));
+    }
+
+    /**
      * w/o required resource.
      */
     @Test(expected = IllegalStateException.class)
