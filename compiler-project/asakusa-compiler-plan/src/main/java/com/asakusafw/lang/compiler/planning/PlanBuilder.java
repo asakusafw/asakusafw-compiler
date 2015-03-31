@@ -19,13 +19,18 @@ import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.asakusafw.lang.compiler.model.graph.MarkerOperator;
 import com.asakusafw.lang.compiler.model.graph.Operator;
 import com.asakusafw.lang.compiler.model.graph.OperatorGraph;
+import com.asakusafw.lang.compiler.model.graph.OperatorPort;
 import com.asakusafw.lang.compiler.model.graph.Operators;
 import com.asakusafw.lang.compiler.planning.basic.BasicPlan;
 import com.asakusafw.lang.compiler.planning.basic.BasicSubPlan;
@@ -35,12 +40,16 @@ import com.asakusafw.lang.compiler.planning.basic.BasicSubPlan;
  */
 public final class PlanBuilder {
 
+    static final Logger LOG = LoggerFactory.getLogger(PlanBuilder.class);
+
     private final BasicPlan plan = new BasicPlan();
 
     private final Set<Operator> sourceOperators;
 
     // copy -> source
     private final Map<Operator, Operator> copyToSource = new HashMap<>();
+
+    private boolean strict;
 
     private PlanBuilder(Set<Operator> operators) {
         this.sourceOperators = operators;
@@ -53,6 +62,16 @@ public final class PlanBuilder {
      */
     public static PlanBuilder from(Collection<? extends Operator> operators) {
         return new PlanBuilder(Operators.getTransitiveConnected(operators));
+    }
+
+    /**
+     * Sets whether this builder strictly validates sub-plans or not.
+     * @param newValue {@code true} to validate strictly, otherwise {@code false}
+     * @return this
+     */
+    public PlanBuilder withStrict(boolean newValue) {
+        this.strict = newValue;
+        return this;
     }
 
     /**
@@ -105,8 +124,7 @@ public final class PlanBuilder {
         validateSource(in);
         validateSource(out);
         validateReachable(in, out);
-        Set<Operator> members = computeRange(in, out);
-        Map<Operator, Operator> sourceToCopy = OperatorGraph.copy(members);
+        Map<Operator, Operator> sourceToCopy = copyRange(in, out);
 
         Set<MarkerOperator> copyInputs = applyMarkers(sourceToCopy, in);
         Set<MarkerOperator> copyOutputs = applyMarkers(sourceToCopy, out);
@@ -171,12 +189,14 @@ public final class PlanBuilder {
         for (MarkerOperator operator : inputs) {
             Set<Operator> reachables = Operators.findNearestReachableSuccessors(
                     operator.getOutputs(), Planning.PLAN_MARKERS);
-            for (MarkerOperator other : inputs) {
-                if (reachables.contains(other)) {
-                    throw new IllegalArgumentException(MessageFormat.format(
-                            "input must not be reachable to other inputs: {0} -> {1}",
-                            operator,
-                            other));
+            if (strict) {
+                for (MarkerOperator other : inputs) {
+                    if (reachables.contains(other)) {
+                        throw new IllegalArgumentException(MessageFormat.format(
+                                "input must not be reachable to other inputs: {0} -> {1}",
+                                operator,
+                                other));
+                    }
                 }
             }
             reachables.retainAll(outputs);
@@ -196,18 +216,51 @@ public final class PlanBuilder {
                 }
             }
         }
-        for (MarkerOperator operator : outputs) {
-            Set<Operator> reachables = Operators.findNearestReachablePredecessors(
-                    operator.getInputs(), Planning.PLAN_MARKERS);
-            for (MarkerOperator other : outputs) {
-                if (reachables.contains(other)) {
-                    throw new IllegalArgumentException(MessageFormat.format(
-                            "output must be reachable to other outputs: {0} -> {1}",
-                            operator,
-                            other));
+        if (strict) {
+            for (MarkerOperator operator : outputs) {
+                Set<Operator> reachables = Operators.findNearestReachablePredecessors(
+                        operator.getInputs(), Planning.PLAN_MARKERS);
+                for (MarkerOperator other : outputs) {
+                    if (reachables.contains(other)) {
+                        throw new IllegalArgumentException(MessageFormat.format(
+                                "output must not be reachable to other outputs: {0} -> {1}",
+                                operator,
+                                other));
+                    }
                 }
             }
         }
+    }
+
+    private Map<Operator, Operator> copyRange(Set<MarkerOperator> in, Set<MarkerOperator> out) {
+        Set<Operator> members = computeRange(in, out);
+        Map<Operator, Operator> sourceToCopy = OperatorGraph.copy(members);
+        Set<Operator> copyEdges = new LinkedHashSet<>();
+        for (Operator source : in) {
+            Operator copy = sourceToCopy.get(source);
+            copyEdges.add(copy);
+            assert copy != null;
+            for (OperatorPort port : copy.getInputs()) {
+                port.disconnectAll();
+            }
+        }
+        for (Operator source : out) {
+            Operator copy = sourceToCopy.get(source);
+            copyEdges.add(copy);
+            assert copy != null;
+            for (OperatorPort port : copy.getOutputs()) {
+                port.disconnectAll();
+            }
+        }
+        Set<Operator> availables = Operators.getTransitiveConnected(copyEdges);
+        for (Iterator<Map.Entry<Operator, Operator>> iter = sourceToCopy.entrySet().iterator(); iter.hasNext();) {
+            Map.Entry<Operator, Operator> entry = iter.next();
+            if (availables.contains(entry.getValue()) == false) {
+                iter.remove();
+                LOG.trace("removing redundant operator: {}", entry.getKey()); //$NON-NLS-1$
+            }
+        }
+        return sourceToCopy;
     }
 
     private Set<Operator> computeRange(Set<MarkerOperator> in, Set<MarkerOperator> out) {

@@ -374,7 +374,7 @@ public class PlanBuilderTest extends PlanningTestRoot {
      * input reaches other inputs.
      */
     @Test(expected = RuntimeException.class)
-    public void invalid_input_reach_input() {
+    public void invalid_input_reach_input_strict() {
         MockOperators mock = new MockOperators()
             .marker("begin", PlanMarker.BEGIN)
             .operator("a").connect("begin", "a")
@@ -382,6 +382,7 @@ public class PlanBuilderTest extends PlanningTestRoot {
             .marker("invalid", PlanMarker.CHECKPOINT).connect("invalid", "begin").connect("invalid", "a");
 
         PlanBuilder.from(mock.all())
+            .withStrict(true)
             .add(mock.getAsSet("begin", "invalid"), mock.getAsSet("end"))
             .build();
     }
@@ -441,7 +442,7 @@ public class PlanBuilderTest extends PlanningTestRoot {
      * output reaches other outputs.
      */
     @Test(expected = RuntimeException.class)
-    public void invalid_output_reach_output() {
+    public void invalid_output_reach_output_strict() {
         MockOperators mock = new MockOperators()
             .marker("begin", PlanMarker.BEGIN)
             .operator("a").connect("begin", "a")
@@ -449,6 +450,7 @@ public class PlanBuilderTest extends PlanningTestRoot {
             .marker("invalid", PlanMarker.CHECKPOINT).connect("end", "invalid").connect("a", "invalid");
 
         PlanBuilder.from(mock.all())
+            .withStrict(true)
             .add(mock.getAsSet("begin"), mock.getAsSet("end", "invalid"))
             .build();
     }

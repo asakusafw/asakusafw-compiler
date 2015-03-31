@@ -303,6 +303,23 @@ public class PrimitivePlannerTest extends PlanningTestRoot {
     }
 
     /**
+     * drive begin and its derived broadcast.
+     */
+    @Test
+    public void input_broadcast_same_target() {
+        MockOperators mock = new MockOperators()
+            .marker("begin", PlanMarker.BEGIN)
+            .marker("checkpoint", PlanMarker.CHECKPOINT).connect("begin", "checkpoint")
+            .marker("broadcast", PlanMarker.BROADCAST).connect("checkpoint", "broadcast")
+            .operator("a", "p0,p1", "p").connect("checkpoint", "a.p0").connect("broadcast", "a.p1")
+            .marker("end", PlanMarker.END).connect("a", "end");
+
+        PlanDetail detail = plan(mock);
+        Plan plan = detail.getPlan();
+        assertThat(plan.getElements(), hasSize(3));
+    }
+
+    /**
      * no preds.
      */
     @Test(expected = RuntimeException.class)
