@@ -58,7 +58,7 @@ public class BasicClassAnalyzer implements ClassAnalyzer {
      * @param context the current context
      * @return the created builder
      */
-    public static FlowPartBuilder newFlowPartBuilder(Context context) {
+    public static FlowPartBuilder newFlowPartBuilder(AnalyzerContext context) {
         return new FlowPartBuilder(createFlowGraphAnalyzer(context));
     }
 
