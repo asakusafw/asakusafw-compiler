@@ -18,6 +18,7 @@ package com.asakusafw.lang.compiler.core.basic;
 import com.asakusafw.lang.compiler.analyzer.BatchAnalyzer;
 import com.asakusafw.lang.compiler.analyzer.ExternalPortAnalyzer;
 import com.asakusafw.lang.compiler.analyzer.FlowGraphAnalyzer;
+import com.asakusafw.lang.compiler.analyzer.FlowPartBuilder;
 import com.asakusafw.lang.compiler.analyzer.JobflowAnalyzer;
 import com.asakusafw.lang.compiler.analyzer.adapter.BatchAdapter;
 import com.asakusafw.lang.compiler.analyzer.adapter.JobflowAdapter;
@@ -52,19 +53,28 @@ public class BasicClassAnalyzer implements ClassAnalyzer {
         return createJobflowAnalyzer(context).analyze(jobflowClass);
     }
 
-    BatchAnalyzer createBatchAnalyzer(AnalyzerContext context) {
+    /**
+     * Creates a new {@link FlowPartBuilder}.
+     * @param context the current context
+     * @return the created builder
+     */
+    public static FlowPartBuilder newFlowPartBuilder(Context context) {
+        return new FlowPartBuilder(createFlowGraphAnalyzer(context));
+    }
+
+    static BatchAnalyzer createBatchAnalyzer(AnalyzerContext context) {
         return new BatchAnalyzer(createJobflowAnalyzer(context));
     }
 
-    JobflowAnalyzer createJobflowAnalyzer(AnalyzerContext context) {
+    static JobflowAnalyzer createJobflowAnalyzer(AnalyzerContext context) {
         return new JobflowAnalyzer(createFlowGraphAnalyzer(context));
     }
 
-    FlowGraphAnalyzer createFlowGraphAnalyzer(AnalyzerContext context) {
+    static FlowGraphAnalyzer createFlowGraphAnalyzer(AnalyzerContext context) {
         return new FlowGraphAnalyzer(createExternalPortAnalyzer(context));
     }
 
-    ExternalPortAnalyzer createExternalPortAnalyzer(AnalyzerContext context) {
+    static ExternalPortAnalyzer createExternalPortAnalyzer(AnalyzerContext context) {
         return new ExternalPortAnalyzerAdapter(context);
     }
 }
