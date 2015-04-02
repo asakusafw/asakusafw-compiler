@@ -190,6 +190,40 @@ public class CompilerProfileTest {
         }
     }
 
+    /**
+     * copy artifacts.
+     * @throws Exception if failed
+     */
+    @Test
+    public void copy() throws Exception {
+        CompilerProfile profile = newProfile();
+        profile.forToolRepository()
+            .use(new JobflowProcessor() {
+                @Override
+                public void process(Context context, Jobflow source) throws IOException {
+                    return;
+                }
+            });
+
+        File copy = new File(folder.getRoot(), "copy");
+        File home;
+        File batchapps;
+        try (CompilerTester compiler = profile.build()) {
+            home = compiler.getTesterContext().getFrameworkHome();
+            batchapps = compiler.getTesterContext().getBatchApplicationHome();
+            assertThat(home.isDirectory(), is(true));
+            assertThat(batchapps.isDirectory(), is(true));
+
+            JobflowArtifact artifact = compiler.compile("B", jobflow("testing"));
+            compiler.copyArtifact(artifact, copy);
+        }
+
+        // disposed
+        assertThat(home.isDirectory(), is(false));
+        assertThat(batchapps.isDirectory(), is(false));
+        assertThat(new File(copy, "B").isDirectory(), is(true));
+    }
+
     private CompilerProfile newProfile(CompilerParticipant... participants) {
         CompilerProfile profile = new CompilerProfile(getClass().getClassLoader());
         profile.forToolRepository()

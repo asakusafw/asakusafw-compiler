@@ -17,6 +17,7 @@ package com.asakusafw.lang.compiler.tester;
 
 import java.io.Closeable;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -48,6 +49,7 @@ import com.asakusafw.lang.compiler.model.graph.Batch;
 import com.asakusafw.lang.compiler.model.graph.Jobflow;
 import com.asakusafw.lang.compiler.model.info.BatchInfo;
 import com.asakusafw.lang.compiler.packaging.FileContainer;
+import com.asakusafw.lang.compiler.packaging.ResourceSink;
 import com.asakusafw.lang.compiler.packaging.ResourceUtil;
 import com.asakusafw.lang.compiler.tester.executor.util.DummyBatchClass;
 
@@ -250,24 +252,66 @@ public class CompilerTester implements Closeable {
     public BatchArtifact compile(Batch batch) throws IOException {
         FileContainer output = createBatchOutput(batch);
         BatchCompiler.Context context = new BatchCompiler.Context(compilerContext, output);
-
         collector.reset();
         batchCompiler.compile(context, batch);
         BatchArtifact result = collector.take();
         return result;
     }
 
+    /**
+     * Copies the compiled artifact into the target batch applications directory.
+     * @param artifact the target artifact
+     * @param batchapps the target batch applications directory
+     * @throws IOException if failed to copy the artifact
+     */
+    public void copyArtifact(JobflowArtifact artifact, File batchapps) throws IOException {
+        copyArtifact(artifact.getBatch(), batchapps);
+    }
+
+    /**
+     * Copies the compiled artifact into the target batch applications directory.
+     * @param artifact the target artifact
+     * @param batchapps the target batch applications directory
+     * @throws IOException if failed to copy the artifact
+     */
+    public void copyArtifact(BatchArtifact artifact, File batchapps) throws IOException {
+        copyArtifact(artifact.getReference(), batchapps);
+    }
+
+    private void copyArtifact(BatchInfo info, File batchapps) throws IOException {
+        FileContainer source = computeBatchOutput(info, testerContext.getBatchApplicationHome());
+        if (source.getBasePath().exists() == false) {
+            throw new FileNotFoundException(source.getBasePath().getPath());
+        }
+        FileContainer destination = computeBatchOutput(info, batchapps);
+        cleanOutput(destination);
+        LOG.debug("copy: {} -> {}", source, destination); //$NON-NLS-1$
+        try (ResourceSink sink = destination.createSink()) {
+            ResourceUtil.copy(source, sink);
+        }
+    }
+
     private FileContainer createBatchOutput(BatchInfo batch) throws IOException {
-        File output = new File(testerContext.getBatchApplicationHome(), batch.getBatchId());
+        FileContainer container = computeBatchOutput(batch, testerContext.getBatchApplicationHome());
+        cleanOutput(container);
+        return container;
+    }
+
+    private FileContainer computeBatchOutput(BatchInfo batch, File batchapps) {
+        File output = new File(batchapps, batch.getBatchId());
+        return new FileContainer(output);
+    }
+
+    private void cleanOutput(FileContainer container) throws IOException {
+        File output = container.getBasePath();
         if (output.exists()) {
-            LOG.debug("cleaning output target: {}", output); //$NON-NLS-1$
+            LOG.debug("cleaning output target: {}", container); //$NON-NLS-1$
             if (ResourceUtil.delete(output) == false) {
                 throw new IOException(MessageFormat.format(
                         "failed to delete output target: {0}",
-                        output));
+                        container));
             }
         }
-        return new FileContainer(output);
     }
 
     @Override
