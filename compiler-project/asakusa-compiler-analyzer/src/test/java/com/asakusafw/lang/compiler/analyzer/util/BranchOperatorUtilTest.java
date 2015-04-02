@@ -59,6 +59,21 @@ public class BranchOperatorUtilTest {
     }
 
     /**
+     * w/ number.
+     * @throws Exception if failed
+     */
+    @Test
+    public void numeric() throws Exception {
+        UserOperator m = extract(Branch.class, Ops.class, "mN", WithNumber.values());
+        assertThat(BranchOperatorUtil.isSupported(m), is(true));
+        Map<Enum<?>, OperatorOutput> o0 = rev(BranchOperatorUtil.getOutputMap(cl, m));
+        assertThat(o0.keySet(), containsInAnyOrder((Enum<?>[]) WithNumber.values()));
+        assertThat(o0.get(WithNumber.CODE_100).getName(), is("code100"));
+        assertThat(o0.get(WithNumber.CODE_200_X).getName(), is("code200X"));
+        assertThat(o0.get(WithNumber.CODE_300_2).getName(), is("code3002"));
+    }
+
+    /**
      * check supports.
      * @throws Exception if failed
      */
@@ -96,7 +111,7 @@ public class BranchOperatorUtilTest {
      */
     @Test(expected = RuntimeException.class)
     public void invalid_not_enum() throws Exception {
-        BranchOperatorUtil.getOutputMap(cl, extract(Branch.class, Ops.class, "m3"));
+        BranchOperatorUtil.getOutputMap(cl, extract(Branch.class, Ops.class, "mX"));
     }
 
     /**
@@ -152,9 +167,17 @@ public class BranchOperatorUtilTest {
             Class<? extends Annotation> annotationType,
             Class<?> operatorClass,
             String methodName) {
+        return extract(annotationType, operatorClass, methodName, State.values());
+    }
+
+    private UserOperator extract(
+            Class<? extends Annotation> annotationType,
+            Class<?> operatorClass,
+            String methodName,
+            Enum<?>[] constants) {
         UserOperator.Builder builder = OperatorExtractor.extract(annotationType, operatorClass, methodName)
                 .input("in", typeOf(String.class));
-        for (State value : State.values()) {
+        for (Enum<?> value : constants) {
             String name = PropertyName.of(value.name()).toMemberName();
             builder.output(name, typeOf(String.class));
         }
@@ -183,6 +206,16 @@ public class BranchOperatorUtilTest {
     }
 
     @SuppressWarnings("javadoc")
+    public enum WithNumber {
+
+        CODE_100,
+
+        CODE_200_X,
+
+        CODE_300_2,
+    }
+
+    @SuppressWarnings("javadoc")
     public static abstract class Ops {
 
         @Branch
@@ -195,6 +228,9 @@ public class BranchOperatorUtilTest {
         public abstract State m2();
 
         @Branch
-        public abstract void m3();
+        public abstract WithNumber mN();
+
+        @Branch
+        public abstract void mX();
     }
 }

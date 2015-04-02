@@ -18,7 +18,10 @@ package com.asakusafw.lang.compiler.model;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -32,7 +35,9 @@ public class PropertyName {
      */
     public static final String EMPTY_NAME = "_"; //$NON-NLS-1$
 
-    private static final Pattern TRIM_PATTERN = Pattern.compile("[ _]*(.*?)[ _]*"); //$NON-NLS-1$
+    static final Option[] EMPTY_OPTIONS = new Option[0];
+
+    static final Pattern TRIM_PATTERN = Pattern.compile("[ _]*(.*?)[ _]*"); //$NON-NLS-1$
 
     private final List<String> words;
 
@@ -50,13 +55,23 @@ public class PropertyName {
      * @return the created instance
      */
     public static PropertyName of(String nameString) {
+        return of(nameString, EMPTY_OPTIONS);
+    }
+
+    /**
+     * Creates a new instance.
+     * @param nameString the property name string
+     * @param options options for building property name
+     * @return the created instance
+     */
+    public static PropertyName of(String nameString, Option... options) {
         if (nameString.isEmpty()) {
             throw new IllegalArgumentException("nameString must not be empty"); //$NON-NLS-1$
         }
         String s = trimNameString(nameString);
         if (s.indexOf('_') >= 0 || s.toUpperCase().equals(s)) {
             String[] segments = s.split("_"); //$NON-NLS-1$
-            return new PropertyName(Arrays.asList(segments));
+            return build(Arrays.asList(segments), options);
         } else {
             List<String> segments = new ArrayList<>();
             int start = 0;
@@ -67,8 +82,51 @@ public class PropertyName {
                 }
             }
             segments.add(s.substring(start));
-            return new PropertyName(segments);
+            return build(segments, options);
         }
+    }
+
+    private static PropertyName build(List<String> segments, Option[] options) {
+        Set<Option> opts = EnumSet.noneOf(Option.class);
+        Collections.addAll(opts, options);
+        return new PropertyName(apply(opts, segments));
+    }
+
+    private static List<String> apply(Set<Option> opts, List<String> segments) {
+        if (segments.isEmpty()) {
+            return segments;
+        }
+        List<String> results = segments;
+        if (opts.contains(Option.KEEP_CASELESS_WORDS) == false) {
+            results = combineCaselessSegments(segments);
+        }
+        return results;
+    }
+
+    private static List<String> combineCaselessSegments(List<String> segments) {
+        List<String> applied = new ArrayList<>();
+        applied.add(segments.get(0));
+        for (int i = 1, n = segments.size(); i < n; i++) {
+            String s = segments.get(i);
+            if (s.isEmpty()) {
+                continue;
+            }
+            if (hasCase(s) == false) {
+                int last = applied.size() - 1;
+                assert last >= 0;
+                applied.set(last, applied.get(last) + s);
+            } else {
+                applied.add(s);
+            }
+        }
+        return applied;
+    }
+
+    private static boolean hasCase(String s) {
+        assert s.isEmpty() == false;
+        char first = s.charAt(0);
+        int type = Character.getType(first);
+        return type == Character.UPPERCASE_LETTER || type == Character.LOWERCASE_LETTER;
     }
 
     private static String trimNameString(String nameString) {
@@ -83,7 +141,7 @@ public class PropertyName {
         List<String> results = new ArrayList<>();
         for (String segment : segments) {
             if (segment.isEmpty() == false) {
-                results.add(segment.toLowerCase());
+                results.add(segment.toLowerCase(Locale.ENGLISH));
             }
         }
         return Collections.unmodifiableList(results);
@@ -192,7 +250,7 @@ public class PropertyName {
 
     private String capitalize(String segment) {
         assert segment != null;
-        StringBuilder buf = new StringBuilder(segment.toLowerCase());
+        StringBuilder buf = new StringBuilder(segment.toLowerCase(Locale.ENGLISH));
         buf.setCharAt(0, Character.toUpperCase(buf.charAt(0)));
         return buf.toString();
     }
@@ -226,5 +284,16 @@ public class PropertyName {
     @Override
     public String toString() {
         return toName();
+    }
+
+    /**
+     * Represents options of {@link PropertyName}.
+     */
+    public enum Option {
+
+        /**
+         * do not combine segments which consist of case-less word.
+         */
+        KEEP_CASELESS_WORDS,
     }
 }

@@ -23,6 +23,8 @@ import java.util.List;
 
 import org.junit.Test;
 
+import com.asakusafw.lang.compiler.model.PropertyName.Option;
+
 /**
  * Test for {@link PropertyName}.
  */
@@ -139,6 +141,24 @@ public class PropertyNameTest {
         PropertyName edit = name.removeFirst().removeLast();
         assertThat(edit, is(not(name)));
         assertThat(edit.getWords(), is(words("hello")));
+    }
+
+    /**
+     * w/ case-less word.
+     */
+    @Test
+    public void caseless() {
+        PropertyName name = PropertyName.of("code_100");
+        assertThat(name.getWords(), is(words("code100")));
+    }
+
+    /**
+     * w/ case-less word.
+     */
+    @Test
+    public void caseless_suppress() {
+        PropertyName name = PropertyName.of("code_100", Option.KEEP_CASELESS_WORDS);
+        assertThat(name.getWords(), is(words("code,100")));
     }
 
     private List<String> words(String sequence) {
