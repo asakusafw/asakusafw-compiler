@@ -174,6 +174,7 @@ public class FlowDescriptionAnalyzer {
      * Analyze {@link FlowDescription} object using previously added flow inputs/outputs.
      * @param description the target flow description
      * @return the analyzed flow graph
+     * @throws DiagnosticException if failed to analyze flow DSL
      */
     public FlowGraph analyze(FlowDescription description) {
         try {

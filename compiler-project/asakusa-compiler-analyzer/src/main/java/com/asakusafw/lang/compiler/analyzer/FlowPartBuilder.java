@@ -31,7 +31,6 @@ import com.asakusafw.lang.compiler.model.info.JobflowInfo;
 import com.asakusafw.vocabulary.external.ExporterDescription;
 import com.asakusafw.vocabulary.external.ImporterDescription;
 import com.asakusafw.vocabulary.flow.FlowDescription;
-import com.asakusafw.vocabulary.flow.graph.FlowGraph;
 import com.asakusafw.vocabulary.flow.graph.FlowIn;
 import com.asakusafw.vocabulary.flow.graph.FlowOut;
 
@@ -41,18 +40,24 @@ import com.asakusafw.vocabulary.flow.graph.FlowOut;
  */
 public class FlowPartBuilder {
 
-    private final FlowGraphAnalyzer elementAnalyzer;
-
-    private final FlowDescriptionAnalyzer driver = new FlowDescriptionAnalyzer();
+    private final FlowPartDriver driver;
 
     private final List<Object> arguments = new ArrayList<>();
 
     /**
      * Creates a new instance.
-     * @param elementAnalyzer the element analyzer
+     * @param driver the internal driver
      */
-    public FlowPartBuilder(FlowGraphAnalyzer elementAnalyzer) {
-        this.elementAnalyzer = elementAnalyzer;
+    public FlowPartBuilder(FlowPartDriver driver) {
+        this.driver = driver;
+    }
+
+    /**
+     * Creates a new instance.
+     * @param analyzer the element analyzer
+     */
+    public FlowPartBuilder(FlowGraphAnalyzer analyzer) {
+        this(new FlowPartDriver(analyzer));
     }
 
     /**
@@ -108,23 +113,19 @@ public class FlowPartBuilder {
      * @return the built operator graph
      */
     public OperatorGraph build(Class<? extends FlowDescription> flowClass) {
-        FlowGraph flowGraph = buildFlowGraph(flowClass);
-        FlowGraphVerifier.verify(flowGraph);
-        OperatorGraph graph = elementAnalyzer.analyze(flowGraph);
-        return graph;
+        FlowDescription description = analyze(flowClass);
+        return driver.build(description);
     }
 
-    private FlowGraph buildFlowGraph(Class<? extends FlowDescription> flowClass) {
+    private FlowDescription analyze(Class<? extends FlowDescription> flowClass) {
         Constructor<? extends FlowDescription> ctor = getConstructor(flowClass);
-        FlowDescription description;
         try {
-            description = ctor.newInstance(arguments.toArray(new Object[arguments.size()]));
+            return ctor.newInstance(arguments.toArray(new Object[arguments.size()]));
         } catch (ReflectiveOperationException e) {
             throw new DiagnosticException(Diagnostic.Level.ERROR, MessageFormat.format(
                     "error occurred while creating an instance of {0}",
                     flowClass.getName()), e);
         }
-        return driver.analyze(description);
     }
 
     @SuppressWarnings("unchecked")

@@ -19,6 +19,7 @@ import com.asakusafw.lang.compiler.analyzer.BatchAnalyzer;
 import com.asakusafw.lang.compiler.analyzer.ExternalPortAnalyzer;
 import com.asakusafw.lang.compiler.analyzer.FlowGraphAnalyzer;
 import com.asakusafw.lang.compiler.analyzer.FlowPartBuilder;
+import com.asakusafw.lang.compiler.analyzer.FlowPartDriver;
 import com.asakusafw.lang.compiler.analyzer.JobflowAnalyzer;
 import com.asakusafw.lang.compiler.analyzer.adapter.BatchAdapter;
 import com.asakusafw.lang.compiler.analyzer.adapter.JobflowAdapter;
@@ -51,6 +52,15 @@ public class BasicClassAnalyzer implements ClassAnalyzer {
     @Override
     public Jobflow analyzeJobflow(Context context, Class<?> jobflowClass) {
         return createJobflowAnalyzer(context).analyze(jobflowClass);
+    }
+
+    /**
+     * Creates a new {@link FlowPartDriver}.
+     * @param context the current context
+     * @return the created builder
+     */
+    public static FlowPartDriver newFlowPartDriver(AnalyzerContext context) {
+        return new FlowPartDriver(createFlowGraphAnalyzer(context));
     }
 
     /**
