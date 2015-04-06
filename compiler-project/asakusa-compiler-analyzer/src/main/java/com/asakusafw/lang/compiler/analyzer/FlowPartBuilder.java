@@ -16,10 +16,12 @@
 package com.asakusafw.lang.compiler.analyzer;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Type;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.asakusafw.lang.compiler.analyzer.util.TypeInfo;
 import com.asakusafw.lang.compiler.common.Diagnostic;
 import com.asakusafw.lang.compiler.common.DiagnosticException;
 import com.asakusafw.lang.compiler.model.description.Descriptions;
@@ -30,6 +32,8 @@ import com.asakusafw.vocabulary.external.ExporterDescription;
 import com.asakusafw.vocabulary.external.ImporterDescription;
 import com.asakusafw.vocabulary.flow.FlowDescription;
 import com.asakusafw.vocabulary.flow.graph.FlowGraph;
+import com.asakusafw.vocabulary.flow.graph.FlowIn;
+import com.asakusafw.vocabulary.flow.graph.FlowOut;
 
 /**
  * Builds an {@link OperatorGraph} from generic {@link FlowDescription} class.
@@ -137,19 +141,40 @@ public class FlowPartBuilder {
     }
 
     private boolean canApply(Constructor<?> constructor) {
-        Class<?>[] types = constructor.getParameterTypes();
+        Type[] types = constructor.getGenericParameterTypes();
         if (types.length != arguments.size()) {
             return false;
         }
         for (int i = 0; i < types.length; i++) {
-            Class<?> type = types[i];
+            Type type = types[i];
             Object arg = arguments.get(i);
             if (arg == null) {
                 // null type
                 continue;
             }
-            if (type.isAssignableFrom(arg.getClass()) == false) {
+            Class<?> raw = TypeInfo.erase(type);
+            if (raw.isAssignableFrom(arg.getClass()) == false) {
                 return false;
+            }
+            Type dataType;
+            if (arg instanceof FlowIn<?>) {
+                dataType = ((FlowIn<?>) arg).getDescription().getDataType();
+            } else if (arg instanceof FlowOut<?>) {
+                dataType = ((FlowOut<?>) arg).getDescription().getDataType();
+            } else {
+                dataType = null;
+            }
+            if (dataType == null || (dataType instanceof Class<?>) == false) {
+                continue;
+            }
+            TypeInfo info = TypeInfo.of(type);
+            List<Type> typeArguments = info.getTypeArguments();
+            if (typeArguments.size() == 1) {
+                Class<?> required = TypeInfo.erase(typeArguments.get(0));
+                Class<?> target = (Class<?>) dataType;
+                if (required.isAssignableFrom(target) == false) {
+                    return false;
+                }
             }
         }
         return true;

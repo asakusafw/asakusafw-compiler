@@ -22,8 +22,25 @@ import com.asakusafw.vocabulary.external.ExporterDescription;
  */
 public class MockExporterDescription implements ExporterDescription {
 
+    private final Class<?> modelType;
+
+    /**
+     * Creates a new instance w/ string model type.
+     */
+    public MockExporterDescription() {
+        this(String.class);
+    }
+
+    /**
+     * Creates a new instance.
+     * @param modelType the model type
+     */
+    public MockExporterDescription(Class<?> modelType) {
+        this.modelType = modelType;
+    }
+
     @Override
     public Class<?> getModelType() {
-        return String.class;
+        return modelType;
     }
 }

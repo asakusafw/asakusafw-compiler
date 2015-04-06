@@ -25,6 +25,7 @@ import org.junit.Test;
 import com.asakusafw.lang.compiler.analyzer.mock.MockExporterDescription;
 import com.asakusafw.lang.compiler.analyzer.mock.MockImporterDescription;
 import com.asakusafw.lang.compiler.analyzer.mock.MockJobflow;
+import com.asakusafw.lang.compiler.common.DiagnosticException;
 import com.asakusafw.lang.compiler.model.description.Descriptions;
 import com.asakusafw.lang.compiler.model.graph.CoreOperator;
 import com.asakusafw.lang.compiler.model.graph.CoreOperator.CoreOperatorKind;
@@ -72,6 +73,61 @@ public class FlowPartBuilderTest {
         assertThat(out.getName(), is("out"));
         assertThat(out.isExternal(), is(true));
         assertThat(out.getInfo().getDescriptionClass(), is(Descriptions.classOf(MockExporterDescription.class)));
+    }
+
+    /**
+     * lack parameters.
+     */
+    @Test(expected = DiagnosticException.class)
+    public void lack() {
+        new FlowPartBuilder(new FlowGraphAnalyzer(new MockExternalPortAnalyzer()))
+            .addInput("in", new MockImporterDescription())
+            .build("mock", MockJobflow.class);
+    }
+
+    /**
+     * extra parameters.
+     */
+    @Test(expected = DiagnosticException.class)
+    public void extra() {
+        new FlowPartBuilder(new FlowGraphAnalyzer(new MockExternalPortAnalyzer()))
+        .addInput("in", new MockImporterDescription())
+        .addOutput("out", new MockExporterDescription())
+        .addValue("Hello, world!")
+        .build("mock", MockJobflow.class);
+    }
+
+    /**
+     * invalid raw type.
+     */
+    @Test(expected = DiagnosticException.class)
+    public void invalid_raw() {
+        new FlowPartBuilder(new FlowGraphAnalyzer(new MockExternalPortAnalyzer()))
+        .addInput("in", new MockImporterDescription())
+        .addInput("out", new MockImporterDescription())
+        .build("mock", MockJobflow.class);
+    }
+
+    /**
+     * inconsistent input data type.
+     */
+    @Test(expected = DiagnosticException.class)
+    public void inconsistent_input() {
+        new FlowPartBuilder(new FlowGraphAnalyzer(new MockExternalPortAnalyzer()))
+        .addInput("in", new MockImporterDescription(Integer.class))
+        .addOutput("out", new MockExporterDescription())
+        .build("mock", MockJobflow.class);
+    }
+
+    /**
+     * inconsistent output data type.
+     */
+    @Test(expected = DiagnosticException.class)
+    public void inconsistent_output() {
+        new FlowPartBuilder(new FlowGraphAnalyzer(new MockExternalPortAnalyzer()))
+        .addInput("in", new MockImporterDescription())
+        .addOutput("out", new MockExporterDescription(Integer.class))
+        .build("mock", MockJobflow.class);
     }
 
     private Operator succ(Operator operator) {

@@ -15,10 +15,13 @@
  */
 package com.asakusafw.lang.compiler.analyzer.util;
 
+import java.lang.reflect.Array;
+import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -43,11 +46,29 @@ public final class TypeInfo {
     }
 
     /**
+     * Returns whether the target type is class or interface type or not.
+     * @param type the target type
+     * @return {@code true} if the target type is a class or interface type
+     */
+    public static boolean isClassOrInterface(Type type) {
+        if (type instanceof Class<?>) {
+            Class<?> aClass = (Class<?>) type;
+            return aClass.isArray() == false && aClass.isPrimitive() == false;
+        }
+        return type instanceof ParameterizedType;
+    }
+
+    /**
      * Creates a new instance.
      * @param type the original type (must be a class or interface type)
      * @return the type information
      */
     public static TypeInfo of(Type type) {
+        if (type instanceof Class<?> == false && isClassOrInterface(type) == false) {
+            throw new IllegalArgumentException(MessageFormat.format(
+                    "type must be a class or interface type: {0}",
+                    type));
+        }
         GenericContext generic = toGenericContext(type);
         assert generic != null : "type must be a class or interface type";
         return new TypeInfo(generic.raw, new ArrayList<>(generic.mapping.values()));
@@ -136,9 +157,21 @@ public final class TypeInfo {
      * @return the related erasure type
      */
     public static Class<?> erase(Type type) {
-        GenericContext generic = toGenericContext(type);
-        assert generic != null : "type must be a class or interface type";
-        return generic.raw;
+        if (type instanceof TypeVariable<?>) {
+            Type[] bounds = ((TypeVariable<?>) type).getBounds();
+            if (bounds == null || bounds.length == 0) {
+                return Object.class;
+            }
+            return erase(bounds[0]);
+        } else if (type instanceof GenericArrayType) {
+            Class<?> component = erase(((GenericArrayType) type).getGenericComponentType());
+            Object array = Array.newInstance(component, 0);
+            return array.getClass();
+        } else {
+            GenericContext generic = toGenericContext(type);
+            assert generic != null : "type must be a class or interface type";
+            return generic.raw;
+        }
     }
 
     /**
