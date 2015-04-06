@@ -1,1 +1,2 @@
+com.asakusafw.lang.compiler.tester.executor.HadoopTaskExecutor
 com.asakusafw.lang.compiler.tester.executor.CommandTaskExecutor
