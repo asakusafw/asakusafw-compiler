@@ -54,5 +54,6 @@
 		<module>asakusa-compiler-javac-testing</module>
 		<module>asakusa-compiler-api-testing</module>
 		<module>asakusa-compiler-tester</module>
+		<module>asakusa-internal-test-moderator</module>
 	</modules>
 </project>

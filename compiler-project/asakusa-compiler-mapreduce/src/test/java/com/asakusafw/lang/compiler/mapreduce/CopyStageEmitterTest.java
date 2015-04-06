@@ -87,7 +87,7 @@ public class CopyStageEmitterTest {
                 javac.compile());
         assertThat("exit status code", status, is(0));
 
-        assertThat(collect(CopyStageInfo.getOutputPath(base.toString(), "out")), contains("Hello, world!"));
+        assertThat(collect(MapReduceUtil.getStageOutputPath(base.toString(), "out")), contains("Hello, world!"));
     }
 
     /**
@@ -144,9 +144,9 @@ public class CopyStageEmitterTest {
                 javac.compile());
         assertThat("exit status code", status, is(0));
 
-        assertThat(collect(CopyStageInfo.getOutputPath(base.toString(), "out0")), contains("Hello0"));
-        assertThat(collect(CopyStageInfo.getOutputPath(base.toString(), "out1")), contains("Hello1"));
-        assertThat(collect(CopyStageInfo.getOutputPath(base.toString(), "out2")), contains("Hello2"));
+        assertThat(collect(MapReduceUtil.getStageOutputPath(base.toString(), "out0")), contains("Hello0"));
+        assertThat(collect(MapReduceUtil.getStageOutputPath(base.toString(), "out1")), contains("Hello1"));
+        assertThat(collect(MapReduceUtil.getStageOutputPath(base.toString(), "out2")), contains("Hello2"));
     }
 
     private List<String> collect(String path) {

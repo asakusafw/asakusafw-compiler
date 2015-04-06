@@ -29,11 +29,11 @@ public final class MapReduceUtil {
     }
 
     /**
-     * Returns a name for {@link StageOutput}.
+     * Returns a quoted name for {@link StageOutput}.
      * @param name the output name
      * @return the processed name
      */
-    public static String getStageOutputName(String name) {
+    public static String quoteOutputName(String name) {
         StringBuilder buf = new StringBuilder();
         for (char c : name.toCharArray()) {
             // 0 as escape character
@@ -53,12 +53,11 @@ public final class MapReduceUtil {
     /**
      * Returns the actual path of the target stage output.
      * @param basePath the stage output base path
-     * @param name the output name
+     * @param outputName the stage output name (see {@link #quoteOutputName(String)})
      * @return the processed path
      */
-    public static String getStageOutputPath(String basePath, String name) {
-        String prefix = getStageOutputName(name);
-        String fileName = String.format("%s-*", prefix); //$NON-NLS-1$
+    public static String getStageOutputPath(String basePath, String outputName) {
+        String fileName = String.format("%s-*", outputName); //$NON-NLS-1$
         Path path = new Path(basePath, fileName);
         return path.toString();
     }

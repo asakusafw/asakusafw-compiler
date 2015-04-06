@@ -90,7 +90,7 @@ public final class CopyStageEmitter {
                         source.getAttributes()));
             }
             outputs.add(new MapReduceStageInfo.Output(
-                    MapReduceUtil.getStageOutputName(operation.name),
+                    operation.outputName,
                     Descriptions.classOf(NullWritable.class),
                     source.getDataClass(),
                     operation.outputFormatClass,
@@ -156,7 +156,6 @@ public final class CopyStageEmitter {
         }
 
         private MethodDeclaration generateMethod() {
-            String name = MapReduceUtil.getStageOutputName(operation.name);
             return f.newMethodDeclaration(
                     null,
                     new AttributeBuilder(f)
@@ -166,7 +165,7 @@ public final class CopyStageEmitter {
                     importer.toType(String.class),
                     f.newSimpleName(PreparatorMapper.NAME_GET_OUTPUT_NAME),
                     Collections.<FormalParameterDeclaration>emptyList(),
-                    Collections.singletonList(f.newReturnStatement(Models.toLiteral(f, name))));
+                    Collections.singletonList(f.newReturnStatement(Models.toLiteral(f, operation.outputName))));
         }
     }
 }

@@ -50,6 +50,7 @@ import com.asakusafw.lang.compiler.hadoop.HadoopTaskReference;
 import com.asakusafw.lang.compiler.javac.JavaSourceExtension;
 import com.asakusafw.lang.compiler.mapreduce.CopyStageEmitter;
 import com.asakusafw.lang.compiler.mapreduce.CopyStageInfo;
+import com.asakusafw.lang.compiler.mapreduce.MapReduceUtil;
 import com.asakusafw.lang.compiler.mapreduce.SourceInfo;
 import com.asakusafw.lang.compiler.mapreduce.StageInfo;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
@@ -412,7 +413,7 @@ public class DirectFileIoPortProcessor
     @Override
     protected Set<String> computeInputPaths(Context context, String name, ExternalInputInfo info) {
         String base = getTemporaryPath(context, PHASE_INPUT, null);
-        String path = CopyStageInfo.getOutputPath(base, name);
+        String path = MapReduceUtil.getStageOutputPath(base, MapReduceUtil.quoteOutputName(name));
         return Collections.singleton(path);
     }
 
@@ -477,7 +478,7 @@ public class DirectFileIoPortProcessor
         String dummyInputPath = String.format(PATTERN_DUMMY_INPUT, reference.getName(), resolved.model.getBasePath());
         Map<String, String> inputAttributes = getInputAttributes(resolved);
         return new CopyStageInfo.Operation(
-                reference.getName(),
+                MapReduceUtil.quoteOutputName(reference.getName()),
                 new SourceInfo(
                         dummyInputPath,
                         reference.getDataModelClass(),

@@ -48,21 +48,11 @@ public class CopyStageInfo {
     }
 
     /**
-     * Computes the output path for this stage.
-     * @param basePath the output base path
-     * @param name the output operation name
-     * @return the computed output path
-     */
-    public static String getOutputPath(String basePath, String name) {
-        return MapReduceUtil.getStageOutputPath(basePath, name);
-    }
-
-    /**
      * Represents a copy operation.
      */
     public static class Operation {
 
-        final String name;
+        final String outputName;
 
         final SourceInfo source;
 
@@ -72,16 +62,18 @@ public class CopyStageInfo {
 
         /**
          * Creates a new instance.
-         * @param name the operation name
+         * @param outputName the output name (must consist of alphabets and digits)
          * @param source the source information
          * @param outputFormatClass the output format class
          * @param outputAttributes the output attributes (for the output format class)
+         * @see MapReduceUtil#quoteOutputName(String)
          */
         public Operation(
-                String name, SourceInfo source,
+                String outputName,
+                SourceInfo source,
                 ClassDescription outputFormatClass,
                 Map<String, String> outputAttributes) {
-            this.name = name;
+            this.outputName = outputName;
             this.source = source;
             this.outputFormatClass = outputFormatClass;
             this.outputAttributes = Collections.unmodifiableMap(new LinkedHashMap<>(outputAttributes));
