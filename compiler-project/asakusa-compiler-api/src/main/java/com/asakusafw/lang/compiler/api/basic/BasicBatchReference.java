@@ -22,13 +22,14 @@ import java.util.Set;
 import com.asakusafw.lang.compiler.api.reference.BatchReference;
 import com.asakusafw.lang.compiler.api.reference.JobflowReference;
 import com.asakusafw.lang.compiler.api.reference.JobflowReferenceMap;
+import com.asakusafw.lang.compiler.common.BasicAttributeContainer;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.info.BatchInfo;
 
 /**
  * A basic implementation of {@link BatchReference}.
  */
-public class BasicBatchReference implements BatchReference {
+public class BasicBatchReference extends BasicAttributeContainer implements BatchReference {
 
     private final BatchInfo info;
 

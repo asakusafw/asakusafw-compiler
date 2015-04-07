@@ -60,6 +60,7 @@ import com.asakusafw.lang.compiler.core.ToolRepository;
 import com.asakusafw.lang.compiler.core.basic.BasicBatchCompiler;
 import com.asakusafw.lang.compiler.core.basic.BasicClassAnalyzer;
 import com.asakusafw.lang.compiler.core.basic.JobflowPackager;
+import com.asakusafw.lang.compiler.core.util.DiagnosticUtil;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.description.Descriptions;
 import com.asakusafw.lang.compiler.model.graph.Batch;
@@ -487,7 +488,7 @@ public final class BatchCompilerCli {
             } catch (DiagnosticException e) {
                 errors.put(aClass, e);
                 for (Diagnostic diagnostic : e.getDiagnostics()) {
-                    log(diagnostic);
+                    DiagnosticUtil.log(LOG, diagnostic);
                 }
                 if (configuration.failOnError.get()) {
                     throw new DiagnosticException(Diagnostic.Level.ERROR, MessageFormat.format(
@@ -505,34 +506,6 @@ public final class BatchCompilerCli {
             return false;
         }
         return true;
-    }
-
-    private static void log(Diagnostic diagnostic) {
-        switch (diagnostic.getLevel()) {
-        case ERROR:
-            if (diagnostic.getException() == null) {
-                LOG.error(diagnostic.getMessage());
-            } else {
-                LOG.error(diagnostic.getMessage(), diagnostic.getException());
-            }
-            break;
-        case WARN:
-            if (diagnostic.getException() == null) {
-                LOG.warn(diagnostic.getMessage());
-            } else {
-                LOG.warn(diagnostic.getMessage(), diagnostic.getException());
-            }
-            break;
-        case INFO:
-            if (diagnostic.getException() == null) {
-                LOG.info(diagnostic.getMessage());
-            } else {
-                LOG.info(diagnostic.getMessage(), diagnostic.getException());
-            }
-            break;
-        default:
-            throw new AssertionError(diagnostic);
-        }
     }
 
     private static Predicate<? super Class<?>> loadPredicate(

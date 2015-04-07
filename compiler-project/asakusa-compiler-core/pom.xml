@@ -42,6 +42,11 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>asakusa-compiler-inspection-driver</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>${asakusafw.groupId}</groupId>
 			<artifactId>simple-graph</artifactId>
 			<version>${asakusafw.version}</version>

@@ -22,7 +22,7 @@ import com.asakusafw.lang.compiler.model.info.BatchInfo;
 /**
  * A symbol of batch.
  */
-public interface BatchReference extends BatchInfo, JobflowReferenceMap {
+public interface BatchReference extends BatchInfo, Reference, JobflowReferenceMap {
 
     /**
      * Returns the jobflows which must be executed in this batch.

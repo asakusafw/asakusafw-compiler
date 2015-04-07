@@ -19,9 +19,6 @@ import static com.asakusafw.lang.compiler.model.description.Descriptions.*;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
-import java.util.Arrays;
-import java.util.Collections;
-
 import org.junit.Test;
 
 import com.asakusafw.lang.compiler.model.description.AnnotationDescription;
@@ -42,11 +39,9 @@ public class UserOperatorTest {
         UserOperator operator = UserOperator.builder(
                 new AnnotationDescription(
                         classOf(SuppressWarnings.class),
-                        Collections.singletonMap("value", Descriptions.valueOf(new String[] { "all" }))),
-                new MethodDescription(
-                        classOf(Mock.class), "method",
-                        Arrays.asList(typeOf(int.class))),
-                        classOf(MockImpl.class))
+                        Descriptions.valueOf(new String[] { "all" })),
+                new MethodDescription(classOf(Mock.class), "method", typeOf(int.class)),
+                classOf(MockImpl.class))
                 .input("model", classOf(String.class))
                 .output("out", classOf(Integer.class))
                 .argument("value", valueOf(100))
@@ -71,11 +66,9 @@ public class UserOperatorTest {
         UserOperator operator = UserOperator.builder(
                 new AnnotationDescription(
                         classOf(SuppressWarnings.class),
-                        Collections.singletonMap("value", Descriptions.valueOf(new String[] { "all" }))),
-                new MethodDescription(
-                        classOf(Mock.class), "method",
-                        Arrays.asList(typeOf(int.class))),
-                        classOf(MockImpl.class))
+                        Descriptions.valueOf(new String[] { "all" })),
+                new MethodDescription(classOf(Mock.class), "method", typeOf(int.class)),
+                classOf(MockImpl.class))
                 .input("model", classOf(String.class))
                 .output("out", classOf(Integer.class))
                 .argument("value", valueOf(100))

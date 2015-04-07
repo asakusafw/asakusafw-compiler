@@ -70,22 +70,34 @@ public final class CoreOperator extends Operator {
         /**
          * Checkpoint operators.
          */
-        CHECKPOINT,
+        CHECKPOINT("Checkpoint"), //$NON-NLS-1$
 
         /**
          * Project operators.
          */
-        PROJECT,
+        PROJECT("Project"), //$NON-NLS-1$
 
         /**
          * Extend operators.
          */
-        EXTEND,
+        EXTEND("Extend"), //$NON-NLS-1$
 
         /**
          * Restructure operators.
          */
-        RESTRUCTURE,
+        RESTRUCTURE("Restructure"), //$NON-NLS-1$
+        ;
+
+        private final String symbol;
+
+        private CoreOperatorKind(String symbol) {
+            this.symbol = symbol;
+        }
+
+        @Override
+        public String toString() {
+            return symbol;
+        }
     }
 
     /**

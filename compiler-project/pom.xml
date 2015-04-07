@@ -55,5 +55,11 @@
 		<module>asakusa-compiler-api-testing</module>
 		<module>asakusa-compiler-tester</module>
 		<module>asakusa-internal-test-moderator</module>
+
+		<!-- inspecting utilities -->
+		<module>asakusa-compiler-inspection-core</module>
+		<module>asakusa-compiler-inspection-driver</module>
+		<module>asakusa-compiler-inspection-processor</module>
+		<module>asakusa-compiler-inspection-cli</module>
 	</modules>
 </project>

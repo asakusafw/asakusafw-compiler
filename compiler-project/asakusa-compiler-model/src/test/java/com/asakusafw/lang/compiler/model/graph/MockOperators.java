@@ -20,7 +20,6 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -32,7 +31,6 @@ import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.description.Descriptions;
 import com.asakusafw.lang.compiler.model.description.ImmediateDescription;
 import com.asakusafw.lang.compiler.model.description.MethodDescription;
-import com.asakusafw.lang.compiler.model.description.ReifiableTypeDescription;
 import com.asakusafw.lang.compiler.model.description.TypeDescription;
 import com.asakusafw.lang.compiler.model.description.ValueDescription;
 import com.asakusafw.lang.compiler.model.description.ValueDescription.ValueKind;
@@ -47,9 +45,7 @@ public final class MockOperators {
 
     private static final OperatorConstraint[] EMPTY_CONSTRAINTS = new OperatorConstraint[0];
 
-    private static final AnnotationDescription ANNOTATION = new AnnotationDescription(
-            classOf(Deprecated.class),
-            Collections.<String, ValueDescription>emptyMap());
+    private static final AnnotationDescription ANNOTATION = new AnnotationDescription(classOf(Deprecated.class));
 
     private static final String KEY_ARGUMENT = "ID"; //$NON-NLS-1$
 
@@ -125,8 +121,7 @@ public final class MockOperators {
     public MockOperators operator(String id, String inputNames, String outputNames, OperatorConstraint... constraints) {
         UserOperator.Builder builder = UserOperator.builder(
                 ANNOTATION,
-                new MethodDescription(
-                        classOf(MockOperators.class), id, Collections.<ReifiableTypeDescription>emptyList()),
+                new MethodDescription(classOf(MockOperators.class), id),
                 classOf(MockOperators.class));
         for (String name : inputNames.split(",")) { //$NON-NLS-1$
             builder.input(name, TYPE);

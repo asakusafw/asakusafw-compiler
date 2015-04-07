@@ -18,6 +18,7 @@ package com.asakusafw.lang.compiler.model.description;
 import java.lang.reflect.Method;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -45,6 +46,19 @@ public class MethodDescription implements Description {
         this.declaringClass = declaringClass;
         this.name = name;
         this.parameterTypes = Collections.unmodifiableList(new ArrayList<>(parameterTypes));
+    }
+
+    /**
+     * Creates a new instance.
+     * @param declaringClass the declaring class
+     * @param name the method name
+     * @param parameterTypes the erased parameter types
+     */
+    public MethodDescription(
+            ClassDescription declaringClass,
+            String name,
+            ReifiableTypeDescription... parameterTypes) {
+        this(declaringClass, name, Arrays.asList(parameterTypes));
     }
 
     /**

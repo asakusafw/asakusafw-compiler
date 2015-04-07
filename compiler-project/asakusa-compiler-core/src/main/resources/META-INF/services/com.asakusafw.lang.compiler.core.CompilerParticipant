@@ -6,3 +6,6 @@ com.asakusafw.lang.compiler.core.participant.RuntimeContextParticipant
 com.asakusafw.lang.compiler.core.participant.HadoopFormatExtensionParticipant
 com.asakusafw.lang.compiler.core.participant.HadoopTaskExtensionParticipant
 com.asakusafw.lang.compiler.core.participant.JavaSourceExtensionParticipant
+
+# for both
+com.asakusafw.lang.compiler.core.participant.InspectionExtensionParticipant

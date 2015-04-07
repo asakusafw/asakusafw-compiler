@@ -93,6 +93,14 @@ public final class MarkerOperator extends Operator {
     }
 
     /**
+     * Returns the data type on this operator.
+     * @return the data type
+     */
+    public TypeDescription getDataType() {
+        return getInput().getDataType();
+    }
+
+    /**
      * Returns the all attribute types which this operator has.
      * @return the all attribute types
      */
