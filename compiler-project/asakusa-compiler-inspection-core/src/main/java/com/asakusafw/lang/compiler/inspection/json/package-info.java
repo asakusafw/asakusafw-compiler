@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 /**
- * 
- */
-/**
- * @author arakawa
- *
+ * JSON format persistent support for inspection information.
  */
 package com.asakusafw.lang.compiler.inspection.json;

@@ -40,13 +40,13 @@ public class PortAdapter implements JsonAdapter<InspectionNode.Port> {
 
     private static final String KEY_OPPOSITES = "opposites";
 
-    private static final Type TYPE_PROPERTIES = new TypeToken<Map<String, String>>() {
+    private static final Type TYPE_PROPERTIES = (new TypeToken<Map<String, String>>() {
         // empty
-    }.getType();
+    }).getType();
 
-    private static final Type TYPE_REFERENCES = new TypeToken<Set<PortReference>>() {
+    private static final Type TYPE_REFERENCES = (new TypeToken<Set<PortReference>>() {
         // empty
-    }.getType();
+    }).getType();
 
     @Override
     public InspectionNode.Port deserialize(

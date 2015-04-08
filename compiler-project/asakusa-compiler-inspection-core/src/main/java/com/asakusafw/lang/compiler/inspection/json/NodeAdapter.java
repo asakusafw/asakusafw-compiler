@@ -45,17 +45,17 @@ public class NodeAdapter implements JsonAdapter<InspectionNode> {
 
     private static final String KEY_ELEMENTS = "elements";
 
-    private static final Type TYPE_PORTS = new TypeToken<Map<String, Port>>() {
+    private static final Type TYPE_PORTS = (new TypeToken<Map<String, Port>>() {
         // empty
-    }.getType();
+    }).getType();
 
-    private static final Type TYPE_PROPERTIES = new TypeToken<Map<String, String>>() {
+    private static final Type TYPE_PROPERTIES = (new TypeToken<Map<String, String>>() {
         // empty
-    }.getType();
+    }).getType();
 
-    private static final Type TYPE_NODES = new TypeToken<Map<String, InspectionNode>>() {
+    private static final Type TYPE_NODES = (new TypeToken<Map<String, InspectionNode>>() {
         // empty
-    }.getType();
+    }).getType();
 
     @Override
     public InspectionNode deserialize(
