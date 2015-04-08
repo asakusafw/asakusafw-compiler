@@ -85,22 +85,50 @@ public class DotProcessorTest {
      */
     @Test
     public void diamond() {
+        InspectionNode root = buildDiamond();
+        process(root);
+    }
+
+    /**
+     * diamond w/ verbose.
+     */
+    @Test
+    public void diamond_verbose() {
+        InspectionNode root = buildDiamond();
+        process(context(DotProcessor.KEY_VERBOSE, "true"), root);
+    }
+
+    private InspectionNode buildDiamond() {
         InspectionNode root = new InspectionNode("diamond", "TESTING");
+        root.withElement(new InspectionNode("BEGIN", "BEGIN")
+                .withOutput(new Port("o0")
+                    .withOpposite(new PortReference("a", "i0"))
+                    .withOpposite(new PortReference("a", "i1"))));
         root.withElement(new InspectionNode("a", "AAA")
-                .withInput(new Port("i0"))
+                .withInput(new Port("i0").withOpposite(new PortReference("BEGIN", "o0")))
+                .withInput(new Port("i1").withOpposite(new PortReference("BEGIN", "o0")))
                 .withOutput(new Port("o0").withOpposite(new PortReference("b", "i0")))
                 .withOutput(new Port("o1").withOpposite(new PortReference("c", "i0"))));
         root.withElement(new InspectionNode("b", "BBB")
                 .withInput(new Port("i0").withOpposite(new PortReference("a", "o0")))
-                .withOutput(new Port("o0").withOpposite(new PortReference("d", "i0"))));
+                .withInput(new Port("i1"))
+                .withOutput(new Port("o0").withOpposite(new PortReference("d", "i0")))
+                .withOutput(new Port("o1")));
         root.withElement(new InspectionNode("c", "CCC")
                 .withInput(new Port("i0").withOpposite(new PortReference("a", "o1")))
-                .withOutput(new Port("o0").withOpposite(new PortReference("d", "i1"))));
+                .withInput(new Port("i1"))
+                .withOutput(new Port("o0").withOpposite(new PortReference("d", "i1")))
+                .withOutput(new Port("o1")));
         root.withElement(new InspectionNode("d", "DDD")
                 .withInput(new Port("i0").withOpposite(new PortReference("b", "o0")))
                 .withInput(new Port("i1").withOpposite(new PortReference("c", "o0")))
-                .withOutput(new Port("o1")));
-        process(root);
+                .withOutput(new Port("o0").withOpposite(new PortReference("END", "i0")))
+                .withOutput(new Port("o1").withOpposite(new PortReference("END", "i0"))));
+        root.withElement(new InspectionNode("END", "END")
+                .withInput(new Port("i0")
+                    .withOpposite(new PortReference("d", "o0"))
+                    .withOpposite(new PortReference("d", "o1"))));
+        return root;
     }
 
     private void process(InspectionNode node) {

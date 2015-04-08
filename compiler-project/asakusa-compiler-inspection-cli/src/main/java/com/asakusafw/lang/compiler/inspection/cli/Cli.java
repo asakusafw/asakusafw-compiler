@@ -66,7 +66,7 @@ public final class Cli {
         BUILTIN_PROCESSORS = map;
     }
 
-    private static final String PATH_SEPARATOR = "/";
+    private static final String PATH_SEPARATOR = "/"; //$NON-NLS-1$
 
     private Cli() {
         return;
@@ -176,7 +176,7 @@ public final class Cli {
         InspectionNodeProcessor.Context context = new InspectionNodeProcessor.Context(configuration.properties);
         InspectionNode node = loadInput(configuration.input, configuration.repository, configuration.path);
         if (configuration.output == null) {
-            processor.process(context, node, System.out);
+            processor.process(context, node, configuration.defaultOutput);
         } else {
             try (OutputStream output = openOutput(configuration.output)) {
                 processor.process(context, node, output);
@@ -261,6 +261,7 @@ public final class Cli {
                 .withArgumentDescription("txt|dot|json|class-name");
 
         final Option properties = properties("P", "property") //$NON-NLS-1$ //$NON-NLS-2$
+                .withValueSeparator('=')
                 .withDescription("format property")
                 .withArgumentDescription("key=value");
 
@@ -307,5 +308,7 @@ public final class Cli {
         Map<String, String> properties;
 
         InspectionNodeRepository repository = new JsonInspectionNodeRepository();
+
+        OutputStream defaultOutput = System.out;
     }
 }

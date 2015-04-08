@@ -22,7 +22,9 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.text.MessageFormat;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import com.asakusafw.lang.compiler.inspection.InspectionNode;
 
@@ -87,13 +89,15 @@ public class DotProcessor implements InspectionNodeProcessor {
 
         private final PrintWriter writer;
 
-        private final boolean showProperties;
+        private final boolean verbose;
+
+        private final Set<NodeArc> sawNodeArcs = new HashSet<>();
 
         private int indent = 0;
 
         Editor(Context context, OutputStream output) {
             this.writer = new PrintWriter(new OutputStreamWriter(output, ENCODING));
-            this.showProperties = context.getOption(KEY_VERBOSE, false);
+            this.verbose = context.getOption(KEY_VERBOSE, false);
         }
 
         void push() {
@@ -116,7 +120,7 @@ public class DotProcessor implements InspectionNodeProcessor {
             buf.append(node.getTitle());
             buf.append('\n');
             buf.append(node.getId());
-            if (showProperties) {
+            if (verbose) {
                 for (Map.Entry<String, String> entry : node.getProperties().entrySet()) {
                     buf.append('\n');
                     buf.append(String.format("%s: %s", entry.getKey(), entry.getValue()));
@@ -126,6 +130,25 @@ public class DotProcessor implements InspectionNodeProcessor {
         }
 
         public void connect(
+                InspectionNode upstreamNode, String upstreamPort,
+                InspectionNode downstreamNode, String downstreamPort) {
+            if (verbose) {
+                connectVerbose(upstreamNode, upstreamPort, downstreamNode, downstreamPort);
+            } else {
+                connectSimple(upstreamNode, downstreamNode);
+            }
+        }
+
+        private void connectSimple(InspectionNode upstreamNode, InspectionNode downstreamNode) {
+            NodeArc arc = new NodeArc(upstreamNode.getId(), downstreamNode.getId());
+            if (sawNodeArcs.contains(arc) == false) {
+                sawNodeArcs.add(arc);
+                put("{0} -> {1};",
+                        literal(upstreamNode.getId()), literal(downstreamNode.getId()));
+            }
+        }
+
+        private void connectVerbose(
                 InspectionNode upstreamNode, String upstreamPort,
                 InspectionNode downstreamNode, String downstreamPort) {
             boolean upstreamUnique = upstreamNode.getOutputs().size() <= 1;
@@ -163,6 +186,48 @@ public class DotProcessor implements InspectionNodeProcessor {
         @Override
         public void close() throws IOException {
             writer.flush();
+        }
+    }
+
+    private static class NodeArc {
+
+        final String sourceId;
+
+        final String destinationId;
+
+        public NodeArc(String sourceId, String destinationId) {
+            this.sourceId = sourceId;
+            this.destinationId = destinationId;
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + sourceId.hashCode();
+            result = prime * result + destinationId.hashCode();
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            NodeArc other = (NodeArc) obj;
+            if (!sourceId.equals(other.sourceId)) {
+                return false;
+            }
+            if (!destinationId.equals(other.destinationId)) {
+                return false;
+            }
+            return true;
         }
     }
 }
