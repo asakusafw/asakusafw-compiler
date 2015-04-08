@@ -33,11 +33,8 @@ import com.asakusafw.lang.compiler.core.CompilerContext;
 import com.asakusafw.lang.compiler.core.JobflowCompiler;
 import com.asakusafw.lang.compiler.core.basic.AbstractCompilerParticipant;
 import com.asakusafw.lang.compiler.core.util.DiagnosticUtil;
-import com.asakusafw.lang.compiler.inspection.InspectionNode;
-import com.asakusafw.lang.compiler.inspection.InspectionNodeRepository;
+import com.asakusafw.lang.compiler.inspection.driver.AbstractInspectionExtension;
 import com.asakusafw.lang.compiler.inspection.driver.InspectionExtension;
-import com.asakusafw.lang.compiler.inspection.driver.ObjectInspector;
-import com.asakusafw.lang.compiler.inspection.json.JsonInspectionNodeRepository;
 import com.asakusafw.lang.compiler.model.graph.Batch;
 import com.asakusafw.lang.compiler.model.graph.Jobflow;
 import com.asakusafw.lang.compiler.model.info.BatchInfo;
@@ -94,7 +91,7 @@ public class InspectionExtensionParticipant extends AbstractCompilerParticipant 
     }
 
     private InspectionExtension setUp(ExtensionContainer.Editable extensions, ResourceContainer output) {
-        Extension extension = new Extension(new ObjectInspector(), output);
+        Extension extension = new Extension(output);
         extensions.registerExtension(InspectionExtension.class, extension);
         return extension;
     }
@@ -126,34 +123,17 @@ public class InspectionExtensionParticipant extends AbstractCompilerParticipant 
         }
     }
 
-    private static class Extension extends InspectionExtension {
+    private static class Extension extends AbstractInspectionExtension {
 
-        private final ObjectInspector inspector;
+        private final ResourceContainer delegate;
 
-        private final ResourceContainer container;
-
-        private final InspectionNodeRepository repository = new JsonInspectionNodeRepository();
-
-        public Extension(ObjectInspector inspector, ResourceContainer container) {
-            this.inspector = inspector;
-            this.container = container;
+        public Extension(ResourceContainer delegate) {
+            this.delegate = delegate;
         }
 
         @Override
-        public boolean isSupported(Object element) {
-            return inspector.isSupported(element);
-        }
-
-        @Override
-        public void inspect(Location location, Object element) {
-            InspectionNode node = inspector.inspect(element);
-            try (OutputStream output = container.addResource(location)) {
-                repository.store(output, node);
-            } catch (IOException e) {
-                throw new DiagnosticException(Diagnostic.Level.ERROR, MessageFormat.format(
-                        "failed to save inspection object: {0}",
-                        node), e);
-            }
+        public OutputStream addResource(Location location) throws IOException {
+            return delegate.addResource(location);
         }
     }
 }
