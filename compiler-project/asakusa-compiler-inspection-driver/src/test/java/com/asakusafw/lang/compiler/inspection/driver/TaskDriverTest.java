@@ -275,7 +275,7 @@ public class TaskDriverTest {
     }
 
     /**
-     * jobflow - via {@link ObjectInspector}.
+     * jobflow - via {@link BasicObjectInspector}.
      */
     @Test
     public void jobflow_bridge() {
@@ -283,7 +283,7 @@ public class TaskDriverTest {
 
         JobflowReference ref = jobflow("j", new MockTaskReferenceMap()
                 .add(MAIN, t0));
-        ObjectInspector inspector = new ObjectInspector();
+        ObjectInspector inspector = new BasicObjectInspector();
         assertThat(inspector.isSupported(ref), is(true));
         InspectionNode node = inspector.inspect(ref);
         assertThat(node.getId(), is("j"));
@@ -295,14 +295,14 @@ public class TaskDriverTest {
     }
 
     /**
-     * batch - via {@link ObjectInspector}.
+     * batch - via {@link BasicObjectInspector}.
      */
     @Test
     public void batch_via() {
         JobflowReference j0 = jobflow("j0");
 
         BatchReference ref = batch("B", j0);
-        ObjectInspector inspector = new ObjectInspector();
+        ObjectInspector inspector = new BasicObjectInspector();
         assertThat(inspector.isSupported(ref), is(true));
         InspectionNode node = inspector.inspect(ref);
         assertThat(node.getId(), is("B"));

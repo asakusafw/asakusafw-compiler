@@ -150,7 +150,7 @@ public class PlanDriverTest {
     }
 
     /**
-     * via {@link ObjectInspector}.
+     * via {@link BasicObjectInspector}.
      */
     @Test
     public void bridge() {
@@ -165,7 +165,7 @@ public class PlanDriverTest {
         bless(detail);
 
         Plan plan = detail.getPlan();
-        ObjectInspector inspector = new ObjectInspector();
+        ObjectInspector inspector = new BasicObjectInspector();
         assertThat(inspector.isSupported(plan), is(true));
         InspectionNode node = inspector.inspect(plan);
 

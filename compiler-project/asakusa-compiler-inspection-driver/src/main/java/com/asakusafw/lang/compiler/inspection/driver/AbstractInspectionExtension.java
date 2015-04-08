@@ -40,7 +40,7 @@ public abstract class AbstractInspectionExtension extends InspectionExtension im
      * Creates a new instance with default settings.
      */
     public AbstractInspectionExtension() {
-        this(new ObjectInspector(), new JsonInspectionNodeRepository());
+        this(new BasicObjectInspector(), new JsonInspectionNodeRepository());
     }
 
     /**

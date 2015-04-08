@@ -228,7 +228,7 @@ public class DslDriverTest {
     }
 
     /**
-     * inspects operator graph via {@link ObjectInspector}.
+     * inspects operator graph via {@link BasicObjectInspector}.
      */
     @Test
     public void inspect_graph_bridge() {
@@ -240,7 +240,7 @@ public class DslDriverTest {
             .connect("operator", "output")
             .toGraph();
 
-        ObjectInspector inspector = new ObjectInspector();
+        ObjectInspector inspector = new BasicObjectInspector();
         assertThat(inspector.isSupported(graph), is(true));
         InspectionNode node = inspector.inspect(graph);
         assertThat(node.getElements().keySet(), hasSize(3));
@@ -248,7 +248,7 @@ public class DslDriverTest {
     }
 
     /**
-     * inspects jobflow via {@link ObjectInspector}.
+     * inspects jobflow via {@link BasicObjectInspector}.
      */
     @Test
     public void inspect_jobflow_bridge() {
@@ -263,7 +263,7 @@ public class DslDriverTest {
             .toGraph();
 
         Jobflow object = new Jobflow("f", classOf(String.class), graph);
-        ObjectInspector inspector = new ObjectInspector();
+        ObjectInspector inspector = new BasicObjectInspector();
         assertThat(inspector.isSupported(object), is(true));
         InspectionNode node = inspector.inspect(object);
         assertThat(node.getId(), is("f"));
@@ -274,7 +274,7 @@ public class DslDriverTest {
     }
 
     /**
-     * inspects batch via {@link ObjectInspector}.
+     * inspects batch via {@link BasicObjectInspector}.
      */
     @Test
     public void inspect_batch_bridge() {
@@ -293,7 +293,7 @@ public class DslDriverTest {
         eD.addBlockerElement(eB);
         eD.addBlockerElement(eC);
 
-        ObjectInspector inspector = new ObjectInspector();
+        ObjectInspector inspector = new BasicObjectInspector();
         assertThat(inspector.isSupported(batch), is(true));
         InspectionNode node = inspector.inspect(batch);
         assertThat(node.getId(), is("B"));
