@@ -22,6 +22,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.text.MessageFormat;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -85,7 +86,9 @@ public class DotProcessor implements InspectionNodeProcessor {
 
     private static class Editor implements Closeable {
 
-        private static final String ARROW = "->";
+        private static final String PREFIX_IN = "in.";
+
+        private static final String PREFIX_OUT = "out.";
 
         private final PrintWriter writer;
 
@@ -112,21 +115,11 @@ public class DotProcessor implements InspectionNodeProcessor {
         }
 
         public void put(InspectionNode node) {
-            put("\"{0}\" [shape = box, label = {1}];", node.getId(), label(node));
-        }
-
-        private String label(InspectionNode node) {
-            StringBuilder buf = new StringBuilder();
-            buf.append(node.getTitle());
-            buf.append('\n');
-            buf.append(node.getId());
             if (verbose) {
-                for (Map.Entry<String, String> entry : node.getProperties().entrySet()) {
-                    buf.append('\n');
-                    buf.append(String.format("%s: %s", entry.getKey(), entry.getValue()));
-                }
+                putVerbose(node);
+            } else {
+                putSimple(node);
             }
-            return literal(buf.toString());
         }
 
         public void connect(
@@ -137,6 +130,88 @@ public class DotProcessor implements InspectionNodeProcessor {
             } else {
                 connectSimple(upstreamNode, downstreamNode);
             }
+        }
+
+        private void putSimple(InspectionNode node) {
+            put("\"{0}\" [shape = box, label = {1}];",
+                    node.getId(),
+                    literal(String.format("%s\n@%s", node.getTitle(), node.getId())));
+        }
+
+        private void putVerbose(InspectionNode node) {
+            StringBuilder buf = new StringBuilder();
+            buf.append('{');
+            if (node.getInputs().isEmpty() == false) {
+                appendPorts(buf, PREFIX_IN, node.getInputs().values());
+                buf.append('|');
+            }
+            buf.append(getNodeLabel(node));
+            if (node.getOutputs().isEmpty() == false) {
+                buf.append('|');
+                appendPorts(buf, PREFIX_OUT, node.getOutputs().values());
+            }
+            buf.append('}');
+            put("\"{0}\" [shape = record, label = {1}];", node.getId(), literal(buf.toString()));
+        }
+
+        private void appendPorts(StringBuilder buf, String prefix, Collection<InspectionNode.Port> ports) {
+            assert ports.isEmpty() == false;
+            buf.append('{');
+            int index = 0;
+            for (InspectionNode.Port port : ports) {
+                if (index++ != 0) {
+                    buf.append('|');
+                }
+                appendPort(buf, prefix, port);
+            }
+            buf.append('}');
+        }
+
+        private void appendPort(StringBuilder buf, String prefix, InspectionNode.Port port) {
+            buf.append('<');
+            buf.append(prefix);
+            buf.append(port.getId());
+            buf.append('>');
+            buf.append(' ');
+            buf.append(getPortLabel(port));
+        }
+
+        private String getNodeLabel(InspectionNode node) {
+            StringBuilder buf = new StringBuilder();
+            buf.append(String.format("%s [@%s]", node.getTitle(), node.getId()));
+            appendProperties(buf, node.getProperties());
+            return escapeForRecord(buf);
+        }
+
+        private String getPortLabel(InspectionNode.Port port) {
+            StringBuilder buf = new StringBuilder();
+            buf.append(port.getId());
+            appendProperties(buf, port.getProperties());
+            return escapeForRecord(buf);
+        }
+
+        private void appendProperties(StringBuilder buf, Map<String, String> properties) {
+            for (Map.Entry<String, String> entry : properties.entrySet()) {
+                buf.append('\n');
+                buf.append(String.format("%s: %s", entry.getKey(), entry.getValue())); //$NON-NLS-1$
+            }
+        }
+
+        private String escapeForRecord(CharSequence string) {
+            StringBuilder buf = new StringBuilder();
+            for (int i = 0, n = string.length(); i < n; i++) {
+                char c = string.charAt(i);
+                if (c == '{' || c == '<') {
+                    buf.append('(');
+                } else if (c == '}' || c == '>') {
+                    buf.append(')');
+                } else if (c == '|') {
+                    buf.append('/');
+                } else {
+                    buf.append(c);
+                }
+            }
+            return buf.toString();
         }
 
         private void connectSimple(InspectionNode upstreamNode, InspectionNode downstreamNode) {
@@ -151,24 +226,9 @@ public class DotProcessor implements InspectionNodeProcessor {
         private void connectVerbose(
                 InspectionNode upstreamNode, String upstreamPort,
                 InspectionNode downstreamNode, String downstreamPort) {
-            boolean upstreamUnique = upstreamNode.getOutputs().size() <= 1;
-            boolean downstreamUnique = downstreamNode.getInputs().size() <= 1;
-            if (upstreamUnique && downstreamUnique) {
-                put("{0} -> {1};",
-                        literal(upstreamNode.getId()), literal(downstreamNode.getId()));
-            } else if (upstreamUnique) {
-                put("{0} -> {1} [label = {2}];",
-                        literal(upstreamNode.getId()), literal(downstreamNode.getId()),
-                        literal(ARROW + downstreamPort));
-            } else if (downstreamUnique) {
-                put("{0} -> {1} [label = {2}];",
-                        literal(upstreamNode.getId()), literal(downstreamNode.getId()),
-                        literal(upstreamPort + ARROW));
-            } else {
-                put("{0} -> {1} [label = {2}];",
-                        literal(upstreamNode.getId()), literal(downstreamNode.getId()),
-                        literal(upstreamPort + ARROW + downstreamPort));
-            }
+            put("{0}:{1} -> {2}:{3}",
+                    literal(upstreamNode.getId()), literal(PREFIX_OUT + upstreamPort),
+                    literal(downstreamNode.getId()), literal(PREFIX_IN + downstreamPort));
         }
 
         void put(String pattern, Object... arguments) {
