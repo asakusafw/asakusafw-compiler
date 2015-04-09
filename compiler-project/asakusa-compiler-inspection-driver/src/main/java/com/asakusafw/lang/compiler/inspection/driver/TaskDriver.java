@@ -48,6 +48,7 @@ public class TaskDriver {
     public InspectionNode inspect(BatchReference object) {
         String title = "Batch"; //$NON-NLS-1$
         InspectionNode node = new InspectionNode(id(object), title);
+        node.withProperty(PROPERTY_KIND, "Batch"); //$NON-NLS-1$
         node.getProperties().putAll(extract(object));
         for (InspectionNode element : inspectJobflows(object.getJobflows()).values()) {
             node.withElement(element);
@@ -64,6 +65,7 @@ public class TaskDriver {
     public InspectionNode inspect(JobflowReference object) {
         String title = "Jobflow"; //$NON-NLS-1$
         InspectionNode node = new InspectionNode(id(object), title);
+        node.withProperty(PROPERTY_KIND, "Jobflow"); //$NON-NLS-1$
         node.getProperties().putAll(extract(object));
         for (InspectionNode element : inspectPhases(object).values()) {
             node.withElement(element);
@@ -78,6 +80,7 @@ public class TaskDriver {
         for (TaskReference.Phase phase : TaskReference.Phase.values()) {
             String title = "Phase";
             InspectionNode node = new InspectionNode(id(phase), title);
+            node.withProperty(PROPERTY_KIND, "Phase"); //$NON-NLS-1$
             addDependencyPorts(node);
             if (last != null) {
                 addDependency(last, node);
@@ -126,6 +129,7 @@ public class TaskDriver {
         } else {
             String title = String.format("Unknown(%s)", getPrintableName(object.getClass())); //$NON-NLS-1$
             node = new InspectionNode(id, title);
+            node.withProperty(PROPERTY_KIND, title);
             node.withProperty(PROPERTY_MODULE, object.getModuleName());
         }
         node.getProperties().putAll(extractAttributes(object));
@@ -149,6 +153,7 @@ public class TaskDriver {
     private InspectionNode inspectFlat(String id, CommandTaskReference object) {
         String title = "Command";
         InspectionNode node = new InspectionNode(id, title);
+        node.withProperty(PROPERTY_KIND, "CommandTask"); //$NON-NLS-1$
         node.withProperty(PROPERTY_MODULE, object.getModuleName());
         node.withProperty("profile", object.getProfileName()); //$NON-NLS-1$
         node.withProperty("command", object.getCommand().toPath()); //$NON-NLS-1$
@@ -164,6 +169,7 @@ public class TaskDriver {
     private InspectionNode inspectFlat(String id, HadoopTaskReference object) {
         String title = "Hadoop";
         InspectionNode node = new InspectionNode(id, title);
+        node.withProperty(PROPERTY_KIND, "HadoopTask"); //$NON-NLS-1$
         node.withProperty(PROPERTY_MODULE, object.getModuleName());
         node.withProperty("class", object.getMainClass().getClassName()); //$NON-NLS-1$
         return node;

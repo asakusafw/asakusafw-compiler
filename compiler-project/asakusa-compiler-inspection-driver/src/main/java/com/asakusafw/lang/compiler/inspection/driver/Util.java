@@ -31,6 +31,8 @@ final class Util {
 
     static final String NAME_PREDECESSORS = "predecessors"; //$NON-NLS-1$
 
+    static final String PROPERTY_KIND = "kind"; //$NON-NLS-1$
+
     static final String PROPERTY_DESCRIPTION = "description"; //$NON-NLS-1$
 
     private Util() {
@@ -69,6 +71,7 @@ final class Util {
 
     static Map<String, String> extract(BatchInfo batch) {
         Map<String, String> results = new LinkedHashMap<>();
+        results.put("batchId", batch.getBatchId()); //$NON-NLS-1$
         results.put(PROPERTY_DESCRIPTION, batch.getDescriptionClass().getClassName());
         results.put("comment", comment(batch.getComment())); //$NON-NLS-1$
         for (BatchInfo.Parameter parameter : batch.getParameters()) {
@@ -88,6 +91,7 @@ final class Util {
 
     static Map<String, String> extract(JobflowInfo jobflow) {
         Map<String, String> results = new LinkedHashMap<>();
+        results.put("flowId", jobflow.getFlowId()); //$NON-NLS-1$
         results.put(PROPERTY_DESCRIPTION, jobflow.getDescriptionClass().getClassName());
         return results;
     }

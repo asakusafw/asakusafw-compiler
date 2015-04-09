@@ -42,6 +42,7 @@ public class PlanDriver {
     public InspectionNode inspect(String id, Plan object) {
         String title = "Plan";
         InspectionNode result = new InspectionNode(id, title);
+        result.withProperty(PROPERTY_KIND, "Plan"); //$NON-NLS-1$
         result.getProperties().putAll(extractAttributes(object));
         for (InspectionNode element : inspect(object.getElements()).values()) {
             result.withElement(element);
@@ -84,6 +85,7 @@ public class PlanDriver {
     SubPlanInfo inspect(String id, SubPlan object) {
         String title = "SubPlan"; //$NON-NLS-1$
         InspectionNode node = new InspectionNode(id, title);
+        node.withProperty(PROPERTY_KIND, "SubPlan"); //$NON-NLS-1$
         SubPlanInfo info = new SubPlanInfo(object, node, driver.inspect(object.getOperators()));
         node.getProperties().putAll(extractAttributes(object));
         for (SubPlan.Input port : object.getInputs()) {

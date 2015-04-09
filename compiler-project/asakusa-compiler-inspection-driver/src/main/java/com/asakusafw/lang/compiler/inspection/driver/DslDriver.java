@@ -92,6 +92,7 @@ public class DslDriver {
      */
     public InspectionNode inspect(Jobflow object) {
         InspectionNode node = new InspectionNode(id(object), "Jobflow"); //$NON-NLS-1$
+        node.withProperty(PROPERTY_KIND, "Jobflow"); //$NON-NLS-1$
         node.getProperties().putAll(extract(object));
         for (InspectionNode element : inspect(object.getOperatorGraph().getOperators()).values()) {
             node.withElement(element);
@@ -107,6 +108,7 @@ public class DslDriver {
      */
     public InspectionNode inspect(String id, OperatorGraph object) {
         InspectionNode node = new InspectionNode(id, "Graph"); //$NON-NLS-1$
+        node.withProperty(PROPERTY_KIND, "OperatorGraph"); //$NON-NLS-1$
         for (InspectionNode element : inspect(object.getOperators()).values()) {
             node.withElement(element);
         }
@@ -167,7 +169,7 @@ public class DslDriver {
             node.withProperty(String.format("arguments.%s", arg.getName()), arg.getValue().toString()); //$NON-NLS-1$
         }
         for (OperatorConstraint constraint : object.getConstraints()) {
-            node.withProperty(String.format("constraints.%s", constraint.name()), "true"); //$NON-NLS-1$ //$NON-NLS-2$
+            node.withProperty(String.format("constraints.%s", constraint), "true"); //$NON-NLS-1$ //$NON-NLS-2$
         }
         return node;
     }
@@ -194,12 +196,14 @@ public class DslDriver {
     private InspectionNode inspectFlat(String id, CoreOperator object) {
         String title = object.getCoreOperatorKind().toString();
         InspectionNode result = new InspectionNode(id, title);
+        result.withProperty(PROPERTY_KIND, title);
         return result;
     }
 
     private InspectionNode inspectFlat(String id, UserOperator object) {
         String title = object.getAnnotation().getDeclaringClass().getSimpleName();
         InspectionNode result = new InspectionNode(id, title);
+        result.withProperty(PROPERTY_KIND, title);
         result.withProperty("class", object.getMethod().getDeclaringClass().getClassName()); //$NON-NLS-1$
         result.withProperty("method", object.getMethod().getName()); //$NON-NLS-1$
         return result;
@@ -209,6 +213,7 @@ public class DslDriver {
     private InspectionNode inspectFlat(String id, FlowOperator object) {
         String title = "Flow"; //$NON-NLS-1$
         InspectionNode result = new InspectionNode(id, title);
+        result.withProperty(PROPERTY_KIND, "FlowPart"); //$NON-NLS-1$
         result.withProperty(PROPERTY_DESCRIPTION, object.getDescriptionClass().getClassName());
         for (InspectionNode element : inspect(object.getOperatorGraph().getOperators()).values()) {
             result.withElement(element);
@@ -219,6 +224,7 @@ public class DslDriver {
     private InspectionNode inspectFlat(String id, ExternalInput object) {
         String title = "Input"; //$NON-NLS-1$
         InspectionNode result = new InspectionNode(id, title);
+        result.withProperty(PROPERTY_KIND, "ExternalInput"); //$NON-NLS-1$
         result.withProperty(PROPERTY_NAME, object.getName());
         result.withProperty(PROPERTY_TYPE, object.getDataType().toString());
         if (object.isExternal()) {
@@ -233,6 +239,7 @@ public class DslDriver {
     private InspectionNode inspectFlat(String id, ExternalOutput object) {
         String title = "Output"; //$NON-NLS-1$
         InspectionNode result = new InspectionNode(id, title);
+        result.withProperty(PROPERTY_KIND, "ExternalOutput"); //$NON-NLS-1$
         result.withProperty(PROPERTY_NAME, object.getName());
         result.withProperty(PROPERTY_TYPE, object.getDataType().toString());
         if (object.isExternal()) {
@@ -246,6 +253,7 @@ public class DslDriver {
     private InspectionNode inspectFlat(String id, MarkerOperator object) {
         String title = "Marker"; //$NON-NLS-1$
         InspectionNode result = new InspectionNode(id, title);
+        result.withProperty(PROPERTY_KIND, "MarkerOperator"); //$NON-NLS-1$
         result.withProperty(PROPERTY_TYPE, object.getDataType().toString());
         for (Class<?> type : object.getAttributeTypes()) {
             Object attribute = object.getAttribute(type);
