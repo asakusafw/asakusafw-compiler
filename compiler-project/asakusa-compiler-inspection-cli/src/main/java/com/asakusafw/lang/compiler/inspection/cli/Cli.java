@@ -43,6 +43,7 @@ import org.slf4j.LoggerFactory;
 import com.asakusafw.lang.compiler.inspection.InspectionNode;
 import com.asakusafw.lang.compiler.inspection.InspectionNodeRepository;
 import com.asakusafw.lang.compiler.inspection.json.JsonInspectionNodeRepository;
+import com.asakusafw.lang.compiler.inspection.processor.ListProcessor;
 import com.asakusafw.lang.compiler.inspection.processor.StoreProcessor;
 import com.asakusafw.lang.compiler.inspection.processor.DetailProcessor;
 import com.asakusafw.lang.compiler.inspection.processor.DotProcessor;
@@ -60,7 +61,10 @@ public final class Cli {
     private static final Map<String, InspectionNodeProcessor> BUILTIN_PROCESSORS;
     static {
         Map<String, InspectionNodeProcessor> map = new LinkedHashMap<>();
+        map.put("ls", new ListProcessor()); //$NON-NLS-1$
+        map.put("list", new ListProcessor()); //$NON-NLS-1$
         map.put("txt", new DetailProcessor()); //$NON-NLS-1$
+        map.put("text", new DetailProcessor()); //$NON-NLS-1$
         map.put("json", new StoreProcessor()); //$NON-NLS-1$
         map.put("dot", new DotProcessor()); //$NON-NLS-1$
         BUILTIN_PROCESSORS = map;
@@ -258,7 +262,7 @@ public final class Cli {
 
         final Option format = optional("format", 1) //$NON-NLS-1$
                 .withDescription("output format (default: txt)")
-                .withArgumentDescription("txt|dot|json|class-name");
+                .withArgumentDescription("ls|txt|dot|json|class-name");
 
         final Option properties = properties("P", "property") //$NON-NLS-1$ //$NON-NLS-2$
                 .withValueSeparator('=')
