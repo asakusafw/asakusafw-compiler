@@ -61,5 +61,6 @@
 		<module>asakusa-compiler-inspection-driver</module>
 		<module>asakusa-compiler-inspection-processor</module>
 		<module>asakusa-compiler-inspection-cli</module>
+		<module>asakusa-compiler-inspection-gui</module>
 	</modules>
 </project>

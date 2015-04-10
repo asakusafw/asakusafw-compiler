@@ -27,6 +27,7 @@ import com.asakusafw.lang.compiler.model.graph.BatchElement;
 import com.asakusafw.lang.compiler.model.graph.CoreOperator;
 import com.asakusafw.lang.compiler.model.graph.ExternalInput;
 import com.asakusafw.lang.compiler.model.graph.ExternalOutput;
+import com.asakusafw.lang.compiler.model.graph.ExternalPort;
 import com.asakusafw.lang.compiler.model.graph.FlowOperator;
 import com.asakusafw.lang.compiler.model.graph.Jobflow;
 import com.asakusafw.lang.compiler.model.graph.MarkerOperator;
@@ -116,10 +117,10 @@ public class DslDriver {
     }
 
     Map<Operator, InspectionNode> inspect(Collection<? extends Operator> operators) {
-        OperatorCount counter = new OperatorCount();
+        OperatorNamer namer = new OperatorNamer();
         Map<Operator, InspectionNode> results = new LinkedHashMap<>();
         for (Operator operator : Operators.getTransitiveConnected(operators)) {
-            String id = counter.id(operator);
+            String id = namer.id(operator);
             InspectionNode node = inspect(id, operator);
             results.put(operator, node);
         }
@@ -152,6 +153,8 @@ public class DslDriver {
 
     InspectionNode inspect(String id, Operator object) {
         InspectionNode node = inspectFlat(id, object);
+        node.withProperty("serialNumber", String.valueOf(object.getSerialNumber())); //$NON-NLS-1$
+        node.withProperty("originalSerialNumber", String.valueOf(object.getOriginalSerialNumber())); //$NON-NLS-1$
         for (OperatorInput port : object.getInputs()) {
             InspectionNode.Port p = new InspectionNode.Port(id(port));
             node.withInput(p);
@@ -262,31 +265,33 @@ public class DslDriver {
         return result;
     }
 
-    private static class OperatorCount {
+    private static class OperatorNamer {
 
-        private final Counter counter = new Counter();
-
-        OperatorCount() {
+        OperatorNamer() {
             return;
         }
 
         public String id(Operator operator) {
-            switch (operator.getOperatorKind()) {
-            case CORE:
-                return counter.fetchId("core"); //$NON-NLS-1$
-            case USER:
-                return counter.fetchId("user"); //$NON-NLS-1$
-            case FLOW:
-                return counter.fetchId("flow"); //$NON-NLS-1$
-            case MARKER:
-                return counter.fetchId("marker"); //$NON-NLS-1$
-            case INPUT:
-                return String.format("input-%s", ((ExternalInput) operator).getName()); //$NON-NLS-1$
-            case OUTPUT:
-                return String.format("output-%s", ((ExternalOutput) operator).getName()); //$NON-NLS-1$
-            default:
-                throw new AssertionError(operator);
+            if (operator instanceof ExternalPort) {
+                return createId((ExternalPort) operator);
+            } else {
+                return createId(operator);
             }
+        }
+
+        private String createId(Operator operator) {
+            return String.format(
+                    "%s-%d", //$NON-NLS-1$
+                    operator.getOperatorKind().name().toLowerCase(),
+                    operator.getSerialNumber());
+        }
+
+        private String createId(ExternalPort operator) {
+            return String.format(
+                    "%s-%d-%s", //$NON-NLS-1$
+                    operator.getOperatorKind().name().toLowerCase(),
+                    operator.getSerialNumber(),
+                    operator.getName());
         }
     }
 }

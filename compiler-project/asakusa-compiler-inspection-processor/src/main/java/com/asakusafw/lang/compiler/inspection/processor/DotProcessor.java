@@ -43,7 +43,19 @@ public class DotProcessor implements InspectionNodeProcessor {
 
     @Override
     public void process(Context context, InspectionNode node, OutputStream output) throws IOException {
-        try (Editor editor = new Editor(context, output)) {
+        boolean verbose = context.getOption(KEY_VERBOSE, false);
+        process(node, output, verbose);
+    }
+
+    /**
+     * Generates Graphviz DOT script.
+     * @param node the target node
+     * @param output the target output
+     * @param verbose {@code true} to output detail graph
+     * @throws IOException if failed to generate the script
+     */
+    public static void process(InspectionNode node, OutputStream output, boolean verbose) throws IOException {
+        try (Editor editor = new Editor(output, verbose)) {
             editor.put("digraph {0} '{'", literal(node.getId()));
             editor.push();
             editor.put("label = {0};", literal(node.getId()));
@@ -98,9 +110,9 @@ public class DotProcessor implements InspectionNodeProcessor {
 
         private int indent = 0;
 
-        Editor(Context context, OutputStream output) {
+        Editor(OutputStream output, boolean verbose) {
             this.writer = new PrintWriter(new OutputStreamWriter(output, ENCODING));
-            this.verbose = context.getOption(KEY_VERBOSE, false);
+            this.verbose = verbose;
         }
 
         void push() {
@@ -133,9 +145,14 @@ public class DotProcessor implements InspectionNodeProcessor {
         }
 
         private void putSimple(InspectionNode node) {
+            StringBuilder buf = new StringBuilder();
+            buf.append(node.getTitle());
+            buf.append('\n');
+            buf.append('@');
+            buf.append(node.getId());
             put("\"{0}\" [shape = box, label = {1}];",
                     node.getId(),
-                    literal(String.format("%s\n@%s", node.getTitle(), node.getId())));
+                    literal(buf.toString()));
         }
 
         private void putVerbose(InspectionNode node) {
