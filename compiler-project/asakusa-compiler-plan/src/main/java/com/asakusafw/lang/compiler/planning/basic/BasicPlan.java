@@ -15,7 +15,11 @@
  */
 package com.asakusafw.lang.compiler.planning.basic;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import com.asakusafw.lang.compiler.common.BasicAttributeContainer;
@@ -24,6 +28,8 @@ import com.asakusafw.lang.compiler.planning.Plan;
 import com.asakusafw.lang.compiler.planning.PlanMarker;
 import com.asakusafw.lang.compiler.planning.PlanMarkers;
 import com.asakusafw.lang.compiler.planning.SubPlan;
+import com.asakusafw.utils.graph.Graph;
+import com.asakusafw.utils.graph.Graphs;
 
 /**
  * A basic implementation of {@link Plan}.
@@ -88,6 +94,61 @@ public class BasicPlan extends BasicAttributeContainer implements Plan {
             port.disconnectAll();
         }
         elements.remove(sub);
+    }
+
+    /**
+     * Sorts the sub-plans by their topological structure.
+     * @param stable {@code true} to use stable sort
+     */
+    public void sort(boolean stable) {
+        List<BasicSubPlan> newElements;
+        if (stable) {
+            newElements = sortStable();
+        } else {
+            newElements = Graphs.sortPostOrder(buildDependencyGraph());
+        }
+        assert elements != newElements;
+        assert elements.size() == newElements.size();
+        elements.clear();
+        elements.addAll(newElements);
+    }
+
+    private Graph<BasicSubPlan> buildDependencyGraph() {
+        Graph<BasicSubPlan> results = Graphs.newInstance();
+        for (BasicSubPlan element : elements) {
+            results.addNode(element);
+            for (BasicSubPlan.BasicInput downstream : element.getInputs()) {
+                for (BasicSubPlan.BasicOutput upstream : downstream.getOpposites()) {
+                    results.addEdge(element, upstream.getOwner());
+                }
+            }
+        }
+        return results;
+    }
+
+    private List<BasicSubPlan> sortStable() {
+        Graph<BasicSubPlan> graph = buildDependencyGraph();
+        List<BasicSubPlan> results = new ArrayList<>();
+        LinkedList<BasicSubPlan> work = new LinkedList<>(elements);
+        while (work.isEmpty() == false) {
+            boolean changed = false;
+            for (Iterator<BasicSubPlan> iter = work.iterator(); iter.hasNext();) {
+                BasicSubPlan next = iter.next();
+                Set<BasicSubPlan> blockers = graph.getConnected(next);
+                if (blockers.isEmpty()) {
+                    iter.remove();
+                    graph.removeNode(next);
+                    results.add(next);
+                    changed = true;
+                    continue;
+                }
+            }
+            if (changed == false) {
+                throw new IllegalStateException();
+            }
+        }
+        assert elements.size() == results.size();
+        return results;
     }
 
     @Override

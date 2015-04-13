@@ -92,7 +92,8 @@ public final class PrimitivePlanner {
         validateGraph();
         Set<Set<MarkerOperator>> inputCandidates = collectInputCandidates();
         Map<Operator, Set<MarkerOperator>> broadcastConsumers = collectBroadcastConsumers();
-        PlanBuilder builder = PlanBuilder.from(operators);
+        PlanBuilder builder = PlanBuilder.from(operators)
+                .withSort(true);
 
         for (Set<MarkerOperator> inputCandidate : inputCandidates) {
             // detects output candidates for the input group

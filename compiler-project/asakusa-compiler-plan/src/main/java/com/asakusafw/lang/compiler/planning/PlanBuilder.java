@@ -42,12 +42,16 @@ public final class PlanBuilder {
 
     static final Logger LOG = LoggerFactory.getLogger(PlanBuilder.class);
 
+    private static final int MAX_STABLE_SORT = 1000;
+
     private final BasicPlan plan = new BasicPlan();
 
     private final Set<Operator> sourceOperators;
 
     // copy -> source
     private final Map<Operator, Operator> copyToSource = new HashMap<>();
+
+    private boolean sort;
 
     private boolean strict;
 
@@ -62,6 +66,16 @@ public final class PlanBuilder {
      */
     public static PlanBuilder from(Collection<? extends Operator> operators) {
         return new PlanBuilder(Operators.getTransitiveConnected(operators));
+    }
+
+    /**
+     * Sets whether this builder re-orders the sub-plans.
+     * @param newValue {@code true} to re-order sub-plans, otherwise {@code false}
+     * @return this
+     */
+    public PlanBuilder withSort(boolean newValue) {
+        this.sort = newValue;
+        return this;
     }
 
     /**
@@ -284,6 +298,10 @@ public final class PlanBuilder {
      */
     public PlanDetail build() {
         connect();
+        if (sort) {
+            boolean stable = plan.getElements().size() <= MAX_STABLE_SORT;
+            plan.sort(stable);
+        }
         PlanDetail detail = new PlanDetail(plan, copyToSource);
         return detail;
     }
