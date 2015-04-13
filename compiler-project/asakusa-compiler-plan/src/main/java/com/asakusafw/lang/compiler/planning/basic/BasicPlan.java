@@ -107,7 +107,6 @@ public class BasicPlan extends BasicAttributeContainer implements Plan {
         } else {
             newElements = Graphs.sortPostOrder(buildDependencyGraph());
         }
-        assert elements != newElements;
         assert elements.size() == newElements.size();
         elements.clear();
         elements.addAll(newElements);
