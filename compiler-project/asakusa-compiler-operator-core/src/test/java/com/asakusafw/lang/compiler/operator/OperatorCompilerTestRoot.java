@@ -36,6 +36,8 @@ import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
 
 import org.junit.After;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.operator.flowpart.FlowPartAnnotationProcessor;
@@ -50,6 +52,8 @@ import com.asakusafw.utils.java.model.util.Models;
  * Test helper for operator compilers.
  */
 public class OperatorCompilerTestRoot {
+
+    static final Logger LOG = LoggerFactory.getLogger(OperatorCompilerTestRoot.class);
 
     final ModelFactory f = Models.getModelFactory();
 
@@ -328,20 +332,37 @@ public class OperatorCompilerTestRoot {
 
     private ClassLoader compile() {
         List<Diagnostic<? extends JavaFileObject>> diagnostics = doCompile();
+        boolean wrong = false;
         for (Diagnostic<?> d : diagnostics) {
             if (d.getKind() != Diagnostic.Kind.NOTE) {
-                throw new AssertionError(diagnostics);
+                wrong = true;
+                break;
             }
+        }
+        if (wrong) {
+            for (JavaFileObject java : compiler.getSources()) {
+                try {
+                    System.out.println("====" + java.getName());
+                    System.out.println(java.getCharContent(true));
+                } catch (IOException e) {
+                    // ignore.
+                }
+            }
+            for (Diagnostic<? extends JavaFileObject> d : diagnostics) {
+                System.out.println("====");
+                System.out.println(d);
+            }
+            throw new AssertionError(diagnostics);
         }
         return compiler.getClassLoader();
     }
 
     private List<Diagnostic<? extends JavaFileObject>> doCompile() {
-        if (dump) {
+        if (LOG.isDebugEnabled()) {
             for (JavaFileObject java : sources) {
                 try {
-                    System.out.println("====" + java.getName());
-                    System.out.println(java.getCharContent(true));
+                    LOG.debug("==== {}", java.getName());
+                    LOG.debug("{}", java.getCharContent(true));
                 } catch (IOException e) {
                     // ignore.
                 }
@@ -356,18 +377,18 @@ public class OperatorCompilerTestRoot {
             compiler.addSource(new VolatileJavaFile("A", "public class A {}"));
         }
         List<Diagnostic<? extends JavaFileObject>> diagnostics = compiler.doCompile();
-        for (JavaFileObject java : compiler.getSources()) {
-            try {
-                System.out.println("====" + java.getName());
-                System.out.println(java.getCharContent(true));
-            } catch (IOException e) {
-                // ignore.
+        if (LOG.isDebugEnabled()) {
+            for (JavaFileObject java : compiler.getSources()) {
+                try {
+                    LOG.debug("==== {}", java.getName());
+                    LOG.debug("{}", java.getCharContent(true));
+                } catch (IOException e) {
+                    // ignore.
+                }
             }
-        }
-        if (dump) {
             for (Diagnostic<? extends JavaFileObject> d : diagnostics) {
-                System.out.println("====");
-                System.out.println(d);
+                LOG.debug("====");
+                LOG.debug("{}", d);
             }
         }
         return diagnostics;
