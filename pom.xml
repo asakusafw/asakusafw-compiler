@@ -34,7 +34,9 @@
 		<plugin.antrun.version>1.7</plugin.antrun.version>
 		<plugin.properties.version>1.0-alpha-2</plugin.properties.version>
 		<plugin.assembly.version>2.4</plugin.assembly.version>
+		<plugin.jar.version>2.4</plugin.jar.version>
 		<plugin.shade.version>2.3</plugin.shade.version>
+		<plugin.javadoc.version>2.10.1</plugin.javadoc.version>
 
 		<!-- artifact versions -->
 		<asakusafw.groupId>com.asakusafw</asakusafw.groupId>
@@ -247,7 +249,12 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-jar-plugin</artifactId>
-					<version>2.4</version>
+					<version>${plugin.jar.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-shade-plugin</artifactId>
+					<version>${plugin.shade.version}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -333,7 +340,7 @@ encoding/<project>=UTF-8
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>2.10.1</version>
+					<version>${plugin.javadoc.version}</version>
 					<configuration>
 						<encoding>UTF-8</encoding>
 						<charset>UTF-8</charset>
@@ -400,7 +407,7 @@ encoding/<project>=UTF-8
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.10.1</version>
+				<version>${plugin.javadoc.version}</version>
 				<configuration>
 					<encoding>UTF-8</encoding>
 					<charset>UTF-8</charset>
@@ -469,6 +476,11 @@ encoding/<project>=UTF-8
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-api</artifactId>
+				<version>${slf4j.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-simple</artifactId>
 				<version>${slf4j.version}</version>
 			</dependency>
 			<dependency>
