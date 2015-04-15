@@ -144,6 +144,8 @@ public class FlowPartBuilder {
                 Diagnostic diagnostic = checkApply(ctor);
                 if (diagnostic == null) {
                     return (Constructor<? extends FlowDescription>) ctor;
+                } else {
+                    diagnostics.add(diagnostic);
                 }
             }
         }
