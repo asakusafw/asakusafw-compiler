@@ -2,16 +2,16 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<name>Asakusa Direct I/O Bridge API</name>
+	<name>Asakusa Bridge Runtime Adapter</name>
 	<groupId>com.asakusafw.bridge</groupId>
-	<artifactId>asakusa-bridge-directio-runtime</artifactId>
+	<artifactId>asakusa-bridge-runtime-adapter</artifactId>
 	<parent>
 		<artifactId>bridge-project</artifactId>
 		<groupId>com.asakusafw.bridge</groupId>
 		<version>0.1-SNAPSHOT</version>
 	</parent>
 
-	<description>Asakusa Direct I/O Bridge API</description>
+	<description>Asakusa Bridge Runtime Adapter</description>
 
 	<packaging>jar</packaging>
 
@@ -24,12 +24,6 @@
 		<dependency>
 			<groupId>${asakusafw.groupId}</groupId>
 			<artifactId>asakusa-runtime</artifactId>
-			<version>${asakusafw.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>${asakusafw.groupId}.sandbox</groupId>
-			<artifactId>asakusa-directio-runtime-ext</artifactId>
 			<version>${asakusafw.version}</version>
 			<scope>provided</scope>
 		</dependency>
