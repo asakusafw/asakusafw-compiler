@@ -57,6 +57,7 @@
 
 	<modules>
 		<module>compiler-project</module>
+		<module>bridge-project</module>
 	</modules>
 
 	<repositories>
