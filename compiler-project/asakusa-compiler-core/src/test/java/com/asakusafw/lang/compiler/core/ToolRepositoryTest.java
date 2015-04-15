@@ -47,8 +47,10 @@ import com.asakusafw.lang.compiler.core.dummy.DummyBatchProcessor;
 import com.asakusafw.lang.compiler.core.dummy.DummyCompilerParticipant;
 import com.asakusafw.lang.compiler.core.dummy.DummyDataModelProcessor;
 import com.asakusafw.lang.compiler.core.dummy.DummyElement;
+import com.asakusafw.lang.compiler.core.dummy.DummyExclusiveJobflowProcessor;
 import com.asakusafw.lang.compiler.core.dummy.DummyExternalPortProcessor;
 import com.asakusafw.lang.compiler.core.dummy.DummyJobflowProcessor;
+import com.asakusafw.lang.compiler.core.dummy.DummyOptionalJobflowProcessor;
 import com.asakusafw.lang.compiler.core.util.CompositeElement;
 
 /**
@@ -178,6 +180,58 @@ public class ToolRepositoryTest {
             assertThat(tools.getExternalPortProcessor(), not(hasIds("default")));
             assertThat(tools.getParticipant(), not(hasIds("default")));
         }
+    }
+
+    /**
+     * w/ optional elements.
+     */
+    @Test
+    public void suppress_optional() {
+        ToolRepository tools = ToolRepository.builder(getClass().getClassLoader())
+            .use(new DummyDataModelProcessor())
+            .use(new DummyExternalPortProcessor())
+            .use(new DummyBatchProcessor())
+            .use(new DummyCompilerParticipant())
+            .use(new DummyOptionalJobflowProcessor("a"))
+            .use(new DummyExclusiveJobflowProcessor("b"))
+            .use(new DummyOptionalJobflowProcessor("c"))
+            .use(new DummyJobflowProcessor("d"))
+            .build();
+        assertThat(tools.getJobflowProcessor(), hasIds("b", "d"));
+    }
+
+    /**
+     * w/ optional elements.
+     */
+    @Test
+    public void suppress_optional_all() {
+        ToolRepository tools = ToolRepository.builder(getClass().getClassLoader())
+            .use(new DummyDataModelProcessor())
+            .use(new DummyExternalPortProcessor())
+            .use(new DummyBatchProcessor())
+            .use(new DummyCompilerParticipant())
+            .use(new DummyOptionalJobflowProcessor("a"))
+            .use(new DummyOptionalJobflowProcessor("b"))
+            .use(new DummyOptionalJobflowProcessor("c"))
+            .use(new DummyJobflowProcessor("d"))
+            .build();
+        assertThat(tools.getJobflowProcessor(), hasIds("a", "d"));
+    }
+
+    /**
+     * w/ multiple exclusive elements.
+     */
+    @Test(expected = RuntimeException.class)
+    public void invalid_exclusive() {
+        ToolRepository.builder(getClass().getClassLoader())
+            .use(new DummyDataModelProcessor())
+            .use(new DummyExternalPortProcessor())
+            .use(new DummyBatchProcessor())
+            .use(new DummyCompilerParticipant())
+            .use(new DummyExclusiveJobflowProcessor("a"))
+            .use(new DummyExclusiveJobflowProcessor("b"))
+            .use(new DummyExclusiveJobflowProcessor("c"))
+            .build();
     }
 
     /**

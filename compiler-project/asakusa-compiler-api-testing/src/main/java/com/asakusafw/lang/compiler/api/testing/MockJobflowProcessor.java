@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.asakusafw.lang.compiler.api.Exclusive;
 import com.asakusafw.lang.compiler.api.ExternalPortProcessor;
 import com.asakusafw.lang.compiler.api.JobflowProcessor;
 import com.asakusafw.lang.compiler.api.reference.ExternalInputReference;
@@ -47,6 +48,7 @@ import com.asakusafw.lang.compiler.model.graph.Operators;
  * </p>
  * @see MockExternalPortProcessor
  */
+@Exclusive(optional = true)
 public class MockJobflowProcessor implements JobflowProcessor {
 
     @Override

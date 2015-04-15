@@ -17,6 +17,7 @@ package com.asakusafw.lang.compiler.core;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -32,6 +33,7 @@ import org.slf4j.LoggerFactory;
 
 import com.asakusafw.lang.compiler.api.BatchProcessor;
 import com.asakusafw.lang.compiler.api.DataModelProcessor;
+import com.asakusafw.lang.compiler.api.Exclusive;
 import com.asakusafw.lang.compiler.api.ExternalPortProcessor;
 import com.asakusafw.lang.compiler.api.JobflowProcessor;
 import com.asakusafw.lang.compiler.core.util.CompositeBatchProcessor;
@@ -286,6 +288,16 @@ public class ToolRepository {
          * @return the built object
          */
         public ToolRepository build() {
+            checkMandatory();
+            return new ToolRepository(
+                    CompositeDataModelProcessor.composite(resolve(DataModelProcessor.class)),
+                    CompositeBatchProcessor.composite(resolve(BatchProcessor.class)),
+                    CompositeJobflowProcessor.composite(resolve(JobflowProcessor.class)),
+                    CompositeExternalPortProcessor.composite(resolve(ExternalPortProcessor.class)),
+                    CompositeCompilerParticipant.composite(resolve(CompilerParticipant.class)));
+        }
+
+        private void checkMandatory() {
             for (Class<?> toolType : MANDATORY_TOOLS) {
                 List<?> elements = get(toolType);
                 if (elements.isEmpty()) {
@@ -294,12 +306,59 @@ public class ToolRepository {
                             toolType.getSimpleName()));
                 }
             }
-            return new ToolRepository(
-                    CompositeDataModelProcessor.composite(get(DataModelProcessor.class)),
-                    CompositeBatchProcessor.composite(get(BatchProcessor.class)),
-                    CompositeJobflowProcessor.composite(get(JobflowProcessor.class)),
-                    CompositeExternalPortProcessor.composite(get(ExternalPortProcessor.class)),
-                    CompositeCompilerParticipant.composite(get(CompilerParticipant.class)));
+        }
+
+        private <T> List<T> resolve(Class<T> type) {
+            List<T> elements = get(type);
+            if (elements.size() <= 1) {
+                return elements;
+            }
+            BitSet exclusives = new BitSet(elements.size());
+            BitSet optionals = new BitSet(elements.size());
+            for (int i = 0, n = elements.size(); i < n; i++) {
+                Class<?> aClass = elements.get(i).getClass();
+                Exclusive annotation = aClass.getAnnotation(Exclusive.class);
+                if (annotation != null) {
+                    exclusives.set(i);
+                    optionals.set(i, annotation.optional());
+                }
+            }
+            if (exclusives.cardinality() <= 1) {
+                // always valid
+                return elements;
+            }
+            if (exclusives.cardinality() == optionals.cardinality()) {
+                // all elements are optional, then we keep the first one
+                assert optionals.cardinality() > 0;
+                optionals.clear(optionals.nextSetBit(0));
+            }
+
+            BitSet mandatory = (BitSet) exclusives.clone();
+            mandatory.andNot(optionals);
+            if (mandatory.cardinality() >= 2) {
+                // conflict some exclusive elements
+                List<T> conflict = new ArrayList<>();
+                for (int i = mandatory.nextSetBit(0); i >= 0; i = mandatory.nextSetBit(i + 1)) {
+                    T element = elements.get(i);
+                    conflict.add(element);
+                }
+                throw new IllegalStateException(MessageFormat.format(
+                        "found multiple exclusive tools: {0}",
+                        conflict));
+            }
+
+            List<T> results = new ArrayList<>();
+            for (int i = 0, n = elements.size(); i < n; i++) {
+                T element = elements.get(i);
+                if (optionals.get(i)) {
+                    LOG.info(MessageFormat.format(
+                            "disabled optional tool: {0}",
+                            element));
+                } else {
+                    results.add(element);
+                }
+            }
+            return results;
         }
     }
 }
