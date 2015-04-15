@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.asakusafw.lang.compiler.analyzer.util.TypeInfo;
+import com.asakusafw.lang.compiler.common.BasicDiagnostic;
 import com.asakusafw.lang.compiler.common.Diagnostic;
 import com.asakusafw.lang.compiler.common.DiagnosticException;
 import com.asakusafw.lang.compiler.model.description.Descriptions;
@@ -31,6 +32,8 @@ import com.asakusafw.lang.compiler.model.info.JobflowInfo;
 import com.asakusafw.vocabulary.external.ExporterDescription;
 import com.asakusafw.vocabulary.external.ImporterDescription;
 import com.asakusafw.vocabulary.flow.FlowDescription;
+import com.asakusafw.vocabulary.flow.In;
+import com.asakusafw.vocabulary.flow.Out;
 import com.asakusafw.vocabulary.flow.graph.FlowIn;
 import com.asakusafw.vocabulary.flow.graph.FlowOut;
 
@@ -130,21 +133,32 @@ public class FlowPartBuilder {
 
     @SuppressWarnings("unchecked")
     private Constructor<? extends FlowDescription> getConstructor(Class<? extends FlowDescription> flowClass) {
-        for (Constructor<?> ctor : flowClass.getConstructors()) {
-            if (canApply(ctor)) {
-                return (Constructor<? extends FlowDescription>) ctor;
+        List<Diagnostic> diagnostics = new ArrayList<>();
+        Constructor<?>[] ctors = flowClass.getConstructors();
+        if (ctors.length == 0) {
+            diagnostics.add(new BasicDiagnostic(Diagnostic.Level.ERROR, MessageFormat.format(
+                    "public constructor is not declared: {0}",
+                    flowClass.getName())));
+        } else {
+            for (Constructor<?> ctor : ctors) {
+                Diagnostic diagnostic = checkApply(ctor);
+                if (diagnostic == null) {
+                    return (Constructor<? extends FlowDescription>) ctor;
+                }
             }
         }
-        throw new DiagnosticException(Diagnostic.Level.ERROR, MessageFormat.format(
-                "missing a suitable constructor: {0}({1})",
-                flowClass.getName(),
-                arguments));
+        throw new DiagnosticException(diagnostics);
     }
 
-    private boolean canApply(Constructor<?> constructor) {
+    private Diagnostic checkApply(Constructor<?> constructor) {
         Type[] types = constructor.getGenericParameterTypes();
         if (types.length != arguments.size()) {
-            return false;
+            return new BasicDiagnostic(Diagnostic.Level.ERROR, MessageFormat.format(
+                    "specified {0} arguments, but target constructor has {1} parameters: {2} <> {3}",
+                    arguments.size(),
+                    types.length,
+                    stringnizeObjects(arguments.toArray()),
+                    stringnizeTypes(types)));
         }
         for (int i = 0; i < types.length; i++) {
             Type type = types[i];
@@ -155,7 +169,11 @@ public class FlowPartBuilder {
             }
             Class<?> raw = TypeInfo.erase(type);
             if (raw.isAssignableFrom(arg.getClass()) == false) {
-                return false;
+                return new BasicDiagnostic(Diagnostic.Level.ERROR, MessageFormat.format(
+                        "cannnot apply #{0} argument: {1}<>{2}",
+                        i,
+                        stringnizeObject(arg),
+                        stringnizeType(type)));
             }
             Type dataType;
             if (arg instanceof FlowIn<?>) {
@@ -174,10 +192,61 @@ public class FlowPartBuilder {
                 Class<?> required = TypeInfo.erase(typeArguments.get(0));
                 Class<?> target = (Class<?>) dataType;
                 if (required.isAssignableFrom(target) == false) {
-                    return false;
+                    return new BasicDiagnostic(Diagnostic.Level.ERROR, MessageFormat.format(
+                            "cannnot apply #{0} argument: {1}<>{2}",
+                            i,
+                            stringnizeObject(arg),
+                            stringnizeType(type)));
                 }
             }
         }
-        return true;
+        return null;
+    }
+
+    private static String stringnizeObject(Object object) {
+        Type dataType;
+        if (object instanceof FlowIn<?>) {
+            dataType = ((FlowIn<?>) object).getDescription().getDataType();
+        } else if (object instanceof FlowOut<?>) {
+            dataType = ((FlowOut<?>) object).getDescription().getDataType();
+        } else if (object instanceof Class<?>) {
+            dataType = (Type) object;
+        } else {
+            dataType = null;
+        }
+        if (dataType == null) {
+            return object.getClass().getSimpleName();
+        }
+        Class<?> first = TypeInfo.erase(dataType);
+        return String.format("%s<%s>", object.getClass().getSimpleName(), first.getSimpleName()); //$NON-NLS-1$
+    }
+
+    private static String stringnizeType(Type type) {
+        Class<?> raw = TypeInfo.erase(type);
+        if (raw == In.class || raw == Out.class || raw == Class.class) {
+            TypeInfo info = TypeInfo.of(type);
+            List<Type> typeArguments = info.getTypeArguments();
+            if (typeArguments.size() == 1) {
+                Class<?> first = TypeInfo.erase(typeArguments.get(0));
+                return String.format("%s<%s>", raw.getSimpleName(), first.getSimpleName()); //$NON-NLS-1$
+            }
+        }
+        return raw.getSimpleName();
+    }
+
+    private static List<String> stringnizeObjects(Object[] objects) {
+        List<String> results = new ArrayList<>();
+        for (int i = 0; i < objects.length; i++) {
+            results.add(stringnizeObject(objects[i]));
+        }
+        return results;
+    }
+
+    private static List<String> stringnizeTypes(Type[] types) {
+        List<String> results = new ArrayList<>();
+        for (int i = 0; i < types.length; i++) {
+            results.add(stringnizeType(types[i]));
+        }
+        return results;
     }
 }
