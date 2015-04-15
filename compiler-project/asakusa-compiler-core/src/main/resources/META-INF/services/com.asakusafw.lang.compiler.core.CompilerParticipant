@@ -1,5 +1,6 @@
 # for batch
 com.asakusafw.lang.compiler.core.participant.AttachedLibrariesParticipant
+com.asakusafw.lang.compiler.core.participant.BuildLogParticipant
 
 # for jobflow
 com.asakusafw.lang.compiler.core.participant.RuntimeContextParticipant
