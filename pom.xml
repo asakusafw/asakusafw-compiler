@@ -40,7 +40,7 @@
 
 		<!-- artifact versions -->
 		<asakusafw.groupId>com.asakusafw</asakusafw.groupId>
-		<asakusafw.version>0.7.3-RC2-hadoop1</asakusafw.version>
+		<asakusafw.version>0.7.3-RC3-hadoop1</asakusafw.version>
 		<hadoop.version>1.2.1</hadoop.version>
 		<commons-cli.version>1.2</commons-cli.version>
 		<asm.version>5.0.3</asm.version>
