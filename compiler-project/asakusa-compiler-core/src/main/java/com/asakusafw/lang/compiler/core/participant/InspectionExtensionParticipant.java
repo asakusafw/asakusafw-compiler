@@ -101,11 +101,7 @@ public class InspectionExtensionParticipant extends AbstractCompilerParticipant 
     }
 
     private boolean isEnabled(CompilerContext context, String key, boolean defaultValue) {
-        String value = context.getOptions().get(key, "").trim(); //$NON-NLS-1$
-        if (value.isEmpty()) {
-            return defaultValue;
-        }
-        return Boolean.parseBoolean(value);
+        return context.getOptions().get(key, defaultValue);
     }
 
     private void inspect(CompilerContext context, Location output, Object element) {
