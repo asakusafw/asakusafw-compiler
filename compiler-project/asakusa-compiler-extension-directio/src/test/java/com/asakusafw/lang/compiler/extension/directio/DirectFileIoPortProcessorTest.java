@@ -31,6 +31,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -61,6 +62,7 @@ import com.asakusafw.lang.compiler.mapreduce.MapReduceRunner;
 import com.asakusafw.lang.compiler.model.description.ValueDescription;
 import com.asakusafw.lang.compiler.model.info.ExternalInputInfo;
 import com.asakusafw.lang.compiler.model.info.ExternalOutputInfo;
+import com.asakusafw.runtime.directio.DataFilter;
 import com.asakusafw.runtime.directio.DataFormat;
 import com.asakusafw.vocabulary.directio.DirectFileInputDescription;
 import com.asakusafw.vocabulary.directio.DirectFileOutputDescription;
@@ -722,6 +724,128 @@ public class DirectFileIoPortProcessorTest {
         assertThat(directio.file("out/a.binx").exists(), is(true));
     }
 
+    /**
+     * process - w/ path filter.
+     * @throws Exception if failed
+     */
+    @Test
+    public void process_filter_path() throws Exception {
+        List<ExternalInputReference> inputs = resolve(input("in", "*.bin")
+                .withFilter(MockFilterPath.class));
+
+        MockExternalPortProcessorContext mock = mock();
+        DirectFileIoPortProcessor processor = new DirectFileIoPortProcessor();
+        processor.process(mock, inputs, Collections.<ExternalOutputReference>emptyList());
+
+        checkTasks(mock.getTasks(), 1, 0);
+
+        File classes = javac.compile();
+
+        prepare("in/a.bin", Collections.singletonMap(100, "A"));
+        prepare("in/b.bin", Collections.singletonMap(200, "B"));
+        prepare("in/c.bin", Collections.singletonMap(300, "C"));
+        prepare("in/d.bin", Collections.singletonMap(400, "D"));
+        run(mock, classes, Phase.PROLOGUE, Collections.singletonMap("filter", ".*/[ac]\\.bin"));
+
+        Map<Integer, String> results = collect(inputs.get(0));
+        assertThat(results.keySet(), hasSize(2));
+        assertThat(results, hasEntry(100, "A"));
+        assertThat(results, hasEntry(300, "C"));
+    }
+
+    /**
+     * process - w/ data filter.
+     * @throws Exception if failed
+     */
+    @Test
+    public void process_filter_object() throws Exception {
+        List<ExternalInputReference> inputs = resolve(input("in", "*.bin")
+                .withFilter(MockFilterObject.class));
+
+        MockExternalPortProcessorContext mock = mock();
+        DirectFileIoPortProcessor processor = new DirectFileIoPortProcessor();
+        processor.process(mock, inputs, Collections.<ExternalOutputReference>emptyList());
+
+        checkTasks(mock.getTasks(), 1, 0);
+
+        File classes = javac.compile();
+
+        prepare("in/a.bin", Collections.singletonMap(100, "A"));
+        prepare("in/b.bin", Collections.singletonMap(200, "B"));
+        prepare("in/c.bin", Collections.singletonMap(300, "C"));
+        prepare("in/d.bin", Collections.singletonMap(400, "D"));
+        run(mock, classes, Phase.PROLOGUE, Collections.singletonMap("filter", "[BC]"));
+
+        Map<Integer, String> results = collect(inputs.get(0));
+        assertThat(results.keySet(), hasSize(2));
+        assertThat(results, hasEntry(200, "B"));
+        assertThat(results, hasEntry(300, "C"));
+    }
+
+    /**
+     * process - w/ path filter but is disabled.
+     * @throws Exception if failed
+     */
+    @Test
+    public void process_filter_path_disabled() throws Exception {
+        List<ExternalInputReference> inputs = resolve(input("in", "*.bin")
+                .withFilter(MockFilterPath.class));
+
+        MockExternalPortProcessorContext mock = mock(
+                Collections.singletonMap(DirectFileIoPortProcessor.OPTION_FILTER_ENABLED, String.valueOf(false)));
+        DirectFileIoPortProcessor processor = new DirectFileIoPortProcessor();
+        processor.process(mock, inputs, Collections.<ExternalOutputReference>emptyList());
+
+        checkTasks(mock.getTasks(), 1, 0);
+
+        File classes = javac.compile();
+
+        prepare("in/a.bin", Collections.singletonMap(100, "A"));
+        prepare("in/b.bin", Collections.singletonMap(200, "B"));
+        prepare("in/c.bin", Collections.singletonMap(300, "C"));
+        prepare("in/d.bin", Collections.singletonMap(400, "D"));
+        run(mock, classes, Phase.PROLOGUE, Collections.singletonMap("filter", ".*/[ac]\\.bin"));
+
+        Map<Integer, String> results = collect(inputs.get(0));
+        assertThat(results.keySet(), hasSize(4));
+        assertThat(results, hasEntry(100, "A"));
+        assertThat(results, hasEntry(200, "B"));
+        assertThat(results, hasEntry(300, "C"));
+        assertThat(results, hasEntry(400, "D"));
+    }
+
+    /**
+     * process - w/ data filter but is disabled.
+     * @throws Exception if failed
+     */
+    @Test
+    public void process_filter_object_disabled() throws Exception {
+        List<ExternalInputReference> inputs = resolve(input("in", "*.bin")
+                .withFilter(MockFilterObject.class));
+
+        MockExternalPortProcessorContext mock = mock(
+                Collections.singletonMap(DirectFileIoPortProcessor.OPTION_FILTER_ENABLED, String.valueOf(false)));
+        DirectFileIoPortProcessor processor = new DirectFileIoPortProcessor();
+        processor.process(mock, inputs, Collections.<ExternalOutputReference>emptyList());
+
+        checkTasks(mock.getTasks(), 1, 0);
+
+        File classes = javac.compile();
+
+        prepare("in/a.bin", Collections.singletonMap(100, "A"));
+        prepare("in/b.bin", Collections.singletonMap(200, "B"));
+        prepare("in/c.bin", Collections.singletonMap(300, "C"));
+        prepare("in/d.bin", Collections.singletonMap(400, "D"));
+        run(mock, classes, Phase.PROLOGUE, Collections.singletonMap("filter", "[BC]"));
+
+        Map<Integer, String> results = collect(inputs.get(0));
+        assertThat(results.keySet(), hasSize(4));
+        assertThat(results, hasEntry(100, "A"));
+        assertThat(results, hasEntry(200, "B"));
+        assertThat(results, hasEntry(300, "C"));
+        assertThat(results, hasEntry(400, "D"));
+    }
+
     private void prepare(String resource, Map<Integer, String> values) throws IOException {
         prepare(directio.file(resource), values);
     }
@@ -784,9 +908,14 @@ public class DirectFileIoPortProcessorTest {
     }
 
     private MockExternalPortProcessorContext mock() {
+        return mock(Collections.<String, String>emptyMap());
+    }
+
+    private MockExternalPortProcessorContext mock(Map<String, String> options) {
         MockExternalPortProcessorContext context = new MockExternalPortProcessorContext(
                 CompilerOptions.builder()
                     .withRuntimeWorkingDirectory(new File(temporary.getRoot(), "tempdir").toURI().toString(), false)
+                    .withProperties(options)
                     .build(),
                 getClass().getClassLoader(),
                 new File(temporary.getRoot(), "output"));
@@ -878,6 +1007,14 @@ public class DirectFileIoPortProcessorTest {
     }
 
     private void run(MockExternalPortProcessorContext mock, File classes, Phase phase) throws Exception {
+        run(mock, classes, phase, Collections.<String, String>emptyMap());
+    }
+
+    private void run(
+            MockExternalPortProcessorContext mock,
+            File classes,
+            Phase phase,
+            Map<String, String> arguments) throws Exception {
         Collection<? extends TaskReference> tasks = mock.getTasks().getTasks(phase);
         assertThat(tasks, hasSize(1));
         TaskReference task = tasks.iterator().next();
@@ -888,7 +1025,7 @@ public class DirectFileIoPortProcessorTest {
                 directio.newConfiguration(),
                 hadoop.getMainClass(),
                 "testing",
-                Collections.<String, String>emptyMap(),
+                arguments,
                 classes);
         assertThat(MessageFormat.format(
                 "unexpected exit status on {0}",
@@ -904,6 +1041,8 @@ public class DirectFileIoPortProcessorTest {
         private final String resourcePattern;
 
         private final Class<? extends DataFormat<?>> format;
+
+        private Class<? extends DataFilter<?>> filter;
 
         private boolean optional;
 
@@ -944,6 +1083,16 @@ public class DirectFileIoPortProcessorTest {
 
         public InputDesc withOptional(boolean newValue) {
             this.optional = newValue;
+            return this;
+        }
+
+        @Override
+        public Class<? extends DataFilter<?>> getFilter() {
+            return filter;
+        }
+
+        public InputDesc withFilter(Class<? extends DataFilter<?>> newValue) {
+            this.filter = newValue;
             return this;
         }
     }
@@ -1010,6 +1159,42 @@ public class DirectFileIoPortProcessorTest {
         @Override
         public Class<? extends DataFormat<?>> getFormat() {
             return format;
+        }
+    }
+
+    /**
+     * filters by path.
+     */
+    public static class MockFilterPath extends DataFilter<Object> {
+
+        private Pattern pattern;
+
+        @Override
+        public void initialize(DataFilter.Context context) {
+            pattern = Pattern.compile(context.getBatchArguments().get("filter"));
+        }
+
+        @Override
+        public boolean acceptsPath(String path) {
+            return pattern.matcher(path).matches();
+        }
+    }
+
+    /**
+     * filters by object.
+     */
+    public static class MockFilterObject extends DataFilter<MockData> {
+
+        private Pattern pattern;
+
+        @Override
+        public void initialize(DataFilter.Context context) {
+            pattern = Pattern.compile(context.getBatchArguments().get("filter"));
+        }
+
+        @Override
+        public boolean acceptsData(MockData data) {
+            return pattern.matcher(data.getStringValueOption().getAsString()).matches();
         }
     }
 }

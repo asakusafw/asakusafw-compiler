@@ -33,6 +33,8 @@ public class DirectFileInputModel implements Serializable {
 
     private String formatClass;
 
+    private String filterClass;
+
     private boolean optional;
 
     /**
@@ -49,7 +51,8 @@ public class DirectFileInputModel implements Serializable {
     public DirectFileInputModel(DirectFileInputDescription description) {
         this.basePath = description.getBasePath();
         this.resourcePattern = description.getResourcePattern();
-        this.formatClass = description.getFormat().getName();
+        this.formatClass = toName(description.getFormat());
+        this.filterClass = toName(description.getFilter());
         this.optional = description.isOptional();
     }
 
@@ -74,7 +77,15 @@ public class DirectFileInputModel implements Serializable {
      * @return the format class
      */
     public ClassDescription getFormatClass() {
-        return new ClassDescription(formatClass);
+        return toClass(formatClass);
+    }
+
+    /**
+     * Returns the filter class.
+     * @return the filter class, or {@code null} if it is not defined
+     */
+    public ClassDescription getFilterClass() {
+        return toClass(filterClass);
     }
 
     /**
@@ -83,5 +94,19 @@ public class DirectFileInputModel implements Serializable {
      */
     public boolean isOptional() {
         return optional;
+    }
+
+    private static String toName(Class<?> aClass) {
+        if (aClass == null) {
+            return null;
+        }
+        return aClass.getName();
+    }
+
+    private static ClassDescription toClass(String className) {
+        if (className == null) {
+            return null;
+        }
+        return new ClassDescription(className);
     }
 }

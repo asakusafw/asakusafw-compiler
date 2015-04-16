@@ -74,11 +74,24 @@ public class DirectFileIoPortProcessor
 
     static final Logger LOG = LoggerFactory.getLogger(DirectFileIoPortProcessor.class);
 
-    private static final String MODULE_NAME = "directio"; //$NON-NLS-1$
+    static final String MODULE_NAME = "directio"; //$NON-NLS-1$
 
-    private static final TaskReference.Phase PHASE_INPUT = TaskReference.Phase.PROLOGUE;
+    static final TaskReference.Phase PHASE_INPUT = TaskReference.Phase.PROLOGUE;
 
-    private static final TaskReference.Phase PHASE_OUTPUT = TaskReference.Phase.EPILOGUE;
+    static final TaskReference.Phase PHASE_OUTPUT = TaskReference.Phase.EPILOGUE;
+
+    static final String PREFIX_OPTION = "directio."; //$NON-NLS-1$
+
+    /**
+     * The compiler option name whether filter feature is enabled or not.
+     * @see #DEFAULT_FILTER_ENABLED
+     */
+    public static final String OPTION_FILTER_ENABLED = PREFIX_OPTION + "input.filter.enabled"; //$NON-NLS-1$
+
+    /**
+     * The default value of {@link #OPTION_FILTER_ENABLED}.
+     */
+    public static final boolean DEFAULT_FILTER_ENABLED = true;
 
     private static final Set<PatternElementKind> INVALID_BASE_PATH_KIND =
             EnumSet.of(PatternElementKind.WILDCARD, PatternElementKind.SELECTION);
@@ -476,7 +489,7 @@ public class DirectFileIoPortProcessor
     private CopyStageInfo.Operation processInput(Context context, ExternalInputReference reference) {
         ResolvedInput resolved = restoreModel(context, reference.getName(), reference);
         String dummyInputPath = String.format(PATTERN_DUMMY_INPUT, reference.getName(), resolved.model.getBasePath());
-        Map<String, String> inputAttributes = getInputAttributes(resolved);
+        Map<String, String> inputAttributes = getInputAttributes(context, resolved);
         return new CopyStageInfo.Operation(
                 MapReduceUtil.quoteOutputName(reference.getName()),
                 new SourceInfo(
@@ -488,14 +501,29 @@ public class DirectFileIoPortProcessor
                 Collections.<String, String>emptyMap());
     }
 
-    private Map<String, String> getInputAttributes(ResolvedInput resolved) {
+    private Map<String, String> getInputAttributes(Context context, ResolvedInput resolved) {
         Map<String, String> results = new LinkedHashMap<>();
         results.put(DirectDataSourceConstants.KEY_DATA_CLASS, resolved.info.getDataModelClass().getBinaryName());
         results.put(DirectDataSourceConstants.KEY_FORMAT_CLASS, resolved.model.getFormatClass().getBinaryName());
         results.put(DirectDataSourceConstants.KEY_BASE_PATH, resolved.model.getBasePath());
         results.put(DirectDataSourceConstants.KEY_RESOURCE_PATH, resolved.model.getResourcePattern());
+        ClassDescription filter = resolved.model.getFilterClass();
+        if (filter != null) {
+            if (isFilterEnabled(context)) {
+                results.put(DirectDataSourceConstants.KEY_FILTER_CLASS, filter.getBinaryName());
+            } else {
+                LOG.info(MessageFormat.format(
+                        "Direct I/O input filter is disabled in current setting: {0} ({1})",
+                        resolved.info.getDescriptionClass().getClassName(),
+                        filter.getClassName()));
+            }
+        }
         results.put(DirectDataSourceConstants.KEY_OPTIONAL, String.valueOf(resolved.model.isOptional()));
         return results;
+    }
+
+    private boolean isFilterEnabled(Context context) {
+        return context.getOptions().get(OPTION_FILTER_ENABLED, DEFAULT_FILTER_ENABLED);
     }
 
     private OutputStageInfo.Operation processOutput(Context context, ExternalOutputReference reference) {
