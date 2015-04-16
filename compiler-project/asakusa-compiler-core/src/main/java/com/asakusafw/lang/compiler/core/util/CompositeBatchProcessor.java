@@ -16,7 +16,6 @@
 package com.asakusafw.lang.compiler.core.util;
 
 import java.io.IOException;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -29,7 +28,7 @@ import com.asakusafw.lang.compiler.common.DiagnosticException;
 /**
  * Composition of {@link BatchProcessor}s.
  */
-public class CompositeBatchProcessor implements BatchProcessor, CompositeElement<BatchProcessor> {
+public class CompositeBatchProcessor extends AbstractCompositeElement<BatchProcessor> implements BatchProcessor {
 
     private final List<BatchProcessor> elements;
 
@@ -73,15 +72,5 @@ public class CompositeBatchProcessor implements BatchProcessor, CompositeElement
         if (error) {
             throw new DiagnosticException(diagnostics);
         }
-    }
-
-    @Override
-    public String toString() {
-        if (elements.isEmpty()) {
-            return "NULL"; //$NON-NLS-1$
-        }
-        return MessageFormat.format(
-                "Composite{0}", //$NON-NLS-1$
-                elements);
     }
 }

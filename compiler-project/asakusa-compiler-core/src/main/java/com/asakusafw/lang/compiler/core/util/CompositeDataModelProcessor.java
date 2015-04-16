@@ -29,7 +29,8 @@ import com.asakusafw.lang.compiler.model.description.TypeDescription;
 /**
  * Composition of {@link DataModelProcessor}s.
  */
-public class CompositeDataModelProcessor implements DataModelProcessor, CompositeElement<DataModelProcessor> {
+public class CompositeDataModelProcessor extends AbstractCompositeElement<DataModelProcessor>
+        implements DataModelProcessor {
 
     private final List<DataModelProcessor> elements;
 
@@ -81,15 +82,5 @@ public class CompositeDataModelProcessor implements DataModelProcessor, Composit
                     type));
         }
         return element.process(context, type);
-    }
-
-    @Override
-    public String toString() {
-        if (elements.isEmpty()) {
-            return "NULL"; //$NON-NLS-1$
-        }
-        return MessageFormat.format(
-                "Composite{0}", //$NON-NLS-1$
-                elements);
     }
 }

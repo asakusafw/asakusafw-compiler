@@ -362,11 +362,15 @@ public final class BatchCompilerCli {
         LOG.debug("  embedded: {}", context.getProject().getEmbeddedContents()); //$NON-NLS-1$
         LOG.debug("  attached: {}", context.getProject().getAttachedLibraries()); //$NON-NLS-1$
         LOG.debug("tools info:"); //$NON-NLS-1$
-        LOG.debug("   data model: {}", context.getTools().getDataModelProcessor()); //$NON-NLS-1$
-        LOG.debug("     external: {}", context.getTools().getExternalPortProcessor()); //$NON-NLS-1$
-        LOG.debug("        batch: {}", context.getTools().getBatchProcessor()); //$NON-NLS-1$
-        LOG.debug("      jobflow: {}", context.getTools().getJobflowProcessor()); //$NON-NLS-1$
-        LOG.debug("  participant: {}", context.getTools().getParticipant()); //$NON-NLS-1$
+        LOG.debug("   data model: {}", info(context.getTools().getDataModelProcessor())); //$NON-NLS-1$
+        LOG.debug("     external: {}", info(context.getTools().getExternalPortProcessor())); //$NON-NLS-1$
+        LOG.debug("        batch: {}", info(context.getTools().getBatchProcessor())); //$NON-NLS-1$
+        LOG.debug("      jobflow: {}", info(context.getTools().getJobflowProcessor())); //$NON-NLS-1$
+        LOG.debug("  participant: {}", info(context.getTools().getParticipant())); //$NON-NLS-1$
+    }
+
+    private static Object info(Object object) {
+        return DiagnosticUtil.getObjectInfo(object);
     }
 
     private static CompilerOptions loadOptions(Configuration configuration) {

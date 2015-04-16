@@ -15,17 +15,29 @@
  */
 package com.asakusafw.lang.compiler.core.util;
 
-import java.util.Collection;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 
 /**
- * An abstract super interface of composition objects.
+ * An abstract implementation of {@link CompositeElement}.
  * @param <E> the element type
  */
-public interface CompositeElement<E> extends Iterable<E> {
+public abstract class AbstractCompositeElement<E> implements CompositeElement<E> {
 
-    /**
-     * Returns the elements in this composition object.
-     * @return the elements
-     */
-    Collection<? extends E> getElements();
+    @Override
+    public Iterator<E> iterator() {
+        return Collections.unmodifiableList(new ArrayList<>(getElements())).iterator();
+    }
+
+    @Override
+    public String toString() {
+        if (getElements().isEmpty()) {
+            return "NULL"; //$NON-NLS-1$
+        }
+        return MessageFormat.format(
+                "Composite{0}", //$NON-NLS-1$
+                getElements());
+    }
 }

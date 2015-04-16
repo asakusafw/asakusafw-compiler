@@ -16,7 +16,6 @@
 package com.asakusafw.lang.compiler.core.util;
 
 import java.io.IOException;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -29,7 +28,8 @@ import com.asakusafw.lang.compiler.model.graph.Jobflow;
 /**
  * Composition of {@link JobflowProcessor}s.
  */
-public class CompositeJobflowProcessor implements JobflowProcessor, CompositeElement<JobflowProcessor> {
+public class CompositeJobflowProcessor extends AbstractCompositeElement<JobflowProcessor>
+        implements JobflowProcessor {
 
     private final List<JobflowProcessor> elements;
 
@@ -73,15 +73,5 @@ public class CompositeJobflowProcessor implements JobflowProcessor, CompositeEle
         if (error) {
             throw new DiagnosticException(diagnostics);
         }
-    }
-
-    @Override
-    public String toString() {
-        if (elements.isEmpty()) {
-            return "NULL"; //$NON-NLS-1$
-        }
-        return MessageFormat.format(
-                "Composite{0}", //$NON-NLS-1$
-                elements);
     }
 }

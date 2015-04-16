@@ -15,10 +15,16 @@
  */
 package com.asakusafw.lang.compiler.core.util;
 
+import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.Matchers.*;
+
+import java.util.Arrays;
+
 import org.junit.Test;
 
 import com.asakusafw.lang.compiler.common.BasicDiagnostic;
 import com.asakusafw.lang.compiler.common.Diagnostic.Level;
+import com.asakusafw.runtime.core.BatchRuntime;
 
 /**
  * Test for {@link DiagnosticUtil}.
@@ -26,20 +32,56 @@ import com.asakusafw.lang.compiler.common.Diagnostic.Level;
 public class DiagnosticUtilTest {
 
     /**
-     * simple case.
+     * artifact info.
      */
     @Test
-    public void simple() {
+    public void artifact_info() {
+        String info = DiagnosticUtil.getArtifactInfo(BatchRuntime.class);
+        assertThat(info, is(notNullValue()));
+    }
+
+    /**
+     * object info.
+     */
+    @Test
+    public void object_info_immediate() {
+        String info = DiagnosticUtil.getObjectInfo("hello");
+        assertThat(info, is(notNullValue()));
+    }
+
+    /**
+     * object info.
+     */
+    @Test
+    public void object_info_list() {
+        String info = DiagnosticUtil.getObjectInfo(Arrays.asList("a", "b", "c"));
+        assertThat(info, is(notNullValue()));
+    }
+
+    /**
+     * object info.
+     */
+    @Test
+    public void object_info_array() {
+        String info = DiagnosticUtil.getObjectInfo(new Object[] { "a", "b", "c" });
+        assertThat(info, is(notNullValue()));
+    }
+
+    /**
+     * log - simple case.
+     */
+    @Test
+    public void log() {
         DiagnosticUtil.log(new BasicDiagnostic(Level.INFO, "info"));
         DiagnosticUtil.log(new BasicDiagnostic(Level.WARN, "warn"));
         DiagnosticUtil.log(new BasicDiagnostic(Level.ERROR, "error"));
     }
 
     /**
-     * w/ causal exceptions.
+     * log - w/ causal exceptions.
      */
     @Test
-    public void w_causes() {
+    public void log_w_causes() {
         DiagnosticUtil.log(new BasicDiagnostic(Level.INFO, "info", new Exception()));
         DiagnosticUtil.log(new BasicDiagnostic(Level.WARN, "warn", new Exception()));
         DiagnosticUtil.log(new BasicDiagnostic(Level.ERROR, "error", new Exception()));

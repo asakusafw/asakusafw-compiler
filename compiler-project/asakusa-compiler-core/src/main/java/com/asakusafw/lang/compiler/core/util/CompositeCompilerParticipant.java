@@ -15,7 +15,6 @@
  */
 package com.asakusafw.lang.compiler.core.util;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -33,7 +32,8 @@ import com.asakusafw.lang.compiler.model.info.BatchInfo;
 /**
  * Composition of {@link CompilerParticipant}s.
  */
-public class CompositeCompilerParticipant implements CompilerParticipant, CompositeElement<CompilerParticipant> {
+public class CompositeCompilerParticipant extends AbstractCompositeElement<CompilerParticipant>
+        implements CompilerParticipant {
 
     private final List<CompilerParticipant> elements;
 
@@ -132,15 +132,5 @@ public class CompositeCompilerParticipant implements CompilerParticipant, Compos
         if (error) {
             throw new DiagnosticException(diagnostics);
         }
-    }
-
-    @Override
-    public String toString() {
-        if (elements.isEmpty()) {
-            return "NULL"; //$NON-NLS-1$
-        }
-        return MessageFormat.format(
-                "Composite{0}", //$NON-NLS-1$
-                elements);
     }
 }

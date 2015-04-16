@@ -36,7 +36,8 @@ import com.asakusafw.lang.compiler.model.info.ExternalPortInfo;
 /**
  * Composition of {@link ExternalPortProcessor}s.
  */
-public class CompositeExternalPortProcessor implements ExternalPortProcessor, CompositeElement<ExternalPortProcessor> {
+public class CompositeExternalPortProcessor extends AbstractCompositeElement<ExternalPortProcessor>
+        implements ExternalPortProcessor {
 
     private final List<ExternalPortProcessor> elements;
 
@@ -180,16 +181,6 @@ public class CompositeExternalPortProcessor implements ExternalPortProcessor, Co
                 element.process(context, pair.inputs, pair.outputs);
             }
         }
-    }
-
-    @Override
-    public String toString() {
-        if (elements.isEmpty()) {
-            return "NULL"; //$NON-NLS-1$
-        }
-        return MessageFormat.format(
-                "Composite{0}", //$NON-NLS-1$
-                elements);
     }
 
     private static final class InfoPair {

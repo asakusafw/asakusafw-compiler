@@ -16,17 +16,12 @@
 package com.asakusafw.lang.compiler.core.participant;
 
 import java.io.Closeable;
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -36,13 +31,13 @@ import org.slf4j.LoggerFactory;
 
 import com.asakusafw.lang.compiler.api.reference.BatchReference;
 import com.asakusafw.lang.compiler.common.Location;
+import com.asakusafw.lang.compiler.core.BatchCompiler;
 import com.asakusafw.lang.compiler.core.BatchCompiler.Context;
 import com.asakusafw.lang.compiler.core.ToolRepository;
 import com.asakusafw.lang.compiler.core.basic.AbstractCompilerParticipant;
-import com.asakusafw.lang.compiler.core.util.CompositeElement;
+import com.asakusafw.lang.compiler.core.util.DiagnosticUtil;
 import com.asakusafw.lang.compiler.model.graph.Batch;
-import com.asakusafw.lang.compiler.packaging.ResourceUtil;
-import com.asakusafw.runtime.core.context.RuntimeContext;
+import com.asakusafw.runtime.core.BatchRuntime;
 
 /**
  * Logs building environment.
@@ -91,52 +86,21 @@ public class BuildLogParticipant extends AbstractCompilerParticipant {
 
         // about compiler
         editor.put("compiler.buildId", context.getOptions().getBuildId()); //$NON-NLS-1$
-        editor.put("compiler.runtimeVersion", RuntimeContext.getRuntimeVersion()); //$NON-NLS-1$
+        editor.put("compiler.runtimeVersion", BatchRuntime.getLabel()); //$NON-NLS-1$
+        editor.put("compiler.runtimeArtifact", DiagnosticUtil.getArtifactInfo(BatchRuntime.class)); //$NON-NLS-1$
+        editor.put("compiler.compilerArtifact", DiagnosticUtil.getArtifactInfo(BatchCompiler.class)); //$NON-NLS-1$
         editor.putAll("compiler.option.", context.getOptions().getProperties()); //$NON-NLS-1$
 
         ToolRepository tools = context.getTools();
-        editor.put("compiler.dataModelProcessor", inspect(tools.getDataModelProcessor())); //$NON-NLS-1$
-        editor.put("compiler.externalPortProcessor", inspect(tools.getExternalPortProcessor())); //$NON-NLS-1$
-        editor.put("compiler.jobflowProcessor", inspect(tools.getJobflowProcessor())); //$NON-NLS-1$
-        editor.put("compiler.batchProcessor", inspect(tools.getBatchProcessor())); //$NON-NLS-1$
-        editor.put("compiler.participant", inspect(tools.getParticipant())); //$NON-NLS-1$
+        editor.put("compiler.dataModelProcessor", info(tools.getDataModelProcessor())); //$NON-NLS-1$
+        editor.put("compiler.externalPortProcessor", info(tools.getExternalPortProcessor())); //$NON-NLS-1$
+        editor.put("compiler.jobflowProcessor", info(tools.getJobflowProcessor())); //$NON-NLS-1$
+        editor.put("compiler.batchProcessor", info(tools.getBatchProcessor())); //$NON-NLS-1$
+        editor.put("compiler.participant", info(tools.getParticipant())); //$NON-NLS-1$
     }
 
-    private String inspect(Object element) {
-        if (element == null) {
-            return "N/A"; //$NON-NLS-1$
-        }
-        if (element instanceof CompositeElement<?>) {
-            Collection<?> children = ((CompositeElement<?>) element).getElements();
-            if (children.isEmpty()) {
-                return "N/A"; //$NON-NLS-1$
-            }
-            List<String> results = new ArrayList<>();
-            for (Object o : children) {
-                results.add(inspect(o));
-            }
-            return results.toString();
-        }
-        String info = inspectInfo(element);
-        File library = ResourceUtil.findLibraryByClass(element.getClass());
-        if (library != null && library.isFile()) {
-            return String.format("%s:%s", info, library.getName()); //$NON-NLS-1$
-        }
-        return info;
-    }
-
-    private String inspectInfo(Object element) {
-        Class<?> aClass = element.getClass();
-        try {
-            // use toString() only if the target element has explicit one
-            Method method = aClass.getMethod("toString");
-            if (method.getDeclaringClass() != Object.class) {
-                return element.toString();
-            }
-        } catch (NoSuchMethodException | SecurityException e) {
-            LOG.debug("{} may not have explicit toString() method", aClass.getName());
-        }
-        return aClass.getSimpleName();
+    private String info(Object object) {
+        return DiagnosticUtil.getObjectInfo(object);
     }
 
     private SortedMap<String, String> filter(Map<?, ?> map, String prefix) {
