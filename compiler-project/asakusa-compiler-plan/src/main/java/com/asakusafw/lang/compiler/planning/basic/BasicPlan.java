@@ -15,6 +15,7 @@
  */
 package com.asakusafw.lang.compiler.planning.basic;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -23,6 +24,9 @@ import java.util.List;
 import java.util.Set;
 
 import com.asakusafw.lang.compiler.common.BasicAttributeContainer;
+import com.asakusafw.lang.compiler.common.BasicDiagnostic;
+import com.asakusafw.lang.compiler.common.Diagnostic;
+import com.asakusafw.lang.compiler.common.DiagnosticException;
 import com.asakusafw.lang.compiler.model.graph.MarkerOperator;
 import com.asakusafw.lang.compiler.planning.Plan;
 import com.asakusafw.lang.compiler.planning.PlanMarker;
@@ -132,6 +136,16 @@ public class BasicPlan extends BasicAttributeContainer implements Plan {
                 }
             }
         }
+        Set<Set<BasicSubPlan>> circuits = Graphs.findCircuit(results);
+        if (circuits.isEmpty() == false) {
+            List<Diagnostic> diagnostics = new ArrayList<>();
+            for (Set<BasicSubPlan> loop : circuits) {
+                diagnostics.add(new BasicDiagnostic(Diagnostic.Level.ERROR, MessageFormat.format(
+                        "plan must by acyclic: {0}",
+                        loop)));
+            }
+            throw new DiagnosticException(diagnostics);
+        }
         return results;
     }
 
@@ -153,8 +167,7 @@ public class BasicPlan extends BasicAttributeContainer implements Plan {
                 }
             }
             if (changed == false) {
-                // FIXME which case can occur it?
-                return new ArrayList<>(elements);
+                throw new AssertionError("internal error: not acyclic plan"); //$NON-NLS-1$
             }
         }
         assert elements.size() == results.size();
