@@ -149,11 +149,12 @@ public class BasicPlan extends BasicAttributeContainer implements Plan {
                     graph.removeNode(next);
                     results.add(next);
                     changed = true;
-                    continue;
+                    break;
                 }
             }
             if (changed == false) {
-                throw new IllegalStateException();
+                // FIXME which case can occur it?
+                return new ArrayList<>(elements);
             }
         }
         assert elements.size() == results.size();
