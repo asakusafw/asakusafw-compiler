@@ -36,6 +36,8 @@ import com.asakusafw.utils.graph.Graphs;
  */
 public class BasicPlan extends BasicAttributeContainer implements Plan {
 
+    private static final int MAX_STABLE_SORT = 1000;
+
     private final Set<BasicSubPlan> elements = new LinkedHashSet<>();
 
     @Override
@@ -94,6 +96,14 @@ public class BasicPlan extends BasicAttributeContainer implements Plan {
             port.disconnectAll();
         }
         elements.remove(sub);
+    }
+
+    /**
+     * Sorts the sub-plans by their topological structure.
+     */
+    public void sort() {
+        boolean stable = elements.size() <= MAX_STABLE_SORT;
+        sort(stable);
     }
 
     /**

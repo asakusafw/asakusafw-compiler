@@ -87,6 +87,17 @@ public final class PlanAssembler {
         return this;
     }
 
+    /**
+     * Sorts the optimized result sub-plans.
+     * @param enable {@code true} to enable sort, or {@code false} to disable it
+     * @return this
+     * @see com.asakusafw.lang.compiler.planning.basic.BasicPlanOptimizer.Option#SORT_RESULT
+     */
+    public PlanAssembler withSortResult(boolean enable) {
+        setOption(BasicPlanOptimizer.Option.SORT_RESULT, enable);
+        return this;
+    }
+
     private void setOption(BasicPlanOptimizer.Option option, boolean enable) {
         if (enable) {
             options.add(option);

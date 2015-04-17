@@ -42,8 +42,6 @@ public final class PlanBuilder {
 
     static final Logger LOG = LoggerFactory.getLogger(PlanBuilder.class);
 
-    private static final int MAX_STABLE_SORT = 1000;
-
     private final BasicPlan plan = new BasicPlan();
 
     private final Set<Operator> sourceOperators;
@@ -299,8 +297,7 @@ public final class PlanBuilder {
     public PlanDetail build() {
         connect();
         if (sort) {
-            boolean stable = plan.getElements().size() <= MAX_STABLE_SORT;
-            plan.sort(stable);
+            plan.sort();
         }
         PlanDetail detail = new PlanDetail(plan, copyToSource);
         return detail;

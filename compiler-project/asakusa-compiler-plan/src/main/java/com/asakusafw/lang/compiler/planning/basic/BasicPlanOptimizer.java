@@ -47,6 +47,9 @@ public class BasicPlanOptimizer {
         do {
             changed = doOptimize(editor);
         } while (changed);
+        if (options.contains(Option.SORT_RESULT)) {
+            plan.sort();
+        }
     }
 
     private boolean doOptimize(BasicPlanEditor editor) {
@@ -134,5 +137,10 @@ public class BasicPlanOptimizer {
          * Push-down {@code union} operations.
          */
         UNION_PUSH_DOWN,
+
+        /**
+         * Sorts sub-plans for optimized plan.
+         */
+        SORT_RESULT,
     }
 }
