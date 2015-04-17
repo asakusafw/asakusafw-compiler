@@ -44,7 +44,7 @@ public class MockJobflowProcessorContext extends AbstractJobflowProcessorContext
      * The actual path will be follow its {@link ExternalInput#getName() name} after this prefix,
      * and it is relative from {@link CompilerOptions#getRuntimeWorkingDirectory()}.
      */
-    public static final String EXTERNAL_INPUT_BASE = "extenal/input/"; //$NON-NLS-1$
+    public static final String EXTERNAL_INPUT_BASE = "external/input/"; //$NON-NLS-1$
 
     private static final String DEFAULT_BATCH_ID = "mockbatch"; //$NON-NLS-1$
 
