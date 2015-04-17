@@ -64,6 +64,8 @@ import com.asakusafw.lang.compiler.core.util.DiagnosticUtil;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.description.Descriptions;
 import com.asakusafw.lang.compiler.model.graph.Batch;
+import com.asakusafw.lang.compiler.model.graph.BatchElement;
+import com.asakusafw.lang.compiler.model.info.BatchInfo;
 import com.asakusafw.lang.compiler.packaging.FileContainer;
 import com.asakusafw.lang.compiler.packaging.FileContainerRepository;
 import com.asakusafw.lang.compiler.packaging.ResourceUtil;
@@ -235,6 +237,7 @@ public final class BatchCompilerCli {
         results.runtimeWorkingDirectory.set(parse(cmd, opts.runtimeWorkingDirectory));
         results.properties.putAll(parseProperties(cmd, opts.properties));
         results.failOnError.set(cmd.hasOption(opts.failOnError.getLongOpt()));
+        results.batchIdPrefix.set(parse(cmd, opts.batchIdPrefix));
         return results;
     }
 
@@ -470,6 +473,9 @@ public final class BatchCompilerCli {
             }
             try {
                 Batch batch = analyzer.analyzeBatch(new ClassAnalyzer.Context(root), aClass);
+                if (configuration.batchIdPrefix.isEmpty() == false) {
+                    batch = transformBatchId(batch, configuration.batchIdPrefix.get());
+                }
                 if (sawBatch.containsKey(batch.getBatchId())) {
                     throw new DiagnosticException(Diagnostic.Level.ERROR, MessageFormat.format(
                             "conflict batch ID: {0} ({1} <=> {2})",
@@ -510,6 +516,33 @@ public final class BatchCompilerCli {
             return false;
         }
         return true;
+    }
+
+    private static Batch transformBatchId(Batch batch, String prefix) {
+        BatchInfo transformed = new BatchInfo.Basic(
+                prefix + batch.getBatchId(),
+                batch.getDescriptionClass(),
+                batch.getComment(),
+                batch.getParameters(),
+                batch.getAttributes());
+        Batch result = new Batch(transformed);
+        copyJobflows(batch, result);
+        return result;
+    }
+
+    private static void copyJobflows(Batch source, Batch target) {
+        for (BatchElement element : source.getElements()) {
+            target.addElement(element.getJobflow());
+        }
+        for (BatchElement element : source.getElements()) {
+            BatchElement targetElement = target.findElement(element.getJobflow());
+            assert targetElement != null;
+            for (BatchElement blocker : element.getBlockerElements()) {
+                BatchElement targetBlocker = target.findElement(blocker.getJobflow());
+                assert targetBlocker != null;
+                targetElement.addBlockerElement(targetBlocker);
+            }
+        }
     }
 
     private static Predicate<? super Class<?>> loadPredicate(
@@ -597,6 +630,10 @@ public final class BatchCompilerCli {
                 .withDescription("custom runtime working directory path")
                 .withArgumentDescription("path/to/working"); //$NON-NLS-1$
 
+        final Option batchIdPrefix = optional("batchIdPrefix", 1) //$NON-NLS-1$
+                .withDescription("custom batch ID prefix (for testing)")
+                .withArgumentDescription("id.prefix.");
+
         final Option properties = properties("P", "property") //$NON-NLS-1$ //$NON-NLS-2$
                 .withDescription("compiler property")
                 .withArgumentDescription("key=value"); //$NON-NLS-1$
@@ -672,6 +709,8 @@ public final class BatchCompilerCli {
         final ListHolder<Predicate<? super Class<?>>> sourcePredicate = new ListHolder<>();
 
         final ValueHolder<String> runtimeWorkingDirectory = new ValueHolder<>(DEFAULT_RUNTIME_WORKING_DIRECTORY);
+
+        final ValueHolder<String> batchIdPrefix = new ValueHolder<>();
 
         final Map<String, String> properties = new LinkedHashMap<>();
 

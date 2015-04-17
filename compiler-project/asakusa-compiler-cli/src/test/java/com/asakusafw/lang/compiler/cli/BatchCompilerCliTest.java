@@ -101,6 +101,7 @@ public class BatchCompilerCliTest {
         assertThat(conf.runtimeWorkingDirectory, contains(BatchCompilerCli.DEFAULT_RUNTIME_WORKING_DIRECTORY));
         assertThat(conf.properties.entrySet(), is(empty()));
         assertThat(conf.failOnError, contains(false));
+        assertThat(conf.batchIdPrefix, isEmpty());
     }
 
     /**
@@ -134,6 +135,7 @@ public class BatchCompilerCliTest {
                 "--participants", classes(DummyCompilerParticipant.class),
                 "--runtimeWorkingDirectory", "testRuntimeWorkingDirectory",
                 "--failOnError", true,
+                "--batchIdPrefix", "prefix.",
                 "-P", "a=b",
                 "-property", "c=d",
         }));
@@ -153,6 +155,7 @@ public class BatchCompilerCliTest {
         assertThat(conf.runtimeWorkingDirectory, contains("testRuntimeWorkingDirectory"));
         assertThat(conf.properties.entrySet(), hasSize(2));
         assertThat(conf.failOnError, contains(true));
+        assertThat(conf.batchIdPrefix, contains("prefix."));
 
         assertThat(conf.sourcePredicate.get(), hasSize(2));
         Predicate<? super Class<?>> p = Predicates.and(conf.sourcePredicate.get(0), conf.sourcePredicate.get(1));
@@ -194,6 +197,7 @@ public class BatchCompilerCliTest {
             @Override
             public void compile(Context context, Batch batch) {
                 count.incrementAndGet();
+                assertThat(batch.getBatchId(), is("DummyBatch"));
                 assertThat(batch.getDescriptionClass(), is(classOf(DummyBatch.class)));
                 assertThat(context.getOutput().getBasePath(), is(new File(output, batch.getBatchId())));
             }
@@ -229,6 +233,7 @@ public class BatchCompilerCliTest {
                 "--participants", classes(DummyCompilerParticipant.class),
                 "--runtimeWorkingDirectory", "testRuntimeWorkingDirectory",
                 "--failOnError", true,
+                "--batchIdPrefix", "prefix.",
                 "-P", "a=b",
                 "-property", "c=d",
         });
@@ -237,6 +242,7 @@ public class BatchCompilerCliTest {
             @Override
             public void compile(Context context, Batch batch) {
                 count.incrementAndGet();
+                assertThat(batch.getBatchId(), is("prefix.DummyBatch"));
                 assertThat(batch.getDescriptionClass(), is(classOf(DummyBatch.class)));
                 assertThat(context.getOutput().getBasePath(), is(new File(output, batch.getBatchId())));
 
