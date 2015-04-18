@@ -17,6 +17,8 @@ package com.asakusafw.lang.compiler.model.graph;
 
 import java.text.MessageFormat;
 
+import com.asakusafw.lang.compiler.model.description.ClassDescription;
+
 /**
  * Represents a core operator.
  */
@@ -88,15 +90,29 @@ public final class CoreOperator extends Operator {
         RESTRUCTURE("Restructure"), //$NON-NLS-1$
         ;
 
-        private final String symbol;
+        private static final String PREFIX_ANNOTATION_TYPE = "com.asakusafw.vocabulary.operator."; //$NON-NLS-1$
 
-        private CoreOperatorKind(String symbol) {
-            this.symbol = symbol;
+        private final ClassDescription annotationType;
+
+        private CoreOperatorKind(String simpleName) {
+            this(new ClassDescription(PREFIX_ANNOTATION_TYPE + simpleName));
+        }
+
+        private CoreOperatorKind(ClassDescription annotationType) {
+            this.annotationType = annotationType;
+        }
+
+        /**
+         * Returns the (pseudo) annotation type for this.
+         * @return the annotation type
+         */
+        public ClassDescription getAnnotationType() {
+            return annotationType;
         }
 
         @Override
         public String toString() {
-            return symbol;
+            return annotationType.getSimpleName();
         }
     }
 

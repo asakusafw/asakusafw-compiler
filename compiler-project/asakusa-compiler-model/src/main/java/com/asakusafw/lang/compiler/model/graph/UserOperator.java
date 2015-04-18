@@ -93,7 +93,7 @@ public final class UserOperator extends Operator {
     @Override
     public String toString() {
         return MessageFormat.format(
-                "UserOperator({1}#{2}@{0})", //$NON-NLS-1$
+                "UserOperator({2}:{1}@{0})", //$NON-NLS-1$
                 method.getDeclaringClass().getClassName(),
                 method.getName(),
                 annotation.getDeclaringClass().getSimpleName());

@@ -18,6 +18,7 @@ package com.asakusafw.lang.compiler.model.graph;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -94,12 +95,29 @@ public class OperatorGraph {
      * Returns operators in this graph.
      * If connections between operators are changed, clients may
      * {@link #rebuild() rebuild this graph} as well before invokes this method.
-     * @return this
+     * @return the thin copy of operators in this graph
      * @see #rebuild()
      * @see #getAllOperators(Collection)
      */
     public Collection<Operator> getOperators() {
-        return new ArrayList<>(operators);
+        return getOperators(true);
+    }
+
+    /**
+     * Returns operators in this graph.
+     * If connections between operators are changed, clients may
+     * {@link #rebuild() rebuild this graph} as well before invokes this method.
+     * @param copy {@code true} to create a thin copy of operators
+     * @return the operators in this graph
+     * @see #rebuild()
+     * @see #getAllOperators(Collection)
+     */
+    public Collection<Operator> getOperators(boolean copy) {
+        if (copy) {
+            return new ArrayList<>(operators);
+        } else {
+            return Collections.unmodifiableSet(operators);
+        }
     }
 
     /**

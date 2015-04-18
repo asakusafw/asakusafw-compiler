@@ -20,6 +20,7 @@
 		<module>asakusa-compiler-model</module>
 		<module>asakusa-compiler-api</module>
 		<module>asakusa-compiler-plan</module>
+		<module>asakusa-compiler-optimizer</module>
 		<module>asakusa-compiler-packaging</module>
 
 		<!-- DSL driver -->
