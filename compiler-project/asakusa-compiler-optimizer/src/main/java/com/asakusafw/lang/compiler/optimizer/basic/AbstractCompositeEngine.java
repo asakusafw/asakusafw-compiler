@@ -136,7 +136,7 @@ public abstract class AbstractCompositeEngine<T> {
      */
     public abstract static class AbstractBuilder<TSelf extends AbstractBuilder<TSelf, TElement>, TElement> {
 
-        static Map<ClassDescription, CoreOperatorKind> CORE_ANNOTATION_TYPES;
+        static final Map<ClassDescription, CoreOperatorKind> CORE_ANNOTATION_TYPES;
         static {
             Map<ClassDescription, CoreOperatorKind> map = new HashMap<>();
             for (CoreOperatorKind kind : CoreOperatorKind.values()) {

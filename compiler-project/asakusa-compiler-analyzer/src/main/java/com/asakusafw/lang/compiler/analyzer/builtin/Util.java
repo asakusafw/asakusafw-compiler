@@ -33,6 +33,10 @@ final class Util {
 
     static final Logger LOG = LoggerFactory.getLogger(Util.class);
 
+    private Util() {
+        return;
+    }
+
     public static <T extends Enum<T>> T element(AnnotationDescription annotation, String elementName, T defaultValue) {
         ValueDescription element = annotation.getElements().get(elementName);
         if (element == null) {
