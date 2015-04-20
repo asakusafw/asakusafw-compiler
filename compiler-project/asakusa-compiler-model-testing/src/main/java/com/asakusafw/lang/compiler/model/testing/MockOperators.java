@@ -154,6 +154,34 @@ public final class MockOperators {
                 ANNOTATION,
                 new MethodDescription(classOf(MockOperators.class), id),
                 classOf(MockOperators.class));
+        return operator(builder, id, inputNames, outputNames, constraints);
+    }
+
+    /**
+     * Adds {@link Operator}.
+     * @param builder the operator builder
+     * @param id the operator ID
+     * @param constraints operator constraints
+     * @return this
+     */
+    public MockOperators operator(
+            Operator.AbstractBuilder<?, ?> builder,
+            String id, OperatorConstraint... constraints) {
+        return operator(builder, id, "in", "out", constraints);
+    }
+
+    /**
+     * Adds {@link Operator}.
+     * @param builder the operator builder
+     * @param id the operator ID
+     * @param inputNames comma separated input names
+     * @param outputNames comma separated output names
+     * @param constraints operator constraints
+     * @return this
+     */
+    public MockOperators operator(
+            Operator.AbstractBuilder<?, ?> builder,
+            String id, String inputNames, String outputNames, OperatorConstraint... constraints) {
         for (String name : inputNames.split(",")) { //$NON-NLS-1$
             builder.input(name, commonDataType);
         }
