@@ -18,6 +18,7 @@ package com.asakusafw.lang.compiler.analyzer.builtin;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
@@ -30,6 +31,8 @@ import org.junit.rules.TemporaryFolder;
 import com.asakusafw.lang.compiler.api.CompilerOptions;
 import com.asakusafw.lang.compiler.api.JobflowProcessor;
 import com.asakusafw.lang.compiler.api.testing.MockJobflowProcessorContext;
+import com.asakusafw.lang.compiler.model.graph.CoreOperator;
+import com.asakusafw.lang.compiler.model.graph.CoreOperator.CoreOperatorKind;
 import com.asakusafw.lang.compiler.model.graph.Operator;
 import com.asakusafw.lang.compiler.model.graph.Operator.OperatorKind;
 import com.asakusafw.lang.compiler.model.graph.OperatorGraph;
@@ -105,6 +108,23 @@ public abstract class BuiltInOptimizerTestRoot {
     }
 
     /**
+     * Connects straight operators.
+     * @param line the operator line
+     * @return the created graph
+     */
+    public OperatorGraph connect(Operator... line) {
+        Operator last = line[0];
+        for (int i = 1; i < line.length; i++) {
+            Operator current = line[i];
+            assert last.getOutputs().size() == 1;
+            assert current.getInputs().size() == 1;
+            last.getOutputs().get(0).connect(current.getInputs().get(0));
+            last = current;
+        }
+        return new OperatorGraph(Arrays.asList(line));
+    }
+
+    /**
      * Returns a matcher whether the operator graph contains the target operator.
      * @param methodName the target method name
      * @return the matcher
@@ -129,6 +149,35 @@ public abstract class BuiltInOptimizerTestRoot {
             @Override
             public void describeTo(Description description) {
                 description.appendText("contains ").appendValue(methodName);
+            }
+        };
+    }
+
+    /**
+     * Returns a matcher whether the operator graph contains the target operator.
+     * @param kind the target operator kind
+     * @return the matcher
+     */
+    public Matcher<OperatorGraph> hasOperator(final CoreOperatorKind kind) {
+        return new BaseMatcher<OperatorGraph>() {
+            @Override
+            public boolean matches(Object item) {
+                OperatorGraph graph = (OperatorGraph) item;
+                for (Operator operator : graph.getOperators(false)) {
+                    if (operator.getOperatorKind() != OperatorKind.CORE) {
+                        continue;
+                    }
+                    CoreOperator core = (CoreOperator) operator;
+                    if (core.getCoreOperatorKind() == kind) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("contains ").appendValue(kind);
             }
         };
     }

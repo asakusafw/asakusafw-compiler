@@ -19,8 +19,6 @@ import static com.asakusafw.lang.compiler.model.description.Descriptions.*;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
-import java.util.Arrays;
-
 import org.junit.Test;
 
 import com.asakusafw.lang.compiler.model.description.ReifiableTypeDescription;
@@ -38,12 +36,13 @@ import com.asakusafw.vocabulary.operator.Logging;
  */
 public class LoggingOperatorRemoverTest extends BuiltInOptimizerTestRoot {
 
+    private final OperatorRewriter optimizer = new LoggingOperatorRemover();
+
     /**
      * test for default level.
      */
     @Test
     public void default_level() {
-        OperatorRewriter optimizer = new LoggingOperatorRemover();
         OperatorGraph graph = graph();
         apply(context(), optimizer, graph);
         assertThat(graph, not(hasOperator("debug")));
@@ -57,7 +56,6 @@ public class LoggingOperatorRemoverTest extends BuiltInOptimizerTestRoot {
      */
     @Test
     public void special_level() {
-        OperatorRewriter optimizer = new LoggingOperatorRemover();
         OperatorGraph graph = graph();
         apply(context(LoggingOperatorRemover.KEY_LOG_LEVEL, "warn"), optimizer, graph);
         assertThat(graph, not(hasOperator("debug")));
@@ -83,18 +81,6 @@ public class LoggingOperatorRemoverTest extends BuiltInOptimizerTestRoot {
                 .input("p", type)
                 .output("p", type)
                 .build();
-    }
-
-    private OperatorGraph connect(Operator... line) {
-        Operator last = line[0];
-        for (int i = 1; i < line.length; i++) {
-            Operator current = line[i];
-            assert last.getOutputs().size() == 1;
-            assert current.getInputs().size() == 1;
-            last.getOutputs().get(0).connect(current.getInputs().get(0));
-            last = current;
-        }
-        return new OperatorGraph(Arrays.asList(line));
     }
 
     @SuppressWarnings("javadoc")
