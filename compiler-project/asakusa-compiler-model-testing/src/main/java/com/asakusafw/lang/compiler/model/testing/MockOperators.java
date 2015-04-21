@@ -46,6 +46,8 @@ import com.asakusafw.lang.compiler.model.graph.OperatorGraph;
 import com.asakusafw.lang.compiler.model.graph.OperatorInput;
 import com.asakusafw.lang.compiler.model.graph.OperatorOutput;
 import com.asakusafw.lang.compiler.model.graph.UserOperator;
+import com.asakusafw.lang.compiler.model.info.ExternalInputInfo;
+import com.asakusafw.lang.compiler.model.info.ExternalInputInfo.DataSize;
 
 /**
  * Mock operator graph builder.
@@ -103,12 +105,35 @@ public final class MockOperators {
     }
 
     /**
+     * Returns the common data type.
+     * @return the common data type
+     */
+    public TypeDescription getCommonDataType() {
+        return commonDataType;
+    }
+
+    /**
      * Adds {@link ExternalInput}.
      * @param id the operator ID
      * @return this
      */
     public MockOperators input(String id) {
         operators.put(id, ExternalInput.newInstance(id, commonDataType));
+        return this;
+    }
+
+    /**
+     * Adds {@link ExternalInput}.
+     * @param id the operator ID
+     * @param dataSize the data size
+     * @return this
+     */
+    public MockOperators input(String id, DataSize dataSize) {
+        operators.put(id, ExternalInput.newInstance(id, new ExternalInputInfo.Basic(
+                new ClassDescription(id),
+                id,
+                (ClassDescription) commonDataType,
+                dataSize)));
         return this;
     }
 
@@ -189,6 +214,16 @@ public final class MockOperators {
             builder.output(name, commonDataType);
         }
         builder.constraint(constraints);
+        return bless(id, builder);
+    }
+
+    /**
+     * Adds {@link Operator}.
+     * @param id the operator ID
+     * @param builder the operator builder
+     * @return this
+     */
+    public MockOperators bless(String id, Operator.AbstractBuilder<?, ?> builder) {
         builder.argument(KEY_ARGUMENT, valueOf(id));
         return bless(id, builder.build());
     }
@@ -409,7 +444,16 @@ public final class MockOperators {
         return results;
     }
 
-    private String id0(Operator operator) {
+    /**
+     * Returns the ID of the target operator.
+     * @param operator the target operator
+     * @return the related ID, or {@code null} if it is not defined
+     */
+    public static String getId(Operator operator) {
+        return id0(operator);
+    }
+
+    private static String id0(Operator operator) {
         switch (operator.getOperatorKind()) {
         case INPUT:
             return ((ExternalInput) operator).getName();
@@ -419,8 +463,9 @@ public final class MockOperators {
             return ((FlowOperator) operator).getDescriptionClass().getBinaryName();
         case MARKER:
             return ((MarkerOperator) operator).getAttribute(String.class);
+        case CORE:
         case USER: {
-            OperatorArgument arg = ((UserOperator) operator).findArgument(KEY_ARGUMENT);
+            OperatorArgument arg = operator.findArgument(KEY_ARGUMENT);
             if (arg == null) {
                 return null;
             }
