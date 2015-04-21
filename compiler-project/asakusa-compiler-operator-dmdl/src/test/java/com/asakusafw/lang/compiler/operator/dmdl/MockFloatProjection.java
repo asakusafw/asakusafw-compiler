@@ -19,7 +19,6 @@ import com.asakusafw.runtime.value.FloatOption;
 
 /**
  * Mock {@link FloatOption} projection.
- * @since 0.9.0
  */
 public interface MockFloatProjection {
 

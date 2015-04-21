@@ -28,7 +28,6 @@ public interface Data {
 
     /**
      * Kind of data.
-     * @since 0.9.0
      */
     public enum Kind {
 

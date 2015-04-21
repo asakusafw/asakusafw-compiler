@@ -75,10 +75,12 @@ public class InternalExporterRetriever extends BaseExporterRetriever<InternalExp
         Path output = path.getParent();
         Path target;
         if (output == null) {
-            LOG.warn("skipped deleting output directory because it is a base directory: {}", path);
+            LOG.warn(MessageFormat.format(
+                    "skipped deleting output directory because it is a base directory: {0}",
+                    path));
             target = fs.makeQualified(path);
         } else {
-            LOG.warn("output directory will be deleted: {}", output);
+            LOG.debug("output directory will be deleted: {}", output); //$NON-NLS-1$
             target = fs.makeQualified(output);
         }
         LOG.debug("deleting output target: {}", target); //$NON-NLS-1$
