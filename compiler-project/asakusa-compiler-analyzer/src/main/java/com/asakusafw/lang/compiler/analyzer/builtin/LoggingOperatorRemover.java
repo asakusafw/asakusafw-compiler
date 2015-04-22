@@ -51,10 +51,7 @@ public class LoggingOperatorRemover implements OperatorRewriter {
         if (level == Logging.Level.DEBUG) {
             return;
         }
-        LOG.info(MessageFormat.format(
-                "applying logging operator remover: flow={0}, level={1}",
-                context.getFlowId(),
-                level));
+        LOG.debug("applying logging operator remover: flow={}, level={}", context.getFlowId(), level); //$NON-NLS-1$
         for (Operator operator : graph.getOperators(true)) {
             if (LoggingOperatorUtil.isSupported(operator) == false) {
                 continue;
@@ -69,10 +66,7 @@ public class LoggingOperatorRemover implements OperatorRewriter {
                 continue;
             }
             if (isEnabled(level, target) == false) {
-                LOG.info(MessageFormat.format(
-                        "suppressing logging operator: operator={0}, level={1}",
-                        operator,
-                        target));
+                LOG.debug("suppressing logging operator: operator={}, level={}", operator, target); //$NON-NLS-1$
                 Operators.remove(operator);
                 graph.remove(operator);
             }

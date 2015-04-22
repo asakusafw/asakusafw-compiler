@@ -52,14 +52,10 @@ public class CheckpointOperatorRemover implements OperatorRewriter {
         if (isEnabled(context.getOptions()) == false) {
             return;
         }
-        LOG.info(MessageFormat.format(
-                "applying checkpoint operator remover: flow={0}",
-                context.getFlowId()));
+        LOG.debug("applying checkpoint operator remover: flow={}", context.getFlowId()); //$NON-NLS-1$
         for (Operator operator : graph.getOperators(true)) {
             if (isTarget(operator)) {
-                LOG.info(MessageFormat.format(
-                        "removing checkpoint operator: operator={0}",
-                        operator));
+                LOG.debug("removing checkpoint operator: operator={}", operator); //$NON-NLS-1$
                 Operators.remove(operator);
                 graph.remove(operator);
             }

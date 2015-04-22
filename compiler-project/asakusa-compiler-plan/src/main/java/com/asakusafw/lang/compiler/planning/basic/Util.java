@@ -38,6 +38,10 @@ final class Util {
         return;
     }
 
+    public static Predicate<Operator> isMember(Set<? extends Operator> operators) {
+        return new IsMember(operators);
+    }
+
     public static Set<OperatorInput> computeBroadcastInputs(
             Collection<? extends Operator> inputs,
             Collection<? extends Operator> outputs) {

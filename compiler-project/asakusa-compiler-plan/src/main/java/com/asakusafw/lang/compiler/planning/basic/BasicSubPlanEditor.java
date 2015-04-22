@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.asakusafw.lang.compiler.common.Predicate;
 import com.asakusafw.lang.compiler.model.graph.Operator;
 import com.asakusafw.lang.compiler.model.graph.OperatorInput;
 import com.asakusafw.lang.compiler.model.graph.OperatorOutput;
@@ -180,12 +179,8 @@ final class BasicSubPlanEditor {
             }
         }
         if (generators.isEmpty() == false) {
-            Set<Operator> reachables = Operators.findNearestReachablePredecessors(generators, new Predicate<Operator>() {
-                @Override
-                public boolean apply(Operator argument) {
-                    return candidates.contains(argument);
-                }
-            });
+            Set<Operator> reachables =
+                    Operators.findNearestReachablePredecessors(generators, Util.isMember(candidates));
             candidates.removeAll(reachables);
         }
         return removeAll(candidates);
@@ -204,12 +199,7 @@ final class BasicSubPlanEditor {
             }
         }
         if (consumers.isEmpty() == false) {
-            Set<Operator> reachables = Operators.findNearestReachableSuccessors(consumers, new Predicate<Operator>() {
-                @Override
-                public boolean apply(Operator argument) {
-                    return candidates.contains(argument);
-                }
-            });
+            Set<Operator> reachables = Operators.findNearestReachableSuccessors(consumers, Util.isMember(candidates));
             candidates.removeAll(reachables);
         }
         return removeAll(candidates);

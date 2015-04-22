@@ -260,7 +260,7 @@ public abstract class AbstractJavaCompilerSupport implements JavaCompilerSupport
                     }
                     lineNumber++;
                 }
-                LOG.info("==", source.toUri(), diagnostic.getLineNumber()); //$NON-NLS-1$
+                LOG.info("=="); //$NON-NLS-1$
                 LOG.info("message: {}", diagnostic.getMessage(null)); //$NON-NLS-1$
             } catch (IOException e) {
                 LOG.warn(MessageFormat.format(
