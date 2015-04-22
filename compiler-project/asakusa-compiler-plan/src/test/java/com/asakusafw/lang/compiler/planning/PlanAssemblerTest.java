@@ -353,6 +353,56 @@ s0 --- o0 --- b0 --+ o1 --- d0
         assertThat(getDuplications(s1), hasSize(0));
     }
 
+    /**
+     * w/ custom equivalence.
+<pre>{@code
+in0 +-- c0 --- out0
+     \- c1 --- out1
+     \- c2 --- out2
+}</pre>
+     */
+    @Test
+    public void custom_equivalence() {
+        MockOperators mock = new MockOperators()
+            .input("in0")
+            .marker("c0", PlanMarker.CHECKPOINT).connect("in0", "c0")
+            .marker("c1", PlanMarker.CHECKPOINT).connect("in0", "c1")
+            .marker("c2", PlanMarker.CHECKPOINT).connect("in0", "c2")
+            .output("out0").connect("c0", "out0")
+            .output("out1").connect("c1", "out1")
+            .output("out2").connect("c2", "out2");
+        PlanDetail origin = prepare(mock);
+        assertThat(origin.getPlan().getElements(), hasSize(6));
+        mock = new MockOperators(origin.getSources()); // rebuild mock
+
+        PlanDetail detail = Planning.startAssemblePlan(origin)
+            .add(ownersOf(origin, mock.getAsSet("in0")))
+            .add(ownersOf(origin, mock.getAsSet("out0")))
+            .add(ownersOf(origin, mock.getAsSet("out1")))
+            .add(ownersOf(origin, mock.getAsSet("out2")))
+            .withRedundantOutputElimination(true)
+            .withDuplicateCheckpointElimination(true)
+            .withCustomEquivalence(new OperatorEquivalence() {
+                @Override
+                public Object extract(SubPlan owner, Operator operator) {
+                    if (owner.findOutput(operator) != null) {
+                        return PlanMarkers.get(operator);
+                    }
+                    return PlanAssembler.DEFAULT_EQUIVALENCE.extract(owner, operator);
+                }
+            })
+            .build();
+        assertThat(detail.getPlan().getElements(), hasSize(4));
+
+        SubPlan s0 = ownerOf(detail, mock.get("in0"));
+        SubPlan s1 = ownerOf(detail, mock.get("out0"));
+        SubPlan s2 = ownerOf(detail, mock.get("out1"));
+        SubPlan s3 = ownerOf(detail, mock.get("out2"));
+
+        assertThat(s0.getOutputs(), hasSize(1));
+        assertThat(succ(s0), containsInAnyOrder(s1, s2, s3));
+    }
+
     private PlanDetail prepare(MockOperators mock) {
         OperatorGraph g = mock.toGraph();
         Planning.normalize(g);

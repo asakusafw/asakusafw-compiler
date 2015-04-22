@@ -121,6 +121,10 @@ final class OperatorGroup {
         return operators.isEmpty();
     }
 
+    public boolean has(Attribute attribute) {
+        return attributes.contains(attribute);
+    }
+
     public void remove(Operator operator) {
         if (operators.remove(operator)) {
             owner.removeOperator(operator);
@@ -140,7 +144,7 @@ final class OperatorGroup {
         // a +-- $ --- b
         //    \- $ --- c
         // >>>
-        // a +-- $ +-- b
+        // a --- $ +-- b
         //    \- $  \- c
         if (hasSameInputs(base, target) == false) {
             return false;
@@ -522,13 +526,13 @@ final class OperatorGroup {
 
     public static final class GroupInfo {
 
-        final long id;
+        final Object id;
 
         final BitSet broadcastInputIndices;
 
         final Set<Attribute> attributes;
 
-        public GroupInfo(long id, BitSet broadcastInputIndices, Set<Attribute> attributes) {
+        public GroupInfo(Object id, BitSet broadcastInputIndices, Set<Attribute> attributes) {
             this.id = id;
             this.broadcastInputIndices = broadcastInputIndices;
             this.attributes = attributes;
@@ -538,9 +542,9 @@ final class OperatorGroup {
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + (int) (id ^ (id >>> 32));
-            result = prime * result + attributes.hashCode();
+            result = prime * result + ((id == null) ? 0 : id.hashCode());
             result = prime * result + broadcastInputIndices.hashCode();
+            result = prime * result + attributes.hashCode();
             return result;
         }
 
@@ -556,13 +560,17 @@ final class OperatorGroup {
                 return false;
             }
             GroupInfo other = (GroupInfo) obj;
-            if (id != other.id) {
-                return false;
-            }
-            if (!attributes.equals(other.attributes)) {
+            if (id == null) {
+                if (other.id != null) {
+                    return false;
+                }
+            } else if (!id.equals(other.id)) {
                 return false;
             }
             if (!broadcastInputIndices.equals(other.broadcastInputIndices)) {
+                return false;
+            }
+            if (!attributes.equals(other.attributes)) {
                 return false;
             }
             return true;
@@ -570,7 +578,7 @@ final class OperatorGroup {
 
         @Override
         public String toString() {
-            return String.format("OperatorGroup(%x)", id); //$NON-NLS-1$
+            return MessageFormat.format("Group({0})", id); //$NON-NLS-1$
         }
     }
 

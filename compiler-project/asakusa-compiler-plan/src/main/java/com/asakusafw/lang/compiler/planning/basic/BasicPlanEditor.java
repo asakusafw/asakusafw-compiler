@@ -21,6 +21,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.asakusafw.lang.compiler.planning.OperatorEquivalence;
 import com.asakusafw.lang.compiler.planning.Planning;
 import com.asakusafw.lang.compiler.planning.SubPlan;
 import com.asakusafw.utils.graph.Graph;
@@ -40,12 +41,13 @@ final class BasicPlanEditor {
     /**
      * Creates a new instance.
      * @param target the target plan
+     * @param equivalence tester for operator isomorphism
      */
-    public BasicPlanEditor(BasicPlan target) {
+    public BasicPlanEditor(BasicPlan target, OperatorEquivalence equivalence) {
         this.target = target;
         Map<SubPlan, BasicSubPlanEditor> editors = new HashMap<>();
         for (BasicSubPlan s : target.getElements()) {
-            editors.put(s, new BasicSubPlanEditor(s));
+            editors.put(s, new BasicSubPlanEditor(s, equivalence));
         }
         Graph<SubPlan> g = Planning.toDependencyGraph(target);
         for (SubPlan s : Graphs.sortPostOrder(g)) {

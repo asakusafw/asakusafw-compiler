@@ -15,7 +15,9 @@
  */
 package com.asakusafw.lang.compiler.planning.basic;
 
+import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -24,10 +26,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.asakusafw.lang.compiler.common.Predicate;
 import com.asakusafw.lang.compiler.model.graph.Operator;
 import com.asakusafw.lang.compiler.model.graph.OperatorInput;
+import com.asakusafw.lang.compiler.model.graph.OperatorOutput;
 import com.asakusafw.lang.compiler.model.graph.Operators;
+import com.asakusafw.lang.compiler.planning.OperatorEquivalence;
 import com.asakusafw.lang.compiler.planning.SubPlan;
+import com.asakusafw.lang.compiler.planning.basic.OperatorGroup.Attribute;
+import com.asakusafw.lang.compiler.planning.basic.OperatorGroup.GroupInfo;
 import com.asakusafw.utils.graph.Graph;
 import com.asakusafw.utils.graph.Graphs;
 
@@ -47,17 +54,18 @@ final class BasicSubPlanEditor {
     /**
      * Creates a new instance.
      * @param target the target sub-plan
+     * @param equivalence tester for operator isomorphism
      */
-    public BasicSubPlanEditor(BasicSubPlan target) {
+    public BasicSubPlanEditor(BasicSubPlan target, OperatorEquivalence equivalence) {
         this.target = target;
-        this.groupMap = computeGroupMap(target);
+        this.groupMap = computeGroupMap(target, equivalence);
         Graph<OperatorGroup> graph = computeOperatorGroups(target, groupMap);
         forward.addAll(Graphs.sortPostOrder(graph));
         backward.addAll(Graphs.sortPostOrder(Graphs.transpose(graph)));
     }
 
-    private static Map<Operator, OperatorGroup> computeGroupMap(BasicSubPlan sub) {
-        Map<OperatorGroup.GroupInfo, Set<Operator>> partitions = computeGroupPartitions(sub);
+    private static Map<Operator, OperatorGroup> computeGroupMap(BasicSubPlan sub, OperatorEquivalence equivalence) {
+        Map<OperatorGroup.GroupInfo, Set<Operator>> partitions = computeGroupPartitions(sub, equivalence);
         Map<Operator, OperatorGroup> results = new HashMap<>();
         for (Map.Entry<OperatorGroup.GroupInfo, Set<Operator>> entry : partitions.entrySet()) {
             Set<Operator> operators = entry.getValue();
@@ -70,24 +78,29 @@ final class BasicSubPlanEditor {
         return results;
     }
 
-    private static Map<OperatorGroup.GroupInfo, Set<Operator>> computeGroupPartitions(SubPlan sub) {
+    private static Map<GroupInfo, Set<Operator>> computeGroupPartitions(SubPlan sub, OperatorEquivalence equivalence) {
         Set<Operator> inputs = toOperators(sub.getInputs());
         Set<Operator> outputs = toOperators(sub.getOutputs());
         Set<OperatorInput> broadcastInputs = Util.computeBroadcastInputs(inputs, outputs);
-        Map<OperatorGroup.GroupInfo, Set<Operator>> partitions = new HashMap<>();
+        Map<OperatorGroup.GroupInfo, Set<Operator>> results = new HashMap<>();
         for (Operator operator : sub.getOperators()) {
-            long id = operator.getOriginalSerialNumber();
+            Object id = equivalence.extract(sub, operator);
             BitSet broadcastIndices = getBroadcastInputIndices(operator, broadcastInputs);
             Set<OperatorGroup.Attribute> attributes = OperatorGroup.getAttributes(sub, operator);
             OperatorGroup.GroupInfo info = new OperatorGroup.GroupInfo(id, broadcastIndices, attributes);
-            Set<Operator> partition = partitions.get(info);
-            if (partition == null) {
-                partition = new HashSet<>();
-                partitions.put(info, partition);
-            }
-            partition.add(operator);
+            add(results, info, operator);
         }
-        return partitions;
+        return results;
+    }
+
+    private static <K, V> void add(Map<K, Set<V>> map, K key, V value) {
+        Set<V> values = map.get(key);
+        if (values == null) {
+            values = new HashSet<>();
+            map.put(key, values);
+        }
+        assert values.contains(value) == false;
+        values.add(value);
     }
 
     private static BitSet getBroadcastInputIndices(Operator operator, Set<OperatorInput> broadcastInputs) {
@@ -147,8 +160,80 @@ final class BasicSubPlanEditor {
      */
     public boolean revalidate() {
         boolean changed = false;
+        changed |= removeRedundantInputs();
+        changed |= removeRedundantOutputs();
         changed |= removeRedundantOperators();
         changed |= removeEmptyGroups();
+        return changed;
+    }
+
+    private boolean removeRedundantInputs() {
+        final Set<Operator> candidates = collectOpenPorts(target.getInputs());
+        if (candidates.isEmpty()) {
+            return false;
+        }
+        List<OperatorInput> generators = new ArrayList<>();
+        for (Map.Entry<Operator, OperatorGroup> entry : groupMap.entrySet()) {
+            Operator operator = entry.getKey();
+            if (entry.getValue().has(Attribute.GENERATOR)) {
+                generators.addAll(operator.getInputs());
+            }
+        }
+        if (generators.isEmpty() == false) {
+            Set<Operator> reachables = Operators.findNearestReachablePredecessors(generators, new Predicate<Operator>() {
+                @Override
+                public boolean apply(Operator argument) {
+                    return candidates.contains(argument);
+                }
+            });
+            candidates.removeAll(reachables);
+        }
+        return removeAll(candidates);
+    }
+
+    private boolean removeRedundantOutputs() {
+        final Set<Operator> candidates = collectOpenPorts(target.getOutputs());
+        if (candidates.isEmpty()) {
+            return false;
+        }
+        List<OperatorOutput> consumers = new ArrayList<>();
+        for (Map.Entry<Operator, OperatorGroup> entry : groupMap.entrySet()) {
+            Operator operator = entry.getKey();
+            if (entry.getValue().has(Attribute.CONSUMER)) {
+                consumers.addAll(operator.getOutputs());
+            }
+        }
+        if (consumers.isEmpty() == false) {
+            Set<Operator> reachables = Operators.findNearestReachableSuccessors(consumers, new Predicate<Operator>() {
+                @Override
+                public boolean apply(Operator argument) {
+                    return candidates.contains(argument);
+                }
+            });
+            candidates.removeAll(reachables);
+        }
+        return removeAll(candidates);
+    }
+
+    private static Set<Operator> collectOpenPorts(Collection<? extends SubPlan.Port> ports) {
+        final Set<Operator> results = new HashSet<>();
+        for (SubPlan.Port port : ports) {
+            if (port.getOpposites().isEmpty()) {
+                results.add(port.getOperator());
+            }
+        }
+        return results;
+    }
+
+    private boolean removeAll(Collection<? extends Operator> operators) {
+        boolean changed = false;
+        for (Operator operator : operators) {
+            OperatorGroup group = groupMap.remove(operator);
+            if (group != null) {
+                group.remove(operator);
+                changed = true;
+            }
+        }
         return changed;
     }
 

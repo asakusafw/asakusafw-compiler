@@ -19,6 +19,8 @@ import java.util.Collection;
 import java.util.EnumSet;
 import java.util.Set;
 
+import com.asakusafw.lang.compiler.planning.OperatorEquivalence;
+
 /**
  * Optimizes {@link BasicPlan}s.
  */
@@ -26,12 +28,16 @@ public class BasicPlanOptimizer {
 
     private final Set<Option> options = EnumSet.noneOf(Option.class);
 
+    private final OperatorEquivalence equivalence;
+
     /**
      * Creates a new instance.
+     * @param equivalence tester for operator isomorphism
      * @param options the optimizer options
      */
-    public BasicPlanOptimizer(Collection<? extends Option> options) {
+    public BasicPlanOptimizer(OperatorEquivalence equivalence, Collection<? extends Option> options) {
         this.options.addAll(options);
+        this.equivalence = equivalence;
     }
 
     /**
@@ -42,7 +48,7 @@ public class BasicPlanOptimizer {
         if (options.isEmpty()) {
             return;
         }
-        BasicPlanEditor editor = new BasicPlanEditor(plan);
+        BasicPlanEditor editor = new BasicPlanEditor(plan, equivalence);
         boolean changed;
         do {
             changed = doOptimize(editor);

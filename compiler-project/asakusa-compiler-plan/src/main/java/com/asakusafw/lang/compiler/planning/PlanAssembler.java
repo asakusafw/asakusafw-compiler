@@ -31,9 +31,16 @@ import com.asakusafw.lang.compiler.planning.basic.SubPlanMerger;
  */
 public final class PlanAssembler {
 
+    /**
+     * The default implementation of {@link OperatorEquivalence}.
+     */
+    public static final OperatorEquivalence DEFAULT_EQUIVALENCE = OperatorEquivalence.SAME_ORIGIN;
+
     private final SubPlanMerger merger;
 
     private final Set<BasicPlanOptimizer.Option> options = EnumSet.noneOf(BasicPlanOptimizer.Option.class);
+
+    private OperatorEquivalence equivalence = DEFAULT_EQUIVALENCE;
 
     /**
      * Creates a new instance with a plan as the re-organize target.
@@ -41,6 +48,16 @@ public final class PlanAssembler {
      */
     public PlanAssembler(PlanDetail target) {
         this.merger = new SubPlanMerger(target);
+    }
+
+    /**
+     * Sets a custom tester for operator's isomorphism.
+     * @param newValue the tester for operator's isomorphism
+     * @return this
+     */
+    public PlanAssembler withCustomEquivalence(OperatorEquivalence newValue) {
+        this.equivalence = newValue;
+        return this;
     }
 
     /**
@@ -128,7 +145,7 @@ public final class PlanAssembler {
         PlanDetail merged = merger.build();
         Plan plan = merged.getPlan();
         assert plan instanceof BasicPlan;
-        BasicPlanOptimizer optimizer = new BasicPlanOptimizer(options);
+        BasicPlanOptimizer optimizer = new BasicPlanOptimizer(equivalence, options);
         optimizer.optimize((BasicPlan) plan);
         return restoreDetail(merged);
     }
