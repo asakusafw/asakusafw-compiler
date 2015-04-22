@@ -18,8 +18,13 @@ package com.asakusafw.lang.compiler.model.graph;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
 import org.junit.Test;
 
 import com.asakusafw.lang.compiler.model.PropertyName;
@@ -134,16 +139,59 @@ public class GroupsTest {
      */
     @Test
     public void equality() {
-        Group g0 = Groups.parse(Arrays.asList("g0", "g1"), Arrays.asList("+o0", "-o1"));
-        Group g1 = Groups.parse(Arrays.asList("g0", "g1"), Arrays.asList("+o0", "-o1"));
-        Group g2 = Groups.parse(Arrays.asList("g0", "g2"), Arrays.asList("+o0", "-o1"));
-        Group g3 = Groups.parse(Arrays.asList("g0", "g1"), Arrays.asList("-o0", "-o1"));
-        Group g4 = Groups.parse(Arrays.asList("g0", "g1"), Arrays.asList("+o0", "-o2"));
+        Group g0 = group("=g0", "=g1", "+o0", "-o1");
+        Group g1 = group("=g0", "=g1", "+o0", "-o1");
+        Group g2 = group("=g0", "=g2", "+o0", "-o1");
+        Group g3 = group("=g0", "=g1", "-o0", "-o1");
+        Group g4 = group("=g0", "=g1", "+o0", "-o2");
 
         assertThat(g1.toString(), g1, is(g0));
         assertThat(g1.toString(), g1.hashCode(), is(g0.hashCode()));
         assertThat(g2.toString(), g2, is(not(g0)));
         assertThat(g3.toString(), g3, is(not(g0)));
         assertThat(g4.toString(), g4, is(not(g0)));
+    }
+
+    /**
+     * test for subgroups.
+     */
+    @Test
+    public void subgroup() {
+        assertThat(group("=k"), is(subgroupOf("=k")));
+        assertThat(group("=k"), is(not(subgroupOf("=x"))));
+        assertThat(group("=k"), is(not(subgroupOf("=k", "=l"))));
+
+        assertThat(group("=k", "+a"), is(subgroupOf("=k")));
+        assertThat(group("=k", "+a"), is(subgroupOf("=k", "+a")));
+        assertThat(group("=k", "+a"), is(not(subgroupOf("=k", "+a", "+b"))));
+        assertThat(group("=k", "+a"), is(not(subgroupOf("=k", "-a"))));
+    }
+
+    private static Group group(String... expressions) {
+        List<String> grouping = new ArrayList<>();
+        List<String> ordering = new ArrayList<>();
+        for (String s : expressions) {
+            if (s.startsWith("=")) {
+                grouping.add(s.substring(1));
+            } else {
+                ordering.add(s);
+            }
+        }
+        return Groups.parse(grouping, ordering);
+    }
+
+    private static Matcher<Group> subgroupOf(String... expressions) {
+        final Group b = group(expressions);
+        return new BaseMatcher<Group>() {
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("subgroup of ").appendValue(b);
+            }
+            @Override
+            public boolean matches(Object item) {
+                Group a = (Group) item;
+                return Groups.isSubGroup(a, b);
+            }
+        };
     }
 }

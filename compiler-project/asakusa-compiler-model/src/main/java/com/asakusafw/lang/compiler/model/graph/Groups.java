@@ -58,6 +58,29 @@ public final class Groups {
     }
 
     /**
+     * Returns whether the first group is a sub-group of the second one.
+     * @param a the first group
+     * @param b the second group
+     * @return {@code true} if the first group is a sub-group of the second one, otherwise {@code false}
+     */
+    public static boolean isSubGroup(Group a, Group b) {
+        if (a.getGrouping().equals(b.getGrouping()) == false) {
+            return false;
+        }
+        List<Ordering> as = a.getOrdering();
+        List<Ordering> bs = b.getOrdering();
+        if (as.size() < bs.size()) {
+            return false;
+        }
+        for (int i = 0, n = bs.size(); i < n; i++) {
+            if (as.get(i).equals(bs.get(i)) == false) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * Parses string representation of a {@link Group}.
      * @param grouping the grouping property expressions
      * @return the related {@link Group} object
