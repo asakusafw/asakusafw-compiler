@@ -21,6 +21,8 @@ import static org.junit.Assert.*;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Map;
 
 import org.junit.Test;
@@ -102,6 +104,44 @@ public class JsonInspectionNodeRepositoryTest {
         node.withElement(new InspectionNode("c", "C"));
         node.withElement(new InspectionNode("d", "D"));
         test(node);
+    }
+
+    /**
+     * load from invalid input.
+     * @throws Exception must occur
+     */
+    @Test(expected = IOException.class)
+    public void load_invalid() throws Exception {
+        try (InputStream in = new ByteArrayInputStream(new byte[] { 0x00 })) {
+            new JsonInspectionNodeRepository().load(in);
+        }
+    }
+
+    /**
+     * load from invalid input.
+     * @throws Exception must occur
+     */
+    @Test(expected = IOException.class)
+    public void load_empty() throws Exception {
+        try (InputStream in = new ByteArrayInputStream(new byte[0])) {
+            new JsonInspectionNodeRepository().load(in);
+        }
+    }
+
+    /**
+     * store to erroneous output.
+     * @throws Exception must occur
+     */
+    @Test(expected = IOException.class)
+    public void store_error() throws Exception {
+        try (OutputStream out = new OutputStream() {
+            @Override
+            public void write(int b) throws IOException {
+                throw new IOException("testing");
+            }
+        }) {
+            new JsonInspectionNodeRepository().store(out, new InspectionNode("a", "A"));
+        }
     }
 
     private void test(InspectionNode node) {

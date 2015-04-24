@@ -26,6 +26,8 @@ import com.asakusafw.lang.compiler.inspection.InspectionNode;
 import com.asakusafw.lang.compiler.inspection.InspectionNodeRepository;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonParseException;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
@@ -45,7 +47,13 @@ public class JsonInspectionNodeRepository implements InspectionNodeRepository {
     @Override
     public InspectionNode load(InputStream input) throws IOException {
         try (JsonReader reader = new JsonReader(new InputStreamReader(input, ENCODING))) {
-            return gson.fromJson(reader, InspectionNode.class);
+            InspectionNode result = gson.fromJson(reader, InspectionNode.class);
+            if (result == null) {
+                throw new IOException("there are no valid JSON object");
+            }
+            return result;
+        } catch (JsonParseException e) {
+            throw new IOException("invalid JSON object", e);
         }
     }
 
@@ -53,6 +61,8 @@ public class JsonInspectionNodeRepository implements InspectionNodeRepository {
     public void store(OutputStream output, InspectionNode node) throws IOException {
         try (JsonWriter writer = new JsonWriter(new OutputStreamWriter(output, ENCODING))) {
             gson.toJson(node, InspectionNode.class, writer);
+        } catch (JsonIOException e) {
+            throw new IOException("failed to store as JSON object", e);
         }
     }
 }
