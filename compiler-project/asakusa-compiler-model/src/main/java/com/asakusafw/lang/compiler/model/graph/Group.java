@@ -16,6 +16,7 @@
 package com.asakusafw.lang.compiler.model.graph;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.asakusafw.lang.compiler.model.PropertyName;
@@ -89,10 +90,16 @@ public class Group {
 
     @Override
     public String toString() {
+        List<String> elements = new ArrayList<>();
+        for (PropertyName name : grouping) {
+            elements.add(String.format("=%s", name)); //$NON-NLS-1$
+        }
+        for (Ordering order : ordering) {
+            elements.add(order.toString());
+        }
         return MessageFormat.format(
-                "Group(grouping={0}, sort={1})", //$NON-NLS-1$
-                grouping,
-                ordering);
+                "Group{0}", //$NON-NLS-1$
+                elements);
     }
 
     /**

@@ -140,12 +140,12 @@ public class GraphStatistics {
     public String toString() {
         if (criticalPathLength == UNDEFINED) {
             return MessageFormat.format(
-                    "'{'#-vertex={0}, #-edge={1}'}'", //$NON-NLS-1$
+                    "'{'vertices={0}, edges={1}'}'", //$NON-NLS-1$
                     numberOfVertices,
                     numberOfEdges);
         } else {
             return MessageFormat.format(
-                    "'{'#-vertex={0}, #-edge={1}, critical={2}, average-width={3,number,#.#}'}'", //$NON-NLS-1$
+                    "'{'vertices={0}, edges={1}, critical={2}, average-width={3,number,#.#}'}'", //$NON-NLS-1$
                     numberOfVertices,
                     numberOfEdges,
                     criticalPathLength,

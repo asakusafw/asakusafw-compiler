@@ -95,7 +95,6 @@ public class PlanDriver {
             node.withInput(p);
             info.inputs.put(port, p);
             p.getProperties().putAll(extractAttributes(port));
-            p.getProperties().putAll(inheritAttributes(operator));
         }
         for (SubPlan.Output port : object.getOutputs()) {
             InspectionNode operator = info.elements.get(port.getOperator());
@@ -104,20 +103,11 @@ public class PlanDriver {
             node.withOutput(p);
             info.outputs.put(port, p);
             p.getProperties().putAll(extractAttributes(port));
-            p.getProperties().putAll(inheritAttributes(operator));
         }
         for (InspectionNode element : info.elements.values()) {
             node.withElement(element);
         }
         return info;
-    }
-
-    private Map<String, String> inheritAttributes(InspectionNode operator) {
-        Map<String, String> results = new LinkedHashMap<>();
-        for (Map.Entry<String, String> entry : operator.getProperties().entrySet()) {
-            results.put(String.format("operator.%s", entry.getKey()), entry.getValue()); //$NON-NLS-1$
-        }
-        return results;
     }
 
     static class SubPlanInfo {
