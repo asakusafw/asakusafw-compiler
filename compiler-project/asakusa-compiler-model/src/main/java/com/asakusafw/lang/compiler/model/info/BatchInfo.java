@@ -19,10 +19,10 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import com.asakusafw.lang.compiler.common.util.EnumUtil;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 
 /**
@@ -181,8 +181,7 @@ public interface BatchInfo extends DescriptionInfo {
             this.descriptionClass = descriptionClass;
             this.comment = comment;
             this.parameters = new ArrayList<>(parameters);
-            this.attributes = EnumSet.noneOf(Attribute.class);
-            this.attributes.addAll(attributes);
+            this.attributes = EnumUtil.freeze(attributes);
         }
 
         /**

@@ -16,7 +16,6 @@
 package com.asakusafw.lang.compiler.core.util;
 
 import java.text.MessageFormat;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 
@@ -28,7 +27,7 @@ public abstract class AbstractCompositeElement<E> implements CompositeElement<E>
 
     @Override
     public Iterator<E> iterator() {
-        return Collections.unmodifiableList(new ArrayList<>(getElements())).iterator();
+        return Collections.unmodifiableCollection(getElements()).iterator();
     }
 
     @Override

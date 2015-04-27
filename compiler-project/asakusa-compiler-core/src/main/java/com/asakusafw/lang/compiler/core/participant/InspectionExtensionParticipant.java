@@ -66,6 +66,7 @@ public class InspectionExtensionParticipant extends AbstractCompilerParticipant 
 
     @Override
     public void beforeBatch(BatchCompiler.Context context, Batch batch) {
+        LOG.debug("enabling {}", InspectionExtension.class.getName()); //$NON-NLS-1$
         setUp(context, context.getOutput());
     }
 

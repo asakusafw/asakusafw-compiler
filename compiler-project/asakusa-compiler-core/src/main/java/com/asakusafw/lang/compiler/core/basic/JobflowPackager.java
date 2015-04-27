@@ -96,7 +96,7 @@ public class JobflowPackager {
             ResourceContainer batchOutput,
             ResourceRepository jobflowOutput,
             Collection<? extends ResourceRepository> jobflowEmbedded) throws IOException {
-        LOG.debug("building jobflow package: {}->{}", flowId, batchOutput);
+        LOG.debug("building jobflow package: {}->{}", flowId, batchOutput); //$NON-NLS-1$
         ResourceRepository result = assemble(jobflowOutput, jobflowEmbedded);
         Location location = getLibraryLocation(flowId);
         try (ResourceSink sink = new ZipSink(new JarOutputStream(batchOutput.addResource(location)))) {

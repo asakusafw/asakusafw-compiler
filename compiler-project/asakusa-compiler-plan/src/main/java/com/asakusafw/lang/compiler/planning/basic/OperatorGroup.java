@@ -25,6 +25,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.asakusafw.lang.compiler.common.util.EnumUtil;
 import com.asakusafw.lang.compiler.model.graph.MarkerOperator;
 import com.asakusafw.lang.compiler.model.graph.Operator;
 import com.asakusafw.lang.compiler.model.graph.OperatorConstraint;
@@ -55,8 +56,7 @@ final class OperatorGroup {
         this.owner = owner;
         this.operators = new LinkedHashSet<>(operators);
         this.broadcastInputIndices = (BitSet) broadcastInputIndices.clone();
-        this.attributes = EnumSet.noneOf(Attribute.class);
-        this.attributes.addAll(attributes);
+        this.attributes = EnumUtil.freeze(attributes);
     }
 
     public static Set<Attribute> getAttributes(SubPlan owner, Operator operator) {

@@ -74,11 +74,9 @@ public class BasicDataModelProcessor implements DataModelProcessor {
     public DataModelReference process(Context context, TypeDescription type) {
         Class<?> aClass = resolve(context, type);
         if (aClass == null) {
-            throw new DiagnosticException(
-                    Diagnostic.Level.ERROR,
-                    MessageFormat.format(
-                            "unsupported data model: {0}",
-                            type));
+            throw new DiagnosticException(Diagnostic.Level.ERROR, MessageFormat.format(
+                    "unsupported data model: {0}",
+                    type));
         }
         Map<PropertyName, Method> map = extractPropertyMap(aClass);
         List<PropertyName> order = extractPropertyOrder(aClass, map);
@@ -131,12 +129,10 @@ public class BasicDataModelProcessor implements DataModelProcessor {
                 results.add(name);
                 saw.add(name);
             } else {
-                throw new DiagnosticException(
-                        Diagnostic.Level.ERROR,
-                        MessageFormat.format(
-                                "missing data model property: {0}#{1}",
-                                aClass.getName(),
-                                name.toName()));
+                throw new DiagnosticException(Diagnostic.Level.ERROR, MessageFormat.format(
+                        "missing data model property: {0}#{1}",
+                        aClass.getName(),
+                        name.toName()));
             }
         }
         for (PropertyName name : methods.keySet()) {

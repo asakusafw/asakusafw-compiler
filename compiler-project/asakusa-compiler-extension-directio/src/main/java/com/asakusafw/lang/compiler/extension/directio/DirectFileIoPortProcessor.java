@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +39,7 @@ import com.asakusafw.lang.compiler.common.BasicDiagnostic;
 import com.asakusafw.lang.compiler.common.Diagnostic;
 import com.asakusafw.lang.compiler.common.DiagnosticException;
 import com.asakusafw.lang.compiler.common.Location;
+import com.asakusafw.lang.compiler.common.util.EnumUtil;
 import com.asakusafw.lang.compiler.extension.directio.emitter.OutputStageEmitter;
 import com.asakusafw.lang.compiler.extension.directio.emitter.OutputStageInfo;
 import com.asakusafw.lang.compiler.extension.externalio.AbstractExternalPortProcessor;
@@ -93,8 +93,10 @@ public class DirectFileIoPortProcessor
      */
     public static final boolean DEFAULT_FILTER_ENABLED = true;
 
-    private static final Set<PatternElementKind> INVALID_BASE_PATH_KIND =
-            EnumSet.of(PatternElementKind.WILDCARD, PatternElementKind.SELECTION);
+    private static final Set<PatternElementKind> INVALID_BASE_PATH_KIND = EnumUtil.freeze(new PatternElementKind[] {
+            PatternElementKind.WILDCARD,
+            PatternElementKind.SELECTION,
+    });
 
     private static final String PATTERN_DUMMY_INPUT = "directio:%s/%s"; //$NON-NLS-1$
 

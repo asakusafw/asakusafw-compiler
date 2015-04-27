@@ -166,7 +166,7 @@ public class ProjectRepository implements Closeable {
         name = name.substring(0, name.length() - EXTENSION_CLASS.length());
 
         try {
-            LOG.trace("loading project class: {}", name);
+            LOG.trace("loading project class: {}", name); //$NON-NLS-1$
             return getClassLoader().loadClass(name);
         } catch (ClassNotFoundException e) {
             LOG.warn(MessageFormat.format(

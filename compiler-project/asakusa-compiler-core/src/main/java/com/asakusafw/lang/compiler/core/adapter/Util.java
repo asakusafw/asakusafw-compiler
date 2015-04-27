@@ -20,7 +20,6 @@ import com.asakusafw.lang.compiler.model.description.ClassDescription;
 
 /**
  * Utilities for this package.
- *
  */
 final class Util {
 

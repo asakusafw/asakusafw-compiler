@@ -91,7 +91,7 @@ public final class DiagnosticUtil {
             if (method.getDeclaringClass() != Object.class) {
                 return object.toString();
             }
-        } catch (NoSuchMethodException | SecurityException e) {
+        } catch (NoSuchMethodException e) {
             LOG.debug("{} may not have explicit toString() method", aClass.getName()); //$NON-NLS-1$
         }
         return aClass.getSimpleName();
@@ -112,7 +112,7 @@ public final class DiagnosticUtil {
         } catch (IOException e) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug(MessageFormat.format(
-                        "target artifact is not a valid ZIP file: {0}",
+                        "target artifact is not a valid ZIP file: {0}", //$NON-NLS-1$
                         file), e);
             }
         }
@@ -129,8 +129,8 @@ public final class DiagnosticUtil {
         if (id != null) {
             return id;
         }
-        String title = main.getValue(MANIFEST_IMPLEMENTATION_TITLE); 
-        String version = main.getValue(MANIFEST_IMPLEMENTATION_VERSION); 
+        String title = main.getValue(MANIFEST_IMPLEMENTATION_TITLE);
+        String version = main.getValue(MANIFEST_IMPLEMENTATION_VERSION);
         if (title != null && version != null) {
             return String.format("%s-%s", title, version); //$NON-NLS-1$
         }

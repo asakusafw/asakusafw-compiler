@@ -17,7 +17,6 @@ package com.asakusafw.lang.compiler.analyzer.util;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +28,7 @@ import com.asakusafw.lang.compiler.api.reference.PropertyReference;
 import com.asakusafw.lang.compiler.common.BasicDiagnostic;
 import com.asakusafw.lang.compiler.common.Diagnostic;
 import com.asakusafw.lang.compiler.common.DiagnosticException;
+import com.asakusafw.lang.compiler.common.util.EnumUtil;
 import com.asakusafw.lang.compiler.model.PropertyName;
 import com.asakusafw.lang.compiler.model.graph.CoreOperator;
 import com.asakusafw.lang.compiler.model.graph.CoreOperator.CoreOperatorKind;
@@ -45,14 +45,11 @@ import com.asakusafw.vocabulary.operator.Restructure;
  */
 public final class ProjectionOperatorUtil {
 
-    private static final Set<CoreOperatorKind> SUPPORTED;
-    static {
-        Set<CoreOperatorKind> set = EnumSet.noneOf(CoreOperatorKind.class);
-        set.add(CoreOperatorKind.PROJECT);
-        set.add(CoreOperatorKind.EXTEND);
-        set.add(CoreOperatorKind.RESTRUCTURE);
-        SUPPORTED = set;
-    }
+    private static final Set<CoreOperatorKind> SUPPORTED = EnumUtil.freeze(new CoreOperatorKind[] {
+            CoreOperatorKind.PROJECT,
+            CoreOperatorKind.EXTEND,
+            CoreOperatorKind.RESTRUCTURE,
+    });
 
     private ProjectionOperatorUtil() {
         return;

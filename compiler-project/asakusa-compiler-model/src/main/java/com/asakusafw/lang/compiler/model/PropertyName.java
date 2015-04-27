@@ -18,12 +18,13 @@ package com.asakusafw.lang.compiler.model;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import com.asakusafw.lang.compiler.common.util.EnumUtil;
 
 /**
  * Represents a property name.
@@ -87,8 +88,7 @@ public class PropertyName {
     }
 
     private static PropertyName build(List<String> segments, Option[] options) {
-        Set<Option> opts = EnumSet.noneOf(Option.class);
-        Collections.addAll(opts, options);
+        Set<Option> opts = EnumUtil.freeze(options);
         return new PropertyName(apply(opts, segments));
     }
 
