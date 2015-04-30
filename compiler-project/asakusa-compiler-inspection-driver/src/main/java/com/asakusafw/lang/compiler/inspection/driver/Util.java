@@ -103,7 +103,7 @@ final class Util {
             String key = getAttributeKey(type);
             Object value = attributes.getAttribute(type);
             if (value instanceof ComplexAttribute) {
-                results.putAll(extractComplexAttributes(key, ((ComplexAttribute) value).getNestedAttributes()));
+                results.putAll(extractComplexAttributes(key, ((ComplexAttribute) value).toMap()));
             } else {
                 results.put(key, getAttributeValue(value));
             }

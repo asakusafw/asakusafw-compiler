@@ -15,18 +15,19 @@
  */
 package com.asakusafw.lang.compiler.planning.util;
 
-import java.text.MessageFormat;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.asakusafw.lang.compiler.common.ComplexAttribute;
 import com.asakusafw.utils.graph.Graph;
 import com.asakusafw.utils.graph.Graphs;
 
 /**
  * Represents statistics for dependency graphs.
  */
-public class GraphStatistics {
+public class GraphStatistics implements ComplexAttribute {
 
     /**
      * Represents unknown values.
@@ -137,19 +138,21 @@ public class GraphStatistics {
     }
 
     @Override
-    public String toString() {
-        if (criticalPathLength == UNDEFINED) {
-            return MessageFormat.format(
-                    "'{'vertices={0}, edges={1}'}'", //$NON-NLS-1$
-                    numberOfVertices,
-                    numberOfEdges);
-        } else {
-            return MessageFormat.format(
-                    "'{'vertices={0}, edges={1}, critical={2}, average-width={3,number,#.#}'}'", //$NON-NLS-1$
-                    numberOfVertices,
-                    numberOfEdges,
-                    criticalPathLength,
-                    criticalPathLength == 0 ? 0d : (double) numberOfVertices / criticalPathLength);
+    public Map<String, ?> toMap() {
+        Map<String, Object> results = new LinkedHashMap<>();
+        results.put("vertices", getNumberOfVertices()); //$NON-NLS-1$
+        results.put("edges", getNumberOfEdges()); //$NON-NLS-1$
+        if (criticalPathLength != UNDEFINED) {
+            results.put("critical", getCriticalPathLength()); //$NON-NLS-1$
+            results.put("average-width", String.format( //$NON-NLS-1$
+                    "%.3f", //$NON-NLS-1$
+                    criticalPathLength == 0 ? 0d : (double) numberOfVertices / criticalPathLength));
         }
+        return results;
+    }
+
+    @Override
+    public String toString() {
+        return toMap().toString();
     }
 }

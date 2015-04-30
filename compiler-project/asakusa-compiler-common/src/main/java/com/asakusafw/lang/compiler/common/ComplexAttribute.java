@@ -26,5 +26,5 @@ public interface ComplexAttribute {
      * Returns the nested attributes.
      * @return the nested attributes
      */
-    Map<String, ?> getNestedAttributes();
+    Map<String, ?> toMap();
 }
