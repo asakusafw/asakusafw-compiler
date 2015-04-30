@@ -17,7 +17,7 @@ package com.asakusafw.lang.compiler.model.graph;
 
 import java.text.MessageFormat;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -34,7 +34,7 @@ public final class MarkerOperator extends Operator {
      */
     public static final String PORT_NAME = "port"; //$NON-NLS-1$
 
-    final Map<Class<?>, Object> attributes = new HashMap<>();
+    final Map<Class<?>, Object> attributes = new LinkedHashMap<>();
 
     private MarkerOperator() {
         return;

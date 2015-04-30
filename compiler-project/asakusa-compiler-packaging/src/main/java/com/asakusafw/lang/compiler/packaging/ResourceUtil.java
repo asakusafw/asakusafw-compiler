@@ -26,7 +26,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.MessageFormat;
-import java.util.Enumeration;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Properties;
 import java.util.Set;
@@ -166,10 +166,8 @@ public final class ResourceUtil {
      */
     public static Set<File> findLibrariesByResource(ClassLoader classLoader, Location location) throws IOException {
         String path = location.toPath('/');
-        Enumeration<URL> resources = classLoader.getResources(path);
         Set<File> results = new LinkedHashSet<>();
-        while (resources.hasMoreElements()) {
-            URL url = resources.nextElement();
+        for (URL url : Collections.list(classLoader.getResources(path))) {
             File library = findLibraryFromUrl(url, path);
             if (library != null) {
                 LOG.debug("found library of \"{}\": {}", path, library); //$NON-NLS-1$

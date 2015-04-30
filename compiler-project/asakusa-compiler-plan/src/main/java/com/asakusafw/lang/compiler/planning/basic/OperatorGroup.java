@@ -508,13 +508,13 @@ final class OperatorGroup {
     @Override
     public String toString() {
         if (operators.isEmpty()) {
-            return "OperatorGroup(count=0)"; //$NON-NLS-1$
+            return "OperatorGroup(+0)"; //$NON-NLS-1$
         } else {
             Operator first = operators.iterator().next();
             return MessageFormat.format(
-                    "OperatorGroup(count={0}, operator={1}, attributes={2})", //$NON-NLS-1$
-                    operators.size(),
+                    "OperatorGroup{2}({0}+{1})", //$NON-NLS-1$
                     first,
+                    operators.size() - 1,
                     attributes);
         }
     }

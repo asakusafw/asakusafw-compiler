@@ -18,6 +18,7 @@ package com.asakusafw.lang.compiler.optimizer.basic;
 import java.util.EnumMap;
 import java.util.Map;
 
+import com.asakusafw.lang.compiler.common.util.EnumUtil;
 import com.asakusafw.lang.compiler.model.graph.ExternalInput;
 import com.asakusafw.lang.compiler.model.graph.Operator;
 import com.asakusafw.lang.compiler.model.info.ExternalInputInfo;
@@ -54,8 +55,7 @@ public class BasicExternalInputEstimator implements OperatorEstimator {
      * @param sizeMap data size map
      */
     public BasicExternalInputEstimator(Map<ExternalInputInfo.DataSize, Double> sizeMap) {
-        this.sizeMap = new EnumMap<>(ExternalInputInfo.DataSize.class);
-        this.sizeMap.putAll(sizeMap);
+        this.sizeMap = EnumUtil.freeze(sizeMap);
     }
 
     @Override

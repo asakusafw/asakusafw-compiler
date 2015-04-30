@@ -23,16 +23,6 @@ import com.asakusafw.lang.compiler.model.graph.Operator;
 public interface OperatorEquivalence {
 
     /**
-     * Each operator is identical.
-     */
-    OperatorEquivalence IDENTICAL = new OperatorEquivalence() {
-        @Override
-        public Object extract(SubPlan owner, Operator operator) {
-            return operator;
-        }
-    };
-
-    /**
      * Use original serial number as ID.
      */
     OperatorEquivalence SAME_ORIGIN = new OperatorEquivalence() {

@@ -67,7 +67,7 @@ public class FileContainerRepository {
                 assert result.isDirectory();
                 return new FileContainer(result);
             } else {
-                if (root.getParentFile().isDirectory() == false) {
+                if (root.mkdirs() == false && root.isDirectory() == false) {
                     throw new IOException(MessageFormat.format(
                             "failed to create folder: {0}",
                             result));

@@ -18,7 +18,9 @@ package com.asakusafw.lang.compiler.common.util;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.EnumSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -52,5 +54,19 @@ public final class EnumUtil {
     @SafeVarargs
     public static <T extends Enum<T>> Set<T> freeze(T... elements) {
         return freeze(Arrays.asList(elements));
+    }
+
+    /**
+     * Returns unmodifiable map.
+     * @param <K> the enum type
+     * @param <V> the map value type
+     * @param elements the elements
+     * @return the unmodifiable map
+     */
+    public static <K extends Enum<K>, V> Map<K, V> freeze(Map<K, ? extends V> elements) {
+        if (elements.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        return Collections.unmodifiableMap(new EnumMap<>(elements));
     }
 }

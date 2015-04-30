@@ -257,6 +257,7 @@ s1 -/      \- d1
         PlanDetail detail = Planning.startAssemblePlan(origin)
             .withRedundantOutputElimination(true)
             .withUnionPushDown(true)
+            .withSortResult(true)
             .add(origin.getPlan().getElements())
             .build();
         assertThat(detail.getPlan().getElements(), hasSize(1));
@@ -290,6 +291,7 @@ s1 -/                    \- d1
         PlanDetail detail = Planning.startAssemblePlan(origin)
             .withRedundantOutputElimination(true)
             .withUnionPushDown(true)
+            .withSortResult(true)
             .add(ownersOf(origin, mock.getAsSet("o0")))
             .add(ownersOf(origin, mock.getAsSet("o1")))
             .build();
@@ -337,6 +339,7 @@ s0 --- o0 --- b0 --+ o1 --- d0
         PlanDetail detail = Planning.startAssemblePlan(origin)
             .withRedundantOutputElimination(true)
             .withUnionPushDown(true)
+            .withSortResult(true)
             .add(ownersOf(origin, mock.getAsSet("o0")))
             .add(ownersOf(origin, mock.getAsSet("o1")))
             .build();

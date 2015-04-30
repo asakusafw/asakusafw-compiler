@@ -20,6 +20,7 @@ import java.util.Map;
 
 import com.asakusafw.lang.compiler.api.reference.TaskReference;
 import com.asakusafw.lang.compiler.common.AttributeContainer;
+import com.asakusafw.lang.compiler.common.ComplexAttribute;
 import com.asakusafw.lang.compiler.inspection.InspectionNode;
 import com.asakusafw.lang.compiler.model.graph.OperatorPort;
 import com.asakusafw.lang.compiler.model.info.BatchInfo;
@@ -99,8 +100,23 @@ final class Util {
     static Map<String, String> extractAttributes(AttributeContainer attributes) {
         Map<String, String> results = new LinkedHashMap<>();
         for (Class<?> type : attributes.getAttributeTypes()) {
+            String key = getAttributeKey(type);
             Object value = attributes.getAttribute(type);
-            results.put(getAttributeKey(type), getAttributeValue(value));
+            if (value instanceof ComplexAttribute) {
+                results.putAll(extractComplexAttributes(key, ((ComplexAttribute) value).getNestedAttributes()));
+            } else {
+                results.put(key, getAttributeValue(value));
+            }
+        }
+        return results;
+    }
+
+    private static Map<String, String> extractComplexAttributes(String prefix, Map<String, ?> nested) {
+        Map<String, String> results = new LinkedHashMap<>();
+        for (Map.Entry<String, ?> entry : nested.entrySet()) {
+            String key = String.format("%s.%s", prefix, entry.getKey());
+            Object value = entry.getValue();
+            results.put(key, getAttributeValue(value));
         }
         return results;
     }

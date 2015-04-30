@@ -17,7 +17,7 @@ package com.asakusafw.lang.compiler.common;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -26,7 +26,7 @@ import java.util.Map;
  */
 public class BasicAttributeContainer implements AttributeContainer {
 
-    private final Map<Class<?>, Object> attributes = new HashMap<>();
+    private final Map<Class<?>, Object> attributes = new LinkedHashMap<>();
 
     @Override
     public Collection<Class<?>> getAttributeTypes() {
