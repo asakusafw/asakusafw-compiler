@@ -127,7 +127,7 @@ public class YaessScriptCompressor {
 
     static int exec(String... args) {
         if (args.length == 0) {
-            System.err.printf("Usage: java -jar <this.jar> /path/to/batchapp [/path/to/batchapp [...]]");
+            System.err.println("Usage: java -jar <this.jar> /path/to/batchapp [/path/to/batchapp [...]]");
             return 1;
         }
         List<File> targets = new ArrayList<>();
