@@ -4,20 +4,19 @@
 	<modelVersion>4.0.0</modelVersion>
 	<name>Asakusa Framework Bridge</name>
 	<groupId>com.asakusafw.bridge</groupId>
-	<artifactId>bridge-project</artifactId>
+	<artifactId>project</artifactId>
 	<parent>
-		<groupId>com.asakusafw.lang.compiler</groupId>
-		<artifactId>root</artifactId>
+		<groupId>com.asakusafw.lang</groupId>
+		<artifactId>project</artifactId>
 		<version>0.1-SNAPSHOT</version>
 	</parent>
 
 	<packaging>pom</packaging>
 
 	<modules>
-		<module>asakusa-bridge-runtime</module>
-		<module>asakusa-bridge-runtime-directio</module>
-		<module>asakusa-bridge-runtime-adapter</module>
-		<module>asakusa-bridge-runtime-all</module>
-		<module>asakusa-bridge-redirector</module>
+		<module>runtime</module>
+		<module>runtime-directio</module>
+		<module>runtime-adapter</module>
+		<module>runtime-all</module>
 	</modules>
 </project>

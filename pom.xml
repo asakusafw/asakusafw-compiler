@@ -1,13 +1,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<name>Asakusa DSL Compiler Project Root</name>
-	<groupId>com.asakusafw.lang.compiler</groupId>
-	<artifactId>root</artifactId>
+	<name>Asakusa Framework Language Project</name>
+	<groupId>com.asakusafw.lang</groupId>
+	<artifactId>project</artifactId>
 	<version>0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
-	<description>Asakusa Framework Compiler Project Root</description>
+	<description>Asakusa Framework Language Project</description>
 	<url>http://asakusafw.com</url>
 	<licenses>
 		<license>
@@ -61,6 +61,7 @@
 	<modules>
 		<module>bridge-project</module>
 		<module>compiler-project</module>
+		<module>inspection-project</module>
 		<module>tool-project</module>
 	</modules>
 

@@ -2,11 +2,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<name>Asakusa DSL Tools</name>
-	<groupId>com.asakusafw.lang.tool</groupId>
+	<name>Asakusa Operator DSL Compiler</name>
+	<groupId>com.asakusafw.lang.compiler.operator</groupId>
 	<artifactId>project</artifactId>
 	<parent>
-		<groupId>com.asakusafw.lang</groupId>
+		<groupId>com.asakusafw.lang.compiler</groupId>
 		<artifactId>project</artifactId>
 		<version>0.1-SNAPSHOT</version>
 	</parent>
@@ -14,7 +14,11 @@
 	<packaging>pom</packaging>
 
 	<modules>
-		<module>api-redirector</module>
-		<module>yaess-compress</module>
+		<!-- operators -->
+		<module>core</module>
+		<module>builtin</module>
+		<module>dmdl</module>
+		<module>all</module>
+		<module>vocabulary</module>
 	</modules>
 </project>
