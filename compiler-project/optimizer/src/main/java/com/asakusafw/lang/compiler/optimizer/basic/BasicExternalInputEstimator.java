@@ -15,8 +15,13 @@
  */
 package com.asakusafw.lang.compiler.optimizer.basic;
 
-import java.util.EnumMap;
+import java.text.MessageFormat;
+import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.asakusafw.lang.compiler.common.util.EnumUtil;
 import com.asakusafw.lang.compiler.model.graph.ExternalInput;
@@ -31,14 +36,30 @@ import com.asakusafw.lang.compiler.optimizer.OperatorEstimators;
  */
 public class BasicExternalInputEstimator implements OperatorEstimator {
 
+    static final Logger LOG = LoggerFactory.getLogger(BasicExternalInputEstimator.class);
+
     private static final Map<ExternalInputInfo.DataSize, Double> DEFAULT_SIZE_MAP;
     static {
-        Map<ExternalInputInfo.DataSize, Double> map = new EnumMap<>(ExternalInputInfo.DataSize.class);
+        Map<ExternalInputInfo.DataSize, Double> map = new LinkedHashMap<>();
         final int mega = 1024 * 1024;
         map.put(ExternalInputInfo.DataSize.TINY, 10.0 * mega);
         map.put(ExternalInputInfo.DataSize.SMALL, 200.0 * mega);
         map.put(ExternalInputInfo.DataSize.LARGE, Double.POSITIVE_INFINITY);
-        DEFAULT_SIZE_MAP = map;
+        DEFAULT_SIZE_MAP = EnumUtil.freeze(map);
+    }
+
+    /**
+     * The compiler option key prefix of the size scale for the target data size.
+     */
+    public static final String PREFIX_KEY = "input.estimator."; //$NON-NLS-1$
+
+    private static final Map<ExternalInputInfo.DataSize, String> KEY_SIZE_MAP;
+    static {
+        Map<ExternalInputInfo.DataSize, String> map = new LinkedHashMap<>();
+        for (ExternalInputInfo.DataSize size : ExternalInputInfo.DataSize.values()) {
+            map.put(size, PREFIX_KEY + size.name().toLowerCase(Locale.ENGLISH));
+        }
+        KEY_SIZE_MAP = EnumUtil.freeze(map);
     }
 
     private final Map<ExternalInputInfo.DataSize, Double> sizeMap;
@@ -67,15 +88,30 @@ public class BasicExternalInputEstimator implements OperatorEstimator {
 
     private void perform(Context context, ExternalInput operator) {
         if (operator.isExternal()) {
-            double size = estimate(operator.getInfo());
+            double size = estimate(context, operator.getInfo());
             if (Double.isNaN(size) == false) {
                 OperatorEstimators.putSize(context, operator, size);
             }
         }
     }
 
-    private double estimate(ExternalInputInfo info) {
-        Double size = sizeMap.get(info.getDataSize());
+    private double estimate(Context context, ExternalInputInfo info) {
+        ExternalInputInfo.DataSize symbol = info.getDataSize();
+        // find override
+        String string = context.getOptions().get(KEY_SIZE_MAP.get(symbol), null);
+        if (string != null) {
+            LOG.debug("found custom estimator: DataSize.{} => {}", symbol, string); //$NON-NLS-1$
+            try {
+                double value = Double.parseDouble(string);
+                return value;
+            } catch (NumberFormatException e) {
+                LOG.warn(MessageFormat.format(
+                        "invalid custom estimator size: {0}={1}",
+                        KEY_SIZE_MAP.get(symbol),
+                        string), e);
+            }
+        }
+        Double size = sizeMap.get(symbol);
         if (size == null) {
             return OperatorEstimate.UNKNOWN_SIZE;
         }

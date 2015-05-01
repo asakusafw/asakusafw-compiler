@@ -87,6 +87,19 @@ public class BasicExternalInputEstimatorTest extends OptimizerTestRoot {
         assertThat(estimate.getSize(operator.getOperatorPort()), is(OperatorEstimate.UNKNOWN_SIZE));
     }
 
+    /**
+     * custom.
+     */
+    @Test
+    public void custom() {
+        OperatorEstimator estimator = new BasicExternalInputEstimator();
+        ExternalInput operator = of(DataSize.UNKNOWN);
+        String key = BasicExternalInputEstimator.PREFIX_KEY + "unknown";
+        OperatorEstimate estimate = perform(context(key, "100"), estimator, operator);
+
+        assertThat(estimate.getSize(operator.getOperatorPort()), closeTo(100.0, 0.0));
+    }
+
     private ExternalInput of(DataSize size) {
         return ExternalInput.newInstance("a", new ExternalInputInfo.Basic(
                 clazz(size.name()),

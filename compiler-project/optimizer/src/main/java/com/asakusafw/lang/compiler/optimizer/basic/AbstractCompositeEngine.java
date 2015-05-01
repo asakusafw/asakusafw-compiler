@@ -238,13 +238,17 @@ public abstract class AbstractCompositeEngine<T> {
 
         /**
          * Sets the operator element for the target input.
-         * @param moduleName the external input module
+         * @param moduleName the external input module (nullable)
          * @param element the element
          * @return this
          * @see ExternalInputInfo#getModuleName()
          */
         public TSelf withInput(String moduleName, TElement element) {
-            inputs.put(moduleName, element);
+            if (moduleName == null) {
+                withInput(element);
+            } else {
+                inputs.put(moduleName, element);
+            }
             return getSelf();
         }
 
@@ -259,13 +263,17 @@ public abstract class AbstractCompositeEngine<T> {
 
         /**
          * Sets the operator element for the target output.
-         * @param moduleName the external output module
+         * @param moduleName the external output module (nullable)
          * @param element the element
          * @return this
          * @see ExternalOutputInfo#getModuleName()
          */
         public TSelf withOutput(String moduleName, TElement element) {
-            outputs.put(moduleName, element);
+            if (moduleName == null) {
+                withOutput(element);
+            } else {
+                outputs.put(moduleName, element);
+            }
             return getSelf();
         }
 
@@ -289,11 +297,16 @@ public abstract class AbstractCompositeEngine<T> {
          * @see UserOperator#getAnnotation()
          */
         public TSelf withUser(ClassDescription annotationType, TElement element) {
-            CoreOperatorKind coreKind = CORE_ANNOTATION_TYPES.get(annotationType);
-            if (coreKind != null) {
-                cores.put(coreKind, element);
+            if (annotationType == null) {
+                withDefault(OperatorKind.CORE, element);
+                withDefault(OperatorKind.USER, element);
             } else {
-                users.put(annotationType, element);
+                CoreOperatorKind coreKind = CORE_ANNOTATION_TYPES.get(annotationType);
+                if (coreKind != null) {
+                    cores.put(coreKind, element);
+                } else {
+                    users.put(annotationType, element);
+                }
             }
             return getSelf();
         }
