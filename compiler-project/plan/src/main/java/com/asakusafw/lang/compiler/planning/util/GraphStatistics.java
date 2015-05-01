@@ -144,8 +144,8 @@ public class GraphStatistics implements ComplexAttribute {
         results.put("edges", getNumberOfEdges()); //$NON-NLS-1$
         if (criticalPathLength != UNDEFINED) {
             results.put("critical", getCriticalPathLength()); //$NON-NLS-1$
-            results.put("average-width", String.format( //$NON-NLS-1$
-                    "%.3f", //$NON-NLS-1$
+            results.put("average-width", String.format(//$NON-NLS-1$
+                    "%.2f", //$NON-NLS-1$
                     criticalPathLength == 0 ? 0d : (double) numberOfVertices / criticalPathLength));
         }
         return results;

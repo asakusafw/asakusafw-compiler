@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<name>Test Moderator for Internal Data Formats</name>
+	<name>Asakusa DSL Compiler Extension for Test Moderator</name>
 	<groupId>com.asakusafw.lang.compiler</groupId>
 	<artifactId>asakusa-compiler-extension-test-moderator</artifactId>
 	<parent>
@@ -11,7 +11,7 @@
 		<version>0.1-SNAPSHOT</version>
 	</parent>
 
-	<description>Test Moderator for Internal Data Formats</description>
+	<description>Asakusa DSL Compiler Extension for Test Moderator</description>
 
 	<packaging>jar</packaging>
 
