@@ -17,13 +17,19 @@ package com.asakusafw.lang.compiler.analyzer.builtin;
 
 import static com.asakusafw.lang.compiler.model.description.Descriptions.*;
 
+import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.graph.Operator;
+import com.asakusafw.lang.compiler.model.graph.OperatorInput;
 import com.asakusafw.lang.compiler.optimizer.OperatorEstimator;
+import com.asakusafw.lang.compiler.optimizer.OperatorEstimators;
 import com.asakusafw.lang.compiler.optimizer.basic.BasicPropagateEstimator;
 import com.asakusafw.lang.compiler.optimizer.basic.OperatorEstimatorBinding;
 import com.asakusafw.vocabulary.operator.Branch;
@@ -51,6 +57,13 @@ import com.asakusafw.vocabulary.operator.Update;
 public class BuiltInOperatorEstimator
         extends OperatorEstimatorBinding
         implements OperatorEstimator {
+
+    static final Logger LOG = LoggerFactory.getLogger(BuiltInOperatorEstimator.class);
+
+    /**
+     * The compiler option key prefix of the size scale for the target operator (simple annotation type).
+     */
+    public static final String PREFIX_KEY = "operator.estimator."; //$NON-NLS-1$
 
     static final double PROJECT_SCALE = 1.0;
 
@@ -121,9 +134,55 @@ public class BuiltInOperatorEstimator
 
     @Override
     public void perform(Context context, Operator operator) {
-        ClassDescription type = Util.getAnnotationType(operator);
-        OperatorEstimator delegate = ENGINE_MAP.get(type);
+        OperatorEstimator delegate = findEngine(context, operator);
         assert delegate != null;
         delegate.perform(context, operator);
+    }
+
+    private OperatorEstimator findEngine(Context context, Operator operator) {
+        ClassDescription type = Util.getAnnotationType(operator);
+        String string = context.getOptions().get(toEngineKey(type), null);
+        if (string != null) {
+            LOG.debug("found custom estimator: {} => {}", type.getSimpleName(), string); //$NON-NLS-1$
+            try {
+                double scale = Double.parseDouble(string);
+                if (Double.isNaN(scale)) {
+                    return OperatorEstimator.NULL;
+                }
+                return new CustomEstimator(scale);
+            } catch (NumberFormatException e) {
+                LOG.warn(MessageFormat.format(
+                        "invalid custom estimator scale: {0}={1}",
+                        toEngineKey(type),
+                        string), e);
+            }
+        }
+        return ENGINE_MAP.get(type);
+    }
+
+    private String toEngineKey(ClassDescription type) {
+        return PREFIX_KEY + type.getSimpleName();
+    }
+
+    private static class CustomEstimator implements OperatorEstimator {
+
+        private final double scale;
+
+        public CustomEstimator(double scale) {
+            this.scale = scale;
+        }
+
+        @Override
+        public void perform(Context context, Operator operator) {
+            double total = 0.0;
+            for (OperatorInput input : operator.getInputs()) {
+                double size = OperatorEstimators.getSize(context, input);
+                if (Double.isNaN(size)) {
+                    return;
+                }
+                total += size;
+            }
+            OperatorEstimators.putSize(context, operator, total * scale);
+        }
     }
 }

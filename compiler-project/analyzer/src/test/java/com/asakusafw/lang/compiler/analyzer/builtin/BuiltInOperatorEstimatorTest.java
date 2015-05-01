@@ -88,6 +88,21 @@ public class BuiltInOperatorEstimatorTest extends BuiltInOptimizerTestRoot {
         assertThat(estimate.getSize(output(operator)), is(OperatorEstimate.UNKNOWN_SIZE));
     }
 
+    /**
+     * custom engine.
+     */
+    @Test
+    public void custom() {
+        Operator operator = OperatorExtractor.extract(Extract.class, Ops.class, "extract")
+                .input("i", typeOf(String.class))
+                .output("r", typeOf(String.class))
+                .build();
+
+        String key = BuiltInOperatorEstimator.PREFIX_KEY + Extract.class.getSimpleName();
+        OperatorEstimate estimate = estimate(context(key, "10"), operator, 100.0);
+        assertThat(estimate.getSize(output(operator)), closeTo(1000.0, 1.0));
+    }
+
     private OperatorEstimate estimate(OptimizerContext context, Operator operator, double... inputSizes) {
         OperatorEstimatorAdapter adapter = new OperatorEstimatorAdapter(context);
         List<OperatorInput> inputs = operator.getInputs();
