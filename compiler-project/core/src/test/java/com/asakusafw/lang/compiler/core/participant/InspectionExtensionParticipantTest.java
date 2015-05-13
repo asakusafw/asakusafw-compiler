@@ -31,7 +31,7 @@ import com.asakusafw.lang.compiler.core.CompilerTestRoot;
 import com.asakusafw.lang.compiler.core.basic.BasicBatchCompiler;
 import com.asakusafw.lang.compiler.core.dummy.SimpleExternalPortProcessor;
 import com.asakusafw.lang.compiler.core.dummy.SimpleJobflowProcessor;
-import com.asakusafw.lang.compiler.inspection.driver.InspectionExtension;
+import com.asakusafw.lang.compiler.inspection.InspectionExtension;
 import com.asakusafw.lang.compiler.model.graph.Batch;
 import com.asakusafw.lang.compiler.model.graph.Jobflow;
 import com.asakusafw.lang.compiler.packaging.FileContainer;
