@@ -204,9 +204,8 @@ public class OperatorCompilerTestRoot {
                 aClass.getSimpleName(),
                 name.replace('.', '/'));
         StringBuilder buf = new StringBuilder();
-        InputStream in = aClass.getResourceAsStream(file);
-        assertThat(file, in, not(nullValue()));
-        try {
+        try (InputStream in = aClass.getResourceAsStream(file)) {
+            assertThat(file, in, not(nullValue()));
             Reader reader = new BufferedReader(new InputStreamReader(in, "UTF-8"));
             while (true) {
                 int c = reader.read();
@@ -217,12 +216,6 @@ public class OperatorCompilerTestRoot {
             }
         } catch (IOException e) {
             throw new AssertionError(e);
-        } finally {
-            try {
-                in.close();
-            } catch (IOException e) {
-                throw new AssertionError(e);
-            }
         }
         sources.add(new VolatileJavaFile(
                 name.replace('.', '/'),

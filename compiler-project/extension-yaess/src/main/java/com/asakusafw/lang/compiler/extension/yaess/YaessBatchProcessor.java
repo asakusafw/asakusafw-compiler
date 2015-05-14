@@ -90,14 +90,11 @@ public class YaessBatchProcessor implements BatchProcessor {
         }
 
         LOG.debug("exporting YAESS batch script"); //$NON-NLS-1$
-        OutputStream output = context.addResourceFile(Location.of(PATH));
-        try {
+        try (OutputStream output = context.addResourceFile(Location.of(PATH))) {
             properties.store(output, MessageFormat.format(
                     "YAESS batch script for \"{0}\", version {1}", //$NON-NLS-1$
                     source.getBatchId(),
                     BatchScript.VERSION));
-        } finally {
-            output.close();
         }
         LOG.debug("exported YAESS batch script"); //$NON-NLS-1$
     }

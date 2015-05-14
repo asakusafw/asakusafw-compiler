@@ -112,12 +112,8 @@ public class ResourceSessionContainerTest {
             Future<Boolean> future = executor.submit(new Callable<Boolean>() {
                 @Override
                 public Boolean call() throws Exception {
-                    ResourceSession session = container.create(scope);
-                    if (session == null) {
-                        return false;
-                    } else {
-                        session.close();
-                        return true;
+                    try (ResourceSession session = container.create(scope)) {
+                        return session != null;
                     }
                 }
             });

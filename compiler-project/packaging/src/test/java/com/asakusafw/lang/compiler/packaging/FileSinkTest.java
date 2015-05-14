@@ -63,7 +63,9 @@ public class FileSinkTest extends ResourceTestRoot {
     @Test
     public void no_items() throws Exception {
         File base = folder.newFolder();
-        new FileSink(base).close();
+        try (FileSink sink = new FileSink(base)) {
+            // do nothing
+        }
         Map<String, String> items = dump(new FileRepository(base));
         assertThat(items.keySet(), hasSize(0));
     }

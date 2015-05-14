@@ -20,7 +20,6 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -195,18 +194,13 @@ public class FileRepositoryTest {
             Map<String, List<String>> entries = new TreeMap<>();
             while (cur.next()) {
                 Location location = cur.getLocation();
-                InputStream input = cur.openResource();
-                try {
+                try (Scanner scanner = new Scanner(cur.openResource(), "UTF-8")) {
                     List<String> contents = new ArrayList<>();
-                    Scanner scanner = new Scanner(input, "UTF-8");
                     while (scanner.hasNextLine()) {
                         String line = scanner.nextLine();
                         contents.add(line);
                     }
                     entries.put(location.toPath('/'), contents);
-                    scanner.close();
-                } finally {
-                    input.close();
                 }
             }
             return entries;

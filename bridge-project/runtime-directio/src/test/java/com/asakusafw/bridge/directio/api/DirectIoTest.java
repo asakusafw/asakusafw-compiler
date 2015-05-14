@@ -59,14 +59,7 @@ public class DirectIoTest {
         ResourceBroker.put(Configuration.class, env.newConfiguration());
         put(env.file("testing/a.txt"), "Hello, world!");
 
-        Set<String> results;
-        ModelInput<StringBuilder> input = DirectIo.open(MockFormat.class, "testing", "*.txt");
-        try {
-            results = consume(input);
-        } finally {
-            input.close();
-        }
-
+        Set<String> results = consume();
         assertThat(results, is(set("Hello, world!")));
     }
 
@@ -77,13 +70,8 @@ public class DirectIoTest {
     @Test
     public void missing() throws Exception {
         ResourceBroker.put(Configuration.class, env.newConfiguration());
-        Set<String> results;
-        ModelInput<StringBuilder> input = DirectIo.open(MockFormat.class, "testing", "*.txt");
-        try {
-            results = consume(input);
-        } finally {
-            input.close();
-        }
+
+        Set<String> results = consume();
         assertThat(results, is(empty()));
     }
 
@@ -98,14 +86,7 @@ public class DirectIoTest {
         put(env.file("testing/t2.txt"), "Hello2");
         put(env.file("testing/t3.txt"), "Hello3");
 
-        Set<String> results;
-        ModelInput<StringBuilder> input = DirectIo.open(MockFormat.class, "testing", "*.txt");
-        try {
-            results = consume(input);
-        } finally {
-            input.close();
-        }
-
+        Set<String> results = consume();
         assertThat(results, is(set("Hello1", "Hello2", "Hello3")));
     }
 
@@ -118,15 +99,14 @@ public class DirectIoTest {
         ResourceBroker.put(ResourceConfiguration.class, new HadoopConfiguration(env.newConfiguration()));
         put(env.file("testing/a.txt"), "Hello, world!");
 
-        Set<String> results;
-        ModelInput<StringBuilder> input = DirectIo.open(MockFormat.class, "testing", "*.txt");
-        try {
-            results = consume(input);
-        } finally {
-            input.close();
-        }
-
+        Set<String> results = consume();
         assertThat(results, is(set("Hello, world!")));
+    }
+
+    private Set<String> consume() throws IOException {
+        try (ModelInput<StringBuilder> input = DirectIo.open(MockFormat.class, "testing", "*.txt")) {
+            return consume(input);
+        }
     }
 
     /**
@@ -144,13 +124,10 @@ public class DirectIoTest {
 
     private File put(File file, String... lines) throws IOException {
         file.getAbsoluteFile().getParentFile().mkdirs();
-        PrintWriter writer = new PrintWriter(file, "UTF-8");
-        try {
+        try (PrintWriter writer = new PrintWriter(file, "UTF-8")) {
             for (String line : lines) {
                 writer.println(line);
             }
-        } finally {
-            writer.close();
         }
         return file;
     }

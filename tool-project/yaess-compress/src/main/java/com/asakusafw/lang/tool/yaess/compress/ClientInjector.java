@@ -81,15 +81,12 @@ public final class ClientInjector {
 
     private static void putClient(ZipOutputStream output) throws IOException {
         String path = Util.getClientClassName().replace('.', '/') + ".class";
-        InputStream resource = ClientInjector.class.getClassLoader().getResourceAsStream(path);
-        if (resource == null) {
-            throw new FileNotFoundException(path);
-        }
-        try {
+        try (InputStream resource = ClientInjector.class.getClassLoader().getResourceAsStream(path)) {
+            if (resource == null) {
+                throw new FileNotFoundException(path);
+            }
             output.putNextEntry(new ZipEntry(path));
             Util.copy(resource, output);
-        } finally {
-            resource.close();
         }
     }
 

@@ -179,29 +179,28 @@ public abstract class AbstractJavaCompilerSupport implements JavaCompilerSupport
             arguments.addAll(getCompilerOptions());
 
             StringWriter errors = new StringWriter();
-            PrintWriter pw = new PrintWriter(errors);
-
-            CompilationTask task;
-            try {
-                LOG.debug("javac options: {}", arguments); //$NON-NLS-1$
-                task = compiler.getTask(
-                        pw,
-                        fileManager,
-                        diagnostics,
-                        arguments,
-                        getAnnotationProcessors(),
-                        getSourceFiles(fileManager));
-            } catch (RuntimeException e) {
-                throw new DiagnosticException(
-                        com.asakusafw.lang.compiler.common.Diagnostic.Level.ERROR,
-                        MessageFormat.format(
-                                "failed to initialize Java compiler: arguments={0}",
-                                arguments),
-                        e);
+            boolean success;
+            try (PrintWriter pw = new PrintWriter(errors)) {
+                CompilationTask task;
+                try {
+                    LOG.debug("javac options: {}", arguments); //$NON-NLS-1$
+                    task = compiler.getTask(
+                            pw,
+                            fileManager,
+                            diagnostics,
+                            arguments,
+                            getAnnotationProcessors(),
+                            getSourceFiles(fileManager));
+                } catch (RuntimeException e) {
+                    throw new DiagnosticException(
+                            com.asakusafw.lang.compiler.common.Diagnostic.Level.ERROR,
+                            MessageFormat.format(
+                                    "failed to initialize Java compiler: arguments={0}",
+                                    arguments),
+                            e);
+                }
+                success = task.call();
             }
-
-            boolean success = task.call();
-            pw.close();
             List<com.asakusafw.lang.compiler.common.Diagnostic> results = new ArrayList<>();
             for (Diagnostic<? extends JavaFileObject> diagnostic : diagnostics.getDiagnostics()) {
                 dumpDiagnostic(diagnostic);

@@ -344,11 +344,8 @@ public class WindGatePortProcessor
         assert script != null;
         Properties properties = new Properties();
         script.storeTo(properties);
-        OutputStream output = context.addResourceFile(path);
-        try {
+        try (OutputStream output = context.addResourceFile(path)) {
             properties.store(output, context.getOptions().getBuildId());
-        } finally {
-            output.close();
         }
     }
 

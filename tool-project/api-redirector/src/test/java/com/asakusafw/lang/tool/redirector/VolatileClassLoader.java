@@ -57,14 +57,11 @@ public class VolatileClassLoader extends ClassLoader {
      */
     public static byte[] dump(Class<?> aClass) throws IOException {
         String path = toPath(aClass);
-        InputStream input = aClass.getClassLoader().getResourceAsStream(path);
-        if (input == null) {
-            throw new FileNotFoundException(path);
-        }
-        try {
+        try (InputStream input = aClass.getClassLoader().getResourceAsStream(path)) {
+            if (input == null) {
+                throw new FileNotFoundException(path);
+            }
             return consume(input);
-        } finally {
-            input.close();
         }
     }
 

@@ -207,9 +207,9 @@ public final class Cli {
         if (input.exists() == false) {
             throw new FileNotFoundException(input.getPath());
         }
-        try {
-            ZipFile zip = new ZipFile(input);
-            zip.close();
+        try (ZipFile zip = new ZipFile(input)) {
+            // only check
+            return;
         } catch (ZipException e) {
             throw new IOException(MessageFormat.format(
                     "invalid input file: {0}",
