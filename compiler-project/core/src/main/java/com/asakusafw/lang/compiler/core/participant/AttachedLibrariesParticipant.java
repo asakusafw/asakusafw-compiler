@@ -29,6 +29,7 @@ import com.asakusafw.lang.compiler.api.reference.BatchReference;
 import com.asakusafw.lang.compiler.common.Diagnostic;
 import com.asakusafw.lang.compiler.common.DiagnosticException;
 import com.asakusafw.lang.compiler.common.Location;
+import com.asakusafw.lang.compiler.common.util.StringUtil;
 import com.asakusafw.lang.compiler.core.BatchCompiler.Context;
 import com.asakusafw.lang.compiler.core.basic.AbstractCompilerParticipant;
 import com.asakusafw.lang.compiler.model.graph.Batch;
@@ -101,7 +102,7 @@ public class AttachedLibrariesParticipant extends AbstractCompilerParticipant {
             String suffix;
             if (dotAt <= 0) { // may be a dot file
                 prefix = name;
-                suffix = ""; //$NON-NLS-1$
+                suffix = StringUtil.EMPTY;
             } else {
                 prefix = name.substring(0, dotAt);
                 suffix = name.substring(dotAt);

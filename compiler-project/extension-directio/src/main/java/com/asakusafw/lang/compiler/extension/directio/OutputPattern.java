@@ -573,13 +573,9 @@ public final class OutputPattern {
         public String toString() {
             StringBuilder buf = new StringBuilder();
             buf.append('[');
-            for (int i = 0, n = position; i < n; i++) {
-                buf.append(cbuf[i]);
-            }
+            buf.append(cbuf, 0, position);
             buf.append(" >> "); //$NON-NLS-1$
-            for (int i = position, n = cbuf.length; i < n; i++) {
-                buf.append(cbuf[i]);
-            }
+            buf.append(cbuf, position, cbuf.length - position);
             buf.append(']');
             return buf.toString();
         }

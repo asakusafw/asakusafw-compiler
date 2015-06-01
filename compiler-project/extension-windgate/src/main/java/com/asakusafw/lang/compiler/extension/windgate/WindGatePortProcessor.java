@@ -42,6 +42,7 @@ import com.asakusafw.lang.compiler.api.reference.TaskReference.Phase;
 import com.asakusafw.lang.compiler.common.Diagnostic;
 import com.asakusafw.lang.compiler.common.DiagnosticException;
 import com.asakusafw.lang.compiler.common.Location;
+import com.asakusafw.lang.compiler.common.util.StringUtil;
 import com.asakusafw.lang.compiler.extension.externalio.AbstractExternalPortProcessor;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.description.Descriptions;
@@ -275,13 +276,7 @@ public class WindGatePortProcessor
 
     private ProcessScript<?> toProcessScript(
             Context context, ExternalOutputReference reference, DescriptionModel model) {
-        StringBuilder locations = new StringBuilder();
-        for (String path : reference.getPaths()) {
-            if (locations.length() > 0) {
-                locations.append('\n');
-            }
-            locations.append(path);
-        }
+        String locations = StringUtil.join('\n', reference.getPaths());
         Class<?> dataModelType;
         try {
             dataModelType = reference.getDataModelClass().resolve(context.getClassLoader());
@@ -292,7 +287,7 @@ public class WindGatePortProcessor
         }
         DriverScript source = new DriverScript(
                 Constants.HADOOP_FILE_RESOURCE_NAME,
-                Collections.singletonMap(FileProcess.FILE.key(), locations.toString()));
+                Collections.singletonMap(FileProcess.FILE.key(), locations));
         DriverScript drain = model.getDriverScript();
         return createProcessScript(reference.getName(), dataModelType, source, drain);
     }

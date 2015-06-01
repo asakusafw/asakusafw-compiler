@@ -20,6 +20,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import com.asakusafw.lang.compiler.common.util.StringUtil;
+
 /**
  * Represents a set of Asakusa DSL compiler options.
  */
@@ -133,7 +135,7 @@ public class CompilerOptions {
      * @return the property value, or the default value if the property value is not defined
      */
     public boolean get(String propertyKey, boolean defaultValue) {
-        String value = get(propertyKey, "").trim(); //$NON-NLS-1$
+        String value = get(propertyKey, StringUtil.EMPTY).trim();
         if (value.isEmpty()) {
             return defaultValue;
         }

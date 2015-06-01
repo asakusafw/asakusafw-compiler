@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.asakusafw.lang.compiler.common.util.StringUtil;
 import com.asakusafw.lang.compiler.model.PropertyName;
 import com.asakusafw.lang.compiler.model.graph.Group.Direction;
 import com.asakusafw.lang.compiler.model.graph.Group.Ordering;
@@ -33,14 +34,13 @@ import com.asakusafw.lang.compiler.model.graph.Group.Ordering;
  */
 public final class Groups {
 
-    private static final Pattern PATTERN_ORDER = Pattern.compile(
-            "(\\w+)"                    // 1 - asc //$NON-NLS-1$
-            + "|" + "(\\+\\s*(\\w+))"   // 3 - asc //$NON-NLS-1$ //$NON-NLS-2$
-            + "|" + "(-\\s*(\\w+))"     // 5 - desc //$NON-NLS-1$ //$NON-NLS-2$
-            + "|" + "((\\w+)\\s+ASC)"   // 7 - asc //$NON-NLS-1$ //$NON-NLS-2$
-            + "|" + "((\\w+)\\s+DESC)"  // 9 - desc //$NON-NLS-1$ //$NON-NLS-2$
-            + "", //$NON-NLS-1$
-            Pattern.CASE_INSENSITIVE);
+    private static final Pattern PATTERN_ORDER = Pattern.compile(StringUtil.join('|', new Object[] {
+            "(\\w+)",            // 1 - asc //$NON-NLS-1$
+            "(\\+\\s*(\\w+))",   // 3 - asc //$NON-NLS-1$
+            "(-\\s*(\\w+))",     // 5 - desc //$NON-NLS-1$
+            "((\\w+)\\s+ASC)",   // 7 - asc //$NON-NLS-1$
+            "((\\w+)\\s+DESC)",  // 9 - desc //$NON-NLS-1$
+    }), Pattern.CASE_INSENSITIVE);
 
     private static final Map<Integer, Direction> ORDER_GROUP_DIRECTIONS;
     static {

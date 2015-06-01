@@ -19,6 +19,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.regex.Pattern;
 
+import com.asakusafw.lang.compiler.common.util.StringUtil;
+
 /**
  * Represents a resource location.
  */
@@ -128,13 +130,7 @@ public class Location implements Comparable<Location> {
      */
     public String toPath(char separator) {
         LinkedList<String> segments = asList();
-        StringBuilder buf = new StringBuilder();
-        buf.append(segments.removeFirst());
-        for (String segment : segments) {
-            buf.append(separator);
-            buf.append(segment);
-        }
-        return buf.toString();
+        return StringUtil.join(separator, segments);
     }
 
     private LinkedList<String> asList() {
