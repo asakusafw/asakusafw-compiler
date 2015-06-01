@@ -35,8 +35,7 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.objectweb.asm.Type;
 
-import com.asakusafw.lang.tool.redirector.Cli;
-import com.asakusafw.lang.tool.redirector.RedirectRule;
+import com.asakusafw.lang.compiler.redirector.RedirectRule;
 import com.asakusafw.lang.tool.redirector.Cli.Configuration;
 import com.asakusafw.lang.tool.redirector.mock.MockCallee0;
 import com.asakusafw.lang.tool.redirector.mock.MockCallee1;

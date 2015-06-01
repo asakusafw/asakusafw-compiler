@@ -35,6 +35,7 @@
 		<module>hadoop</module>
 		<module>mapreduce</module>
 		<module>inspection</module>
+		<module>redirector</module>
 
 		<!-- extensions -->
 		<module>extension-externalio</module>
@@ -42,6 +43,7 @@
 		<module>extension-windgate</module>
 		<module>extension-yaess</module>
 		<module>extension-cleanup</module>
+		<module>extension-redirector</module>
 		<module>extension-test-moderator</module>
 
 		<!-- testing utilities -->

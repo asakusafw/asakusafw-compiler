@@ -13,7 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.asakusafw.lang.tool.redirector.mock;
+package com.asakusafw.lang.compiler.redirector.mock;
+
+
 
 @SuppressWarnings("javadoc")
 public class MockCaller {

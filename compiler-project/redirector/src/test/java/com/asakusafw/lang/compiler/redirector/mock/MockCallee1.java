@@ -13,16 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.asakusafw.lang.tool.redirector.mock;
+package com.asakusafw.lang.compiler.redirector.mock;
 
 @SuppressWarnings("javadoc")
-public class MockCaller {
+public class MockCallee1 {
 
-    @Override
-    public String toString() {
-        return String.format("%s:%s:%s",
-                new MockCallee0().get(),
-                MockCallee0.call(),
-                MockCallee1.call());
+    public static String call() {
+        return "1";
     }
 }

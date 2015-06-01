@@ -13,9 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.asakusafw.lang.tool.redirector;
+package com.asakusafw.lang.compiler.redirector;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.text.MessageFormat;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -71,6 +77,36 @@ public class ZipRewriter {
             } else {
                 LOG.debug("    copy file: {}", entry.getName()); //$NON-NLS-1$
                 Util.copy(input, output);
+            }
+        }
+    }
+
+    /**
+     * Rewrite entries in the ZIP archive file.
+     * @param file the target ZIP file
+     * @throws IOException if failed to rewrite by I/O error
+     */
+    public void rewrite(File file) throws IOException {
+        LOG.debug("rewrting JAR file: {}", file); //$NON-NLS-1$
+        File temporary = File.createTempFile("redirect-", ".zip"); //$NON-NLS-1$ //$NON-NLS-2$
+        try {
+            try (ZipInputStream input = new ZipInputStream(new FileInputStream(file));
+                    ZipOutputStream output = new ZipOutputStream(new FileOutputStream(temporary))) {
+                rewrite(input, output);
+            }
+            try (InputStream input = new FileInputStream(temporary);
+                    OutputStream output = new FileOutputStream(file)) {
+                Util.copy(input, output);
+            }
+        } catch (IOException e) {
+            throw new IOException(MessageFormat.format(
+                    "failed to rewrite JAR file: {0}",
+                    file), e);
+        } finally {
+            if (temporary.isFile() && temporary.delete() == false) {
+                LOG.warn(MessageFormat.format(
+                        "failed to delete a temporary file: {0}",
+                        temporary));
             }
         }
     }

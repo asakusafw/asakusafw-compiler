@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.asakusafw.lang.tool.redirector;
+package com.asakusafw.lang.compiler.redirector;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -25,13 +25,11 @@ import java.io.IOException;
 import org.junit.Test;
 import org.objectweb.asm.Type;
 
-import com.asakusafw.lang.tool.redirector.ClassRewriter;
-import com.asakusafw.lang.tool.redirector.RedirectRule;
-import com.asakusafw.lang.tool.redirector.mock.MockCallee0;
-import com.asakusafw.lang.tool.redirector.mock.MockCallee1;
-import com.asakusafw.lang.tool.redirector.mock.MockCallee2;
-import com.asakusafw.lang.tool.redirector.mock.MockCallee3;
-import com.asakusafw.lang.tool.redirector.mock.MockCaller;
+import com.asakusafw.lang.compiler.redirector.mock.MockCallee0;
+import com.asakusafw.lang.compiler.redirector.mock.MockCallee1;
+import com.asakusafw.lang.compiler.redirector.mock.MockCallee2;
+import com.asakusafw.lang.compiler.redirector.mock.MockCallee3;
+import com.asakusafw.lang.compiler.redirector.mock.MockCaller;
 
 /**
  * Test for {@link ClassRewriter}.

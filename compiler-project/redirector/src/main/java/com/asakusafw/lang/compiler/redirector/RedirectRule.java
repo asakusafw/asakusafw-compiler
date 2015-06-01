@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.asakusafw.lang.tool.redirector;
+package com.asakusafw.lang.compiler.redirector;
 
 import java.text.MessageFormat;
 import java.util.HashMap;
@@ -27,6 +27,14 @@ import org.objectweb.asm.Type;
 public class RedirectRule {
 
     private final Map<Type, Type> typeMapping = new HashMap<>();
+
+    /**
+     * Returns whether this rule is empty or not.
+     * @return {@code true} if this rule is empty, otherwise {@code false}
+     */
+    public boolean isEmpty() {
+        return typeMapping.isEmpty();
+    }
 
     /**
      * Adds a mapping rule.

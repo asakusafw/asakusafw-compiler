@@ -13,16 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.asakusafw.lang.tool.redirector.mock;
-
-@SuppressWarnings("javadoc")
-public class MockCaller {
-
-    @Override
-    public String toString() {
-        return String.format("%s:%s:%s",
-                new MockCallee0().get(),
-                MockCallee0.call(),
-                MockCallee1.call());
-    }
-}
+/**
+ * API redirector tool classes.
+ */
+package com.asakusafw.lang.compiler.redirector;

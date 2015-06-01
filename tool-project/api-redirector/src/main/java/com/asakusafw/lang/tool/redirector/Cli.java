@@ -42,6 +42,9 @@ import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.asakusafw.lang.compiler.redirector.RedirectRule;
+import com.asakusafw.lang.compiler.redirector.ZipRewriter;
+
 /**
  * CLI for API invocation redirector.
  *
