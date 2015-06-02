@@ -15,6 +15,9 @@
  */
 package com.asakusafw.lang.compiler.common;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Utilities for {@link Predicate}.
  */
@@ -69,11 +72,16 @@ public final class Predicates {
      * @param b the second predicate
      * @return {@code AND} predicate
      */
-    public static <T> Predicate<T> and(final Predicate<? super T> a, final Predicate<? super T> b) {
-        return new Predicate<T>() {
+    public static <T> Predicate<T> and(Predicate<? super T> a, Predicate<? super T> b) {
+        return new Composite<T>("All", a, b) { //$NON-NLS-1$
             @Override
             public boolean apply(T argument) {
-                return a.apply(argument) && b.apply(argument);
+                for (Predicate<? super T> p : elements) {
+                    if (p.apply(argument) == false) {
+                        return false;
+                    }
+                }
+                return true;
             }
         };
     }
@@ -86,11 +94,42 @@ public final class Predicates {
      * @return {@code OR} predicate
      */
     public static <T> Predicate<T> or(final Predicate<? super T> a, final Predicate<? super T> b) {
-        return new Predicate<T>() {
+        return new Composite<T>("Exists", a, b) { //$NON-NLS-1$
             @Override
             public boolean apply(T argument) {
-                return a.apply(argument) || b.apply(argument);
+                for (Predicate<? super T> p : elements) {
+                    if (p.apply(argument)) {
+                        return true;
+                    }
+                }
+                return false;
             }
         };
+    }
+
+    private abstract static class Composite<T> implements Predicate<T> {
+
+        private final String operator;
+
+        final List<Predicate<? super T>> elements = new ArrayList<>();
+
+        Composite(String operator, Predicate<? super T> a, Predicate<? super T> b) {
+            this.operator = operator;
+            add(a);
+            add(b);
+        }
+
+        private void add(Predicate<? super T> p) {
+            if (p.getClass() == getClass()) {
+                elements.addAll(((Composite<? super T>) p).elements);
+            } else {
+                elements.add(p);
+            }
+        }
+
+        @Override
+        public String toString() {
+            return operator + elements;
+        }
     }
 }

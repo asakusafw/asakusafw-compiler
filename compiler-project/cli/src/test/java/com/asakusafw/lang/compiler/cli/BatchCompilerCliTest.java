@@ -157,14 +157,51 @@ public class BatchCompilerCliTest {
         assertThat(conf.failOnError, contains(true));
         assertThat(conf.batchIdPrefix, contains("prefix."));
 
-        assertThat(conf.sourcePredicate.get(), hasSize(2));
-        Predicate<? super Class<?>> p = Predicates.and(conf.sourcePredicate.get(0), conf.sourcePredicate.get(1));
+        Predicate<? super Class<?>> p = predicate(conf.sourcePredicate);
         assertThat(p.apply(ByteBuffer.class), is(true));
         assertThat(p.apply(ByteChannel.class), is(false));
         assertThat(p.apply(StringBuffer.class), is(false));
 
         assertThat(conf.properties, hasEntry("a", "b"));
         assertThat(conf.properties, hasEntry("c", "d"));
+    }
+
+    /**
+     * {@code --include} multiple patterns.
+     * @throws Exception if failed
+     */
+    @Test
+    public void parse_include() throws Exception {
+        Configuration conf = BatchCompilerCli.parse(strings(new Object[] {
+                "--explore", deployer.newFolder(),
+                "--output", deployer.newFolder(),
+                "--include", "*.String*,*Buffer",
+        }));
+        Predicate<? super Class<?>> p = predicate(conf.sourcePredicate);
+        assertThat(p.apply(String.class), is(true));
+        assertThat(p.apply(StringBuilder.class), is(true));
+        assertThat(p.apply(ByteBuffer.class), is(true));
+        assertThat(p.apply(Integer.class), is(false));
+        assertThat(p.apply(ByteChannel.class), is(false));
+    }
+
+    /**
+     * {@code --exclude} multiple patterns.
+     * @throws Exception if failed
+     */
+    @Test
+    public void parse_exclude() throws Exception {
+        Configuration conf = BatchCompilerCli.parse(strings(new Object[] {
+                "--explore", deployer.newFolder(),
+                "--output", deployer.newFolder(),
+                "--exclude", "*.String*,*Buffer",
+        }));
+        Predicate<? super Class<?>> p = predicate(conf.sourcePredicate);
+        assertThat(p.apply(String.class), is(false));
+        assertThat(p.apply(StringBuilder.class), is(false));
+        assertThat(p.apply(ByteBuffer.class), is(false));
+        assertThat(p.apply(Integer.class), is(true));
+        assertThat(p.apply(ByteChannel.class), is(true));
     }
 
     /**
@@ -442,6 +479,14 @@ public class BatchCompilerCliTest {
             buf.append(aClass.getName());
         }
         return buf.toString();
+    }
+
+    private Predicate<? super Class<?>> predicate(Iterable<? extends Predicate<? super Class<?>>> elements) {
+        Predicate<? super Class<?>> current = Predicates.anything();
+        for (Predicate<? super Class<?>> p : elements) {
+            current = Predicates.and(current, p);
+        }
+        return current;
     }
 
     private String files(File... files) {

@@ -93,12 +93,12 @@ import com.asakusafw.lang.compiler.packaging.ResourceUtil;
  * <dd>external library paths</dd>
  * <dd>default: <em>(empty)</em></dd>
  *
- * <dt><code>--include &lt;class-name-pattern&gt;</code> <em>(optional)</em></dt>
- * <dd>accepting batch class name pattern ({@code "*"} as a wildcard character)</dd>
+ * <dt><code>--include &lt;class-pattern1[,class-pattern2[,..]]&gt;</code> <em>(optional)</em></dt>
+ * <dd>accepting batch class name patterns ({@code "*"} as a wildcard character)</dd>
  * <dd>default: <em>(accepts anything)</em></dd>
  *
- * <dt><code>--exclude &lt;class-name-pattern&gt;</code> <em>(optional)</em></dt>
- * <dd>denying batch class name pattern ({@code "*"} as a wildcard character)</dd>
+ * <dt><code>--exclude &lt;class-pattern1[,class-pattern2[,..]]&gt;</code> <em>(optional)</em></dt>
+ * <dd>denying batch class name patterns ({@code "*"} as a wildcard character)</dd>
  * <dd>default: <em>(denies nothing)</em></dd>
  *
  * <dt><code>--dataModelProcessors &lt;class-name1[,class-name2[,..]]&gt;</code> <em>(optional)</em></dt>
@@ -232,8 +232,8 @@ public final class BatchCompilerCli {
         results.batchProcessors.addAll(parseClasses(cmd, opts.batchProcessors));
         results.jobflowProcessors.addAll(parseClasses(cmd, opts.jobflowProcessors));
         results.compilerParticipants.addAll(parseClasses(cmd, opts.compilerParticipants));
-        results.sourcePredicate.add(parsePattern(cmd, opts.include, false));
-        results.sourcePredicate.add(parsePattern(cmd, opts.exclude, true));
+        results.sourcePredicate.add(parsePatterns(cmd, opts.include, false));
+        results.sourcePredicate.add(parsePatterns(cmd, opts.exclude, true));
         results.runtimeWorkingDirectory.set(parse(cmd, opts.runtimeWorkingDirectory));
         results.properties.putAll(parseProperties(cmd, opts.properties));
         results.failOnError.set(cmd.hasOption(opts.failOnError.getLongOpt()));
@@ -255,16 +255,28 @@ public final class BatchCompilerCli {
         return value;
     }
 
-    private static Predicate<? super Class<?>> parsePattern(CommandLine cmd, Option option, boolean negate) {
+    private static Predicate<? super Class<?>> parsePatterns(CommandLine cmd, Option option, boolean negate) {
         String value = parse(cmd, option);
         if (value == null) {
             return null;
         }
-        Predicate<? super Class<?>> resolved = resolvePattern(option, value);
-        if (negate) {
-            resolved = Predicates.not(resolved);
+        Predicate<? super Class<?>> current = null;
+        for (String segment : value.split(CLASS_SEPARATOR)) {
+            String s = segment.trim();
+            if (s.isEmpty()) {
+                continue;
+            }
+            Predicate<? super Class<?>> resolved = resolvePattern(option, s);
+            if (current == null) {
+                current = resolved;
+            } else {
+                current = Predicates.or(current, resolved);
+            }
         }
-        return resolved;
+        if (current != null && negate) {
+            current = Predicates.not(current);
+        }
+        return current;
     }
 
     private static File parseFile(CommandLine cmd, Option option, boolean check) {
@@ -562,7 +574,7 @@ public final class BatchCompilerCli {
 
     private static class Opts {
 
-        private static final String ARG_CLASS_PATTERN = "class-name-pattern"; //$NON-NLS-1$
+        private static final String ARG_CLASS_PATTERNS = "class-pattern1[,class-pattern1[,..]]"; //$NON-NLS-1$
 
         private static final String ARG_CLASS = "class-name"; //$NON-NLS-1$
 
@@ -599,12 +611,12 @@ public final class BatchCompilerCli {
                 .withArgumentDescription(ARG_LIBRARIES);
 
         final Option include = optional("include", 1) //$NON-NLS-1$
-                .withDescription("included batch class name pattern")
-                .withArgumentDescription(ARG_CLASS_PATTERN);
+                .withDescription("included batch class name patterns")
+                .withArgumentDescription(ARG_CLASS_PATTERNS);
 
         final Option exclude = optional("exclude", 1) //$NON-NLS-1$
-                .withDescription("excluded batch class name pattern")
-                .withArgumentDescription(ARG_CLASS_PATTERN);
+                .withDescription("excluded batch class name patterns")
+                .withArgumentDescription(ARG_CLASS_PATTERNS);
 
         final Option dataModelProcessors = optional("dataModelProcessors", 1) //$NON-NLS-1$
                 .withDescription("custom data model processor classes")
