@@ -20,11 +20,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.objectweb.asm.Type;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Represents redirect rules.
  */
 public class RedirectRule {
+
+    static final Logger LOG = LoggerFactory.getLogger(RedirectRule.class);
 
     private final Map<Type, Type> typeMapping = new HashMap<>();
 

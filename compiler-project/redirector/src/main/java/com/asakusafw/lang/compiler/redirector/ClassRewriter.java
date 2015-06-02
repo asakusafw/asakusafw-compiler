@@ -54,7 +54,11 @@ public class ClassRewriter {
      */
     public void rewrite(InputStream input, OutputStream output) throws IOException {
         ClassReader reader = new ClassReader(input);
-        ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
+
+        /* NOTE: Avoid ClassWriter.COMPUTE_MAX|COMPUTE_FRAME
+         * This may occur ClassWriter.getCommonSupreClass(), and then it may load the target classes.
+         */
+        ClassWriter writer = new ClassWriter(0);
         reader.accept(new ClassEditor(writer), 0);
         output.write(writer.toByteArray());
     }
