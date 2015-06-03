@@ -16,5 +16,6 @@
 	<modules>
 		<module>api-redirector</module>
 		<module>yaess-compress</module>
+		<module>tool-launcher</module>
 	</modules>
 </project>
