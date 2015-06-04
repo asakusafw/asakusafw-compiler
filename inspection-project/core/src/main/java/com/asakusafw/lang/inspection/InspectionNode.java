@@ -24,7 +24,7 @@ import java.util.Set;
 /**
  * Represents a node for inspection.
  */
-public class InspectionNode {
+public class InspectionNode implements WithId {
 
     private final String id;
 
@@ -52,6 +52,7 @@ public class InspectionNode {
      * Returns the ID of this node.
      * @return the node ID
      */
+    @Override
     public String getId() {
         return id;
     }
@@ -149,7 +150,7 @@ public class InspectionNode {
     /**
      * Represents a port of {@link InspectionNode}.
      */
-    public static class Port {
+    public static class Port implements WithId {
 
         private final String id;
 
@@ -169,6 +170,7 @@ public class InspectionNode {
          * Returns the ID of this port.
          * @return the port ID
          */
+        @Override
         public String getId() {
             return id;
         }

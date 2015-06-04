@@ -16,10 +16,14 @@
 package com.asakusafw.lang.inspection.json;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import com.asakusafw.lang.inspection.InspectionNode;
 import com.asakusafw.lang.inspection.InspectionNode.Port;
+import com.asakusafw.lang.inspection.WithId;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -45,7 +49,7 @@ public class NodeAdapter implements JsonAdapter<InspectionNode> {
 
     private static final String KEY_ELEMENTS = "elements";
 
-    private static final Type TYPE_PORTS = (new TypeToken<Map<String, Port>>() {
+    private static final Type TYPE_PORTS = (new TypeToken<List<Port>>() {
         // empty
     }).getType();
 
@@ -53,7 +57,7 @@ public class NodeAdapter implements JsonAdapter<InspectionNode> {
         // empty
     }).getType();
 
-    private static final Type TYPE_NODES = (new TypeToken<Map<String, InspectionNode>>() {
+    private static final Type TYPE_NODES = (new TypeToken<List<InspectionNode>>() {
         // empty
     }).getType();
 
@@ -68,16 +72,16 @@ public class NodeAdapter implements JsonAdapter<InspectionNode> {
         JsonObject object = (JsonObject) json;
         String id = object.get(KEY_ID).getAsString();
         String title = object.get(KEY_TITLE).getAsString();
-        Map<String, Port> inputs = context.deserialize(object.get(KEY_INPUTS), TYPE_PORTS);
-        Map<String, Port> outputs = context.deserialize(object.get(KEY_OUTPUTS), TYPE_PORTS);
+        List<Port> inputs = context.deserialize(object.get(KEY_INPUTS), TYPE_PORTS);
+        List<Port> outputs = context.deserialize(object.get(KEY_OUTPUTS), TYPE_PORTS);
         Map<String, String> properties = context.deserialize(object.get(KEY_PROPERTIES), TYPE_PROPERTIES);
-        Map<String, InspectionNode> elements = context.deserialize(object.get(KEY_ELEMENTS), TYPE_NODES);
+        List<InspectionNode> elements = context.deserialize(object.get(KEY_ELEMENTS), TYPE_NODES);
 
         InspectionNode result = new InspectionNode(id, title);
-        result.getInputs().putAll(inputs);
-        result.getOutputs().putAll(outputs);
+        put(inputs, result.getInputs());
+        put(outputs, result.getOutputs());
         result.getProperties().putAll(properties);
-        result.getElements().putAll(elements);
+        put(elements, result.getElements());
         return result;
     }
 
@@ -89,10 +93,20 @@ public class NodeAdapter implements JsonAdapter<InspectionNode> {
         JsonObject result = new JsonObject();
         result.add(KEY_ID, new JsonPrimitive(src.getId()));
         result.add(KEY_TITLE, new JsonPrimitive(src.getTitle()));
-        result.add(KEY_INPUTS, context.serialize(src.getInputs(), TYPE_PORTS));
-        result.add(KEY_OUTPUTS, context.serialize(src.getOutputs(), TYPE_PORTS));
+        result.add(KEY_INPUTS, context.serialize(extract(src.getInputs()), TYPE_PORTS));
+        result.add(KEY_OUTPUTS, context.serialize(extract(src.getOutputs()), TYPE_PORTS));
         result.add(KEY_PROPERTIES, context.serialize(src.getProperties(), TYPE_PROPERTIES));
-        result.add(KEY_ELEMENTS, context.serialize(src.getElements(), TYPE_NODES));
+        result.add(KEY_ELEMENTS, context.serialize(extract(src.getElements()), TYPE_NODES));
         return result;
+    }
+
+    private <T extends WithId> List<T> extract(Map<String, ? extends T> map) {
+        return new ArrayList<>(map.values());
+    }
+
+    private <T extends WithId> void put(Collection<? extends T> elements, Map<String, ? super T> target) {
+        for (T element : elements) {
+            target.put(element.getId(), element);
+        }
     }
 }
