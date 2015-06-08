@@ -16,6 +16,7 @@
 package com.asakusafw.lang.compiler.core.dummy;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -29,6 +30,7 @@ import com.asakusafw.lang.compiler.api.reference.ExternalOutputReference;
 import com.asakusafw.lang.compiler.api.reference.TaskReference;
 import com.asakusafw.lang.compiler.common.Location;
 import com.asakusafw.lang.compiler.core.JobflowCompiler;
+import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.description.Descriptions;
 import com.asakusafw.lang.compiler.model.info.ExternalInputInfo;
 import com.asakusafw.lang.compiler.model.info.ExternalOutputInfo;
@@ -39,6 +41,23 @@ import com.asakusafw.lang.compiler.model.info.ExternalOutputInfo;
 public class SimpleExternalPortProcessor implements ExternalPortProcessor {
 
     private static final String MODULE_NAME = SimpleExternalPortProcessor.class.getSimpleName().toLowerCase();
+
+    private final List<?> adapters;
+
+    /**
+     * Creates a new instance.
+     */
+    public SimpleExternalPortProcessor() {
+        this(Collections.emptyList());
+    }
+
+    /**
+     * Creates a new instance.
+     * @param adapters the adapter objects
+     */
+    public SimpleExternalPortProcessor(List<?> adapters) {
+        this.adapters = new ArrayList<>(adapters);
+    }
 
     /**
      * Returns whether the processor was activated in the context.
@@ -63,17 +82,35 @@ public class SimpleExternalPortProcessor implements ExternalPortProcessor {
 
     @Override
     public ExternalInputInfo analyzeInput(AnalyzeContext context, String name, Object description) {
+        return createInput(Descriptions.classOf(description.getClass()));
+    }
+
+    @Override
+    public ExternalOutputInfo analyzeOutput(AnalyzeContext context, String name, Object description) {
+        return createOutput(Descriptions.classOf(description.getClass()));
+    }
+
+    /**
+     * Creates {@link ExternalInputInfo} for this processor.
+     * @param descriptionClass the description class
+     * @return the {@link ExternalInputInfo}
+     */
+    public static ExternalInputInfo createInput(ClassDescription descriptionClass) {
         return new ExternalInputInfo.Basic(
-                Descriptions.classOf(description.getClass()),
+                descriptionClass,
                 MODULE_NAME,
                 Descriptions.classOf(String.class),
                 ExternalInputInfo.DataSize.UNKNOWN);
     }
 
-    @Override
-    public ExternalOutputInfo analyzeOutput(AnalyzeContext context, String name, Object description) {
+    /**
+     * Creates {@link ExternalOutputInfo} for this processor.
+     * @param descriptionClass the description class
+     * @return the {@link ExternalOutputInfo}
+     */
+    public static ExternalOutputInfo createOutput(ClassDescription descriptionClass) {
         return new ExternalOutputInfo.Basic(
-                Descriptions.classOf(description.getClass()),
+                descriptionClass,
                 MODULE_NAME,
                 Descriptions.classOf(String.class));
     }
@@ -105,5 +142,15 @@ public class SimpleExternalPortProcessor implements ExternalPortProcessor {
                 Location.of("simple.sh"),
                 Collections.<CommandToken>emptyList(),
                 Collections.<TaskReference>emptyList()));
+    }
+
+    @Override
+    public <T> T getAdaper(AnalyzeContext context, Class<T> adapterType, Class<?> descriptionClass) {
+        for (Object adapter : adapters) {
+            if (adapterType.isInstance(adapter)) {
+                return adapterType.cast(adapter);
+            }
+        }
+        return null;
     }
 }

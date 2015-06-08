@@ -85,4 +85,9 @@ public class DummyExternalPortProcessor implements ExternalPortProcessor, DummyE
             throws IOException {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public <T> T getAdaper(AnalyzeContext context, Class<T> adapterType, Class<?> descriptionClass) {
+        return null;
+    }
 }

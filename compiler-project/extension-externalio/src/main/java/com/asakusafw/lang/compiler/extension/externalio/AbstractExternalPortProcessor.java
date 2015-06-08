@@ -163,6 +163,24 @@ public abstract class AbstractExternalPortProcessor<
         return new ExternalOutputReference(name, info, internalOutputPaths);
     }
 
+    @Override
+    public <T> T getAdaper(AnalyzeContext context, Class<T> adapterType, Class<?> descriptionClass) {
+        if (isSupported(context, descriptionClass)) {
+            return getAdapter(adapterType);
+        }
+        return null;
+    }
+
+    /**
+     * Returns the adapter object.
+     * @param <T> the adapter type
+     * @param adapterType the adapter type
+     * @return the adapter object for the type, or {@code null} if this does not support the target adapter type
+     */
+    protected <T> T getAdapter(Class<T> adapterType) {
+        return null;
+    }
+
     private static ExternalInputInfo.DataSize convert(ImporterDescription.DataSize value) {
         if (value == null) {
             return ExternalInputInfo.DataSize.UNKNOWN;

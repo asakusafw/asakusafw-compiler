@@ -15,6 +15,7 @@
  */
 package com.asakusafw.lang.compiler.api.testing;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -47,6 +48,8 @@ public class MockExternalPortProcessor implements ExternalPortProcessor {
 
     private final Location inputPrefix;
 
+    private final List<?> adapters;
+
     /**
      * Creates a new instance.
      */
@@ -59,7 +62,17 @@ public class MockExternalPortProcessor implements ExternalPortProcessor {
      * @param inputPrefix the input path prefix
      */
     public MockExternalPortProcessor(Location inputPrefix) {
+        this(inputPrefix, Collections.emptyList());
+    }
+
+    /**
+     * Creates a new instance.
+     * @param inputPrefix the input path prefix
+     * @param adapters the adapter objects for this
+     */
+    public MockExternalPortProcessor(Location inputPrefix, List<?> adapters) {
         this.inputPrefix = inputPrefix;
+        this.adapters = new ArrayList<>(adapters);
     }
 
     @Override
@@ -106,5 +119,15 @@ public class MockExternalPortProcessor implements ExternalPortProcessor {
     @Override
     public void process(Context context, List<ExternalInputReference> inputs, List<ExternalOutputReference> outputs) {
         return;
+    }
+
+    @Override
+    public <T> T getAdaper(AnalyzeContext context, Class<T> adapterType, Class<?> descriptionClass) {
+        for (Object adapter : adapters) {
+            if (adapterType.isInstance(adapter)) {
+                return adapterType.cast(adapter);
+            }
+        }
+        return null;
     }
 }

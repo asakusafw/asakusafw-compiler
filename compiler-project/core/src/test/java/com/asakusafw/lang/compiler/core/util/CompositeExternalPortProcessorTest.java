@@ -216,6 +216,19 @@ public class CompositeExternalPortProcessorTest extends CompilerTestRoot {
         assertThat(b.worked, is(true));
     }
 
+    /**
+     * get adapter.
+     */
+    @Test
+    public void getAdapter() {
+        ExternalPortProcessor c = new DummyProcessor("c", DummyInC.class, DummyOutC.class, "Hello, world!");
+        ExternalPortProcessor composite = CompositeExternalPortProcessor.composite(Arrays.asList(a, c));
+        ExternalPortProcessor.Context context = context();
+        assertThat(composite.getAdaper(context, String.class, DummyInA.class), is(nullValue()));
+        assertThat(composite.getAdaper(context, String.class, DummyInB.class), is(nullValue()));
+        assertThat(composite.getAdaper(context, String.class, DummyInC.class), is("Hello, world!"));
+    }
+
     private Map<String, ExternalInputInfo> prepInputMap(
             ExternalPortProcessor.Context context,
             ExternalPortProcessor processor,
@@ -314,14 +327,17 @@ public class CompositeExternalPortProcessorTest extends CompilerTestRoot {
 
         private final Class<?> supportedOutputClass;
 
+        private final List<Object> adapters;
+
         boolean validated;
 
         boolean worked;
 
-        public DummyProcessor(String moduleName, Class<?> input, Class<?> output) {
+        public DummyProcessor(String moduleName, Class<?> input, Class<?> output, Object... adapters) {
             this.moduleName = moduleName;
             this.supportedInputClass = input;
             this.supportedOutputClass = output;
+            this.adapters = Arrays.asList(adapters);
         }
 
         @Override
@@ -378,6 +394,16 @@ public class CompositeExternalPortProcessorTest extends CompilerTestRoot {
                 assertThat(port.getDescriptionClass(), is(Descriptions.classOf(supportedOutputClass)));
             }
             worked = true;
+        }
+
+        @Override
+        public <T> T getAdaper(AnalyzeContext context, Class<T> adapterType, Class<?> descriptionClass) {
+            for (Object adapter : adapters) {
+                if (adapterType.isInstance(adapter)) {
+                    return adapterType.cast(adapter);
+                }
+            }
+            return null;
         }
     }
 }

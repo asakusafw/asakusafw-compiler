@@ -183,6 +183,15 @@ public class CompositeExternalPortProcessor extends AbstractCompositeElement<Ext
         }
     }
 
+    @Override
+    public <T> T getAdaper(AnalyzeContext context, Class<T> adapterType, Class<?> descriptionClass) {
+        ExternalPortProcessor supported = getSupported(context, descriptionClass);
+        if (supported == null) {
+            return null;
+        }
+        return supported.getAdaper(context, adapterType, descriptionClass);
+    }
+
     private static final class InfoPair {
 
         final Map<String, ExternalInputInfo> inputs = new LinkedHashMap<>();

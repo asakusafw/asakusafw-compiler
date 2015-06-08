@@ -113,6 +113,16 @@ public interface ExternalPortProcessor {
             List<ExternalOutputReference> outputs) throws IOException;
 
     /**
+     * Returns the adapter object for processing the target description type.
+     * @param <T> the adapter type
+     * @param context the current context
+     * @param adapterType the adapter type
+     * @param descriptionClass the target external input/output description type
+     * @return the corresponded adapter object, or {@code null} if this does not support the target adapter type
+     */
+    <T> T getAdaper(AnalyzeContext context, Class<T> adapterType, Class<?> descriptionClass);
+
+    /**
      * Represents a context object for {@link ExternalPortProcessor} only for analyzing DSL descriptions.
      */
     public interface AnalyzeContext {
