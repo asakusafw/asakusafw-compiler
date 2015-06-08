@@ -195,7 +195,7 @@ public class DirectFileIoPortProcessor
         return Location.of(path).toPath() + '/';
     }
 
-    private ResolvedInput restoreModel(AnalyzeContext context, String name, ExternalInputInfo info) {
+    static ResolvedInput restoreModel(AnalyzeContext context, String name, ExternalInputInfo info) {
         DirectFileInputModel model = resolveContents(context, info, DirectFileInputModel.class);
         ValidateContext validate = new ValidateContext(context, info.getDescriptionClass());
         analyzeModel(validate, model, info.getDataModelClass());
@@ -203,7 +203,7 @@ public class DirectFileIoPortProcessor
         return new ResolvedInput(name, info, model);
     }
 
-    private ResolvedOutput restoreModel(AnalyzeContext context, String name, ExternalOutputInfo info) {
+    static ResolvedOutput restoreModel(AnalyzeContext context, String name, ExternalOutputInfo info) {
         DirectFileOutputModel model = resolveContents(context, info, DirectFileOutputModel.class);
         ValidateContext validate = new ValidateContext(context, info.getDescriptionClass());
         analyzeModel(validate, model, info.getDataModelClass());
@@ -211,7 +211,7 @@ public class DirectFileIoPortProcessor
         return new ResolvedOutput(name, info, model);
     }
 
-    private <T> T resolveContents(AnalyzeContext context, ExternalPortInfo info, Class<T> type) {
+    private static <T> T resolveContents(AnalyzeContext context, ExternalPortInfo info, Class<T> type) {
         ValueDescription contents = info.getContents();
         if (contents == null) {
             throw new DiagnosticException(Diagnostic.Level.ERROR, MessageFormat.format(
@@ -228,20 +228,20 @@ public class DirectFileIoPortProcessor
         }
     }
 
-    private void analyzeModel(ValidateContext context, DirectFileInputModel model, ClassDescription dataType) {
+    private static void analyzeModel(ValidateContext context, DirectFileInputModel model, ClassDescription dataType) {
         checkBasePath(context, model.getBasePath());
         checkInputPattern(context, model.getResourcePattern());
         checkFormatClass(context, model.getFormatClass(), dataType);
     }
 
-    private void analyzeModel(ValidateContext context, DirectFileOutputModel model, ClassDescription dataType) {
+    private static void analyzeModel(ValidateContext context, DirectFileOutputModel model, ClassDescription dataType) {
         checkBasePath(context, model.getBasePath());
         checkOutput(context, model, dataType);
         checkDeletePatterns(context, model.getDeletePatterns());
         checkFormatClass(context, model.getFormatClass(), dataType);
     }
 
-    private void checkBasePath(ValidateContext context, String value) {
+    private static void checkBasePath(ValidateContext context, String value) {
         try {
             FilePattern pattern = FilePattern.compile(value);
             if (pattern.containsTraverse()) {
@@ -266,7 +266,7 @@ public class DirectFileIoPortProcessor
         }
     }
 
-    private void checkInputPattern(ValidateContext context, String value) {
+    private static void checkInputPattern(ValidateContext context, String value) {
         try {
             FilePattern.compile(value);
         } catch (IllegalArgumentException e) {
@@ -277,7 +277,7 @@ public class DirectFileIoPortProcessor
         }
     }
 
-    private void checkOutput(ValidateContext context, DirectFileOutputModel model, ClassDescription dataType) {
+    private static void checkOutput(ValidateContext context, DirectFileOutputModel model, ClassDescription dataType) {
         DataModelReference dataModel = context.context.getDataModelLoader().load(dataType);
         List<OutputPattern.CompiledSegment> resourcePattern;
         try {
@@ -319,7 +319,7 @@ public class DirectFileIoPortProcessor
         }
     }
 
-    private void checkDeletePatterns(ValidateContext context, List<String> values) {
+    private static void checkDeletePatterns(ValidateContext context, List<String> values) {
         for (int index = 0, n = values.size(); index < n; index++) {
             String value = values.get(index);
             try {
@@ -334,7 +334,8 @@ public class DirectFileIoPortProcessor
         }
     }
 
-    private void checkFormatClass(ValidateContext context, ClassDescription formatClass, ClassDescription dataType) {
+    private static void checkFormatClass(
+            ValidateContext context, ClassDescription formatClass, ClassDescription dataType) {
         Class<?> resolvedDataType;
         try {
             resolvedDataType = dataType.resolve(context.context.getClassLoader());
@@ -557,6 +558,14 @@ public class DirectFileIoPortProcessor
                 Collections.<TaskReference>emptyList()));
     }
 
+    @Override
+    protected <T> T getAdapter(Class<T> adapterType) {
+        if (adapterType.isAssignableFrom(DirectFileInputFormatInfoSupport.class)) {
+            return adapterType.cast(new DirectFileInputFormatInfoSupport());
+        }
+        return super.getAdapter(adapterType);
+    }
+
     private static class ValidateContext {
 
         final AnalyzeContext context;
@@ -585,7 +594,7 @@ public class DirectFileIoPortProcessor
         }
     }
 
-    private static class ResolvedInput {
+    static class ResolvedInput {
 
         final ExternalInputInfo info;
 
@@ -597,7 +606,7 @@ public class DirectFileIoPortProcessor
         }
     }
 
-    private static class ResolvedOutput {
+    static class ResolvedOutput {
 
         final ExternalOutputInfo info;
 
