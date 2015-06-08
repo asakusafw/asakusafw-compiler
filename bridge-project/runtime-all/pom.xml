@@ -52,6 +52,11 @@
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
+			<artifactId>asakusa-bridge-runtime-hadoop</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>asakusa-bridge-runtime-directio</artifactId>
 			<version>${project.version}</version>
 		</dependency>

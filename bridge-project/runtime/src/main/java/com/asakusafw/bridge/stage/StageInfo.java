@@ -30,6 +30,12 @@ import com.asakusafw.runtime.util.VariableTable;
  */
 public class StageInfo {
 
+    /**
+     * The key name for storing this class object in serialized form.
+     * @see #serialize()
+     */
+    public static final String KEY_NAME = "com.asakusafw.bridge.stage.info";
+
     private static final String KEY_BATCH_ARGUMENTS = "args"; //$NON-NLS-1$
 
     private static final char ESCAPE = '\\';

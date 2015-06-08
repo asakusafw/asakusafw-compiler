@@ -2,24 +2,34 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<name>Asakusa Bridge Core APIs</name>
+	<name>Asakusa Hadoop Bridge API</name>
 	<groupId>com.asakusafw.bridge</groupId>
-	<artifactId>asakusa-bridge-runtime</artifactId>
+	<artifactId>asakusa-bridge-runtime-hadoop</artifactId>
 	<parent>
 		<artifactId>project</artifactId>
 		<groupId>com.asakusafw.bridge</groupId>
 		<version>0.1-SNAPSHOT</version>
 	</parent>
 
-	<description>Asakusa Bridge Core APIs</description>
+	<description>Asakusa Hadoop Bridge API</description>
 
 	<packaging>jar</packaging>
 
 	<dependencies>
 		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>asakusa-bridge-runtime</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>${asakusafw.groupId}</groupId>
 			<artifactId>asakusa-runtime</artifactId>
 			<version>${asakusafw.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.hadoop</groupId>
+			<artifactId>hadoop-core</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -30,11 +40,6 @@
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-simple</artifactId>
 			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.hadoop</groupId>
-			<artifactId>hadoop-core</artifactId>
-			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.hamcrest</groupId>
