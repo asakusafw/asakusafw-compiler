@@ -31,7 +31,7 @@ import com.asakusafw.lang.compiler.api.testing.MockJobflowProcessorContext;
 import com.asakusafw.lang.compiler.common.testing.FileEditor;
 import com.asakusafw.lang.compiler.javac.JavaSourceExtension;
 import com.asakusafw.lang.compiler.javac.testing.JavaCompiler;
-import com.asakusafw.lang.compiler.mapreduce.MapReduceRunner;
+import com.asakusafw.lang.compiler.mapreduce.testing.MapReduceRunner;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.graph.Jobflow;
 import com.asakusafw.lang.compiler.model.graph.OperatorGraph;

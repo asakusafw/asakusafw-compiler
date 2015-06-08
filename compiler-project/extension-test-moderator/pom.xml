@@ -93,6 +93,12 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>asakusa-compiler-mapreduce-testing</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>${asakusafw.groupId}</groupId>
 			<artifactId>asakusa-runtime-inprocess</artifactId>
 			<version>${asakusafw.version}</version>

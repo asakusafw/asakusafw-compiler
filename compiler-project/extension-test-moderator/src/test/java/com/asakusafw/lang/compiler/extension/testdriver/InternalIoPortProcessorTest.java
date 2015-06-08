@@ -56,7 +56,7 @@ import com.asakusafw.lang.compiler.extension.testdriver.mock.MockData;
 import com.asakusafw.lang.compiler.hadoop.HadoopTaskReference;
 import com.asakusafw.lang.compiler.javac.JavaSourceExtension;
 import com.asakusafw.lang.compiler.javac.testing.JavaCompiler;
-import com.asakusafw.lang.compiler.mapreduce.MapReduceRunner;
+import com.asakusafw.lang.compiler.mapreduce.testing.MapReduceRunner;
 import com.asakusafw.lang.compiler.model.description.ValueDescription;
 import com.asakusafw.lang.compiler.model.info.ExternalInputInfo;
 import com.asakusafw.lang.compiler.model.info.ExternalOutputInfo;

@@ -2,28 +2,39 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<name>Asakusa Hadoop Bridge API</name>
-	<groupId>com.asakusafw.bridge</groupId>
-	<artifactId>asakusa-bridge-runtime-hadoop</artifactId>
+	<name>Testing Utilities for Hadoop MapReduce Support</name>
+	<groupId>com.asakusafw.lang.compiler</groupId>
+	<artifactId>asakusa-compiler-mapreduce-testing</artifactId>
 	<parent>
 		<artifactId>project</artifactId>
-		<groupId>com.asakusafw.bridge</groupId>
+		<groupId>com.asakusafw.lang.compiler</groupId>
 		<version>0.1-SNAPSHOT</version>
 	</parent>
 
-	<description>Asakusa Hadoop Bridge API</description>
+	<description>Testing Utilities for Hadoop MapReduce Support</description>
 
 	<packaging>jar</packaging>
 
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>asakusa-bridge-runtime</artifactId>
+			<artifactId>asakusa-compiler-javac</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>asakusa-compiler-common-testing</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>${asakusafw.groupId}</groupId>
 			<artifactId>asakusa-runtime</artifactId>
+			<version>${asakusafw.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>${asakusafw.groupId}</groupId>
+			<artifactId>asakusa-runtime-inprocess</artifactId>
 			<version>${asakusafw.version}</version>
 			<scope>provided</scope>
 		</dependency>
@@ -42,19 +53,19 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.asakusafw.lang.compiler</groupId>
-			<artifactId>asakusa-compiler-mapreduce-testing</artifactId>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>asakusa-compiler-javac-testing</artifactId>
 			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.hamcrest</groupId>
 			<artifactId>hamcrest-library</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

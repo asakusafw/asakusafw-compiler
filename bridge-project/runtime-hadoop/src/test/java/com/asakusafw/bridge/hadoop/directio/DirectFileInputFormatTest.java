@@ -29,11 +29,11 @@ import org.junit.Test;
 import com.asakusafw.bridge.hadoop.ConfigurationEditor;
 import com.asakusafw.bridge.hadoop.InputFormatTester;
 import com.asakusafw.bridge.hadoop.InputFormatTester.Collector;
-import com.asakusafw.bridge.hadoop.directio.mock.DirectIoContext;
-import com.asakusafw.bridge.hadoop.directio.mock.MockData;
-import com.asakusafw.bridge.hadoop.directio.mock.MockDataFormat;
-import com.asakusafw.bridge.hadoop.directio.mock.WritableModelOutput;
 import com.asakusafw.bridge.stage.StageInfo;
+import com.asakusafw.lang.compiler.mapreduce.testing.mock.DirectIoContext;
+import com.asakusafw.lang.compiler.mapreduce.testing.mock.MockData;
+import com.asakusafw.lang.compiler.mapreduce.testing.mock.MockDataFormat;
+import com.asakusafw.lang.compiler.mapreduce.testing.mock.WritableModelOutput;
 import com.asakusafw.runtime.io.ModelOutput;
 
 /**

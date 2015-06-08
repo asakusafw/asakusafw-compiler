@@ -28,7 +28,7 @@ import com.asakusafw.lang.compiler.api.testing.MockDataModelLoader;
 import com.asakusafw.lang.compiler.extension.directio.OutputPattern.CompiledOrder;
 import com.asakusafw.lang.compiler.extension.directio.OutputPattern.CompiledSegment;
 import com.asakusafw.lang.compiler.extension.directio.OutputPattern.SourceKind;
-import com.asakusafw.lang.compiler.extension.directio.mock.MockData;
+import com.asakusafw.lang.compiler.mapreduce.testing.mock.MockData;
 import com.asakusafw.lang.compiler.model.PropertyName;
 import com.asakusafw.runtime.stage.directio.StringTemplate.Format;
 

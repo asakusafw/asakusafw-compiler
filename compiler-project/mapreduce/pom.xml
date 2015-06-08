@@ -34,12 +34,6 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>${asakusafw.groupId}</groupId>
-			<artifactId>asakusa-runtime-inprocess</artifactId>
-			<version>${asakusafw.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.apache.hadoop</groupId>
 			<artifactId>hadoop-core</artifactId>
 			<scope>provided</scope>
@@ -63,6 +57,18 @@
 			<groupId>${project.groupId}</groupId>
 			<artifactId>asakusa-compiler-javac-testing</artifactId>
 			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>asakusa-compiler-mapreduce-testing</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>${asakusafw.groupId}</groupId>
+			<artifactId>asakusa-runtime-inprocess</artifactId>
+			<version>${asakusafw.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

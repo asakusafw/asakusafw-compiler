@@ -50,6 +50,7 @@
 		<module>common-testing</module>
 		<module>model-testing</module>
 		<module>javac-testing</module>
+		<module>mapreduce-testing</module>
 		<module>api-testing</module>
 		<module>tester</module>
 
