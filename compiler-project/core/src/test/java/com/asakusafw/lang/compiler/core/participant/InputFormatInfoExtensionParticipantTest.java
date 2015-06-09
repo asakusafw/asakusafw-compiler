@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.hadoop.io.NullWritable;
+import org.apache.hadoop.io.Text;
 import org.junit.Test;
 
 import com.asakusafw.lang.compiler.api.ExternalPortProcessor;
@@ -59,7 +61,10 @@ public class InputFormatInfoExtensionParticipantTest extends CompilerTestRoot {
             public InputFormatInfo resolveInput(ExternalPortProcessor.Context context, String name, ExternalInputInfo info) {
                 Map<String, String> conf = new LinkedHashMap<>();
                 conf.put("testing", "ok");
-                return new InputFormatInfo(classOf(String.class), conf);
+                return new InputFormatInfo(
+                        classOf(String.class),
+                        classOf(NullWritable.class),
+                        classOf(Text.class), conf);
             }
         });
         externalPortProcessors.add(new SimpleExternalPortProcessor(adapters));

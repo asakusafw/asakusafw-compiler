@@ -29,15 +29,27 @@ public class InputFormatInfo {
 
     private final ClassDescription formatClass;
 
+    private final ClassDescription keyClass;
+
+    private final ClassDescription valueClass;
+
     private final Map<String, String> extraConfiguration;
 
     /**
      * Creates a new instance.
      * @param formatClass the target {@code InputFormat} class
+     * @param keyClass the input key class
+     * @param valueClass the input value class
      * @param extraConfiguration the extra entries for {@code Configuration} object
      */
-    public InputFormatInfo(ClassDescription formatClass, Map<String, String> extraConfiguration) {
+    public InputFormatInfo(
+            ClassDescription formatClass,
+            ClassDescription keyClass,
+            ClassDescription valueClass,
+            Map<String, String> extraConfiguration) {
         this.formatClass = formatClass;
+        this.keyClass = keyClass;
+        this.valueClass = valueClass;
         this.extraConfiguration = Collections.unmodifiableMap(new LinkedHashMap<>(extraConfiguration));
     }
 
@@ -47,6 +59,22 @@ public class InputFormatInfo {
      */
     public ClassDescription getFormatClass() {
         return formatClass;
+    }
+
+    /**
+     * Returns the input key class.
+     * @return the input key class
+     */
+    public ClassDescription getKeyClass() {
+        return keyClass;
+    }
+
+    /**
+     * Returns the input value class.
+     * @return the input value class
+     */
+    public ClassDescription getValueClass() {
+        return valueClass;
     }
 
     /**

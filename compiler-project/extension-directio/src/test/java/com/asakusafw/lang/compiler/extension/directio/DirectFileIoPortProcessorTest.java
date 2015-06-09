@@ -34,6 +34,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.NullWritable;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -1163,6 +1164,8 @@ public class DirectFileIoPortProcessorTest {
     private Map<Integer, String> collect(
             InputFormatInfo info,
             String args) throws IOException, InterruptedException, ClassNotFoundException {
+        assertThat(info.getKeyClass(), is(classOf(NullWritable.class)));
+        assertThat(info.getValueClass(), is(classOf(MockData.class)));
         Configuration conf = directio.newConfiguration();
         ConfigurationEditor.merge(conf, info.getExtraConfiguration());
         ConfigurationEditor.putStageInfo(conf, new StageInfo("u", "b", "f", "s", "e", args));

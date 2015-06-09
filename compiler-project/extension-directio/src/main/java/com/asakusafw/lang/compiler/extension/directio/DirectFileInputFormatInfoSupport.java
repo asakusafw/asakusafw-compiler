@@ -33,6 +33,8 @@ public class DirectFileInputFormatInfoSupport implements InputFormatInfoSupport 
     private static final ClassDescription FORMAT_CLASS =
             new ClassDescription("com.asakusafw.bridge.hadoop.directio.DirectFileInputFormat"); //$NON-NLS-1$
 
+    private static final ClassDescription KEY_CLASS =
+            new ClassDescription("org.apache.hadoop.io.NullWritable"); //$NON-NLS-1$
 
     static String KEY_PREFIX = "com.asakusafw.bridge.directio.input."; //$NON-NLS-1$
 
@@ -80,6 +82,6 @@ public class DirectFileInputFormatInfoSupport implements InputFormatInfoSupport 
             extra.put(KEY_FILTER_CLASS, model.getFilterClass().getBinaryName());
         }
         extra.put(KEY_OPTIONAL, String.valueOf(model.isOptional()));
-        return new InputFormatInfo(FORMAT_CLASS, extra);
+        return new InputFormatInfo(FORMAT_CLASS, KEY_CLASS, info.getDataModelClass(), extra);
     }
 }
