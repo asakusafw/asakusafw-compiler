@@ -54,7 +54,9 @@ public class StageInfo {
 
     private final Map<String, String> batchArguments;
 
-    private final VariableTable variables;
+    private final VariableTable systemVariables;
+
+    private final VariableTable userVariables;
 
     /**
      * Creates a new instance.
@@ -78,8 +80,13 @@ public class StageInfo {
         this.stageId = stageId;
         this.executionId = executionId;
         this.batchArguments = Collections.unmodifiableMap(new LinkedHashMap<>(batchArguments));
-        this.variables = new VariableTable();
-        this.variables.defineVariables(toMap(userName, batchId, flowId, stageId, executionId));
+
+        this.systemVariables = new VariableTable(VariableTable.RedefineStrategy.ERROR);
+        this.systemVariables.defineVariables(toMap(userName, batchId, flowId, stageId, executionId));
+
+        this.userVariables = new VariableTable(VariableTable.RedefineStrategy.IGNORE);
+        this.userVariables.defineVariables(batchArguments);
+        this.userVariables.defineVariables(toMap(userName, batchId, flowId, stageId, executionId));
     }
 
     /**
@@ -171,12 +178,37 @@ public class StageInfo {
 
     /**
      * Resolves stage variables (<code>${&lt;variable-name&gt;}</code>) in the target string.
+     * This never use {@link #getBatchArguments() batch arguments}.
      * @param string the target string
      * @return resolved string
      * @throws IllegalArgumentException if the string contains unknown variables
      */
     public String resolveVariables(String string) {
-        return variables.parse(string, true);
+        return resolveSystemVariables(string);
+    }
+
+    /**
+     * Resolves stage variables (<code>${&lt;variable-name&gt;}</code>) in the target string.
+     * This never use {@link #getBatchArguments() batch arguments}.
+     * @param string the target string
+     * @return resolved string
+     * @throws IllegalArgumentException if the string contains unknown variables
+     * @see #resolveUserVariables(String)
+     */
+    public String resolveSystemVariables(String string) {
+        return systemVariables.parse(string, true);
+    }
+
+    /**
+     * Resolves user variables (<code>${&lt;variable-name&gt;}</code>) in the target string.
+     * This also use {@link #getBatchArguments() batch arguments}.
+     * @param string the target string
+     * @return resolved string
+     * @throws IllegalArgumentException if the string contains unknown variables
+     * @see #resolveSystemVariables(String)
+     */
+    public String resolveUserVariables(String string) {
+        return userVariables.parse(string, true);
     }
 
     /**

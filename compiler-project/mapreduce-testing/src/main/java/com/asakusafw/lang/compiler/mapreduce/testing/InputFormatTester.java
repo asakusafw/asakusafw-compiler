@@ -13,10 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.asakusafw.bridge.hadoop;
-
-import static org.hamcrest.MatcherAssert.*;
-import static org.hamcrest.Matchers.*;
+package com.asakusafw.lang.compiler.mapreduce.testing;
 
 import java.io.IOException;
 import java.util.List;
@@ -79,8 +76,6 @@ public class InputFormatTester {
             try (RecordReader<?, ?> reader = format.createRecordReader(restored, context)) {
                 reader.initialize(restored, context);
                 while (reader.nextKeyValue()) {
-                    assertThat(reader.getCurrentKey(), is(notNullValue()));
-                    assertThat(reader.getProgress(), is(lessThanOrEqualTo(1.0f)));
                     collector.handle((T) reader.getCurrentValue());
                 }
             }

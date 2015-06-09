@@ -525,7 +525,7 @@ public class DirectFileIoPortProcessor
         return results;
     }
 
-    private boolean isFilterEnabled(Context context) {
+    static boolean isFilterEnabled(Context context) {
         return context.getOptions().get(OPTION_FILTER_ENABLED, DEFAULT_FILTER_ENABLED);
     }
 

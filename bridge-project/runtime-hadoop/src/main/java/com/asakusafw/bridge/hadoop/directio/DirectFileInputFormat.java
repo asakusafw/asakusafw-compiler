@@ -170,7 +170,7 @@ public class DirectFileInputFormat extends InputFormat<NullWritable, Object> {
         if (resolve) {
             StageInfo info = getStageInfo(conf);
             try {
-                value = info.resolveVariables(value);
+                value = info.resolveUserVariables(value);
             } catch (IllegalArgumentException e) {
                 throw new IllegalStateException(MessageFormat.format(
                         "failed to resolve configuration: {0}={1}",

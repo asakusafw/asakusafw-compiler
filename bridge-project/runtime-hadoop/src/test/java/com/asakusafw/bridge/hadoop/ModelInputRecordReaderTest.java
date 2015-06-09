@@ -35,6 +35,7 @@ import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.junit.Test;
 
+import com.asakusafw.lang.compiler.mapreduce.testing.InputFormatTester;
 import com.asakusafw.runtime.directio.Counter;
 import com.asakusafw.runtime.io.ModelInput;
 

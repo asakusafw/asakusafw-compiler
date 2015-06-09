@@ -76,7 +76,7 @@ public class DirectFileInputFormatInfoSupport implements InputFormatInfoSupport 
         extra.put(KEY_RESOURCE_PATH, model.getResourcePattern());
         extra.put(KEY_DATA_CLASS, info.getDataModelClass().getBinaryName());
         extra.put(KEY_FORMAT_CLASS, model.getFormatClass().getBinaryName());
-        if (model.getFilterClass() != null) {
+        if (DirectFileIoPortProcessor.isFilterEnabled(context) && model.getFilterClass() != null) {
             extra.put(KEY_FILTER_CLASS, model.getFilterClass().getBinaryName());
         }
         extra.put(KEY_OPTIONAL, String.valueOf(model.isOptional()));

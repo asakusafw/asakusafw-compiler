@@ -33,10 +33,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import org.apache.hadoop.conf.Configuration;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
+import com.asakusafw.bridge.hadoop.ConfigurationEditor;
+import com.asakusafw.bridge.stage.StageInfo;
 import com.asakusafw.lang.compiler.api.CompilerOptions;
 import com.asakusafw.lang.compiler.api.reference.ExternalInputReference;
 import com.asakusafw.lang.compiler.api.reference.ExternalOutputReference;
@@ -49,8 +52,12 @@ import com.asakusafw.lang.compiler.api.testing.MockImporterDescription;
 import com.asakusafw.lang.compiler.common.DiagnosticException;
 import com.asakusafw.lang.compiler.hadoop.HadoopFormatExtension;
 import com.asakusafw.lang.compiler.hadoop.HadoopTaskReference;
+import com.asakusafw.lang.compiler.hadoop.InputFormatInfo;
+import com.asakusafw.lang.compiler.hadoop.InputFormatInfoSupport;
 import com.asakusafw.lang.compiler.javac.JavaSourceExtension;
 import com.asakusafw.lang.compiler.javac.testing.JavaCompiler;
+import com.asakusafw.lang.compiler.mapreduce.testing.InputFormatTester;
+import com.asakusafw.lang.compiler.mapreduce.testing.InputFormatTester.Collector;
 import com.asakusafw.lang.compiler.mapreduce.testing.MapReduceRunner;
 import com.asakusafw.lang.compiler.mapreduce.testing.mock.DirectIoContext;
 import com.asakusafw.lang.compiler.mapreduce.testing.mock.MockData;
@@ -846,6 +853,126 @@ public class DirectFileIoPortProcessorTest {
         assertThat(results, hasEntry(400, "D"));
     }
 
+    /**
+     * direct - simple case.
+     * @throws Exception if failed
+     */
+    @Test
+    public void direct_simple() throws Exception {
+        ExternalInputInfo input = resolve(input("in", "a.bin")).get(0);
+
+        MockExternalPortProcessorContext mock = mock();
+        DirectFileIoPortProcessor processor = new DirectFileIoPortProcessor();
+        InputFormatInfo info = processor
+                .getAdaper(mock, InputFormatInfoSupport.class, InputDesc.class)
+                .resolveInput(mock, "in", input);
+
+        Map<Integer, String> values = new LinkedHashMap<>();
+        values.put(100, "A");
+        values.put(200, "B");
+        values.put(300, "C");
+
+        prepare("in/a.bin", values);
+        assertThat(collect(info, ""), is(values));
+    }
+
+    /**
+     * direct - w/ variables.
+     * @throws Exception if failed
+     */
+    @Test
+    public void direct_variable() throws Exception {
+        ExternalInputInfo input = resolve(input("${base}", "${resource}.bin")).get(0);
+
+        MockExternalPortProcessorContext mock = mock();
+        DirectFileIoPortProcessor processor = new DirectFileIoPortProcessor();
+        InputFormatInfo info = processor
+                .getAdaper(mock, InputFormatInfoSupport.class, InputDesc.class)
+                .resolveInput(mock, "in", input);
+
+        Map<Integer, String> values = new LinkedHashMap<>();
+        values.put(100, "A");
+        values.put(200, "B");
+        values.put(300, "C");
+
+        prepare("in/var.bin", values);
+        assertThat(collect(info, "base=in,resource=var"), is(values));
+    }
+
+    /**
+     * direct - w/ path filter.
+     * @throws Exception if failed
+     */
+    @Test
+    public void direct_filter_path() throws Exception {
+        ExternalInputInfo input = resolve(input("in", "*.bin").withFilter(MockFilterPath.class)).get(0);
+
+        MockExternalPortProcessorContext mock = mock();
+        DirectFileIoPortProcessor processor = new DirectFileIoPortProcessor();
+        InputFormatInfo info = processor
+                .getAdaper(mock, InputFormatInfoSupport.class, InputDesc.class)
+                .resolveInput(mock, "in", input);
+
+        prepare("in/a.bin", Collections.singletonMap(100, "A"));
+        prepare("in/b.bin", Collections.singletonMap(200, "B"));
+        prepare("in/c.bin", Collections.singletonMap(300, "C"));
+        prepare("in/d.bin", Collections.singletonMap(400, "D"));
+
+        Map<Integer, String> results = collect(info, "filter=.*[ac]\\.bin");
+        assertThat(results.keySet(), hasSize(2));
+        assertThat(results, hasEntry(100, "A"));
+        assertThat(results, hasEntry(300, "C"));
+    }
+
+    /**
+     * direct - w/ object filter.
+     * @throws Exception if failed
+     */
+    @Test
+    public void direct_filter_object() throws Exception {
+        ExternalInputInfo input = resolve(input("in", "*.bin").withFilter(MockFilterObject.class)).get(0);
+
+        MockExternalPortProcessorContext mock = mock();
+        DirectFileIoPortProcessor processor = new DirectFileIoPortProcessor();
+        InputFormatInfo info = processor
+                .getAdaper(mock, InputFormatInfoSupport.class, InputDesc.class)
+                .resolveInput(mock, "in", input);
+
+        prepare("in/a.bin", Collections.singletonMap(100, "A"));
+        prepare("in/b.bin", Collections.singletonMap(200, "B"));
+        prepare("in/c.bin", Collections.singletonMap(300, "C"));
+        prepare("in/d.bin", Collections.singletonMap(400, "D"));
+
+        Map<Integer, String> results = collect(info, "filter=[BD]");
+        assertThat(results.keySet(), hasSize(2));
+        assertThat(results, hasEntry(200, "B"));
+        assertThat(results, hasEntry(400, "D"));
+    }
+
+    /**
+     * direct - w/ filter but it is disabled.
+     * @throws Exception if failed
+     */
+    @Test
+    public void direct_filter_suppress() throws Exception {
+        ExternalInputInfo input = resolve(input("in", "*.bin").withFilter(MockFilterPath.class)).get(0);
+
+        MockExternalPortProcessorContext mock = mock(
+                Collections.singletonMap(DirectFileIoPortProcessor.OPTION_FILTER_ENABLED, String.valueOf(false)));
+        DirectFileIoPortProcessor processor = new DirectFileIoPortProcessor();
+        InputFormatInfo info = processor
+                .getAdaper(mock, InputFormatInfoSupport.class, InputDesc.class)
+                .resolveInput(mock, "in", input);
+
+        prepare("in/a.bin", Collections.singletonMap(100, "A"));
+        prepare("in/b.bin", Collections.singletonMap(200, "B"));
+        prepare("in/c.bin", Collections.singletonMap(300, "C"));
+        prepare("in/d.bin", Collections.singletonMap(400, "D"));
+
+        Map<Integer, String> results = collect(info, "filter=");
+        assertThat(results.keySet(), hasSize(4));
+    }
+
     private void prepare(String resource, Map<Integer, String> values) throws IOException {
         prepare(directio.file(resource), values);
     }
@@ -1030,6 +1157,24 @@ public class DirectFileIoPortProcessorTest {
         assertThat(MessageFormat.format(
                 "unexpected exit status on {0}",
                 phase), status, is(0));
+    }
+
+
+    private Map<Integer, String> collect(
+            InputFormatInfo info,
+            String args) throws IOException, InterruptedException, ClassNotFoundException {
+        Configuration conf = directio.newConfiguration();
+        ConfigurationEditor.merge(conf, info.getExtraConfiguration());
+        ConfigurationEditor.putStageInfo(conf, new StageInfo("u", "b", "f", "s", "e", args));
+        InputFormatTester tester = new InputFormatTester(conf, info.getFormatClass().resolve(conf.getClassLoader()));
+        final Map<Integer, String> results = new LinkedHashMap<>();
+        tester.collect(new Collector<MockData>() {
+            @Override
+            public void handle(MockData object) {
+                results.put(object.getKey(), object.getValue());
+            }
+        });
+        return results;
     }
 
     private static class InputDesc extends DirectFileInputDescription {

@@ -93,6 +93,12 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>com.asakusafw.bridge</groupId>
+			<artifactId>asakusa-bridge-runtime-hadoop</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>${asakusafw.groupId}</groupId>
 			<artifactId>asakusa-runtime-inprocess</artifactId>
 			<version>${asakusafw.version}</version>

@@ -27,9 +27,9 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import com.asakusafw.bridge.hadoop.ConfigurationEditor;
-import com.asakusafw.bridge.hadoop.InputFormatTester;
-import com.asakusafw.bridge.hadoop.InputFormatTester.Collector;
 import com.asakusafw.bridge.stage.StageInfo;
+import com.asakusafw.lang.compiler.mapreduce.testing.InputFormatTester;
+import com.asakusafw.lang.compiler.mapreduce.testing.InputFormatTester.Collector;
 import com.asakusafw.lang.compiler.mapreduce.testing.mock.DirectIoContext;
 import com.asakusafw.lang.compiler.mapreduce.testing.mock.MockData;
 import com.asakusafw.lang.compiler.mapreduce.testing.mock.MockDataFormat;
