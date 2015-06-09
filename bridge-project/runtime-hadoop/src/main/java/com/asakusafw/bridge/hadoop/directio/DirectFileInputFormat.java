@@ -33,6 +33,7 @@ import org.apache.hadoop.util.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.asakusafw.bridge.hadoop.Compatibility;
 import com.asakusafw.bridge.hadoop.ModelInputRecordReader;
 import com.asakusafw.bridge.stage.StageInfo;
 import com.asakusafw.runtime.directio.Counter;
@@ -98,7 +99,7 @@ public class DirectFileInputFormat extends InputFormat<NullWritable, Object> {
         List<InputSplit> results = new ArrayList<>();
         for (DirectInputFragment fragment : fragments) {
             DirectFileInputSplit split = new DirectFileInputSplit(containerPath, info.definition, fragment);
-            ReflectionUtils.setConf(split, context.getConfiguration());
+            ReflectionUtils.setConf(split, Compatibility.getConfiguration(context));
             results.add(split);
         }
         if (results.isEmpty()) {
@@ -136,7 +137,7 @@ public class DirectFileInputFormat extends InputFormat<NullWritable, Object> {
     }
 
     private DirectFileInputInfo<?> extractInfo(JobContext context) {
-        Configuration conf = context.getConfiguration();
+        Configuration conf = Compatibility.getConfiguration(context);
         String basePath = extract(conf, KEY_BASE_PATH, true, true);
         String resourcePath = extract(conf, KEY_RESOURCE_PATH, true, true);
         Class<?> dataClass = extractClass(conf, KEY_DATA_CLASS, true);
@@ -220,7 +221,7 @@ public class DirectFileInputFormat extends InputFormat<NullWritable, Object> {
         assert definition != null;
         assert split != null;
         assert context != null;
-        Configuration conf = context.getConfiguration();
+        Configuration conf = Compatibility.getConfiguration(context);
         T buffer = ReflectionUtils.newInstance(definition.getDataClass(), conf);
         Counter counter = new Counter();
         DirectInputFragment fragment = split.getInputFragment();
