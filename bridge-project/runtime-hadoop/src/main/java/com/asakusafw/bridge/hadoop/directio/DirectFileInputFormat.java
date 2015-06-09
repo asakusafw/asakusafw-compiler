@@ -57,7 +57,7 @@ public class DirectFileInputFormat extends InputFormat<NullWritable, Object> {
 
     static final Logger LOG = LoggerFactory.getLogger(DirectFileInputFormat.class);
 
-    static String KEY_PREFIX = "com.asakusafw.bridge.directio.input."; //$NON-NLS-1$
+    static final String KEY_PREFIX = "com.asakusafw.bridge.directio.input."; //$NON-NLS-1$
 
     /**
      * The attribute key name of base path.

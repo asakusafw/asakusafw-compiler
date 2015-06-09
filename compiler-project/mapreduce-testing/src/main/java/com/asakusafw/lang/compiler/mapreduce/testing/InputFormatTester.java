@@ -92,8 +92,8 @@ public class InputFormatTester {
     }
 
     /**
-     * Collects
-     * @param <T> the target data type
+     * Collects values from {@code InputFormat}.
+     * @param <T> the value type
      */
     public interface Collector<T> {
 

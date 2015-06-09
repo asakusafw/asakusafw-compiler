@@ -36,7 +36,7 @@ public class DirectFileInputFormatInfoSupport implements InputFormatInfoSupport 
     private static final ClassDescription KEY_CLASS =
             new ClassDescription("org.apache.hadoop.io.NullWritable"); //$NON-NLS-1$
 
-    static String KEY_PREFIX = "com.asakusafw.bridge.directio.input."; //$NON-NLS-1$
+    static final String KEY_PREFIX = "com.asakusafw.bridge.directio.input."; //$NON-NLS-1$
 
     /**
      * The attribute key name of base path.

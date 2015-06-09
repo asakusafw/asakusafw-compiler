@@ -34,7 +34,6 @@ import com.asakusafw.runtime.value.StringOption;
 /**
  * Mock data model class.
  */
-@SuppressWarnings({ "deprecation", "javadoc" })
 public class MockData implements DataModel<MockData>, Writable {
 
     private final IntOption intValue = new IntOption();
@@ -45,6 +44,12 @@ public class MockData implements DataModel<MockData>, Writable {
 
     private final DateTimeOption datetimeValue = new DateTimeOption();
 
+    /**
+     * Puts values as {@link #getStringValueOption() string_value} .
+     * @param output the target output
+     * @param values the values to set
+     * @throws IOException if failed
+     */
     public static void put(ModelOutput<MockData> output, String... values) throws IOException {
         Map<Integer, String> map = new LinkedHashMap<>();
         for (String s : values) {
@@ -53,6 +58,12 @@ public class MockData implements DataModel<MockData>, Writable {
         put(output, map);
     }
 
+    /**
+     * Puts values.
+     * @param output the target output
+     * @param entries {@code (int_value, string_value)} pairs
+     * @throws IOException if failed
+     */
     public static void put(ModelOutput<MockData> output, Map<Integer, String> entries) throws IOException {
         MockData buf = new MockData();
         for (Map.Entry<Integer, String> entry : entries.entrySet()) {
@@ -60,6 +71,12 @@ public class MockData implements DataModel<MockData>, Writable {
         }
     }
 
+    /**
+     * Collect values.
+     * @param input the target input
+     * @return {@code (int_value, string_value)} pairs
+     * @throws IOException if failed
+     */
     public static Map<Integer, String> collect(ModelInput<MockData> input) throws IOException {
         MockData buf = new MockData();
         Map<Integer, String> results = new LinkedHashMap<>();
@@ -69,36 +86,68 @@ public class MockData implements DataModel<MockData>, Writable {
         return results;
     }
 
+    /**
+     * Sets {@code (int_value, string_value)} pair.
+     * @param key the {@code int_value}
+     * @param value the {@code string_value}
+     * @return this
+     */
+    @SuppressWarnings("deprecation")
     public MockData set(int key, String value) {
         intValue.modify(key);
         stringValue.modify(value);
         return this;
     }
 
+    /**
+     * Returns the {@code int_value}.
+     * @return {@code int_value}
+     */
     public int getKey() {
         return intValue.get();
     }
 
+    /**
+     * Returns the {@code string_value}.
+     * @return {@code string_value}
+     */
     public String getValue() {
         return stringValue.getAsString();
     }
 
+    /**
+     * Returns the {@code int_value} as option.
+     * @return the option value
+     */
     public IntOption getIntValueOption() {
         return intValue;
     }
 
+    /**
+     * Returns the {@code string_value} as option.
+     * @return the option value
+     */
     public StringOption getStringValueOption() {
         return stringValue;
     }
 
+    /**
+     * Returns the {@code date_value} as option.
+     * @return the option value
+     */
     public DateOption getDateValueOption() {
         return dateValue;
     }
 
+    /**
+     * Returns the {@code datetime_value} as option.
+     * @return the option vaule
+     */
     public DateTimeOption getDatetimeValueOption() {
         return datetimeValue;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void reset() {
         intValue.setNull();
@@ -107,6 +156,7 @@ public class MockData implements DataModel<MockData>, Writable {
         datetimeValue.setNull();
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void copyFrom(MockData other) {
         intValue.copyFrom(other.intValue);
