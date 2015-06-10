@@ -135,7 +135,7 @@ public class LaunchConfiguration {
                         command));
             }
             String value = rest.removeFirst();
-            LOG.debug("Launch option: {} {}", command, value); //$NON-NLS-1$
+            LOG.debug("launch option: {} {}", command, value); //$NON-NLS-1$
 
             option.accept(command, value);
         }

@@ -48,10 +48,7 @@ public class HadoopPropertiesOption extends AbstractPropertiesOption {
 
     @Override
     protected Map<String, String> extract(File file) throws LaunchConfigurationException {
-        if (file.exists() == false) {
-            LOG.debug("missing configuration file: {} {}", COMMAND, file);
-            return Collections.emptyMap();
-        }
+        LOG.debug("loading file: {} ({})", file, COMMAND); //$NON-NLS-1$
         Configuration configuration = new Configuration(false);
         try (InputStream in = new FileInputStream(file)) {
             configuration.addResource(in);

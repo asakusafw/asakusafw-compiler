@@ -134,6 +134,64 @@ public class EnginePropertiesOptionTest {
      * @throws Exception if failed
      */
     @Test
+    public void file_skip_empty() throws Exception {
+        Properties p = new Properties();
+        p.setProperty("a", "A");
+        File f = put(p);
+
+        EnginePropertiesOption option = new EnginePropertiesOption();
+        option.accept("--engine-conf", "@|" + f.getAbsolutePath());
+
+        Map<String, String> result = option.resolve();
+        assertThat(result.toString(), result.keySet(), hasSize(1));
+        assertThat(result, hasEntry("a", "A"));
+    }
+
+    /**
+     * using file.
+     * @throws Exception if failed
+     */
+    @Test
+    public void file_first() throws Exception {
+        Properties p1 = new Properties();
+        p1.setProperty("a", "A");
+        File f1 = put(p1);
+
+        Properties p2 = new Properties();
+        p2.setProperty("b", "B");
+        File f2 = put(p2);
+
+        EnginePropertiesOption option = new EnginePropertiesOption();
+        option.accept("--engine-conf", "@" + f1.getAbsolutePath() + "|" + f2.getAbsolutePath());
+
+        Map<String, String> result = option.resolve();
+        assertThat(result.toString(), result.keySet(), hasSize(1));
+        assertThat(result, hasEntry("a", "A"));
+    }
+
+    /**
+     * using file.
+     * @throws Exception if failed
+     */
+    @Test
+    public void file_second() throws Exception {
+        Properties p = new Properties();
+        p.setProperty("a", "A");
+        File f = put(p);
+
+        EnginePropertiesOption option = new EnginePropertiesOption();
+        option.accept("--engine-conf", "@" + f.getAbsolutePath() + ".missing|" + f.getAbsolutePath());
+
+        Map<String, String> result = option.resolve();
+        assertThat(result.toString(), result.keySet(), hasSize(1));
+        assertThat(result, hasEntry("a", "A"));
+    }
+
+    /**
+     * using file.
+     * @throws Exception if failed
+     */
+    @Test
     public void file_missing() throws Exception {
         EnginePropertiesOption option = new EnginePropertiesOption();
         option.accept("--engine-conf", "@MISSING");

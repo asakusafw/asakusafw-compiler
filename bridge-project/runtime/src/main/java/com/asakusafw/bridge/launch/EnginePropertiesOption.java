@@ -48,10 +48,7 @@ public class EnginePropertiesOption extends AbstractPropertiesOption {
 
     @Override
     protected Map<String, String> extract(File file) throws LaunchConfigurationException {
-        if (file.exists() == false) {
-            LOG.debug("missing properties file: {} {}", COMMAND, file);
-            return Collections.emptyMap();
-        }
+        LOG.debug("loading file: {} ({})", file, COMMAND); //$NON-NLS-1$
         Properties properties = new Properties();
         try (InputStream in = new FileInputStream(file)) {
             properties.load(in);
