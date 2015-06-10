@@ -33,6 +33,7 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import com.asakusafw.bridge.broker.ResourceBroker;
+import com.asakusafw.lang.compiler.mapreduce.testing.mock.DirectIoContext;
 import com.asakusafw.runtime.core.HadoopConfiguration;
 import com.asakusafw.runtime.core.ResourceConfiguration;
 import com.asakusafw.runtime.directio.BinaryStreamFormat;

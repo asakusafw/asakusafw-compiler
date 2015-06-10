@@ -85,7 +85,7 @@ final class Util {
 
     private static String comment(String comment) {
         if (comment == null) {
-            return "(no comments)";
+            return "(no comments)"; //$NON-NLS-1$
         }
         return comment;
     }
@@ -114,7 +114,7 @@ final class Util {
     private static Map<String, String> extractComplexAttributes(String prefix, Map<String, ?> nested) {
         Map<String, String> results = new LinkedHashMap<>();
         for (Map.Entry<String, ?> entry : nested.entrySet()) {
-            String key = String.format("%s.%s", prefix, entry.getKey());
+            String key = String.format("%s.%s", prefix, entry.getKey()); //$NON-NLS-1$
             Object value = entry.getValue();
             results.put(key, getAttributeValue(value));
         }

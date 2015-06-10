@@ -34,43 +34,43 @@ import com.asakusafw.lang.inspection.InspectionNode.PortReference;
  */
 public class DetailProcessor implements InspectionNodeProcessor {
 
-    static final Charset ENCODING = Charset.forName("UTF-8");
+    static final Charset ENCODING = Charset.forName("UTF-8"); //$NON-NLS-1$
 
     @Override
     public void process(Context context, InspectionNode node, OutputStream output) throws IOException {
         try (Editor editor = new Editor(context, output)) {
-            editor.put("id: {0}", node.getId());
-            editor.put("title: {0}", node.getTitle());
+            editor.put("id: {0}", node.getId()); //$NON-NLS-1$
+            editor.put("title: {0}", node.getTitle()); //$NON-NLS-1$
             processProperties(editor, node.getProperties());
 
-            processPorts(editor, "inputs", node.getInputs().values());
-            processPorts(editor, "outputs", node.getOutputs().values());
+            processPorts(editor, "inputs", node.getInputs().values()); //$NON-NLS-1$
+            processPorts(editor, "outputs", node.getOutputs().values()); //$NON-NLS-1$
 
             processNodes(editor, node.getElements().values());
         }
     }
 
     private void processProperties(Editor editor, Map<String, String> properties) {
-        editor.put("properties:");
+        editor.put("properties:"); //$NON-NLS-1$
         editor.push();
         for (Map.Entry<String, String> entry : properties.entrySet()) {
-            editor.put("{0}: {1}", entry.getKey(), entry.getValue());
+            editor.put("{0}: {1}", entry.getKey(), entry.getValue()); //$NON-NLS-1$
         }
         editor.pop();
     }
 
     private void processPorts(Editor editor, String label, Iterable<Port> ports) {
-        editor.put("{0}:", label);
+        editor.put("{0}:", label); //$NON-NLS-1$
         editor.push();
         for (Port port : ports) {
-            editor.put("{0}:", port.getId());
+            editor.put("{0}:", port.getId()); //$NON-NLS-1$
             editor.push();
             processProperties(editor, port.getProperties());
 
-            editor.put("opposites:");
+            editor.put("opposites:"); //$NON-NLS-1$
             editor.push();
             for (PortReference opposite : port.getOpposites()) {
-                editor.put("{0}.{1}", opposite.getNodeId(), opposite.getPortId());
+                editor.put("{0}.{1}", opposite.getNodeId(), opposite.getPortId()); //$NON-NLS-1$
             }
             editor.pop();
             editor.pop();
@@ -79,10 +79,10 @@ public class DetailProcessor implements InspectionNodeProcessor {
     }
 
     private void processNodes(Editor editor, Collection<InspectionNode> elements) {
-        editor.put("elements:");
+        editor.put("elements:"); //$NON-NLS-1$
         editor.push();
         for (InspectionNode element : elements) {
-            editor.put("{0} ({1})", element.getId(), element.getTitle());
+            editor.put("{0} ({1})", element.getId(), element.getTitle()); //$NON-NLS-1$
         }
         editor.pop();
     }
@@ -113,7 +113,7 @@ public class DetailProcessor implements InspectionNodeProcessor {
             assert arguments != null;
             StringBuilder buf = new StringBuilder();
             for (int i = 0, n = indent; i < n; i++) {
-                buf.append("    ");
+                buf.append("    "); //$NON-NLS-1$
             }
             buf.append(MessageFormat.format(pattern, arguments));
             String text = buf.toString();

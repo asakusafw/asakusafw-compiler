@@ -43,7 +43,7 @@ public class DirectIoContext implements TestRule {
      * @return the root
      */
     public File getRoot() {
-        return new File(temporary.getRoot(), "directio");
+        return new File(temporary.getRoot(), "directio"); //$NON-NLS-1$
     }
 
     /**
@@ -87,10 +87,11 @@ public class DirectIoContext implements TestRule {
      * @return the configured object
      */
     public Configuration configure(Configuration conf) {
-        conf.set("com.asakusafw.output.system.dir", new Path(new File(getRoot(), "system").toURI()).toString());
-        conf.set("com.asakusafw.directio.root", HadoopDataSource.class.getName());
-        conf.set("com.asakusafw.directio.root.path", "/");
-        conf.set("com.asakusafw.directio.root.fs.path", getRootPath().toString());
+        Path system = new Path(new File(getRoot(), "system").toURI()); //$NON-NLS-1$
+        conf.set("com.asakusafw.output.system.dir", system.toString()); //$NON-NLS-1$
+        conf.set("com.asakusafw.directio.root", HadoopDataSource.class.getName()); //$NON-NLS-1$
+        conf.set("com.asakusafw.directio.root.path", "/"); //$NON-NLS-1$ //$NON-NLS-2$
+        conf.set("com.asakusafw.directio.root.fs.path", getRootPath().toString()); //$NON-NLS-1$
         return conf;
     }
 }

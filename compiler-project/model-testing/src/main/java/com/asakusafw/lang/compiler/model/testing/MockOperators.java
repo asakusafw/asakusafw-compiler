@@ -192,7 +192,7 @@ public final class MockOperators {
     public MockOperators operator(
             Operator.AbstractBuilder<?, ?> builder,
             String id, OperatorConstraint... constraints) {
-        return operator(builder, id, "in", "out", constraints);
+        return operator(builder, id, "in", "out", constraints); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
     /**

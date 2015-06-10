@@ -73,7 +73,7 @@ final class Util {
                 // invalid broadcast input
                 if (sawBroadcast && sawNonBroadcast) {
                     throw new IllegalStateException(MessageFormat.format(
-                            "invalid broadcast input: {2} -> {0}#{1}",
+                            "invalid broadcast input: {2} -> {0}#{1}", //$NON-NLS-1$
                             consumer,
                             port.getName(),
                             sources));

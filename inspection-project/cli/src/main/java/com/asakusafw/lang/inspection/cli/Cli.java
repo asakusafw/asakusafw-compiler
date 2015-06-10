@@ -250,24 +250,24 @@ public final class Cli {
 
         final Option input = required("input", 1) //$NON-NLS-1$
                 .withDescription("input inspection file")
-                .withArgumentDescription("/path/to/input-file.json");
+                .withArgumentDescription("/path/to/input-file.json"); //$NON-NLS-1$
 
         final Option path = optional("path", 1) //$NON-NLS-1$
                 .withDescription("inspection path (default: root)")
-                .withArgumentDescription("path/to/target-node");
+                .withArgumentDescription("path/to/target-node"); //$NON-NLS-1$
 
         final Option output = optional("output", 1) //$NON-NLS-1$
                 .withDescription("output file (default: stdout)")
-                .withArgumentDescription("/path/to/output-file");
+                .withArgumentDescription("/path/to/output-file"); //$NON-NLS-1$
 
         final Option format = optional("format", 1) //$NON-NLS-1$
                 .withDescription("output format (default: txt)")
-                .withArgumentDescription("ls|txt|dot|json|class-name");
+                .withArgumentDescription("ls|txt|dot|json|class-name"); //$NON-NLS-1$
 
         final Option properties = properties("P", "property") //$NON-NLS-1$ //$NON-NLS-2$
                 .withValueSeparator('=')
                 .withDescription("format property")
-                .withArgumentDescription("key=value");
+                .withArgumentDescription("key=value"); //$NON-NLS-1$
 
         final Options options = new Options();
 

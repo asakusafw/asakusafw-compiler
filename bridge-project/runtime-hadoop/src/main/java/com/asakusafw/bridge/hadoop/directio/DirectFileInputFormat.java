@@ -119,14 +119,14 @@ public class DirectFileInputFormat extends InputFormat<NullWritable, Object> {
         if (fragments.isEmpty()) {
             if (info.optional) {
                 LOG.info(MessageFormat.format(
-                        "Skipped optional input (datasource={0}, basePath=\"{1}\", resourcePattern=\"{2}\", type={3})",
+                        "skipped optional input (datasource={0}, basePath=\"{1}\", resourcePattern=\"{2}\", type={3})",
                         repository.getRelatedId(info.basePath),
                         componentPath,
                         info.resourcePattern.toString(),
                         info.definition.getDataClass().getName()));
             } else {
                 throw new IOException(MessageFormat.format(
-                        "Input not found (datasource={0}, basePath=\"{1}\", resourcePattern=\"{2}\", type={3})",
+                        "input not found (datasource={0}, basePath=\"{1}\", resourcePattern=\"{2}\", type={3})",
                         repository.getRelatedId(info.basePath),
                         componentPath,
                         info.resourcePattern.toString(),

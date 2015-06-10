@@ -67,7 +67,7 @@ public class PdfExporter {
                 return file;
             }
         }
-        String path = System.getenv("PATH");
+        String path = System.getenv("PATH"); //$NON-NLS-1$
         if (path == null) {
             return null;
         }
@@ -79,7 +79,7 @@ public class PdfExporter {
             if (base.isDirectory() == false) {
                 continue;
             }
-            File exec = new File(base, "dot");
+            File exec = new File(base, "dot"); //$NON-NLS-1$
             if (exec.isFile() && exec.canExecute()) {
                 return exec;
             }
@@ -104,7 +104,7 @@ public class PdfExporter {
         }
         List<String> command = new ArrayList<>();
         command.add(dot.getAbsolutePath());
-        command.add("-Tpdf");
+        command.add("-Tpdf"); //$NON-NLS-1$
         ProcessBuilder builder = new ProcessBuilder(command);
         builder.redirectOutput(output);
         builder.redirectError(Redirect.INHERIT);

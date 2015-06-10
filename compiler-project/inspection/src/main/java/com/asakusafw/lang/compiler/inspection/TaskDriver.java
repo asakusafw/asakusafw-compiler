@@ -78,7 +78,7 @@ public class TaskDriver {
         Map<TaskReference.Phase, InspectionNode> results = new LinkedHashMap<>();
         InspectionNode last = null;
         for (TaskReference.Phase phase : TaskReference.Phase.values()) {
-            String title = "Phase";
+            String title = "Phase"; //$NON-NLS-1$
             InspectionNode node = new InspectionNode(id(phase), title);
             node.withProperty(PROPERTY_KIND, "Phase"); //$NON-NLS-1$
             addDependencyPorts(node);
@@ -151,7 +151,7 @@ public class TaskDriver {
     }
 
     private InspectionNode inspectFlat(String id, CommandTaskReference object) {
-        String title = "Command";
+        String title = "Command"; //$NON-NLS-1$
         InspectionNode node = new InspectionNode(id, title);
         node.withProperty(PROPERTY_KIND, "CommandTask"); //$NON-NLS-1$
         node.withProperty(PROPERTY_MODULE, object.getModuleName());
@@ -167,7 +167,7 @@ public class TaskDriver {
     }
 
     private InspectionNode inspectFlat(String id, HadoopTaskReference object) {
-        String title = "Hadoop";
+        String title = "Hadoop"; //$NON-NLS-1$
         InspectionNode node = new InspectionNode(id, title);
         node.withProperty(PROPERTY_KIND, "HadoopTask"); //$NON-NLS-1$
         node.withProperty(PROPERTY_MODULE, object.getModuleName());

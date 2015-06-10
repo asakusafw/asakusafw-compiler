@@ -644,7 +644,7 @@ public final class BatchCompilerCli {
 
         final Option batchIdPrefix = optional("batchIdPrefix", 1) //$NON-NLS-1$
                 .withDescription("custom batch ID prefix (for testing)")
-                .withArgumentDescription("id.prefix.");
+                .withArgumentDescription("id.prefix."); //$NON-NLS-1$
 
         final Option properties = properties("P", "property") //$NON-NLS-1$ //$NON-NLS-2$
                 .withDescription("compiler property")

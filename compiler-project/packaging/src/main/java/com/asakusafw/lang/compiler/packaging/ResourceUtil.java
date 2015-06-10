@@ -90,7 +90,7 @@ public final class ResourceUtil {
         URL url = toUrl(aClass);
         if (url == null) {
             throw new IOException(MessageFormat.format(
-                    "Failed to locate the class file: {0}",
+                    "failed to locate the class file: {0}",
                     aClass.getName()));
         }
         return new UrlItem(location, url);
@@ -137,7 +137,7 @@ public final class ResourceUtil {
         URL resource = toUrl(aClass);
         if (resource == null) {
             LOG.warn(MessageFormat.format(
-                    "Failed to locate the class file: {0}",
+                    "failed to locate the class file: {0}",
                     aClass.getName()));
             return null;
         }
@@ -187,7 +187,7 @@ public final class ResourceUtil {
                 return toClassPathRoot(file, resourcePath);
             } catch (URISyntaxException e) {
                 LOG.warn(MessageFormat.format(
-                        "Failed to locate the library path (cannot convert to local file): {0}",
+                        "failed to locate the library path (cannot convert to local file): {0}",
                         resource), e);
                 return null;
             }
@@ -197,7 +197,7 @@ public final class ResourceUtil {
             return toClassPathRoot(path, resourcePath);
         } else {
             LOG.warn(MessageFormat.format(
-                    "Failed to locate the library path (unsupported protocol {0}): {1}",
+                    "failed to locate the library path (unsupported protocol {0}): {1}",
                     resource,
                     resourcePath));
             return null;
@@ -214,7 +214,7 @@ public final class ResourceUtil {
             current = current.getParentFile();
             if (current == null || current.isDirectory() == false) {
                 LOG.warn(MessageFormat.format(
-                        "Failed to locate the library path: {0} ({1})",
+                        "failed to locate the library path: {0} ({1})",
                         resourceFile,
                         resourcePath));
                 return null;
@@ -238,7 +238,7 @@ public final class ResourceUtil {
             archive = new URI(qualifier);
         } catch (URISyntaxException e) {
             LOG.warn(MessageFormat.format(
-                    "Failed to locate the JAR library file {0}: {1}",
+                    "failed to locate the JAR library file {0}: {1}",
                     qualifier,
                     resourceName),
                     e);
@@ -246,7 +246,7 @@ public final class ResourceUtil {
         }
         if (archive.getScheme().equals("file") == false) { //$NON-NLS-1$
             LOG.warn(MessageFormat.format(
-                    "Failed to locate the library path (unsupported protocol {0}): {1}",
+                    "failed to locate the library path (unsupported protocol {0}): {1}",
                     archive,
                     resourceName));
             return null;

@@ -39,7 +39,7 @@ public class EnginePropertiesOption extends AbstractPropertiesOption {
     /**
      * The command name.
      */
-    public static final String COMMAND = "--engine-conf";
+    public static final String COMMAND = "--engine-conf"; //$NON-NLS-1$
 
     @Override
     public Set<String> getCommands() {

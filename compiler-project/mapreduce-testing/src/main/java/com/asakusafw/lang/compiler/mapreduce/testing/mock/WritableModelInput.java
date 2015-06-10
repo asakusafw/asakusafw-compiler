@@ -77,7 +77,7 @@ public class WritableModelInput<T extends Writable> implements ModelInput<T> {
         Set<File> results = new LinkedHashSet<>();
         for (File file : directory.listFiles()) {
             String name = file.getName();
-            if (name.startsWith(".") || name.equals("_SUCCESS")) {
+            if (name.startsWith(".") || name.equals("_SUCCESS")) { //$NON-NLS-1$ //$NON-NLS-2$
                 continue;
             }
             if (prefix != null && name.startsWith(prefix) == false) {

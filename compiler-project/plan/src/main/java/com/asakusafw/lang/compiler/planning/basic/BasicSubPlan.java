@@ -60,17 +60,17 @@ public final class BasicSubPlan extends BasicAttributeContainer implements SubPl
             PlanMarker marker = PlanMarkers.get(operator);
             if (marker == null) {
                 throw new IllegalArgumentException(MessageFormat.format(
-                        "sub-plan input must be a plan marker: {0}",
+                        "sub-plan input must be a plan marker: {0}", //$NON-NLS-1$
                         operator));
             }
             if (Operators.hasPredecessors(operator)) {
                 throw new IllegalArgumentException(MessageFormat.format(
-                        "sub-plan input must not have any predecessors: {0}",
+                        "sub-plan input must not have any predecessors: {0}", //$NON-NLS-1$
                         operator));
             }
             if (Operators.hasSuccessors(operator) == false) {
                 throw new IllegalArgumentException(MessageFormat.format(
-                        "sub-plan input must have at least one successor: {0}",
+                        "sub-plan input must have at least one successor: {0}", //$NON-NLS-1$
                         operator));
             }
             results.put(operator, new BasicInput(operator));
@@ -84,17 +84,17 @@ public final class BasicSubPlan extends BasicAttributeContainer implements SubPl
             PlanMarker marker = PlanMarkers.get(operator);
             if (marker == null) {
                 throw new IllegalArgumentException(MessageFormat.format(
-                        "sub-plan output must be a plan marker: {0}",
+                        "sub-plan output must be a plan marker: {0}", //$NON-NLS-1$
                         operator));
             }
             if (Operators.hasSuccessors(operator)) {
                 throw new IllegalArgumentException(MessageFormat.format(
-                        "sub-plan output must not have any successors: {0}",
+                        "sub-plan output must not have any successors: {0}", //$NON-NLS-1$
                         operator));
             }
             if (Operators.hasPredecessors(operator) == false) {
                 throw new IllegalArgumentException(MessageFormat.format(
-                        "sub-plan output must have at least one predecessor: {0}",
+                        "sub-plan output must have at least one predecessor: {0}", //$NON-NLS-1$
                         operator));
             }
             results.put(operator, new BasicOutput(operator));
@@ -129,7 +129,7 @@ public final class BasicSubPlan extends BasicAttributeContainer implements SubPl
             redundant.addAll(operators);
             redundant.removeAll(effectives);
             throw new IllegalStateException(MessageFormat.format(
-                    "sub-plan includes redundant operators: {0}",
+                    "sub-plan includes redundant operators: {0}", //$NON-NLS-1$
                     redundant));
         }
     }

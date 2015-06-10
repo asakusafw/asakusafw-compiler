@@ -131,7 +131,7 @@ public final class PlanAssembler {
      */
     public PlanAssembler add(Collection<? extends SubPlan> sources) {
         if (sources.isEmpty()) {
-            throw new IllegalArgumentException("sources must not be empty");
+            throw new IllegalArgumentException("sources must not be empty"); //$NON-NLS-1$
         }
         this.merger.add(sources);
         return this;

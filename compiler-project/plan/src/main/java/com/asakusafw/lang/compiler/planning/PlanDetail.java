@@ -52,7 +52,7 @@ public class PlanDetail {
                 if (copyMap.containsKey(copy)) {
                     Mapping conflict = copyMap.get(copy);
                     throw new IllegalArgumentException(MessageFormat.format(
-                            "operator \"{0}\" must be unique: {1} <=> {2}",
+                            "operator \"{0}\" must be unique: {1} <=> {2}", //$NON-NLS-1$
                             copy,
                             conflict.owner,
                             sub));
@@ -153,7 +153,7 @@ public class PlanDetail {
         if (mapping == null) {
             if (sourceMap.containsKey(copy)) {
                 throw new IllegalArgumentException(MessageFormat.format(
-                        "the specified operator must be a copy (it seems source operator): {0}",
+                        "the specified operator must be a copy (it seems source operator): {0}", //$NON-NLS-1$
                         copy));
             }
             return null;

@@ -61,14 +61,14 @@ public final class PrimitivePlanner {
             if (marker != PlanMarker.BEGIN) {
                 if (Operators.hasPredecessors(operator) == false) {
                     throw new IllegalArgumentException(MessageFormat.format(
-                            "operator except BEGIN plan marker must have at least one predecessors: {0}",
+                            "operator except BEGIN plan marker must have at least one predecessors: {0}", //$NON-NLS-1$
                             operator));
                 }
             }
             if (marker != PlanMarker.END) {
                 if (Operators.hasSuccessors(operator) == false) {
                     throw new IllegalArgumentException(MessageFormat.format(
-                            "operator except END plan marker must have at least one succesors: {0}",
+                            "operator except END plan marker must have at least one succesors: {0}", //$NON-NLS-1$
                             operator));
                 }
             }
@@ -130,7 +130,7 @@ public final class PrimitivePlanner {
         Set<Set<Operator>> circuits = Graphs.findCircuit(g);
         if (circuits.isEmpty() == false) {
             throw new IllegalArgumentException(MessageFormat.format(
-                    "operator graph must not have any circuits: {0}",
+                    "operator graph must not have any circuits: {0}", //$NON-NLS-1$
                     circuits));
         }
     }
@@ -184,7 +184,7 @@ public final class PrimitivePlanner {
         assert successors.isEmpty() == false;
         if (successors.size() >= 2) {
             throw new IllegalArgumentException(MessageFormat.format(
-                    "GATHER plan marker must have just one successor: {0}",
+                    "GATHER plan marker must have just one successor: {0}", //$NON-NLS-1$
                     gather));
         }
         // detects gathering input group
@@ -203,7 +203,7 @@ public final class PrimitivePlanner {
             }
             if (kind != PlanMarker.GATHER) {
                 throw new IllegalArgumentException(MessageFormat.format(
-                        "gathering operator requires inputs only GATHER or BROADCAST plan markers: {1} -> {0}",
+                        "gathering operator requires inputs as GATHER/BROADCAST: {1} -> {0}", //$NON-NLS-1$
                         gathering,
                         operator));
             }
@@ -218,7 +218,7 @@ public final class PrimitivePlanner {
             Operator consumer = entry.getKey();
             if (planMarkers.contains(consumer)) {
                 throw new IllegalArgumentException(MessageFormat.format(
-                        "plan marker must not be a broadcast consumer: {0} -> {1}",
+                        "plan marker must not be a broadcast consumer: {0} -> {1}", //$NON-NLS-1$
                         entry.getValue(),
                         consumer));
             }

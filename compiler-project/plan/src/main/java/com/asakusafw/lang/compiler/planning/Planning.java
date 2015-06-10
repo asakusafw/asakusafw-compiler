@@ -243,7 +243,7 @@ public final class Planning {
         effective.addAll(collectInputReachables(operators));
         effective.retainAll(collectOutputReachables(operators));
         if (effective.isEmpty()) {
-            throw new IllegalStateException("there are no effective operators");
+            throw new IllegalStateException("there are no effective operators"); //$NON-NLS-1$
         }
 
         // add only effective operators (this may includes terminators)
@@ -347,7 +347,7 @@ public final class Planning {
         }
         if (sawOther == false && terminators == 0 && PlanMarkers.get(operator) != target) {
             throw new IllegalStateException(MessageFormat.format(
-                    "planning violation - operator does not have {0} terminators: {1}",
+                    "planning violation - operator does not have {0} terminators: {1}", //$NON-NLS-1$
                     target,
                     operator));
         }

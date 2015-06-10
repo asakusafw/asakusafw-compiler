@@ -124,10 +124,10 @@ public final class PlanBuilder {
      */
     public PlanBuilder add(Collection<? extends Operator> inputs, Collection<? extends Operator> outputs) {
         if (inputs.isEmpty()) {
-            throw new IllegalArgumentException("inputs must not be empty");
+            throw new IllegalArgumentException("inputs must not be empty"); //$NON-NLS-1$
         }
         if (outputs.isEmpty()) {
-            throw new IllegalArgumentException("outputs must not be empty");
+            throw new IllegalArgumentException("outputs must not be empty"); //$NON-NLS-1$
         }
 
         Set<MarkerOperator> in = asPlanMarkers(inputs);
@@ -157,7 +157,7 @@ public final class PlanBuilder {
         set.retainAll(out);
         if (set.isEmpty() == false) {
             throw new IllegalArgumentException(MessageFormat.format(
-                    "inputs and outputs must be disjoint: {0}",
+                    "inputs and outputs must be disjoint: {0}", //$NON-NLS-1$
                     set));
         }
     }
@@ -177,7 +177,7 @@ public final class PlanBuilder {
         for (Operator operator : operators) {
             if (sourceOperators.contains(operator) == false) {
                 throw new IllegalArgumentException(MessageFormat.format(
-                        "operator must be in source operators: {0}",
+                        "operator must be in source operators: {0}", //$NON-NLS-1$
                         operator));
             }
         }
@@ -188,7 +188,7 @@ public final class PlanBuilder {
         for (Operator operator : operators) {
             if (PlanMarkers.get(operator) == null) {
                 throw new IllegalArgumentException(MessageFormat.format(
-                        "operator must be a plan marker: {0}",
+                        "operator must be a plan marker: {0}", //$NON-NLS-1$
                         operator));
             }
             results.add((MarkerOperator) operator);
@@ -205,7 +205,7 @@ public final class PlanBuilder {
                 for (MarkerOperator other : inputs) {
                     if (reachables.contains(other)) {
                         throw new IllegalArgumentException(MessageFormat.format(
-                                "input must not be reachable to other inputs: {0} -> {1}",
+                                "input must not be reachable to other inputs: {0} -> {1}", //$NON-NLS-1$
                                 operator,
                                 other));
                     }
@@ -214,7 +214,7 @@ public final class PlanBuilder {
             reachables.retainAll(outputs);
             if (reachables.isEmpty()) {
                 throw new IllegalArgumentException(MessageFormat.format(
-                        "input must be reachable to at least one output: {0}",
+                        "input must be reachable to at least one output: {0}", //$NON-NLS-1$
                         operator));
             }
             saw.addAll(reachables);
@@ -223,7 +223,7 @@ public final class PlanBuilder {
             for (MarkerOperator operator : outputs) {
                 if (saw.contains(operator) == false) {
                     throw new IllegalArgumentException(MessageFormat.format(
-                            "output must be reachable to at least one input: {0}",
+                            "output must be reachable to at least one input: {0}", //$NON-NLS-1$
                             operator));
                 }
             }
@@ -235,7 +235,7 @@ public final class PlanBuilder {
                 for (MarkerOperator other : outputs) {
                     if (reachables.contains(other)) {
                         throw new IllegalArgumentException(MessageFormat.format(
-                                "output must not be reachable to other outputs: {0} -> {1}",
+                                "output must not be reachable to other outputs: {0} -> {1}", //$NON-NLS-1$
                                 operator,
                                 other));
                     }

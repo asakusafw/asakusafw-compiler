@@ -40,7 +40,7 @@ public class PlanDriver {
      * @return the inspection object
      */
     public InspectionNode inspect(String id, Plan object) {
-        String title = "Plan";
+        String title = "Plan"; //$NON-NLS-1$
         InspectionNode result = new InspectionNode(id, title);
         result.withProperty(PROPERTY_KIND, "Plan"); //$NON-NLS-1$
         result.getProperties().putAll(extractAttributes(object));

@@ -253,7 +253,7 @@ public final class OutputPattern {
                 if (property == null) {
                     cursor.rewind();
                     throw new IllegalArgumentException(MessageFormat.format(
-                            "Unknown property \"{1}\": {0}",
+                            "unknown property \"{1}\": {0}",
                             cursor,
                             ph.original));
                 }
@@ -262,7 +262,7 @@ public final class OutputPattern {
                 if (format == null) {
                     cursor.rewind();
                     throw new IllegalArgumentException(MessageFormat.format(
-                            "Invalid format \"{1}\": {0}",
+                            "invalid format \"{1}\": {0}",
                             cursor,
                             argument == null ? "" : argument)); //$NON-NLS-1$
                 }
@@ -271,7 +271,7 @@ public final class OutputPattern {
                 } catch (IllegalArgumentException e) {
                     cursor.rewind();
                     throw new IllegalArgumentException(MessageFormat.format(
-                            "Invalid format \"{1}\": {0}",
+                            "invalid format \"{1}\": {0}",
                             cursor,
                             argument == null ? "" : argument), e); //$NON-NLS-1$
                 }
@@ -285,7 +285,7 @@ public final class OutputPattern {
                 results.add(new CompiledSegment());
             } else {
                 throw new IllegalArgumentException(MessageFormat.format(
-                        "Invalid character: {0}",
+                        "invalid character: {0}",
                         cursor));
             }
         }
@@ -315,19 +315,19 @@ public final class OutputPattern {
                 ordering = Groups.parseOrder(order.trim());
             } catch (IllegalArgumentException e) {
                 throw new IllegalArgumentException(MessageFormat.format(
-                        "Invalid order format: {0}",
+                        "invalid order format: {0}",
                         order), e);
             }
             PropertyReference property = dataType.findProperty(ordering.getPropertyName());
             if (property == null) {
                 throw new IllegalArgumentException(MessageFormat.format(
-                        "Unknown property \"{1}\": {0}",
+                        "unknown property \"{1}\": {0}",
                         order,
                         ordering.getPropertyName()));
             }
             if (saw.contains(property.getName())) {
                 throw new IllegalArgumentException(MessageFormat.format(
-                        "Duplicate property \"{1}\": {0}",
+                        "duplicate property \"{1}\": {0}",
                         order,
                         ordering.getPropertyName()));
             }
@@ -446,7 +446,7 @@ public final class OutputPattern {
                 if (isEof()) {
                     position = start;
                     throw new IllegalArgumentException(MessageFormat.format(
-                            "Variable is not closed: {0}",
+                            "variable is not closed: {0}",
                             this));
                 }
                 char c = cbuf[position];
@@ -469,7 +469,7 @@ public final class OutputPattern {
                 if (isEof()) {
                     position = start;
                     throw new IllegalArgumentException(MessageFormat.format(
-                            "Placeholder is not closed: {0}",
+                            "placeholder is not closed: {0}",
                             this));
                 }
                 char c = cbuf[position];
@@ -486,7 +486,7 @@ public final class OutputPattern {
                     if (isEof()) {
                         position = start;
                         throw new IllegalArgumentException(MessageFormat.format(
-                                "Placeholder is not closed: {0}",
+                                "placeholder is not closed: {0}",
                                 this));
                     }
                     char c = cbuf[position];
@@ -513,7 +513,7 @@ public final class OutputPattern {
                 if (isEof()) {
                     position = start;
                     throw new IllegalArgumentException(MessageFormat.format(
-                            "Random number is not closed: {0}",
+                            "random number is not closed: {0}",
                             this));
                 }
                 char c = cbuf[position];
@@ -527,7 +527,7 @@ public final class OutputPattern {
             if (matcher.matches() == false) {
                 position = start;
                 throw new IllegalArgumentException(MessageFormat.format(
-                        "Invalid random number format: {0}",
+                        "invalid random number format: {0}",
                         this));
             }
             int lower;
@@ -536,7 +536,7 @@ public final class OutputPattern {
             } catch (NumberFormatException e) {
                 position = start + matcher.start(1);
                 throw new IllegalArgumentException(MessageFormat.format(
-                        "Invalid random number format: {0}",
+                        "invalid random number format: {0}",
                         this), e);
             }
             int upper;
@@ -545,13 +545,13 @@ public final class OutputPattern {
             } catch (NumberFormatException e) {
                 position = start + matcher.start(2);
                 throw new IllegalArgumentException(MessageFormat.format(
-                        "Invalid random number format: {0}",
+                        "invalid random number format: {0}",
                         this), e);
             }
             if (lower >= upper) {
                 position = start + matcher.start(1);
                 throw new IllegalArgumentException(MessageFormat.format(
-                        "The random number [lower..upper] must be lower < upper: {0}",
+                        "the random number [lower..upper] must be lower < upper: {0}",
                         this));
             }
 

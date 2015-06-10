@@ -124,7 +124,7 @@ public class ZipRepository implements ResourceRepository {
                 if (current == null) {
                     if (entries == 0) {
                         throw new IOException(MessageFormat.format(
-                                "Invalid ZIP format: {0}",
+                                "invalid ZIP format: {0}",
                                 source));
                     }
                     return false;

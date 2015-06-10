@@ -48,7 +48,7 @@ final class ResourceSessionEntity implements ResourceSession {
 
     public ResourceSessionEntity() {
         if (LOG.isDebugEnabled()) {
-            LOG.debug("start session: {}", toString());
+            LOG.debug("start session: {}", toString()); //$NON-NLS-1$
         }
     }
 
@@ -132,13 +132,13 @@ final class ResourceSessionEntity implements ResourceSession {
             throw new IllegalStateException();
         }
         Reference reference = new Reference();
-        LOG.debug("create session reference: {}", reference);
+        LOG.debug("create session reference: {}", reference); //$NON-NLS-1$
         references.add(reference);
         return reference;
     }
 
     synchronized void close(Reference reference) {
-        LOG.debug("close session reference: {}", reference);
+        LOG.debug("close session reference: {}", reference); //$NON-NLS-1$
         references.remove(reference);
         if (references.isEmpty()) {
             close();
@@ -150,7 +150,7 @@ final class ResourceSessionEntity implements ResourceSession {
         if (closed) {
             return;
         }
-        LOG.debug("close session: {}", this);
+        LOG.debug("close session: {}", this); //$NON-NLS-1$
         references.clear();
         List<Object> values = new ArrayList<>(resources.values());
         resources.clear();

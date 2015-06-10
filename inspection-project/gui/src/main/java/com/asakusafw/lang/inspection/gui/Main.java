@@ -123,7 +123,7 @@ public class Main implements Runnable {
             return;
         }
 
-        frame.setTitle(MessageFormat.format("{1} [@{0}]", node.getId(), node.getTitle()));
+        frame.setTitle(MessageFormat.format("{1} [@{0}]", node.getId(), node.getTitle())); //$NON-NLS-1$
         JTree tree = createOverviewTree(node);
         frame.getContentPane().add(new JScrollPane(tree));
 
@@ -191,7 +191,7 @@ public class Main implements Runnable {
         InspectionNode node = treeNode.getUserObject();
 
         JDialog dialog = new JDialog(SwingUtilities.getWindowAncestor(parent));
-        dialog.setTitle(String.format("%s [@%s]", node.getTitle(), node.getId()));
+        dialog.setTitle(String.format("%s [@%s]", node.getTitle(), node.getId())); //$NON-NLS-1$
         dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         dialog.setSize(400, 300);
 

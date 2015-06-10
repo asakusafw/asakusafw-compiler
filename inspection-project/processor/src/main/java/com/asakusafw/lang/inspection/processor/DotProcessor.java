@@ -39,7 +39,7 @@ public class DotProcessor implements InspectionNodeProcessor {
      */
     public static final String KEY_VERBOSE = "verbose"; //$NON-NLS-1$
 
-    static final Charset ENCODING = Charset.forName("UTF-8");
+    static final Charset ENCODING = Charset.forName("UTF-8"); //$NON-NLS-1$
 
     @Override
     public void process(Context context, InspectionNode node, OutputStream output) throws IOException {
@@ -56,9 +56,9 @@ public class DotProcessor implements InspectionNodeProcessor {
      */
     public static void process(InspectionNode node, OutputStream output, boolean verbose) throws IOException {
         try (Editor editor = new Editor(output, verbose)) {
-            editor.put("digraph {0} '{'", literal(node.getId()));
+            editor.put("digraph {0} '{'", literal(node.getId())); //$NON-NLS-1$
             editor.push();
-            editor.put("label = {0};", literal(node.getId()));
+            editor.put("label = {0};", literal(node.getId())); //$NON-NLS-1$
             Map<String, InspectionNode> elements = node.getElements();
             for (InspectionNode element : elements.values()) {
                 editor.put(element);
@@ -74,7 +74,7 @@ public class DotProcessor implements InspectionNodeProcessor {
                 }
             }
             editor.pop();
-            editor.put("'}'");
+            editor.put("'}'"); //$NON-NLS-1$
         }
     }
 
@@ -98,9 +98,9 @@ public class DotProcessor implements InspectionNodeProcessor {
 
     private static class Editor implements Closeable {
 
-        private static final String PREFIX_IN = "in.";
+        private static final String PREFIX_IN = "in."; //$NON-NLS-1$
 
-        private static final String PREFIX_OUT = "out.";
+        private static final String PREFIX_OUT = "out."; //$NON-NLS-1$
 
         private final PrintWriter writer;
 
@@ -150,7 +150,7 @@ public class DotProcessor implements InspectionNodeProcessor {
             buf.append('\n');
             buf.append('@');
             buf.append(node.getId());
-            put("\"{0}\" [shape = box, label = {1}];",
+            put("\"{0}\" [shape = box, label = {1}];", //$NON-NLS-1$
                     node.getId(),
                     literal(buf.toString()));
         }
@@ -168,7 +168,7 @@ public class DotProcessor implements InspectionNodeProcessor {
                 appendPorts(buf, PREFIX_OUT, node.getOutputs().values());
             }
             buf.append('}');
-            put("\"{0}\" [shape = record, label = {1}];", node.getId(), literal(buf.toString()));
+            put("\"{0}\" [shape = record, label = {1}];", node.getId(), literal(buf.toString())); //$NON-NLS-1$
         }
 
         private void appendPorts(StringBuilder buf, String prefix, Collection<InspectionNode.Port> ports) {
@@ -195,7 +195,7 @@ public class DotProcessor implements InspectionNodeProcessor {
 
         private String getNodeLabel(InspectionNode node) {
             StringBuilder buf = new StringBuilder();
-            buf.append(String.format("%s [@%s]", node.getTitle(), node.getId()));
+            buf.append(String.format("%s [@%s]", node.getTitle(), node.getId())); //$NON-NLS-1$
             appendProperties(buf, node.getProperties());
             return escapeForRecord(buf);
         }
@@ -235,7 +235,7 @@ public class DotProcessor implements InspectionNodeProcessor {
             NodeArc arc = new NodeArc(upstreamNode.getId(), downstreamNode.getId());
             if (sawNodeArcs.contains(arc) == false) {
                 sawNodeArcs.add(arc);
-                put("{0} -> {1};",
+                put("{0} -> {1};", //$NON-NLS-1$
                         literal(upstreamNode.getId()), literal(downstreamNode.getId()));
             }
         }
@@ -243,7 +243,7 @@ public class DotProcessor implements InspectionNodeProcessor {
         private void connectVerbose(
                 InspectionNode upstreamNode, String upstreamPort,
                 InspectionNode downstreamNode, String downstreamPort) {
-            put("{0}:{1} -> {2}:{3}",
+            put("{0}:{1} -> {2}:{3}", //$NON-NLS-1$
                     literal(upstreamNode.getId()), literal(PREFIX_OUT + upstreamPort),
                     literal(downstreamNode.getId()), literal(PREFIX_IN + downstreamPort));
         }
@@ -253,7 +253,7 @@ public class DotProcessor implements InspectionNodeProcessor {
             assert arguments != null;
             StringBuilder buf = new StringBuilder();
             for (int i = 0, n = indent; i < n; i++) {
-                buf.append("    ");
+                buf.append("    "); //$NON-NLS-1$
             }
             buf.append(MessageFormat.format(pattern, arguments));
             String text = buf.toString();

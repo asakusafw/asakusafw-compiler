@@ -110,7 +110,7 @@ public class FileDeployer implements TestRule {
 
     private InputStream open(String sourcePath) {
         Class<?> c = current;
-        assertThat("not yet initialized", c, is(notNullValue()));
+        assertThat("not yet initialized", c, is(notNullValue())); //$NON-NLS-1$
         InputStream in = c.getResourceAsStream(sourcePath);
         assertThat(sourcePath, in, is(notNullValue()));
         return new BufferedInputStream(in);

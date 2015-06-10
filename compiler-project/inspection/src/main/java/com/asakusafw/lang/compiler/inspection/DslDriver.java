@@ -234,7 +234,7 @@ public class DslDriver {
             ExternalInputInfo info = object.getInfo();
             result.withProperty(PROPERTY_DESCRIPTION, info.getDescriptionClass().getClassName());
             result.withProperty(PROPERTY_MODULE, info.getModuleName());
-            result.withProperty("size", info.getDataSize().toString());
+            result.withProperty("size", info.getDataSize().toString()); //$NON-NLS-1$
         }
         return result;
     }

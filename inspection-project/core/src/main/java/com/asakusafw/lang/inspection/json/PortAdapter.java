@@ -34,11 +34,11 @@ import com.google.gson.reflect.TypeToken;
  */
 public class PortAdapter implements JsonAdapter<InspectionNode.Port> {
 
-    private static final String KEY_ID = "id";
+    private static final String KEY_ID = "id"; //$NON-NLS-1$
 
-    private static final String KEY_PROPERTIES = "properties";
+    private static final String KEY_PROPERTIES = "properties"; //$NON-NLS-1$
 
-    private static final String KEY_OPPOSITES = "opposites";
+    private static final String KEY_OPPOSITES = "opposites"; //$NON-NLS-1$
 
     private static final Type TYPE_PROPERTIES = (new TypeToken<Map<String, String>>() {
         // empty

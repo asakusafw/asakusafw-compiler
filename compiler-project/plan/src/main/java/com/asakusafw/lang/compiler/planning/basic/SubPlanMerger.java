@@ -62,7 +62,7 @@ public class SubPlanMerger {
         for (SubPlan sub : sources) {
             if (sourceDetail.getPlan() != sub.getOwner()) {
                 throw new IllegalArgumentException(MessageFormat.format(
-                        "sub-plan \"{0}\" must have the owner \"{2}\": {1}",
+                        "sub-plan \"{0}\" must have the owner \"{2}\": {1}", //$NON-NLS-1$
                         sub,
                         sub.getOwner(),
                         sourceDetail.getPlan()));

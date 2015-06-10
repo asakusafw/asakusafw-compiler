@@ -32,32 +32,32 @@ public class StageInfoOption implements LaunchOption<StageInfo> {
     /**
      * The command name for user name.
      */
-    public static final String COMMAND_USER_NAME = "--user-name";
+    public static final String COMMAND_USER_NAME = "--user-name"; //$NON-NLS-1$
 
     /**
      * The command name for batch ID.
      */
-    public static final String COMMAND_BATCH_ID = "--batch-id";
+    public static final String COMMAND_BATCH_ID = "--batch-id"; //$NON-NLS-1$
 
     /**
      * The command name for flow ID.
      */
-    public static final String COMMAND_FLOW_ID = "--flow-id";
+    public static final String COMMAND_FLOW_ID = "--flow-id"; //$NON-NLS-1$
 
     /**
      * The command name for stage ID.
      */
-    public static final String COMMAND_STAGE_ID = "--stage-id";
+    public static final String COMMAND_STAGE_ID = "--stage-id"; //$NON-NLS-1$
 
     /**
      * The command name for execution ID.
      */
-    public static final String COMMAND_EXECUTION_ID = "--execution-id";
+    public static final String COMMAND_EXECUTION_ID = "--execution-id"; //$NON-NLS-1$
 
     /**
      * The command name for batch arguments.
      */
-    public static final String COMMAND_BATCH_ARGUMENTS = "--batch-arguments";
+    public static final String COMMAND_BATCH_ARGUMENTS = "--batch-arguments"; //$NON-NLS-1$
 
     private static final String[] MANDATORY = { COMMAND_BATCH_ID, COMMAND_FLOW_ID, COMMAND_EXECUTION_ID };
 
@@ -69,7 +69,7 @@ public class StageInfoOption implements LaunchOption<StageInfo> {
      * Creates a new instance.
      */
     public StageInfoOption() {
-        this(System.getProperty("user.name"));
+        this(System.getProperty("user.name")); //$NON-NLS-1$
     }
 
     /**

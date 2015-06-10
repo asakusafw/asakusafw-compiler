@@ -37,17 +37,17 @@ import com.google.gson.reflect.TypeToken;
  */
 public class NodeAdapter implements JsonAdapter<InspectionNode> {
 
-    private static final String KEY_ID = "id";
+    private static final String KEY_ID = "id"; //$NON-NLS-1$
 
-    private static final String KEY_TITLE = "title";
+    private static final String KEY_TITLE = "title"; //$NON-NLS-1$
 
-    private static final String KEY_INPUTS = "inputs";
+    private static final String KEY_INPUTS = "inputs"; //$NON-NLS-1$
 
-    private static final String KEY_OUTPUTS = "outputs";
+    private static final String KEY_OUTPUTS = "outputs"; //$NON-NLS-1$
 
-    private static final String KEY_PROPERTIES = "properties";
+    private static final String KEY_PROPERTIES = "properties"; //$NON-NLS-1$
 
-    private static final String KEY_ELEMENTS = "elements";
+    private static final String KEY_ELEMENTS = "elements"; //$NON-NLS-1$
 
     private static final Type TYPE_PORTS = (new TypeToken<List<Port>>() {
         // empty
