@@ -49,7 +49,13 @@ public class DirectIoTest {
      * testing environment.
      */
     @Rule
-    public DirectIoContext env = new DirectIoContext();
+    public final DirectIoContext env = new DirectIoContext();
+
+    /**
+     * using {@link ResourceBroker} in testing.
+     */
+    @Rule
+    public final ResourceBrokerContext context = new ResourceBrokerContext(true);
 
     /**
      * simple case.
