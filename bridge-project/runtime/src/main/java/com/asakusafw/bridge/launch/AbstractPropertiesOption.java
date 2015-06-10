@@ -18,6 +18,7 @@ package com.asakusafw.bridge.launch;
 import java.io.File;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * An abstract {@link LaunchOption} which accepts properties.
@@ -28,6 +29,11 @@ public abstract class AbstractPropertiesOption implements LaunchOption<Map<Strin
      * The prefix of file path.
      */
     public static final char FILE_PREFIX = '@';
+
+    /**
+     * The selective file separator.
+     */
+    public static final char FILE_SEPARATOR = '|';
 
     /**
      * The key-value separator character.
@@ -47,8 +53,16 @@ public abstract class AbstractPropertiesOption implements LaunchOption<Map<Strin
             return;
         }
         if (value.charAt(0) == FILE_PREFIX) {
-            File file = new File(value.substring(1));
-            properties.putAll(extract(file));
+            for (String s : value.substring(1).split(Pattern.quote(String.valueOf(FILE_SEPARATOR)))) {
+                if (s.isEmpty()) {
+                    continue;
+                }
+                File file = new File(s);
+                if (file.exists()) {
+                    properties.putAll(extract(file));
+                    break;
+                }
+            }
         } else {
             int separtorAt = value.indexOf(KEY_VALUE_SEPARATOR);
             if (separtorAt < 0) {
