@@ -124,7 +124,7 @@ public class CompilerOptions {
         for (Map.Entry<String, String> entry : properties.entrySet()) {
             String key = entry.getKey();
             if (key.startsWith(propertyKeyPrefix)) {
-                results.put(propertyKeyPrefix, entry.getValue());
+                results.put(key, entry.getValue());
             }
         }
         return results;
