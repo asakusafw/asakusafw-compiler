@@ -36,6 +36,7 @@ import org.hamcrest.Matcher;
 import org.junit.Rule;
 import org.junit.Test;
 
+import com.asakusafw.lang.compiler.api.CompilerOptions;
 import com.asakusafw.lang.compiler.cli.BatchCompilerCli.Configuration;
 import com.asakusafw.lang.compiler.cli.mock.DelegateBatchCompiler;
 import com.asakusafw.lang.compiler.cli.mock.DummyBatch;
@@ -309,6 +310,42 @@ public class BatchCompilerCliTest {
                 assertThat(context.getTools().getBatchProcessor(), is(consistsOf(DummyBatchProcessor.class)));
                 assertThat(context.getTools().getJobflowProcessor(), is(consistsOf(DummyJobflowProcessor.class)));
                 assertThat(context.getTools().getParticipant(), is(consistsOf(DummyCompilerParticipant.class)));
+            }
+        });
+        assertThat(status, is(0));
+        assertThat(count.get(), is(1));
+    }
+
+    /**
+     * w/ scoped properties.
+     * @throws Exception if failed
+     */
+    @Test
+    public void execute_scoped_properties() throws Exception {
+        final File output = deployer.newFolder();
+        String[] args = strings(new Object[] {
+                "--explore", files(ResourceUtil.findLibraryByClass(DummyBatch.class)),
+                "--output", output,
+                "--classAnalyzer", classes(DummyClassAnalyzer.class),
+                "--batchCompiler", classes(DelegateBatchCompiler.class),
+                "--include", classes(DummyBatch.class),
+                "--externalPortProcessors", classes(DummyExternalPortProcessor.class),
+                "--batchIdPrefix", "prefix.",
+                "-P", "a=A",
+                "-P", "b=B",
+                "-P", "DummyBatch:b=!",
+                "-P", "DummyBatch:c=C",
+                "-P", "other:a=INVALID",
+        });
+        final AtomicInteger count = new AtomicInteger();
+        int status = execute(args, new BatchCompiler() {
+            @Override
+            public void compile(Context context, Batch batch) {
+                count.incrementAndGet();
+                CompilerOptions options = context.getOptions();
+                assertThat(options.get("a", "?"), is("A"));
+                assertThat(options.get("b", "?"), is("!"));
+                assertThat(options.get("c", "?"), is("C"));
             }
         });
         assertThat(status, is(0));

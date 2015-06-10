@@ -51,6 +51,7 @@ import com.asakusafw.lang.compiler.common.Diagnostic;
 import com.asakusafw.lang.compiler.common.DiagnosticException;
 import com.asakusafw.lang.compiler.common.Predicate;
 import com.asakusafw.lang.compiler.common.Predicates;
+import com.asakusafw.lang.compiler.core.AnalyzerContext;
 import com.asakusafw.lang.compiler.core.BatchCompiler;
 import com.asakusafw.lang.compiler.core.ClassAnalyzer;
 import com.asakusafw.lang.compiler.core.CompilerContext;
@@ -360,9 +361,9 @@ public final class BatchCompilerCli {
         FileContainerRepository temporary = loadTemporary(configuration);
         try (ProjectRepository project = loadProject(configuration)) {
             ToolRepository tools = loadTools(project.getClassLoader(), configuration);
-            CompilerContext context = new CompilerContext.Basic(options, project, tools, temporary);
-            report(context);
-            return process(context, configuration);
+            CompilerContext root = new CompilerContext.Basic(options, project, tools, temporary);
+            report(root);
+            return process(new CompilerContextRoot(root), configuration);
         } finally {
             temporary.reset();
         }
@@ -465,8 +466,8 @@ public final class BatchCompilerCli {
         }
     }
 
-    private static boolean process(CompilerContext root, Configuration configuration) throws IOException {
-        ClassLoader classLoader = root.getProject().getClassLoader();
+    private static boolean process(CompilerContextRoot root, Configuration configuration) throws IOException {
+        ClassLoader classLoader = root.getRoot().getProject().getClassLoader();
         ClassAnalyzer analyzer = newInstance(classLoader, ClassAnalyzer.class, configuration.classAnalyzer.get());
         BatchCompiler compiler = newInstance(classLoader, BatchCompiler.class, configuration.batchCompiler.get());
         if (LOG.isDebugEnabled()) {
@@ -474,17 +475,18 @@ public final class BatchCompilerCli {
             LOG.debug("  analyzer: {}", analyzer.getClass().getName()); //$NON-NLS-1$
             LOG.debug("  compiler: {}", compiler.getClass().getName()); //$NON-NLS-1$
         }
-        Predicate<? super Class<?>> predicate = loadPredicate(root, configuration, analyzer);
+        Predicate<? super Class<?>> predicate = loadPredicate(root.getRoot(), configuration, analyzer);
         Map<Class<?>, DiagnosticException> errors = new LinkedHashMap<>();
         Map<String, ClassDescription> sawBatch = new HashMap<>();
-        for (Class<?> aClass : root.getProject().getProjectClasses(predicate)) {
+        for (Class<?> aClass : root.getRoot().getProject().getProjectClasses(predicate)) {
             if (LOG.isInfoEnabled()) {
                 LOG.info(MessageFormat.format(
                         "compiling batch class: {0}",
                         aClass.getName()));
             }
             try {
-                Batch batch = analyzer.analyzeBatch(new ClassAnalyzer.Context(root), aClass);
+                Batch batch = analyzer.analyzeBatch(new ClassAnalyzer.Context(root.getRoot()), aClass);
+                CompilerContext scoped = root.getScopedContext(batch);
                 if (configuration.batchIdPrefix.isEmpty() == false) {
                     batch = transformBatchId(batch, configuration.batchIdPrefix.get());
                 }
@@ -505,7 +507,7 @@ public final class BatchCompilerCli {
                                 output));
                     }
                 }
-                BatchCompiler.Context context = new BatchCompiler.Context(root, new FileContainer(output));
+                BatchCompiler.Context context = new BatchCompiler.Context(scoped, new FileContainer(output));
                 compiler.compile(context, batch);
             } catch (DiagnosticException e) {
                 errors.put(aClass, e);
@@ -558,7 +560,7 @@ public final class BatchCompilerCli {
     }
 
     private static Predicate<? super Class<?>> loadPredicate(
-            CompilerContext root, Configuration configuration, final ClassAnalyzer analyzer) {
+            AnalyzerContext root, Configuration configuration, final ClassAnalyzer analyzer) {
         final ClassAnalyzer.Context context = new ClassAnalyzer.Context(root);
         Predicate<Class<?>> predicate = new Predicate<Class<?>>() {
             @Override
