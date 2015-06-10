@@ -107,11 +107,27 @@ public class CompilerOptions {
     }
 
     /**
-     * Returns the generic compiler properties.
-     * @return the generic compiler properties
+     * Returns the <em>RAW</em> compiler properties.
+     * @return the <em>RAW</em> compiler properties
      */
-    public Map<String, String> getProperties() {
+    public Map<String, String> getRawProperties() {
         return properties;
+    }
+
+    /**
+     * Returns generic compiler properties which have the provided common prefix.
+     * @param propertyKeyPrefix the common prefix
+     * @return the compiler properties
+     */
+    public Map<String, String> getProperties(String propertyKeyPrefix) {
+        Map<String, String> results = new LinkedHashMap<>();
+        for (Map.Entry<String, String> entry : properties.entrySet()) {
+            String key = entry.getKey();
+            if (key.startsWith(propertyKeyPrefix)) {
+                results.put(propertyKeyPrefix, entry.getValue());
+            }
+        }
+        return results;
     }
 
     /**

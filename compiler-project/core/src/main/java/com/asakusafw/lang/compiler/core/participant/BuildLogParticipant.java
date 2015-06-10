@@ -89,7 +89,7 @@ public class BuildLogParticipant extends AbstractCompilerParticipant {
         editor.put("compiler.runtimeVersion", BatchRuntime.getLabel()); //$NON-NLS-1$
         editor.put("compiler.runtimeArtifact", DiagnosticUtil.getArtifactInfo(BatchRuntime.class)); //$NON-NLS-1$
         editor.put("compiler.compilerArtifact", DiagnosticUtil.getArtifactInfo(BatchCompiler.class)); //$NON-NLS-1$
-        editor.putAll("compiler.option.", context.getOptions().getProperties()); //$NON-NLS-1$
+        editor.putAll("compiler.option.", context.getOptions().getRawProperties()); //$NON-NLS-1$
 
         ToolRepository tools = context.getTools();
         editor.put("compiler.dataModelProcessor", info(tools.getDataModelProcessor())); //$NON-NLS-1$

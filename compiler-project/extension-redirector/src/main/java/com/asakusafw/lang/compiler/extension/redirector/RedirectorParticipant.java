@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.asakusafw.lang.compiler.api.BatchProcessor;
+import com.asakusafw.lang.compiler.api.CompilerOptions;
 import com.asakusafw.lang.compiler.api.reference.BatchReference;
 import com.asakusafw.lang.compiler.api.reference.JobflowReference;
 import com.asakusafw.lang.compiler.common.Diagnostic;
@@ -51,7 +52,7 @@ public class RedirectorParticipant extends AbstractCompilerParticipant {
 
     @Override
     public void afterBatch(Context context, Batch batch, BatchReference reference) {
-        RedirectRule rule = extractRule(context.getOptions().getProperties());
+        RedirectRule rule = extractRule(context.getOptions());
         if (rule.isEmpty()) {
             return;
         }
@@ -76,16 +77,10 @@ public class RedirectorParticipant extends AbstractCompilerParticipant {
         }
     }
 
-    static RedirectRule extractRule(Map<String, String> properties) {
+    private static RedirectRule extractRule(CompilerOptions options) {
         RedirectRule results = new RedirectRule();
-        for (Map.Entry<String, String> entry : properties.entrySet()) {
-            String key = entry.getKey();
-            String from;
-            if (key.startsWith(KEY_RULE_PREFIX)) {
-                from = key.substring(KEY_RULE_PREFIX.length());
-            } else {
-                continue;
-            }
+        for (Map.Entry<String, String> entry : options.getProperties(KEY_RULE_PREFIX).entrySet()) {
+            String from = entry.getKey().substring(KEY_RULE_PREFIX.length());
             String to = entry.getValue();
             results.add(from, to);
         }
