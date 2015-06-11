@@ -8,7 +8,7 @@
 	<parent>
 		<artifactId>project</artifactId>
 		<groupId>com.asakusafw.lang.compiler</groupId>
-		<version>0.1-SNAPSHOT</version>
+		<version>0.1.0-SNAPSHOT</version>
 	</parent>
 
 	<description>Execution Planning Support for Asakusa DSL Compiler</description>
