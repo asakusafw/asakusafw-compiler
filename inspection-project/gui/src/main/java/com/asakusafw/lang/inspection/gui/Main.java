@@ -66,7 +66,15 @@ public class Main implements Runnable {
      * Creates a new instance.
      */
     public Main() {
-        this(new JsonInspectionNodeRepository(), PdfExporter.find());
+        this(null);
+    }
+
+    /**
+     * Creates a new instance.
+     * @param file file to inspect (nullable)
+     */
+    public Main(File file) {
+        this(new JsonInspectionNodeRepository(), PdfExporter.find(), file);
     }
 
     /**
@@ -80,11 +88,36 @@ public class Main implements Runnable {
     }
 
     /**
+     * Creates a new instance.
+     * @param repository the node repository
+     * @param pdfExporter the PDF exporter
+     * @param file file to inspect (nullable)
+     */
+    public Main(InspectionNodeRepository repository, PdfExporter pdfExporter, File file) {
+        this.repository = repository;
+        this.pdfExporter = pdfExporter;
+        this.selectedFile = file;
+    }
+
+    /**
      * Program entry.
      * @param args program arguments (ignored)
      */
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Main());
+        File file;
+        if (args.length == 0) {
+            file = null;
+        } else if (args.length == 1) {
+            file = new File(args[0]);
+            if (file.isFile() == false) {
+                throw new IllegalArgumentException(MessageFormat.format(
+                        "invalid file: {0}",
+                        file));
+            }
+        } else {
+            throw new IllegalArgumentException("usage: java -jar <this.jar> [target-file]"); //$NON-NLS-1$
+        }
+        SwingUtilities.invokeLater(new Main(file));
     }
 
     @Override
@@ -100,15 +133,18 @@ public class Main implements Runnable {
         frame.setSize(400, 300);
         frame.setVisible(true);
 
-        JFileChooser chooser = new JFileChooser();
-        chooser.setMultiSelectionEnabled(false);
-        int result = chooser.showOpenDialog(frame.getContentPane());
-        if (result != JFileChooser.APPROVE_OPTION) {
-            frame.dispose();
-            return;
+        if (selectedFile == null) {
+            JFileChooser chooser = new JFileChooser();
+            chooser.setMultiSelectionEnabled(false);
+            int result = chooser.showOpenDialog(frame.getContentPane());
+            if (result != JFileChooser.APPROVE_OPTION) {
+                frame.dispose();
+                return;
+            }
+
+            selectedFile = chooser.getSelectedFile();
         }
 
-        selectedFile = chooser.getSelectedFile();
         InspectionNode node;
         try {
             node = loadFile(selectedFile);
