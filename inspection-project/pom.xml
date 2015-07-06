@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<name>Asakusa DSL Inspector</name>
-	<groupId>com.asakusafw.lang.inspection</groupId>
-	<artifactId>project</artifactId>
-	<parent>
-		<groupId>com.asakusafw.lang</groupId>
-		<artifactId>project</artifactId>
-		<version>0.1.1-SNAPSHOT</version>
-	</parent>
+  <modelVersion>4.0.0</modelVersion>
+  <name>Asakusa DSL Inspector</name>
+  <groupId>com.asakusafw.lang.inspection</groupId>
+  <artifactId>project</artifactId>
+  <parent>
+    <groupId>com.asakusafw.lang</groupId>
+    <artifactId>project</artifactId>
+    <version>0.1.1-SNAPSHOT</version>
+  </parent>
 
-	<packaging>pom</packaging>
+  <packaging>pom</packaging>
 
-	<modules>
-		<module>core</module>
-		<module>processor</module>
-		<module>cli</module>
-		<module>gui</module>
-	</modules>
+  <modules>
+    <module>core</module>
+    <module>processor</module>
+    <module>cli</module>
+    <module>gui</module>
+  </modules>
 </project>
