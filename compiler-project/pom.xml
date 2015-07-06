@@ -1,59 +1,59 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<name>Asakusa DSL Compiler</name>
-	<groupId>com.asakusafw.lang.compiler</groupId>
-	<artifactId>project</artifactId>
-	<parent>
-		<groupId>com.asakusafw.lang</groupId>
-		<artifactId>project</artifactId>
-		<version>0.1.1-SNAPSHOT</version>
-	</parent>
+  <modelVersion>4.0.0</modelVersion>
+  <name>Asakusa DSL Compiler</name>
+  <groupId>com.asakusafw.lang.compiler</groupId>
+  <artifactId>project</artifactId>
+  <parent>
+    <groupId>com.asakusafw.lang</groupId>
+    <artifactId>project</artifactId>
+    <version>0.1.1-SNAPSHOT</version>
+  </parent>
 
-	<packaging>pom</packaging>
+  <packaging>pom</packaging>
 
-	<modules>
-		<!-- core -->
-		<module>common</module>
-		<module>description</module>
-		<module>model</module>
-		<module>api</module>
-		<module>plan</module>
-		<module>optimizer</module>
-		<module>packaging</module>
+  <modules>
+    <!-- core -->
+    <module>common</module>
+    <module>description</module>
+    <module>model</module>
+    <module>api</module>
+    <module>plan</module>
+    <module>optimizer</module>
+    <module>packaging</module>
 
-		<!-- DSL driver -->
-		<module>analyzer</module>
+    <!-- DSL driver -->
+    <module>analyzer</module>
 
-		<!-- control -->
-		<module>core</module>
-		<module>cli</module>
+    <!-- control -->
+    <module>core</module>
+    <module>cli</module>
 
-		<!-- utilities -->
-		<module>javac</module>
-		<module>hadoop</module>
-		<module>mapreduce</module>
-		<module>inspection</module>
-		<module>redirector</module>
+    <!-- utilities -->
+    <module>javac</module>
+    <module>hadoop</module>
+    <module>mapreduce</module>
+    <module>inspection</module>
+    <module>redirector</module>
 
-		<!-- extensions -->
-		<module>extension-externalio</module>
-		<module>extension-directio</module>
-		<module>extension-windgate</module>
-		<module>extension-yaess</module>
-		<module>extension-cleanup</module>
-		<module>extension-redirector</module>
-		<module>extension-test-moderator</module>
+    <!-- extensions -->
+    <module>extension-externalio</module>
+    <module>extension-directio</module>
+    <module>extension-windgate</module>
+    <module>extension-yaess</module>
+    <module>extension-cleanup</module>
+    <module>extension-redirector</module>
+    <module>extension-test-moderator</module>
 
-		<!-- testing utilities -->
-		<module>common-testing</module>
-		<module>model-testing</module>
-		<module>javac-testing</module>
-		<module>mapreduce-testing</module>
-		<module>api-testing</module>
-		<module>tester</module>
+    <!-- testing utilities -->
+    <module>common-testing</module>
+    <module>model-testing</module>
+    <module>javac-testing</module>
+    <module>mapreduce-testing</module>
+    <module>api-testing</module>
+    <module>tester</module>
 
-		<!-- sub projects -->
-		<module>operator-project</module>
-	</modules>
+    <!-- sub projects -->
+    <module>operator-project</module>
+  </modules>
 </project>
