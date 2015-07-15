@@ -32,6 +32,7 @@ import com.asakusafw.lang.compiler.extension.testdriver.InternalExporterDescript
 import com.asakusafw.lang.compiler.extension.testdriver.InternalExporterRetriever;
 import com.asakusafw.lang.compiler.extension.testdriver.InternalImporterPreparator;
 import com.asakusafw.lang.compiler.extension.testdriver.mock.MockTextDefinition;
+import com.asakusafw.lang.compiler.mapreduce.testing.windows.WindowsConfigurator;
 import com.asakusafw.runtime.io.ModelInput;
 import com.asakusafw.runtime.io.ModelOutput;
 import com.asakusafw.runtime.stage.temporary.TemporaryStorage;
@@ -44,6 +45,10 @@ import com.asakusafw.testdriver.hadoop.ConfigurationFactory;
  * Test for {@link InternalExporterRetriever}.
  */
 public class InternalExporterRetrieverTest {
+
+    static {
+        WindowsConfigurator.install();
+    }
 
     private static final TestContext EMPTY = new TestContext.Empty();
 

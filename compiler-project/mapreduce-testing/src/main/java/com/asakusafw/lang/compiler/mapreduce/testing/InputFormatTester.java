@@ -27,6 +27,7 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.TaskAttemptID;
 import org.apache.hadoop.util.ReflectionUtils;
 
+import com.asakusafw.lang.compiler.mapreduce.testing.windows.WindowsConfigurator;
 import com.asakusafw.runtime.compatibility.JobCompatibility;
 import com.asakusafw.runtime.io.util.DataBuffer;
 
@@ -34,6 +35,10 @@ import com.asakusafw.runtime.io.util.DataBuffer;
  * Testing utilities for {@link InputFormat}.
  */
 public class InputFormatTester {
+
+    static {
+        WindowsConfigurator.install();
+    }
 
     private final InputFormat<?, ?> format;
 

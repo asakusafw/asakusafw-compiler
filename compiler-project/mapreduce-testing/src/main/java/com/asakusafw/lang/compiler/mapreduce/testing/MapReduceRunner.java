@@ -25,6 +25,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.hadoop.util.Tool;
 
+import com.asakusafw.lang.compiler.mapreduce.testing.windows.WindowsConfigurator;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.runtime.stage.StageConstants;
 import com.asakusafw.runtime.stage.inprocess.InProcessStageConfigurator;
@@ -34,6 +35,10 @@ import com.asakusafw.runtime.util.VariableTable;
  * Tester for MapReduce stages.
  */
 public final class MapReduceRunner {
+
+    static {
+        WindowsConfigurator.install();
+    }
 
     private static final String[] EMPTY_ARGUMENTS = new String[0];
 
