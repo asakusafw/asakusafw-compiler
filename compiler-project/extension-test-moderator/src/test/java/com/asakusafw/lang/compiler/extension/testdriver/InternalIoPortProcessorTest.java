@@ -57,6 +57,7 @@ import com.asakusafw.lang.compiler.hadoop.HadoopTaskReference;
 import com.asakusafw.lang.compiler.javac.JavaSourceExtension;
 import com.asakusafw.lang.compiler.javac.testing.JavaCompiler;
 import com.asakusafw.lang.compiler.mapreduce.testing.MapReduceRunner;
+import com.asakusafw.lang.compiler.mapreduce.testing.windows.WindowsConfigurator;
 import com.asakusafw.lang.compiler.model.description.ValueDescription;
 import com.asakusafw.lang.compiler.model.info.ExternalInputInfo;
 import com.asakusafw.lang.compiler.model.info.ExternalOutputInfo;
@@ -71,6 +72,10 @@ import com.asakusafw.vocabulary.external.ImporterDescription;
  * Test for {@link InternalIoPortProcessor}.
  */
 public class InternalIoPortProcessorTest {
+
+    static {
+        WindowsConfigurator.install();
+    }
 
     /**
      * temporary folder for testing.
