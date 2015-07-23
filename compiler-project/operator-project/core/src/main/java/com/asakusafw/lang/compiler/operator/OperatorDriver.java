@@ -15,6 +15,8 @@
  */
 package com.asakusafw.lang.compiler.operator;
 
+import java.util.Objects;
+
 import javax.annotation.processing.Completion;
 import javax.annotation.processing.Completions;
 import javax.lang.model.element.AnnotationMirror;
@@ -77,18 +79,9 @@ public interface OperatorDriver {
          * @throws IllegalArgumentException if some parameters were {@code null}
          */
         public Context(CompileEnvironment environment, AnnotationMirror annotation, ExecutableElement method) {
-            if (environment == null) {
-                throw new IllegalArgumentException("environment must not be null"); //$NON-NLS-1$
-            }
-            if (annotation == null) {
-                throw new IllegalArgumentException("annotation must not be null"); //$NON-NLS-1$
-            }
-            if (method == null) {
-                throw new IllegalArgumentException("method must not be null"); //$NON-NLS-1$
-            }
-            this.environment = environment;
-            this.annotation = annotation;
-            this.method = method;
+            this.environment = Objects.requireNonNull(environment, "environment must not be null"); //$NON-NLS-1$
+            this.annotation = Objects.requireNonNull(annotation, "annotation must not be null"); //$NON-NLS-1$
+            this.method = Objects.requireNonNull(method, "method must not be null"); //$NON-NLS-1$
         }
 
         /**

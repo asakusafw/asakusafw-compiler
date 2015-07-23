@@ -18,6 +18,7 @@ package com.asakusafw.lang.inspection.gui;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Objects;
 
 import javax.swing.tree.TreeNode;
 
@@ -113,7 +114,7 @@ public abstract class AbstractTreeNode<T> implements TreeNode {
         final int prime = 31;
         int result = 1;
         result = prime * result + getClass().hashCode();
-        result = prime * result + ((userObject == null) ? 0 : userObject.hashCode());
+        result = prime * result + Objects.hashCode(userObject.hashCode());
         return result;
     }
 
@@ -129,11 +130,7 @@ public abstract class AbstractTreeNode<T> implements TreeNode {
             return false;
         }
         AbstractTreeNode<?> other = (AbstractTreeNode<?>) obj;
-        if (userObject == null) {
-            if (other.userObject != null) {
-                return false;
-            }
-        } else if (!userObject.equals(other.userObject)) {
+        if (!Objects.equals(userObject, other.userObject)) {
             return false;
         }
         return true;

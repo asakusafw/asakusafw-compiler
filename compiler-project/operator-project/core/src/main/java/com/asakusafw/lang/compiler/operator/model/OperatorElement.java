@@ -15,6 +15,8 @@
  */
 package com.asakusafw.lang.compiler.operator.model;
 
+import java.util.Objects;
+
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ExecutableElement;
 
@@ -40,14 +42,8 @@ public class OperatorElement {
             AnnotationMirror annotation,
             ExecutableElement declaration,
             OperatorDescription description) {
-        if (annotation == null) {
-            throw new IllegalArgumentException("annotation must not be null"); //$NON-NLS-1$
-        }
-        if (declaration == null) {
-            throw new IllegalArgumentException("declaration must not be null"); //$NON-NLS-1$
-        }
-        this.annotation = annotation;
-        this.declaration = declaration;
+        this.annotation = Objects.requireNonNull(annotation, "annotation must not be null"); //$NON-NLS-1$
+        this.declaration = Objects.requireNonNull(declaration, "declaration must not be null"); //$NON-NLS-1$
         this.description = description;
     }
 

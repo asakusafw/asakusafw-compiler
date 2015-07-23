@@ -19,6 +19,7 @@ import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import com.asakusafw.lang.compiler.model.description.TypeDescription;
@@ -178,11 +179,9 @@ public final class MarkerOperator extends Operator {
          * @return this
          */
         public <T> Builder attribute(Class<T> attributeType, T attributeValue) {
-            if (attributeValue == null) {
-                throw new IllegalArgumentException("attribute value must not be null"); //$NON-NLS-1$
-            } else {
-                owner.attributes.put(attributeType, attributeValue);
-            }
+            Objects.requireNonNull(attributeType, "attributeType must not be null"); //$NON-NLS-1$
+            Objects.requireNonNull(attributeValue, "attributeValue must not be null"); //$NON-NLS-1$
+            owner.attributes.put(attributeType, attributeValue);
             return this;
         }
 

@@ -17,6 +17,7 @@ package com.asakusafw.lang.compiler.operator.dmdl;
 
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.lang.model.element.AnnotationMirror;
@@ -63,12 +64,8 @@ public class DmdlDataModelMirrorRepository implements DataModelMirrorRepository,
 
     @Override
     public DataModelMirror load(CompileEnvironment environment, TypeMirror type) {
-        if (environment == null) {
-            throw new IllegalArgumentException("environment must not be null"); //$NON-NLS-1$
-        }
-        if (type == null) {
-            throw new IllegalArgumentException("type must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(environment, "environment must not be null"); //$NON-NLS-1$
+        Objects.requireNonNull(type, "type must not be null"); //$NON-NLS-1$
         if (isConcrete(environment, type)) {
             return new ConcreteDataModelMirror(environment, (DeclaredType) type, this);
         } else if (isPartial(environment, type)) {
@@ -153,15 +150,9 @@ public class DmdlDataModelMirrorRepository implements DataModelMirrorRepository,
             CompileEnvironment environment,
             TypeMirror targetType,
             List<TypeElement> upperBounds) {
-        if (environment == null) {
-            throw new IllegalArgumentException("environment must not be null"); //$NON-NLS-1$
-        }
-        if (targetType == null) {
-            throw new IllegalArgumentException("targetType must not be null"); //$NON-NLS-1$
-        }
-        if (upperBounds == null) {
-            throw new IllegalArgumentException("upperBounds must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(environment, "environment must not be null"); //$NON-NLS-1$
+        Objects.requireNonNull(targetType, "targetType must not be null"); //$NON-NLS-1$
+        Objects.requireNonNull(upperBounds, "upperBounds must not be null"); //$NON-NLS-1$
         Set<PropertyMirror> results = new LinkedHashSet<>();
         Elements elements = environment.getProcessingEnvironment().getElementUtils();
         for (TypeElement element : upperBounds) {

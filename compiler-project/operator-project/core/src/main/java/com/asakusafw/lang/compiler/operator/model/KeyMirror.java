@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -111,18 +112,10 @@ public final class KeyMirror {
             AnnotationMirror source,
             Element annotationOwner,
             DataModelMirror contextType) {
-        if (environment == null) {
-            throw new IllegalArgumentException("environment must not be null"); //$NON-NLS-1$
-        }
-        if (source == null) {
-            throw new IllegalArgumentException("source must not be null"); //$NON-NLS-1$
-        }
-        if (annotationOwner == null) {
-            throw new IllegalArgumentException("annotationOwner must not be null"); //$NON-NLS-1$
-        }
-        if (contextType == null) {
-            throw new IllegalArgumentException("contextType must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(environment, "environment must not be null"); //$NON-NLS-1$
+        Objects.requireNonNull(source, "source must not be null"); //$NON-NLS-1$
+        Objects.requireNonNull(annotationOwner, "annotationOwner must not be null"); //$NON-NLS-1$
+        Objects.requireNonNull(contextType, "contextType must not be null"); //$NON-NLS-1$
         Map<String, AnnotationValue> pairs = AnnotationHelper.getValues(environment, source);
         if (pairs.containsKey("group") == false || pairs.containsKey("order") == false) {
             // May compilation failed

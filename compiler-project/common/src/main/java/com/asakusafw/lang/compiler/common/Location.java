@@ -17,6 +17,7 @@ package com.asakusafw.lang.compiler.common;
 
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 import com.asakusafw.lang.compiler.common.util.StringUtil;
@@ -148,9 +149,7 @@ public class Location implements Comparable<Location> {
      * @throws IllegalArgumentException if some parameters were {@code null}
      */
     public boolean isPrefixOf(Location other) {
-        if (other == null) {
-            throw new IllegalArgumentException("other must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(other);
         int thisSegments = count(this);
         int otherSegments = count(other);
         if (thisSegments > otherSegments) {

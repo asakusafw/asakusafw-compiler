@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import com.asakusafw.bridge.stage.StageInfo;
@@ -113,9 +114,7 @@ public class StageInfoOption implements LaunchOption<StageInfo> {
                         command));
             }
         }
-        String userName = entries.get(COMMAND_USER_NAME);
-        userName = userName == null ? defaultUserName : userName;
-
+        String userName = Objects.toString(entries.get(COMMAND_USER_NAME), defaultUserName);
         String batchId = entries.get(COMMAND_BATCH_ID);
         String flowId = entries.get(COMMAND_FLOW_ID);
         String stageId = entries.get(COMMAND_STAGE_ID);

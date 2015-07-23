@@ -16,6 +16,7 @@
 package com.asakusafw.lang.compiler.model.info;
 
 import java.text.MessageFormat;
+import java.util.Objects;
 
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.description.ValueDescription;
@@ -159,7 +160,7 @@ public interface ExternalInputInfo extends ExternalPortInfo {
             result = prime * result + moduleName.hashCode();
             result = prime * result + dataModelClass.hashCode();
             result = prime * result + dataSize.hashCode();
-            result = prime * result + (contents == null ? 0 : contents.hashCode());
+            result = prime * result + Objects.hashCode(contents);
             return result;
         }
 
@@ -187,11 +188,7 @@ public interface ExternalInputInfo extends ExternalPortInfo {
             if (dataSize != other.dataSize) {
                 return false;
             }
-            if (contents == null) {
-                if (other.contents != null) {
-                    return false;
-                }
-            } else if (!contents.equals(other.contents)) {
+            if (!Objects.equals(contents, other.contents)) {
                 return false;
             }
             return true;

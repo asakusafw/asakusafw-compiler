@@ -23,6 +23,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
@@ -118,15 +119,9 @@ public final class ElementHelper {
             CompileEnvironment environment,
             ExecutableElement element,
             OperatorDescription description) {
-        if (environment == null) {
-            throw new IllegalArgumentException("environment must not be null"); //$NON-NLS-1$
-        }
-        if (element == null) {
-            throw new IllegalArgumentException("element must not be null"); //$NON-NLS-1$
-        }
-        if (description == null) {
-            throw new IllegalArgumentException("description must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(environment, "environment must not be null"); //$NON-NLS-1$
+        Objects.requireNonNull(element, "element must not be null"); //$NON-NLS-1$
+        Objects.requireNonNull(description, "description must not be null"); //$NON-NLS-1$
         boolean valid = true;
         valid &= validateParameterNames(environment, element, description);
         valid &= validateOutputNames(environment, element, description);
@@ -246,15 +241,9 @@ public final class ElementHelper {
             CompileEnvironment environment,
             List<? extends TypeParameterElement> typeParameters,
             ImportBuilder imports) {
-        if (environment == null) {
-            throw new IllegalArgumentException("environment must not be null"); //$NON-NLS-1$
-        }
-        if (typeParameters == null) {
-            throw new IllegalArgumentException("typeParameters must not be null"); //$NON-NLS-1$
-        }
-        if (imports == null) {
-            throw new IllegalArgumentException("imports must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(environment, "environment must not be null"); //$NON-NLS-1$
+        Objects.requireNonNull(typeParameters, "typeParameters must not be null"); //$NON-NLS-1$
+        Objects.requireNonNull(imports, "imports must not be null"); //$NON-NLS-1$
         ModelFactory factory = Models.getModelFactory();
         Jsr269 converter = new Jsr269(factory);
         List<TypeParameterDeclaration> results = new ArrayList<>();
@@ -284,15 +273,10 @@ public final class ElementHelper {
             List<? extends TypeParameterElement> typeParameters,
             Type rawNodeType,
             ImportBuilder imports) {
-        if (environment == null) {
-            throw new IllegalArgumentException("environment must not be null"); //$NON-NLS-1$
-        }
-        if (rawNodeType == null) {
-            throw new IllegalArgumentException("rawNodeType must not be null"); //$NON-NLS-1$
-        }
-        if (imports == null) {
-            throw new IllegalArgumentException("imports must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(environment, "environment must not be null"); //$NON-NLS-1$
+        Objects.requireNonNull(typeParameters, "typeParameters must not be null"); //$NON-NLS-1$
+        Objects.requireNonNull(rawNodeType, "rawNodeType must not be null"); //$NON-NLS-1$
+        Objects.requireNonNull(imports, "imports must not be null"); //$NON-NLS-1$
         if (typeParameters.isEmpty()) {
             return rawNodeType;
         }
@@ -316,18 +300,10 @@ public final class ElementHelper {
             CompileEnvironment environment,
             OperatorElement element,
             ImportBuilder imports) {
-        if (environment == null) {
-            throw new IllegalArgumentException("environment must not be null"); //$NON-NLS-1$
-        }
-        if (element == null) {
-            throw new IllegalArgumentException("element must not be null"); //$NON-NLS-1$
-        }
-        if (imports == null) {
-            throw new IllegalArgumentException("imports must not be null"); //$NON-NLS-1$
-        }
-        if (element.getDescription() == null) {
-            throw new IllegalArgumentException("element.description must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(environment, "environment must not be null"); //$NON-NLS-1$
+        Objects.requireNonNull(element, "element must not be null"); //$NON-NLS-1$
+        Objects.requireNonNull(imports, "imports must not be null"); //$NON-NLS-1$
+        Objects.requireNonNull(element.getDescription(), "element.description must not be null"); //$NON-NLS-1$
         ModelFactory factory = Models.getModelFactory();
         Jsr269 converter = new Jsr269(factory);
         List<FormalParameterDeclaration> results = new ArrayList<>();
@@ -401,18 +377,10 @@ public final class ElementHelper {
             CompileEnvironment environment,
             OperatorElement element,
             ImportBuilder imports) {
-        if (environment == null) {
-            throw new IllegalArgumentException("environment must not be null"); //$NON-NLS-1$
-        }
-        if (element == null) {
-            throw new IllegalArgumentException("element must not be null"); //$NON-NLS-1$
-        }
-        if (imports == null) {
-            throw new IllegalArgumentException("imports must not be null"); //$NON-NLS-1$
-        }
-        if (element.getDescription() == null) {
-            throw new IllegalArgumentException("element.description must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(environment, "environment must not be null"); //$NON-NLS-1$
+        Objects.requireNonNull(element, "element must not be null"); //$NON-NLS-1$
+        Objects.requireNonNull(imports, "imports must not be null"); //$NON-NLS-1$
+        Objects.requireNonNull(element.getDescription(), "element.description must not be null"); //$NON-NLS-1$
         ModelFactory factory = Models.getModelFactory();
         List<Expression> results = new ArrayList<>();
         for (Node param : element.getDescription().getParameters()) {

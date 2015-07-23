@@ -19,6 +19,7 @@ import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Represents primitive types and void type.
@@ -32,7 +33,7 @@ public class BasicTypeDescription extends ReifiableTypeDescription {
      * @param basicTypeKind the type kind
      */
     public BasicTypeDescription(BasicTypeKind basicTypeKind) {
-        this.basicTypeKind = basicTypeKind;
+        this.basicTypeKind = Objects.requireNonNull(basicTypeKind);
     }
 
     /**
@@ -77,7 +78,7 @@ public class BasicTypeDescription extends ReifiableTypeDescription {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((basicTypeKind == null) ? 0 : basicTypeKind.hashCode());
+        result = prime * result + basicTypeKind.hashCode();
         return result;
     }
 

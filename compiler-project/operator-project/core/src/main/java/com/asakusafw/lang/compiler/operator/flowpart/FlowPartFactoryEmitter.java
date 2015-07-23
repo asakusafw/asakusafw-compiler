@@ -20,6 +20,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
@@ -81,10 +82,7 @@ public class FlowPartFactoryEmitter {
      * @throws IllegalArgumentException if some parameters were {@code null}
      */
     public FlowPartFactoryEmitter(CompileEnvironment environment) {
-        if (environment == null) {
-            throw new IllegalArgumentException("environment must not be null"); //$NON-NLS-1$
-        }
-        this.environment = environment;
+        this.environment = Objects.requireNonNull(environment, "environment must not be null"); //$NON-NLS-1$
     }
 
     /**
@@ -93,9 +91,7 @@ public class FlowPartFactoryEmitter {
      * @throws IllegalArgumentException if some parameters were {@code null}
      */
     public void emit(OperatorClass operatorClass) {
-        if (operatorClass == null) {
-            throw new IllegalArgumentException("operatorClass must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(operatorClass, "operatorClass must not be null"); //$NON-NLS-1$
         if (operatorClass.getElements().size() >= 2) {
             throw new IllegalArgumentException();
         }

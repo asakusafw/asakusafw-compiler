@@ -20,6 +20,7 @@ import java.lang.reflect.Method;
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import com.asakusafw.vocabulary.flow.graph.FlowElementAttribute;
 import com.asakusafw.vocabulary.flow.graph.FlowElementDescription;
@@ -51,21 +52,11 @@ public class OperatorNodeBuilder extends FlowElementBuilder {
             Class<?> implementationClass,
             String methodName,
             Class<?>... methodParameterTypes) {
-        if (annotationType == null) {
-            throw new IllegalArgumentException("annotationType must not be null"); //$NON-NLS-1$
-        }
-        if (operatorClass == null) {
-            throw new IllegalArgumentException("operatorClass must not be null"); //$NON-NLS-1$
-        }
-        if (implementationClass == null) {
-            throw new IllegalArgumentException("implementationClass must not be null"); //$NON-NLS-1$
-        }
-        if (methodName == null) {
-            throw new IllegalArgumentException("methodName must not be null"); //$NON-NLS-1$
-        }
-        if (methodParameterTypes == null) {
-            throw new IllegalArgumentException("methodParameters must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(annotationType, "annotationType must not be null"); //$NON-NLS-1$
+        Objects.requireNonNull(operatorClass, "operatorClass must not be null"); //$NON-NLS-1$
+        Objects.requireNonNull(implementationClass, "implementationClass must not be null"); //$NON-NLS-1$
+        Objects.requireNonNull(methodName, "methodName must not be null"); //$NON-NLS-1$
+        Objects.requireNonNull(methodParameterTypes, "methodParameterTypes must not be null"); //$NON-NLS-1$
         if (operatorClass.isAssignableFrom(implementationClass) == false) {
             throw new IllegalArgumentException(MessageFormat.format(
                     "implementationClass ({0}) must be subclass of operatorClass ({1})",
