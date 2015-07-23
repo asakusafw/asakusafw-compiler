@@ -17,6 +17,7 @@ package com.asakusafw.lang.compiler.model.description;
 
 import java.lang.reflect.Array;
 import java.text.MessageFormat;
+import java.util.Objects;
 
 /**
  * Represents an array type.
@@ -30,7 +31,7 @@ public class ArrayTypeDescription extends ReifiableTypeDescription {
      * @param componentType the component type
      */
     public ArrayTypeDescription(TypeDescription componentType) {
-        this.componentType = componentType;
+        this.componentType = Objects.requireNonNull(componentType);
     }
 
     /**
@@ -80,7 +81,7 @@ public class ArrayTypeDescription extends ReifiableTypeDescription {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((componentType == null) ? 0 : componentType.hashCode());
+        result = prime * result + componentType.hashCode();
         return result;
     }
 

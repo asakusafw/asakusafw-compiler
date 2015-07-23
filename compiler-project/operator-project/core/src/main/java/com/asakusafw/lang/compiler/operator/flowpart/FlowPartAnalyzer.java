@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
@@ -77,10 +78,7 @@ public class FlowPartAnalyzer {
      * @throws IllegalArgumentException if some parameters were {@code null}
      */
     public FlowPartAnalyzer(CompileEnvironment environment) {
-        if (environment == null) {
-            throw new IllegalArgumentException("environment must not be null"); //$NON-NLS-1$
-        }
-        this.environment = environment;
+        this.environment = Objects.requireNonNull(environment, "environment must not be null"); //$NON-NLS-1$
         this.annotationDecl = environment.findTypeElement(Constants.TYPE_FLOW_PART);
         this.flowpartClasses = new HashMap<>();
     }
@@ -91,9 +89,7 @@ public class FlowPartAnalyzer {
      * @throws IllegalArgumentException if some parameters were {@code null}
      */
     public void register(TypeElement typeDecl) {
-        if (typeDecl == null) {
-            throw new IllegalArgumentException("typeDecl must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(typeDecl, "typeDecl must not be null"); //$NON-NLS-1$
         AnnotationMirror annotation = AnnotationHelper.findAnnotation(environment, annotationDecl, typeDecl);
         if (annotation == null) {
             environment.getProcessingEnvironment().getMessager().printMessage(Diagnostic.Kind.ERROR,

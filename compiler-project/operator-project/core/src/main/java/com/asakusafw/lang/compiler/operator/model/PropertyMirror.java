@@ -16,6 +16,7 @@
 package com.asakusafw.lang.compiler.operator.model;
 
 import java.text.MessageFormat;
+import java.util.Objects;
 
 import javax.lang.model.type.TypeMirror;
 
@@ -35,14 +36,8 @@ public final class PropertyMirror {
      * @throws IllegalArgumentException if some parameters were {@code null}
      */
     public PropertyMirror(String name, TypeMirror type) {
-        if (name == null) {
-            throw new IllegalArgumentException("name must not be null"); //$NON-NLS-1$
-        }
-        if (type == null) {
-            throw new IllegalArgumentException("type must not be null"); //$NON-NLS-1$
-        }
-        this.name = name;
-        this.type = type;
+        this.name = Objects.requireNonNull(name, "name must not be null"); //$NON-NLS-1$
+        this.type = Objects.requireNonNull(type, "type must not be null"); //$NON-NLS-1$
     }
 
     /**

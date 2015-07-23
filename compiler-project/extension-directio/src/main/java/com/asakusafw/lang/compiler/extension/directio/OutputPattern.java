@@ -23,12 +23,14 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.asakusafw.lang.compiler.api.reference.DataModelReference;
 import com.asakusafw.lang.compiler.api.reference.PropertyReference;
+import com.asakusafw.lang.compiler.common.util.StringUtil;
 import com.asakusafw.lang.compiler.model.PropertyName;
 import com.asakusafw.lang.compiler.model.description.Descriptions;
 import com.asakusafw.lang.compiler.model.description.TypeDescription;
@@ -235,12 +237,8 @@ public final class OutputPattern {
      * @see DirectFileOutputDescription#getResourcePattern()
      */
     public static List<CompiledSegment> compileResourcePattern(String pattern, DataModelReference dataType) {
-        if (pattern == null) {
-            throw new IllegalArgumentException("pattern must not be null"); //$NON-NLS-1$
-        }
-        if (dataType == null) {
-            throw new IllegalArgumentException("dataType must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(pattern, "pattern must not be null"); //$NON-NLS-1$
+        Objects.requireNonNull(dataType, "dataType must not be null"); //$NON-NLS-1$
         List<CompiledSegment> results = new ArrayList<>();
         Cursor cursor = new Cursor(pattern);
         while (cursor.isEof() == false) {
@@ -264,7 +262,7 @@ public final class OutputPattern {
                     throw new IllegalArgumentException(MessageFormat.format(
                             "invalid format \"{1}\": {0}",
                             cursor,
-                            argument == null ? "" : argument)); //$NON-NLS-1$
+                            Objects.toString(argument, StringUtil.EMPTY)));
                 }
                 try {
                     format.check(getType(property), argument);
@@ -273,7 +271,7 @@ public final class OutputPattern {
                     throw new IllegalArgumentException(MessageFormat.format(
                             "invalid format \"{1}\": {0}",
                             cursor,
-                            argument == null ? "" : argument), e); //$NON-NLS-1$
+                            Objects.toString(argument, StringUtil.EMPTY)), e);
                 }
                 results.add(new CompiledSegment(property, format, argument));
             } else if (cursor.isRandomNumber()) {
@@ -301,12 +299,8 @@ public final class OutputPattern {
      * @see DirectFileOutputDescription#getOrder()
      */
     public static List<CompiledOrder> compileOrder(List<String> orders, DataModelReference dataType) {
-        if (orders == null) {
-            throw new IllegalArgumentException("orders must not be null"); //$NON-NLS-1$
-        }
-        if (dataType == null) {
-            throw new IllegalArgumentException("dataType must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(orders, "orders must not be null"); //$NON-NLS-1$
+        Objects.requireNonNull(dataType, "dataType must not be null"); //$NON-NLS-1$
         Set<PropertyName> saw = new HashSet<>();
         List<CompiledOrder> results = new ArrayList<>();
         for (String order : orders) {
@@ -622,13 +616,10 @@ public final class OutputPattern {
          * @throws IllegalArgumentException if some parameters were {@code null}
          */
         public CompiledSegment(String string) {
-            if (string == null) {
-                throw new IllegalArgumentException("string must not be null"); //$NON-NLS-1$
-            }
             this.kind = SourceKind.NOTHING;
             this.source = null;
             this.format = Format.PLAIN;
-            this.argument = string;
+            this.argument = Objects.requireNonNull(string, "string must not be null"); //$NON-NLS-1$
         }
 
         /**
@@ -639,15 +630,9 @@ public final class OutputPattern {
          * @throws IllegalArgumentException if some parameters were {@code null}
          */
         public CompiledSegment(PropertyReference target, Format format, String argument) {
-            if (target == null) {
-                throw new IllegalArgumentException("target must not be null"); //$NON-NLS-1$
-            }
-            if (format == null) {
-                throw new IllegalArgumentException("format must not be null"); //$NON-NLS-1$
-            }
             this.kind = SourceKind.PROPERTY;
-            this.source = target;
-            this.format = format;
+            this.source = Objects.requireNonNull(target, "target must not be null"); //$NON-NLS-1$
+            this.format = Objects.requireNonNull(format, "format must not be null"); //$NON-NLS-1$
             this.argument = argument;
             format.check(getType(target), argument);
         }
@@ -660,15 +645,9 @@ public final class OutputPattern {
          * @throws IllegalArgumentException if some parameters were {@code null}
          */
         public CompiledSegment(RandomNumber source, Format format, String argument) {
-            if (source == null) {
-                throw new IllegalArgumentException("source must not be null"); //$NON-NLS-1$
-            }
-            if (format == null) {
-                throw new IllegalArgumentException("format must not be null"); //$NON-NLS-1$
-            }
             this.kind = SourceKind.RANDOM;
-            this.source = source;
-            this.format = format;
+            this.source = Objects.requireNonNull(source, "source must not be null"); //$NON-NLS-1$
+            this.format = Objects.requireNonNull(format, "format must not be null"); //$NON-NLS-1$
             this.argument = argument;
         }
 
@@ -745,10 +724,7 @@ public final class OutputPattern {
          * @throws IllegalArgumentException if some parameters were {@code null}
          */
         public CompiledOrder(PropertyReference target, boolean ascend) {
-            if (target == null) {
-                throw new IllegalArgumentException("target must not be null"); //$NON-NLS-1$
-            }
-            this.target = target;
+            this.target = Objects.requireNonNull(target, "target must not be null"); //$NON-NLS-1$
             this.ascend = ascend;
         }
 

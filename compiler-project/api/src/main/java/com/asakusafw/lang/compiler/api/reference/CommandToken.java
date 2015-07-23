@@ -15,6 +15,8 @@
  */
 package com.asakusafw.lang.compiler.api.reference;
 
+import java.util.Objects;
+
 /**
  * Represents a token in command.
  */
@@ -91,8 +93,8 @@ public class CommandToken {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + tokenKind.hashCode();
-        result = prime * result + ((image == null) ? 0 : image.hashCode());
+        result = prime * result + Objects.hashCode(tokenKind);
+        result = prime * result + Objects.hashCode(image);
         return result;
     }
 
@@ -108,14 +110,10 @@ public class CommandToken {
             return false;
         }
         CommandToken other = (CommandToken) obj;
-        if (tokenKind != other.tokenKind) {
+        if (!Objects.equals(tokenKind, other.tokenKind)) {
             return false;
         }
-        if (image == null) {
-            if (other.image != null) {
-                return false;
-            }
-        } else if (!image.equals(other.image)) {
+        if (!Objects.equals(image, other.image)) {
             return false;
         }
         return true;

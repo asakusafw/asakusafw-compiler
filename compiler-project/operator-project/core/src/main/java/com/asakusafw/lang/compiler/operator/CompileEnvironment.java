@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
 import java.util.Set;
@@ -78,15 +79,9 @@ public class CompileEnvironment {
             ProcessingEnvironment processingEnvironment,
             List<? extends OperatorDriver> operatorDrivers,
             List<? extends DataModelMirrorRepository> dataModelMirrors) {
-        if (processingEnvironment == null) {
-            throw new IllegalArgumentException("processingEnvironment must not be null"); //$NON-NLS-1$
-        }
-        if (operatorDrivers == null) {
-            throw new IllegalArgumentException("operatorDrivers must not be null"); //$NON-NLS-1$
-        }
-        if (dataModelMirrors == null) {
-            throw new IllegalArgumentException("dataModelMirrors must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(processingEnvironment, "processingEnvironment must not be null"); //$NON-NLS-1$
+        Objects.requireNonNull(operatorDrivers, "operatorDrivers must not be null"); //$NON-NLS-1$
+        Objects.requireNonNull(dataModelMirrors, "dataModelMirrors must not be null"); //$NON-NLS-1$
         this.processingEnvironment = processingEnvironment;
         this.operatorDrivers = new ArrayList<>(operatorDrivers);
         this.dataModelMirrors = new ArrayList<>(dataModelMirrors);
@@ -102,12 +97,8 @@ public class CompileEnvironment {
     public static CompileEnvironment newInstance(
             ProcessingEnvironment processingEnvironment,
             Support... features) {
-        if (processingEnvironment == null) {
-            throw new IllegalArgumentException("processingEnvironment must not be null"); //$NON-NLS-1$
-        }
-        if (features == null) {
-            throw new IllegalArgumentException("features must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(processingEnvironment, "processingEnvironment must not be null"); //$NON-NLS-1$
+        Objects.requireNonNull(features, "features must not be null"); //$NON-NLS-1$
         ClassLoader classLoader = findServiceClassLoader();
         return newInstance(processingEnvironment, classLoader, features);
     }
@@ -135,15 +126,9 @@ public class CompileEnvironment {
             ProcessingEnvironment processingEnvironment,
             ClassLoader serviceLoader,
             Support... features) {
-        if (processingEnvironment == null) {
-            throw new IllegalArgumentException("processingEnvironment must not be null"); //$NON-NLS-1$
-        }
-        if (serviceLoader == null) {
-            throw new IllegalArgumentException("serviceLoader must not be null"); //$NON-NLS-1$
-        }
-        if (features == null) {
-            throw new IllegalArgumentException("features must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(processingEnvironment, "processingEnvironment must not be null"); //$NON-NLS-1$
+        Objects.requireNonNull(serviceLoader, "serviceLoader must not be null"); //$NON-NLS-1$
+        Objects.requireNonNull(features, "features must not be null"); //$NON-NLS-1$
         Set<Support> set = EnumSet.noneOf(Support.class);
         Collections.addAll(set, features);
         List<OperatorDriver> operatorDrivers = new ArrayList<>();
@@ -191,9 +176,7 @@ public class CompileEnvironment {
      * @throws IllegalArgumentException if some parameters were {@code null}
      */
     public void emit(CompilationUnit unit, Element... originatingElements) throws IOException {
-        if (unit == null) {
-            throw new IllegalArgumentException("unit must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(unit, "unit must not be null"); //$NON-NLS-1$
         new Jsr269(Models.getModelFactory()).emit(processingEnvironment.getFiler(), unit, originatingElements);
     }
 
@@ -204,9 +187,7 @@ public class CompileEnvironment {
      * @throws IllegalArgumentException if some parameters were {@code null}
      */
     public DataModelMirror findDataModel(ClassDescription typeName) {
-        if (typeName == null) {
-            throw new IllegalArgumentException("typeName must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(typeName, "typeName must not be null"); //$NON-NLS-1$
         DeclaredType type = findDeclaredType(typeName);
         if (type == null) {
             return null;
@@ -221,9 +202,7 @@ public class CompileEnvironment {
      * @throws IllegalArgumentException if some parameters were {@code null}
      */
     public DataModelMirror findDataModel(TypeMirror type) {
-        if (type == null) {
-            throw new IllegalArgumentException("type must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(type, "type must not be null"); //$NON-NLS-1$
         for (DataModelMirrorRepository repo : dataModelMirrors) {
             DataModelMirror mirror = repo.load(this, type);
             if (mirror != null) {
@@ -248,9 +227,7 @@ public class CompileEnvironment {
      * @throws IllegalArgumentException if some parameters were {@code null}
      */
     public OperatorDriver findDriver(TypeElement annotationType) {
-        if (annotationType == null) {
-            throw new IllegalArgumentException("annotationType must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(annotationType, "annotationType must not be null"); //$NON-NLS-1$
         ClassDescription aClass = DescriptionHelper.toDescription(this, annotationType);
         for (OperatorDriver driver : operatorDrivers) {
             if (driver.getAnnotationTypeName().equals(aClass)) {
@@ -267,9 +244,7 @@ public class CompileEnvironment {
      * @throws IllegalArgumentException if some parameters were {@code null}
      */
     public TypeElement findTypeElement(ClassDescription aClass) {
-        if (aClass == null) {
-            throw new IllegalArgumentException("typeName must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(aClass, "aClass must not be null"); //$NON-NLS-1$
         TypeElement type = processingEnvironment.getElementUtils().getTypeElement(aClass.getClassName());
         return type;
     }
@@ -281,9 +256,7 @@ public class CompileEnvironment {
      * @throws IllegalArgumentException if some parameters were {@code null}
      */
     public DeclaredType findDeclaredType(ClassDescription aClass) {
-        if (aClass == null) {
-            throw new IllegalArgumentException("aClass must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(aClass, "aClass must not be null"); //$NON-NLS-1$
         TypeElement type = findTypeElement(aClass);
         if (type == null) {
             return null;
@@ -298,9 +271,7 @@ public class CompileEnvironment {
      * @throws IllegalArgumentException if some parameters were {@code null}
      */
     public TypeMirror getErasure(TypeMirror type) {
-        if (type == null) {
-            throw new IllegalArgumentException("type must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(type, "type must not be null"); //$NON-NLS-1$
         // Note: for Eclipse JDT
         if (type.getKind() == TypeKind.DECLARED) {
             TypeElement element = (TypeElement) ((DeclaredType) type).asElement();
@@ -314,9 +285,7 @@ public class CompileEnvironment {
      * @param key the target resource key
      */
     public void setResourceGenerated(ClassDescription key) {
-        if (key == null) {
-            throw new IllegalArgumentException("key must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(key, "key must not be null"); //$NON-NLS-1$
         generatedResourceKeys.add(key.getInternalName());
     }
 
@@ -326,9 +295,7 @@ public class CompileEnvironment {
      * @return {@code true} if it is already generated, otherwise {@code false}
      */
     public boolean isResourceGenerated(ClassDescription key) {
-        if (key == null) {
-            throw new IllegalArgumentException("key must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(key, "key must not be null"); //$NON-NLS-1$
         if (forceRegenerateResources) {
             return false;
         }

@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -90,10 +91,7 @@ public class JavaName {
     private final List<String> words;
 
     JavaName(List<String> words) {
-        if (words == null) {
-            throw new IllegalArgumentException("words must not be null"); //$NON-NLS-1$
-        }
-        this.words = normalize(words);
+        this.words = normalize(Objects.requireNonNull(words, "words must not be null")); //$NON-NLS-1$
     }
 
     /**
@@ -103,9 +101,7 @@ public class JavaName {
      * @throws IllegalArgumentException if some parameters were {@code null}
      */
     public static JavaName of(String nameString) {
-        if (nameString == null) {
-            throw new IllegalArgumentException("nameString must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(nameString, "nameString must not be null"); //$NON-NLS-1$
         if (nameString.isEmpty()) {
             throw new IllegalArgumentException("nameString must not be empty"); //$NON-NLS-1$
         } else if (nameString.indexOf('_') >= 0 || nameString.toUpperCase(Locale.ENGLISH).equals(nameString)) {
@@ -249,9 +245,7 @@ public class JavaName {
     }
 
     private static String normalize(String segment) {
-        if (segment == null) {
-            throw new IllegalArgumentException("segment must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(segment, "segment must not be null"); //$NON-NLS-1$
         if (segment.isEmpty()) {
             throw new IllegalArgumentException();
         }

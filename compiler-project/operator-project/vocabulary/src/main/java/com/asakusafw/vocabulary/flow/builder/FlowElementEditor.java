@@ -18,6 +18,7 @@ package com.asakusafw.vocabulary.flow.builder;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import com.asakusafw.vocabulary.flow.Source;
 import com.asakusafw.vocabulary.flow.graph.FlowElement;
@@ -40,9 +41,7 @@ public class FlowElementEditor {
      * @throws IllegalArgumentException if some parameters were {@code null}
      */
     public FlowElementEditor(FlowElement element) {
-        if (element == null) {
-            throw new IllegalArgumentException("flow must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(element, "element must not be null"); //$NON-NLS-1$
         for (FlowElementInput port : element.getInputPorts()) {
             inputs.put(port.getDescription().getName(), port);
         }
@@ -58,9 +57,7 @@ public class FlowElementEditor {
      * @throws IllegalArgumentException if some parameters were {@code null}
      */
     public FlowElementInput getInput(String name) {
-        if (name == null) {
-            throw new IllegalArgumentException("name must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(name, "name must not be null"); //$NON-NLS-1$
         FlowElementInput port = inputs.get(name);
         if (port == null) {
             throw new IllegalArgumentException(MessageFormat.format(
@@ -77,9 +74,7 @@ public class FlowElementEditor {
      * @throws IllegalArgumentException if some parameters were {@code null}
      */
     public FlowElementOutput getOutput(String name) {
-        if (name == null) {
-            throw new IllegalArgumentException("name must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(name, "name must not be null"); //$NON-NLS-1$
         FlowElementOutput port = outputs.get(name);
         if (port == null) {
             throw new IllegalArgumentException(MessageFormat.format(
@@ -98,12 +93,8 @@ public class FlowElementEditor {
      * @throws IllegalArgumentException if some parameters were {@code null}
      */
     public <T> Source<T> createSource(String name, Source<T> typeRef) {
-        if (name == null) {
-            throw new IllegalArgumentException("name must not be null"); //$NON-NLS-1$
-        }
-        if (typeRef == null) {
-            throw new IllegalArgumentException("typeRef must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(name, "name must not be null"); //$NON-NLS-1$
+        Objects.requireNonNull(typeRef, "typeRef must not be null"); //$NON-NLS-1$
         FlowElementOutput port = getOutput(name);
         return toSource(port, typeRef.toOutputPort().getDescription().getDataType());
     }
@@ -117,12 +108,8 @@ public class FlowElementEditor {
      * @throws IllegalArgumentException if some parameters were {@code null}
      */
     public <T> Source<T> createSource(String name, Class<T> type) {
-        if (name == null) {
-            throw new IllegalArgumentException("name must not be null"); //$NON-NLS-1$
-        }
-        if (type == null) {
-            throw new IllegalArgumentException("type must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(name, "name must not be null"); //$NON-NLS-1$
+        Objects.requireNonNull(type, "type must not be null"); //$NON-NLS-1$
         FlowElementOutput port = getOutput(name);
         return toSource(port, type);
     }

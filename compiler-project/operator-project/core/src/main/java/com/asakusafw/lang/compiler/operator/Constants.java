@@ -18,6 +18,7 @@ package com.asakusafw.lang.compiler.operator;
 import java.text.MessageFormat;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.annotation.Generated;
 import javax.lang.model.SourceVersion;
@@ -157,9 +158,7 @@ public final class Constants {
      * @throws IllegalArgumentException if some parameters were {@code null}
      */
     public static ClassDescription getBuiltinOperatorClass(String simpleName) {
-        if (simpleName == null) {
-            throw new IllegalArgumentException("simpleName must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(simpleName, "simpleName must not be null"); //$NON-NLS-1$
         return new ClassDescription(MessageFormat.format(PATTERN_BUILTIN_OPERATOR_ANNOTATION_CLASS, simpleName));
     }
 
@@ -170,9 +169,7 @@ public final class Constants {
      * @throws IllegalArgumentException if some parameters were {@code null}
      */
     public static ClassDescription getImplementationClass(CharSequence originalName) {
-        if (originalName == null) {
-            throw new IllegalArgumentException("originalName must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(originalName, "originalName must not be null"); //$NON-NLS-1$
         return new ClassDescription(MessageFormat.format(PATTERN_IMPLEMENTATION_CLASS, originalName));
     }
 
@@ -183,9 +180,7 @@ public final class Constants {
      * @throws IllegalArgumentException if some parameters were {@code null}
      */
     public static ClassDescription getFactoryClass(CharSequence originalName) {
-        if (originalName == null) {
-            throw new IllegalArgumentException("originalName must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(originalName, "originalName must not be null"); //$NON-NLS-1$
         return new ClassDescription(MessageFormat.format(PATTERN_FACTORY_CLASS, originalName));
     }
 

@@ -15,6 +15,8 @@
  */
 package com.asakusafw.lang.compiler.operator.util;
 
+import java.util.Objects;
+
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
@@ -44,12 +46,8 @@ public final class TypeHelper {
      * @see Constants#TYPE_IN
      */
     public static boolean isIn(CompileEnvironment environment, TypeMirror type) {
-        if (environment == null) {
-            throw new IllegalArgumentException("environment must not be null"); //$NON-NLS-1$
-        }
-        if (type == null) {
-            throw new IllegalArgumentException("type must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(environment, "environment must not be null"); //$NON-NLS-1$
+        Objects.requireNonNull(type, "type must not be null"); //$NON-NLS-1$
         if (type.getKind() != TypeKind.DECLARED) {
             return false;
         }
@@ -67,12 +65,8 @@ public final class TypeHelper {
      * @see #isIn(CompileEnvironment, TypeMirror)
      */
     public static TypeMirror getInType(CompileEnvironment environment, TypeMirror type) {
-        if (environment == null) {
-            throw new IllegalArgumentException("environment must not be null"); //$NON-NLS-1$
-        }
-        if (type == null) {
-            throw new IllegalArgumentException("type must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(environment, "environment must not be null"); //$NON-NLS-1$
+        Objects.requireNonNull(type, "type must not be null"); //$NON-NLS-1$
         if (isIn(environment, type) == false) {
             return null;
         }
@@ -88,12 +82,8 @@ public final class TypeHelper {
      * @see #isIn(CompileEnvironment, TypeMirror)
      */
     public static TypeMirror getOutType(CompileEnvironment environment, TypeMirror type) {
-        if (environment == null) {
-            throw new IllegalArgumentException("environment must not be null"); //$NON-NLS-1$
-        }
-        if (type == null) {
-            throw new IllegalArgumentException("type must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(environment, "environment must not be null"); //$NON-NLS-1$
+        Objects.requireNonNull(type, "type must not be null"); //$NON-NLS-1$
         if (isOut(environment, type) == false) {
             return null;
         }
@@ -116,12 +106,8 @@ public final class TypeHelper {
      * @see Constants#TYPE_IN
      */
     public static boolean isOut(CompileEnvironment environment, TypeMirror type) {
-        if (environment == null) {
-            throw new IllegalArgumentException("environment must not be null"); //$NON-NLS-1$
-        }
-        if (type == null) {
-            throw new IllegalArgumentException("type must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(environment, "environment must not be null"); //$NON-NLS-1$
+        Objects.requireNonNull(type, "type must not be null"); //$NON-NLS-1$
         if (type.getKind() != TypeKind.DECLARED) {
             return false;
         }

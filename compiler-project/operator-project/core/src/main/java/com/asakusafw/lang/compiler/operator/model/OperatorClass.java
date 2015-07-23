@@ -16,6 +16,7 @@
 package com.asakusafw.lang.compiler.operator.model;
 
 import java.util.List;
+import java.util.Objects;
 
 import javax.lang.model.element.TypeElement;
 
@@ -35,14 +36,8 @@ public class OperatorClass {
      * @throws IllegalArgumentException if some parameters were {@code null}
      */
     public OperatorClass(TypeElement declaration, List<OperatorElement> elements) {
-        if (declaration == null) {
-            throw new IllegalArgumentException("declaring must not be null"); //$NON-NLS-1$
-        }
-        if (elements == null) {
-            throw new IllegalArgumentException("elements must not be null"); //$NON-NLS-1$
-        }
-        this.declaration = declaration;
-        this.elements = elements;
+        this.declaration = Objects.requireNonNull(declaration, "declaration must not be null"); //$NON-NLS-1$
+        this.elements = Objects.requireNonNull(elements, "elements must not be null"); //$NON-NLS-1$
     }
 
     /**

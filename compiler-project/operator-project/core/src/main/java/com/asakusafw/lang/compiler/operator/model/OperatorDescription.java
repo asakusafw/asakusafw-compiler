@@ -18,6 +18,7 @@ package com.asakusafw.lang.compiler.operator.model;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.type.TypeMirror;
@@ -66,18 +67,10 @@ public class OperatorDescription {
             List<? extends Node> parameters,
             List<? extends Node> outputs,
             List<? extends EnumConstantDescription> attributes) {
-        if (document == null) {
-            throw new IllegalArgumentException("document must not be null"); //$NON-NLS-1$
-        }
-        if (parameters == null) {
-            throw new IllegalArgumentException("parameters must not be null"); //$NON-NLS-1$
-        }
-        if (outputs == null) {
-            throw new IllegalArgumentException("outputs must not be null"); //$NON-NLS-1$
-        }
-        if (attributes == null) {
-            throw new IllegalArgumentException("attributes must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(document, "document must not be null"); //$NON-NLS-1$
+        Objects.requireNonNull(parameters, "parameters must not be null"); //$NON-NLS-1$
+        Objects.requireNonNull(outputs, "outputs must not be null"); //$NON-NLS-1$
+        Objects.requireNonNull(attributes, "attributes must not be null"); //$NON-NLS-1$
         this.document = document;
         this.parameters = new ArrayList<>(parameters);
         this.outputs = new ArrayList<>(outputs);
@@ -235,6 +228,10 @@ public class OperatorDescription {
             if (getClass() != obj.getClass()) {
                 return false;
             }
+            Reference other = (Reference) obj;
+            if (getKind() != other.getKind()) {
+                return false;
+            }
             return true;
         }
 
@@ -355,10 +352,7 @@ public class OperatorDescription {
          * @throws IllegalArgumentException if some parameters were {@code null}
          */
         public SpecialReference(String info) {
-            if (info == null) {
-                throw new IllegalArgumentException("info must not be null"); //$NON-NLS-1$
-            }
-            this.info = info;
+            this.info = Objects.requireNonNull(info, "info must not be null"); //$NON-NLS-1$
         }
 
         @Override
@@ -491,10 +485,7 @@ public class OperatorDescription {
          * @throws IllegalArgumentException if some parameters were {@code null}
          */
         public ReferenceDocument(Reference reference) {
-            if (reference == null) {
-                throw new IllegalArgumentException("reference must not be null"); //$NON-NLS-1$
-            }
-            this.reference = reference;
+            this.reference = Objects.requireNonNull(reference, "reference must not be null"); //$NON-NLS-1$
         }
 
         @Override
@@ -540,26 +531,11 @@ public class OperatorDescription {
          * @throws IllegalArgumentException if some parameters were {@code null}
          */
         public Node(Kind kind, String name, Document document, TypeMirror type, Reference reference) {
-            if (kind == null) {
-                throw new IllegalArgumentException("kind must not be null"); //$NON-NLS-1$
-            }
-            if (name == null) {
-                throw new IllegalArgumentException("name must not be null"); //$NON-NLS-1$
-            }
-            if (document == null) {
-                throw new IllegalArgumentException("document must not be null"); //$NON-NLS-1$
-            }
-            if (type == null) {
-                throw new IllegalArgumentException("type must not be null"); //$NON-NLS-1$
-            }
-            if (reference == null) {
-                throw new IllegalArgumentException("reference must not be null"); //$NON-NLS-1$
-            }
-            this.kind = kind;
-            this.name = name;
-            this.document = document;
-            this.type = type;
-            this.reference = reference;
+            this.kind = Objects.requireNonNull(kind, "kind must not be null"); //$NON-NLS-1$
+            this.name = Objects.requireNonNull(name, "name must not be null"); //$NON-NLS-1$
+            this.document = Objects.requireNonNull(document, "document must not be null"); //$NON-NLS-1$
+            this.type = Objects.requireNonNull(type, "type must not be null"); //$NON-NLS-1$
+            this.reference = Objects.requireNonNull(reference, "reference must not be null"); //$NON-NLS-1$
         }
 
         /**

@@ -17,6 +17,7 @@ package com.asakusafw.lang.compiler.extension.testdriver;
 
 import java.io.IOException;
 import java.text.MessageFormat;
+import java.util.Objects;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -56,10 +57,7 @@ public class InternalExporterRetriever extends BaseExporterRetriever<InternalExp
      * @throws IllegalArgumentException if some parameters were {@code null}
      */
     public InternalExporterRetriever(ConfigurationFactory configurations) {
-        if (configurations == null) {
-            throw new IllegalArgumentException("configurations must not be null"); //$NON-NLS-1$
-        }
-        this.configurations = configurations;
+        this.configurations = Objects.requireNonNull(configurations, "configurations must not be null"); //$NON-NLS-1$
     }
 
     @Override

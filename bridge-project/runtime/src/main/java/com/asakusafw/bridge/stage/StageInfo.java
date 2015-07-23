@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import com.asakusafw.runtime.stage.StageConstants;
 import com.asakusafw.runtime.util.VariableTable;
@@ -333,19 +334,19 @@ public class StageInfo {
     }
 
     private String toString(String id) {
-        return id == null ? "N/A" : id; //$NON-NLS-1$
+        return Objects.toString(id, "N/A"); //$NON-NLS-1$
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((userName == null) ? 0 : userName.hashCode());
-        result = prime * result + ((batchId == null) ? 0 : batchId.hashCode());
-        result = prime * result + ((executionId == null) ? 0 : executionId.hashCode());
-        result = prime * result + ((flowId == null) ? 0 : flowId.hashCode());
-        result = prime * result + ((stageId == null) ? 0 : stageId.hashCode());
-        result = prime * result + batchArguments.hashCode();
+        result = prime * result + Objects.hashCode(userName);
+        result = prime * result + Objects.hashCode(batchId);
+        result = prime * result + Objects.hashCode(executionId);
+        result = prime * result + Objects.hashCode(flowId);
+        result = prime * result + Objects.hashCode(stageId);
+        result = prime * result + Objects.hashCode(batchArguments);
         return result;
     }
 
@@ -361,42 +362,22 @@ public class StageInfo {
             return false;
         }
         StageInfo other = (StageInfo) obj;
-        if (userName == null) {
-            if (other.userName != null) {
-                return false;
-            }
-        } else if (!userName.equals(other.userName)) {
+        if (!Objects.equals(userName, other.userName)) {
             return false;
         }
-        if (batchId == null) {
-            if (other.batchId != null) {
-                return false;
-            }
-        } else if (!batchId.equals(other.batchId)) {
+        if (!Objects.equals(batchId, other.batchId)) {
             return false;
         }
-        if (flowId == null) {
-            if (other.flowId != null) {
-                return false;
-            }
-        } else if (!flowId.equals(other.flowId)) {
+        if (!Objects.equals(flowId, other.flowId)) {
             return false;
         }
-        if (stageId == null) {
-            if (other.stageId != null) {
-                return false;
-            }
-        } else if (!stageId.equals(other.stageId)) {
+        if (!Objects.equals(stageId, other.stageId)) {
             return false;
         }
-        if (executionId == null) {
-            if (other.executionId != null) {
-                return false;
-            }
-        } else if (!executionId.equals(other.executionId)) {
+        if (!Objects.equals(executionId, other.executionId)) {
             return false;
         }
-        if (!batchArguments.equals(other.batchArguments)) {
+        if (!Objects.equals(batchArguments, other.batchArguments)) {
             return false;
         }
         return true;

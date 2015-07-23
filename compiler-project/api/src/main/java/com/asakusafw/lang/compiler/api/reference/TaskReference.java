@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Represents a task in runtime.
@@ -95,9 +96,7 @@ public interface TaskReference extends BlockingReference<TaskReference> {
          * @throws IllegalArgumentException if some parameters were {@code null}
          */
         public static Phase findFromSymbol(String symbol) {
-            if (symbol == null) {
-                throw new IllegalArgumentException("symbol must not be null"); //$NON-NLS-1$
-            }
+            Objects.requireNonNull(symbol, "symbol must not be null"); //$NON-NLS-1$
             return Lazy.SYMBOLS.get(symbol);
         }
 

@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
@@ -68,10 +69,7 @@ public class OperatorMethodAnalyzer {
      * @throws IllegalArgumentException if some parameters were {@code null}
      */
     public OperatorMethodAnalyzer(CompileEnvironment environment) {
-        if (environment == null) {
-            throw new IllegalArgumentException("environment must not be null"); //$NON-NLS-1$
-        }
-        this.environment = environment;
+        this.environment = Objects.requireNonNull(environment, "environment must not be null"); //$NON-NLS-1$
         this.operatorClasses = new HashMap<>();
     }
 
@@ -82,9 +80,8 @@ public class OperatorMethodAnalyzer {
      * @throws IllegalArgumentException if some parameters were {@code null}
      */
     public void register(TypeElement annotationDecl, ExecutableElement methodDecl) {
-        if (methodDecl == null) {
-            throw new IllegalArgumentException("method must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(annotationDecl, "annotationDecl must not be null"); //$NON-NLS-1$
+        Objects.requireNonNull(methodDecl, "methodDecl must not be null"); //$NON-NLS-1$
         if (methodDecl.getKind() != ElementKind.METHOD) {
             error(methodDecl, "\"{0}\" is not a valid operator declaration (is invalid method?)",
                     methodDecl.getSimpleName());

@@ -16,6 +16,7 @@
 package com.asakusafw.lang.compiler.model.description;
 
 import java.text.MessageFormat;
+import java.util.Objects;
 
 /**
  * Represents an enum constant.
@@ -32,8 +33,8 @@ public class EnumConstantDescription implements ValueDescription {
      * @param name the constant name
      */
     public EnumConstantDescription(ClassDescription declaringClass, String name) {
-        this.declaringClass = declaringClass;
-        this.name = name;
+        this.declaringClass = Objects.requireNonNull(declaringClass);
+        this.name = Objects.requireNonNull(name);
     }
 
     /**

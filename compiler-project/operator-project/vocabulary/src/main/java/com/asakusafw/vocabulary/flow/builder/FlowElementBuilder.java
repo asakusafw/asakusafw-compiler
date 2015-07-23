@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import com.asakusafw.vocabulary.flow.FlowDescription;
 import com.asakusafw.vocabulary.flow.Source;
@@ -104,12 +105,8 @@ public abstract class FlowElementBuilder {
      * @throws IllegalArgumentException if some parameters were {@code null}
      */
     public PortInfo defineInput(String name, Source<?> upstream) {
-        if (name == null) {
-            throw new IllegalArgumentException("name must not be null"); //$NON-NLS-1$
-        }
-        if (upstream == null) {
-            throw new IllegalArgumentException("upstream must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(name, "name must not be null"); //$NON-NLS-1$
+        Objects.requireNonNull(upstream, "upstream must not be null"); //$NON-NLS-1$
         FlowElementOutput output = upstream.toOutputPort();
         PortInfo info = new PortInfo(PortInfo.Direction.INPUT, name, getType(output));
         inputs.add(info);
@@ -129,12 +126,8 @@ public abstract class FlowElementBuilder {
      * @throws IllegalArgumentException if some parameters were {@code null}
      */
     public PortInfo defineOutput(String name, Type type) {
-        if (name == null) {
-            throw new IllegalArgumentException("name must not be null"); //$NON-NLS-1$
-        }
-        if (type == null) {
-            throw new IllegalArgumentException("type must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(name, "name must not be null"); //$NON-NLS-1$
+        Objects.requireNonNull(type, "type must not be null"); //$NON-NLS-1$
         return defineOutput0(name, type);
     }
 
@@ -146,12 +139,8 @@ public abstract class FlowElementBuilder {
      * @throws IllegalArgumentException if some parameters were {@code null}
      */
     public PortInfo defineOutput(String name, Source<?> typeRef) {
-        if (name == null) {
-            throw new IllegalArgumentException("name must not be null"); //$NON-NLS-1$
-        }
-        if (typeRef == null) {
-            throw new IllegalArgumentException("typeRef must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(name, "name must not be null"); //$NON-NLS-1$
+        Objects.requireNonNull(typeRef, "typeRef must not be null"); //$NON-NLS-1$
         return defineOutput0(name, getType(typeRef.toOutputPort()));
     }
 
@@ -171,12 +160,8 @@ public abstract class FlowElementBuilder {
      * @throws IllegalArgumentException if some parameters were {@code null}
      */
     public DataInfo defineData(String name, Data data) {
-        if (name == null) {
-            throw new IllegalArgumentException("name must not be null"); //$NON-NLS-1$
-        }
-        if (data == null) {
-            throw new IllegalArgumentException("data must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(name, "name must not be null"); //$NON-NLS-1$
+        Objects.requireNonNull(data, "data must not be null"); //$NON-NLS-1$
         DataInfo info = new DataInfo(name, data);
         args.add(info);
         return info;
@@ -191,9 +176,7 @@ public abstract class FlowElementBuilder {
      * @throws IllegalArgumentException if some parameters were {@code null}
      */
     public DataInfo defineData(String name, Type type, Object value) {
-        if (name == null) {
-            throw new IllegalArgumentException("name must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(name, "name must not be null"); //$NON-NLS-1$
         return defineData(name, new Constant(type, value));
     }
 
@@ -203,9 +186,7 @@ public abstract class FlowElementBuilder {
      * @throws IllegalArgumentException if some parameters were {@code null}
      */
     public void defineAttribute(Object attribute) {
-        if (attribute == null) {
-            throw new IllegalArgumentException("attribute must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(attribute, "attribute must not be null"); //$NON-NLS-1$
         attrs.add(new AttributeInfo(attribute));
     }
 

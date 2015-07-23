@@ -17,6 +17,7 @@ package com.asakusafw.vocabulary.flow.builder;
 
 import java.text.MessageFormat;
 import java.util.LinkedHashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import com.asakusafw.vocabulary.flow.graph.FlowElementAttribute;
@@ -40,9 +41,7 @@ public class AttributeInfo {
      * @param attribute the target attribute
      */
     public AttributeInfo(Object attribute) {
-        if (attribute == null) {
-            throw new IllegalArgumentException("attribute must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(attribute, "attribute must not be null"); //$NON-NLS-1$
         checkSupported(attribute.getClass());
         this.attribute = attribute;
     }

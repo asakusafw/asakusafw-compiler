@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Map.Entry;
 
 import javax.lang.model.element.AnnotationMirror;
@@ -52,15 +53,9 @@ public final class AnnotationHelper {
             CompileEnvironment environment,
             TypeElement annotationDecl,
             Element element) {
-        if (environment == null) {
-            throw new IllegalArgumentException("environment must not be null"); //$NON-NLS-1$
-        }
-        if (annotationDecl == null) {
-            throw new IllegalArgumentException("annotationDecl must not be null"); //$NON-NLS-1$
-        }
-        if (element == null) {
-            throw new IllegalArgumentException("element must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(environment, "environment must not be null"); //$NON-NLS-1$
+        Objects.requireNonNull(annotationDecl, "annotationDecl must not be null"); //$NON-NLS-1$
+        Objects.requireNonNull(element, "element must not be null"); //$NON-NLS-1$
         List<? extends AnnotationMirror> annotations =
                 environment.getProcessingEnvironment().getElementUtils().getAllAnnotationMirrors(element);
         for (AnnotationMirror annotation : annotations) {
@@ -80,12 +75,8 @@ public final class AnnotationHelper {
      * @throws IllegalArgumentException if some parameters were {@code null}
      */
     public static Map<String, AnnotationValue> getValues(CompileEnvironment environment, AnnotationMirror annotation) {
-        if (environment == null) {
-            throw new IllegalArgumentException("environment must not be null"); //$NON-NLS-1$
-        }
-        if (annotation == null) {
-            throw new IllegalArgumentException("annotation must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(environment, "environment must not be null"); //$NON-NLS-1$
+        Objects.requireNonNull(annotation, "annotation must not be null"); //$NON-NLS-1$
         Elements elements = environment.getProcessingEnvironment().getElementUtils();
         Map<? extends ExecutableElement, ? extends AnnotationValue> map =
                 elements.getElementValuesWithDefaults(annotation);
@@ -108,15 +99,9 @@ public final class AnnotationHelper {
             CompileEnvironment environment,
             AnnotationMirror annotation,
             String name) {
-        if (environment == null) {
-            throw new IllegalArgumentException("environment must not be null"); //$NON-NLS-1$
-        }
-        if (annotation == null) {
-            throw new IllegalArgumentException("annotation must not be null"); //$NON-NLS-1$
-        }
-        if (name == null) {
-            throw new IllegalArgumentException("name must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(environment, "environment must not be null"); //$NON-NLS-1$
+        Objects.requireNonNull(annotation, "annotation must not be null"); //$NON-NLS-1$
+        Objects.requireNonNull(name, "name must not be null"); //$NON-NLS-1$
         Map<? extends ExecutableElement, ? extends AnnotationValue> values =
                 environment.getProcessingEnvironment().getElementUtils().getElementValuesWithDefaults(annotation);
         for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : values.entrySet()) {
@@ -136,12 +121,8 @@ public final class AnnotationHelper {
      * @throws IllegalArgumentException if some parameters were {@code null}
      */
     public static List<AnnotationValue> toValueList(CompileEnvironment environment, AnnotationValue value) {
-        if (environment == null) {
-            throw new IllegalArgumentException("environment must not be null"); //$NON-NLS-1$
-        }
-        if (value == null) {
-            throw new IllegalArgumentException("value must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(environment, "environment must not be null"); //$NON-NLS-1$
+        Objects.requireNonNull(value, "value must not be null"); //$NON-NLS-1$
         Object component = value.getValue();
         if (component instanceof List<?>) {
             List<AnnotationValue> results = new ArrayList<>();
@@ -167,15 +148,9 @@ public final class AnnotationHelper {
             CompileEnvironment environment,
             Class<T> componentValueType,
             List<? extends AnnotationValue> values) {
-        if (environment == null) {
-            throw new IllegalArgumentException("environment must not be null"); //$NON-NLS-1$
-        }
-        if (componentValueType == null) {
-            throw new IllegalArgumentException("componentValueType must not be null"); //$NON-NLS-1$
-        }
-        if (values == null) {
-            throw new IllegalArgumentException("values must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(environment, "environment must not be null"); //$NON-NLS-1$
+        Objects.requireNonNull(componentValueType, "componentValueType must not be null"); //$NON-NLS-1$
+        Objects.requireNonNull(values, "values must not be null"); //$NON-NLS-1$
         List<T> results = new ArrayList<>();
         for (AnnotationValue componentHolder : values) {
             Object componentValue = componentHolder.getValue();

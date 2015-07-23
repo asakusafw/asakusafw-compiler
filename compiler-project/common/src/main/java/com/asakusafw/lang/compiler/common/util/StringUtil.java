@@ -16,6 +16,7 @@
 package com.asakusafw.lang.compiler.common.util;
 
 import java.util.Iterator;
+import java.util.Objects;
 
 /**
  * Utilities for String representations.
@@ -41,7 +42,7 @@ public final class StringUtil {
         if (values.length == 0) {
             return EMPTY;
         }
-        String d = delimiter == null ? null : String.valueOf(delimiter);
+        String d = Objects.toString(delimiter, null);
         StringBuilder buf = new StringBuilder();
         buf.append(values[0]);
         for (int i = 1; i < values.length; i++) {
@@ -64,7 +65,7 @@ public final class StringUtil {
         if (iterator.hasNext() == false) {
             return EMPTY;
         }
-        String d = delimiter == null ? null : String.valueOf(delimiter);
+        String d = Objects.toString(delimiter, null);
         StringBuilder buf = new StringBuilder();
         buf.append(iterator.next());
         while (iterator.hasNext()) {

@@ -15,6 +15,8 @@
  */
 package com.asakusafw.vocabulary.flow.builder;
 
+import java.util.Objects;
+
 /**
  * Represents operator data information.
  */
@@ -31,14 +33,8 @@ public class DataInfo extends EdgeInfo<DataInfo> {
      * @throws IllegalArgumentException if some parameters were {@code null}
      */
     public DataInfo(String name, Data data) {
-        if (name == null) {
-            throw new IllegalArgumentException("name must not be null"); //$NON-NLS-1$
-        }
-        if (data == null) {
-            throw new IllegalArgumentException("data must not be null"); //$NON-NLS-1$
-        }
-        this.name = name;
-        this.data = data;
+        this.name = Objects.requireNonNull(name, "name must not be null"); //$NON-NLS-1$
+        this.data = Objects.requireNonNull(data, "data must not be null"); //$NON-NLS-1$
     }
 
     @Override

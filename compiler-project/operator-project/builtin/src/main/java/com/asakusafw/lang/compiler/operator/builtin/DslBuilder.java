@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -109,9 +110,7 @@ final class DslBuilder {
     private final ElementRef unknownRef;
 
     public DslBuilder(OperatorDriver.Context context) {
-        if (context == null) {
-            throw new IllegalArgumentException("context must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(context, "context must not be null"); //$NON-NLS-1$
         this.environment = context.getEnvironment();
         this.method = context.getMethod();
         this.annotationRef = new AnnotationRef(context.getMethod(), context.getAnnotation());

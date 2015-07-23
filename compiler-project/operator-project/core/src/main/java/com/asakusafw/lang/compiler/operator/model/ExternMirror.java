@@ -16,6 +16,7 @@
 package com.asakusafw.lang.compiler.operator.model;
 
 import java.util.Map;
+import java.util.Objects;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
@@ -79,15 +80,9 @@ public final class ExternMirror {
             CompileEnvironment environment,
             AnnotationMirror source,
             Element annotationOwner) {
-        if (environment == null) {
-            throw new IllegalArgumentException("environment must not be null"); //$NON-NLS-1$
-        }
-        if (source == null) {
-            throw new IllegalArgumentException("source must not be null"); //$NON-NLS-1$
-        }
-        if (annotationOwner == null) {
-            throw new IllegalArgumentException("annotationOwner must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(environment, "environment must not be null"); //$NON-NLS-1$
+        Objects.requireNonNull(source, "source must not be null"); //$NON-NLS-1$
+        Objects.requireNonNull(annotationOwner, "annotationOwner must not be null"); //$NON-NLS-1$
         Map<String, AnnotationValue> pairs = AnnotationHelper.getValues(environment, source);
         AnnotationValue nameValue = pairs.get("name");
         if (nameValue == null || (nameValue.getValue() instanceof String) == false) {

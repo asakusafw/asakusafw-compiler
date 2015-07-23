@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -58,10 +59,7 @@ public class JavadocHelper {
      * @throws IllegalArgumentException if some parameters were {@code null}
      */
     public JavadocHelper(CompileEnvironment environment) {
-        if (environment == null) {
-            throw new IllegalArgumentException("environment must not be null"); //$NON-NLS-1$
-        }
-        this.environment = environment;
+        this.environment = Objects.requireNonNull(environment, "environment must not be null"); //$NON-NLS-1$
     }
 
     /**
@@ -70,9 +68,7 @@ public class JavadocHelper {
      * @throws IllegalArgumentException if some parameters were {@code null}
      */
     public void put(Element element) {
-        if (element == null) {
-            throw new IllegalArgumentException("element must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(element, "element must not be null"); //$NON-NLS-1$
         if (this.executable == null
                 && (element.getKind() == ElementKind.METHOD || element.getKind() == ElementKind.CONSTRUCTOR)) {
             this.executable = (ExecutableElement) element;
@@ -135,9 +131,7 @@ public class JavadocHelper {
      * @throws IllegalArgumentException if some parameters were {@code null}
      */
     public List<? extends DocElement> get(Document document) {
-        if (document == null) {
-            throw new IllegalArgumentException("document must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(document, "document must not be null"); //$NON-NLS-1$
         switch (document.getKind()) {
         case TEXT:
             return text(((TextDocument) document).getText());
@@ -155,9 +149,7 @@ public class JavadocHelper {
      * @throws IllegalArgumentException if some parameters were {@code null}
      */
     public List<? extends DocElement> getParameter(String name) {
-        if (name == null) {
-            throw new IllegalArgumentException("name must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(name, "name must not be null"); //$NON-NLS-1$
         List<List<DocElement>> params = blocks.get("@param"); //$NON-NLS-1$
         if (params == null) {
             return Collections.emptyList();
@@ -180,9 +172,7 @@ public class JavadocHelper {
      * @throws IllegalArgumentException if some parameters were {@code null}
      */
     public List<? extends DocElement> getTypeParameter(String name) {
-        if (name == null) {
-            throw new IllegalArgumentException("name must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(name, "name must not be null"); //$NON-NLS-1$
         List<List<DocElement>> params = blocks.get("@param"); //$NON-NLS-1$
         if (params == null) {
             return Collections.emptyList();

@@ -16,6 +16,7 @@
 package com.asakusafw.bridge.api;
 
 import java.text.MessageFormat;
+import java.util.Objects;
 
 import com.asakusafw.bridge.broker.ResourceBroker;
 import com.asakusafw.bridge.stage.StageInfo;
@@ -47,9 +48,7 @@ public final class BatchContext {
      * @throws IllegalStateException if the current session is wrong
      */
     public static String get(String name) {
-        if (name == null) {
-            throw new IllegalArgumentException("name must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(name);
         StageInfo info = ResourceBroker.find(StageInfo.class);
         if (info == null) {
             throw new IllegalStateException(MessageFormat.format(

@@ -16,6 +16,7 @@
 package com.asakusafw.lang.compiler.model.description;
 
 import java.text.MessageFormat;
+import java.util.Objects;
 
 /**
  * Represents a class.
@@ -29,7 +30,7 @@ public class ClassDescription extends ReifiableTypeDescription {
      * @param name the binary name
      */
     public ClassDescription(String name) {
-        this.name = name;
+        this.name = Objects.requireNonNull(name);
     }
 
     /**

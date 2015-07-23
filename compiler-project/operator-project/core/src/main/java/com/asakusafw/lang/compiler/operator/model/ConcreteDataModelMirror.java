@@ -18,6 +18,7 @@ package com.asakusafw.lang.compiler.operator.model;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.lang.model.element.TypeElement;
@@ -50,18 +51,9 @@ public final class ConcreteDataModelMirror implements DataModelMirror {
             CompileEnvironment environment,
             DeclaredType type,
             PropertyMirrorCollector collector) {
-        if (environment == null) {
-            throw new IllegalArgumentException("environment must not be null"); //$NON-NLS-1$
-        }
-        if (type == null) {
-            throw new IllegalArgumentException("type must not be null"); //$NON-NLS-1$
-        }
-        if (collector == null) {
-            throw new IllegalArgumentException("collector must not be null"); //$NON-NLS-1$
-        }
-        this.environment = environment;
-        this.type = type;
-        this.collector = collector;
+        this.environment = Objects.requireNonNull(environment, "environment must not be null"); //$NON-NLS-1$
+        this.type = Objects.requireNonNull(type, "type must not be null"); //$NON-NLS-1$
+        this.collector = Objects.requireNonNull(collector, "collector must not be null"); //$NON-NLS-1$
     }
 
     /**
@@ -79,9 +71,7 @@ public final class ConcreteDataModelMirror implements DataModelMirror {
 
     @Override
     public boolean isSame(DataModelMirror other) {
-        if (other == null) {
-            throw new IllegalArgumentException("other must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(other, "other must not be null"); //$NON-NLS-1$
         Types types = environment.getProcessingEnvironment().getTypeUtils();
         if (other instanceof ConcreteDataModelMirror) {
             ConcreteDataModelMirror that = (ConcreteDataModelMirror) other;
@@ -92,9 +82,7 @@ public final class ConcreteDataModelMirror implements DataModelMirror {
 
     @Override
     public boolean canInvoke(DataModelMirror other) {
-        if (other == null) {
-            throw new IllegalArgumentException("other must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(other, "other must not be null"); //$NON-NLS-1$
         Types types = environment.getProcessingEnvironment().getTypeUtils();
         if (other instanceof ConcreteDataModelMirror) {
             ConcreteDataModelMirror that = (ConcreteDataModelMirror) other;
@@ -109,9 +97,7 @@ public final class ConcreteDataModelMirror implements DataModelMirror {
 
     @Override
     public boolean canContain(DataModelMirror other) {
-        if (other == null) {
-            throw new IllegalArgumentException("other must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(other, "other must not be null"); //$NON-NLS-1$
         Types types = environment.getProcessingEnvironment().getTypeUtils();
         if (other instanceof ConcreteDataModelMirror) {
             ConcreteDataModelMirror that = (ConcreteDataModelMirror) other;
@@ -127,9 +113,7 @@ public final class ConcreteDataModelMirror implements DataModelMirror {
 
     @Override
     public PropertyMirror findProperty(String name) {
-        if (name == null) {
-            throw new IllegalArgumentException("name must not be null"); //$NON-NLS-1$
-        }
+        Objects.requireNonNull(name, "name must not be null"); //$NON-NLS-1$
         return prepareProperties().get(JavaName.of(name).toMemberName());
     }
 
