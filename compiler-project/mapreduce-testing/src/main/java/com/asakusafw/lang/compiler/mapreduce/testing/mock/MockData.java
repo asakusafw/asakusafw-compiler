@@ -33,6 +33,8 @@ import com.asakusafw.runtime.value.StringOption;
 
 /**
  * Mock data model class.
+ * @since 0.1.0
+ * @version 0.1.1
  */
 public class MockData implements DataModel<MockData>, Writable {
 
@@ -45,15 +47,27 @@ public class MockData implements DataModel<MockData>, Writable {
     private final DateTimeOption datetimeValue = new DateTimeOption();
 
     /**
-     * Puts values as {@link #getStringValueOption() string_value} .
+     * Puts values as {@link #getStringValueOption() string_value}.
      * @param output the target output
      * @param values the values to set
      * @throws IOException if failed
      */
     public static void put(ModelOutput<MockData> output, String... values) throws IOException {
+        put(output, 0, values);
+    }
+
+    /**
+     * Puts values as {@link #getStringValueOption() string_value}.
+     * @param output the target output
+     * @param offset starting ID number
+     * @param values the values to set
+     * @throws IOException if failed
+     * @since 0.1.1
+     */
+    public static void put(ModelOutput<MockData> output, int offset, String... values) throws IOException {
         Map<Integer, String> map = new LinkedHashMap<>();
         for (String s : values) {
-            map.put(map.size(), s);
+            map.put(offset + map.size(), s);
         }
         put(output, map);
     }

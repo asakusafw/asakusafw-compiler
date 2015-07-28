@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -55,12 +55,21 @@ public final class Util {
         return HadoopDataSourceUtil.loadRepository(Compatibility.getConfiguration(context));
     }
 
-    static DataFilter<?> createFilter(Class<?> filterClass, Configuration configuration) {
+    static DataFilter<?> createFilter(
+            Class<?> filterClass, Configuration configuration) {
+        if (filterClass == null) {
+            return null;
+        }
+        Map<String, String> batchArguments = getStageInfo(configuration).getBatchArguments();
+        return createFilter(filterClass, batchArguments, configuration);
+    }
+
+    static DataFilter<?> createFilter(
+            Class<?> filterClass, Map<String, String> batchArguments, Configuration configuration) {
         if (filterClass == null) {
             return null;
         }
         DataFilter<?> result = (DataFilter<?>) ReflectionUtils.newInstance(filterClass, configuration);
-        Map<String, String> batchArguments = getStageInfo(configuration).getBatchArguments();
         DataFilter.Context context = new DataFilter.Context(batchArguments);
         result.initialize(context);
         return result;
@@ -86,7 +95,8 @@ public final class Util {
         }
     }
 
-    static DataDefinition<?> readDataDefinition(DataInput in, Configuration conf) throws IOException {
+    static DataDefinition<?> readDataDefinition(
+            DataInput in, Map<String, String> batchArguments, Configuration conf) throws IOException {
         Class<?> data;
         DataFormat<?> format;
         DataFilter<?> filter;
@@ -97,7 +107,7 @@ public final class Util {
             if (filterClass.isEmpty()) {
                 filter = null;
             } else {
-                filter = createFilter(conf.getClassByName(filterClass), conf);
+                filter = createFilter(conf.getClassByName(filterClass), batchArguments, conf);
             }
         } catch (ReflectiveOperationException e) {
             throw new IOException("error occurred while extracting data definition", e);
@@ -112,11 +122,7 @@ public final class Util {
         List<String> ownerNodeNames = fragment.getOwnerNodeNames();
         WritableUtils.writeStringArray(out, ownerNodeNames.toArray(new String[ownerNodeNames.size()]));
         Map<String, String> attributes = fragment.getAttributes();
-        WritableUtils.writeVInt(out, attributes.size());
-        for (Map.Entry<String, String> entry : attributes.entrySet()) {
-            WritableUtils.writeString(out, entry.getKey());
-            WritableUtils.writeString(out, entry.getValue());
-        }
+        writeMap(out, attributes);
     }
 
     static DirectInputFragment readFragment(DataInput in) throws IOException {
@@ -124,18 +130,33 @@ public final class Util {
         long offset = WritableUtils.readVLong(in);
         long length = WritableUtils.readVLong(in);
         String[] locations = WritableUtils.readStringArray(in);
-        Map<String, String> attributes;
-        int attributeCount = WritableUtils.readVInt(in);
-        if (attributeCount == 0) {
-            attributes = Collections.emptyMap();
+        Map<String, String> attributes = readMap(in);
+        return new DirectInputFragment(path, offset, length, Arrays.asList(locations), attributes);
+    }
+
+    static void writeMap(DataOutput out, Map<String, String> map) throws IOException {
+        if (map == null) {
+            WritableUtils.writeVInt(out, 0);
         } else {
-            attributes = new HashMap<>();
-            for (int i = 0; i < attributeCount; i++) {
-                String key = WritableUtils.readString(in);
-                String value = WritableUtils.readString(in);
-                attributes.put(key, value);
+            WritableUtils.writeVInt(out, map.size());
+            for (Map.Entry<String, String> entry : map.entrySet()) {
+                Text.writeString(out, entry.getKey());
+                Text.writeString(out, entry.getValue());
             }
         }
-        return new DirectInputFragment(path, offset, length, Arrays.asList(locations), attributes);
+    }
+
+    static Map<String, String> readMap(DataInput in) throws IOException {
+        int size = WritableUtils.readVInt(in);
+        if (size == 0) {
+            return Collections.emptyMap();
+        }
+        Map<String, String> result = new LinkedHashMap<>();
+        for (int i = 0; i < size; i++) {
+            String k = Text.readString(in);
+            String v = Text.readString(in);
+            result.put(k, v);
+        }
+        return result;
     }
 }
