@@ -20,7 +20,9 @@ import static com.asakusafw.bridge.hadoop.directio.Util.*;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
@@ -35,6 +37,8 @@ import com.asakusafw.runtime.directio.DirectInputFragment;
 
 /**
  * An {@link InputSplit} for {@link DirectFileInputFormat}.
+ * @since 0.1.0
+ * @version 0.1.1
  */
 public class DirectFileInputSplit extends InputSplit implements Configurable, Writable {
 
@@ -45,6 +49,8 @@ public class DirectFileInputSplit extends InputSplit implements Configurable, Wr
     private DataDefinition<?> definition;
 
     private DirectInputFragment fragment;
+
+    private Map<String, String> batchArguments;
 
     /**
      * Creates a new instance for serializers.
@@ -58,11 +64,31 @@ public class DirectFileInputSplit extends InputSplit implements Configurable, Wr
      * @param containerPath the container path
      * @param definition the data definition
      * @param fragment the target input fragment
+     * @deprecated Use {@link #DirectFileInputSplit(String, DataDefinition, DirectInputFragment, Map)} instead
      */
+    @Deprecated
     public DirectFileInputSplit(String containerPath, DataDefinition<?> definition, DirectInputFragment fragment) {
         this.containerPath = containerPath;
         this.definition = definition;
         this.fragment = fragment;
+        this.batchArguments = Collections.emptyMap();
+    }
+
+    /**
+     * Creates a new instance.
+     * @param containerPath the container path
+     * @param definition the data definition
+     * @param fragment the target input fragment
+     * @param batchArguments the batch arguments
+     * @since 0.1.1
+     */
+    public DirectFileInputSplit(
+            String containerPath, DataDefinition<?> definition, DirectInputFragment fragment,
+            Map<String, String> batchArguments) {
+        this.containerPath = containerPath;
+        this.definition = definition;
+        this.fragment = fragment;
+        this.batchArguments = batchArguments;
     }
 
     @Override
@@ -78,15 +104,17 @@ public class DirectFileInputSplit extends InputSplit implements Configurable, Wr
     @Override
     public void write(DataOutput out) throws IOException {
         Text.writeString(out, containerPath);
-        writeDataDefinition(out, definition);
         writeFragment(out, fragment);
+        writeMap(out, batchArguments);
+        writeDataDefinition(out, definition);
     }
 
     @Override
     public void readFields(DataInput in) throws IOException {
         containerPath = Text.readString(in);
-        definition = readDataDefinition(in, conf);
         fragment = readFragment(in);
+        batchArguments = readMap(in);
+        definition = readDataDefinition(in, batchArguments, conf);
     }
 
     @Override

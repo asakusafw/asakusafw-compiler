@@ -21,6 +21,7 @@ import static org.junit.Assert.*;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.apache.hadoop.conf.Configuration;
 import org.junit.Rule;
@@ -34,6 +35,7 @@ import com.asakusafw.lang.compiler.mapreduce.testing.mock.DirectIoContext;
 import com.asakusafw.lang.compiler.mapreduce.testing.mock.MockData;
 import com.asakusafw.lang.compiler.mapreduce.testing.mock.MockDataFormat;
 import com.asakusafw.lang.compiler.mapreduce.testing.mock.WritableModelOutput;
+import com.asakusafw.runtime.directio.DataFilter;
 import com.asakusafw.runtime.io.ModelOutput;
 
 /**
@@ -62,6 +64,48 @@ public class DirectFileInputFormatTest {
         assertThat(results.keySet(), hasSize(3));
         assertThat(results, hasEntry(0, "Hello0"));
         assertThat(results, hasEntry(1, "Hello1"));
+        assertThat(results, hasEntry(2, "Hello2"));
+    }
+
+    /**
+     * w/ path filter.
+     * @throws Exception if failed
+     */
+    @Test
+    public void filter_path() throws Exception {
+        try (ModelOutput<MockData> out = WritableModelOutput.create(context.file("a.txt"))) {
+            MockData.put(out, 0, "Hello0", "Hello1");
+        }
+        try (ModelOutput<MockData> out = WritableModelOutput.create(context.file("b.txt"))) {
+            MockData.put(out, 2, "Hello2", "Hello3");
+        }
+        try (ModelOutput<MockData> out = WritableModelOutput.create(context.file("c.txt"))) {
+            MockData.put(out, 4, "Hello4", "Hello5");
+        }
+        Configuration conf = conf("/", "*.txt", MockFilterPath.class, null, "filter=.*b\\.txt");
+
+        Map<Integer, String> results = collect(conf);
+        assertThat(results.keySet(), hasSize(4));
+        assertThat(results, hasEntry(0, "Hello0"));
+        assertThat(results, hasEntry(1, "Hello1"));
+        assertThat(results, hasEntry(4, "Hello4"));
+        assertThat(results, hasEntry(5, "Hello5"));
+    }
+
+    /**
+     * w/ object filter.
+     * @throws Exception if failed
+     */
+    @Test
+    public void filter_object() throws Exception {
+        try (ModelOutput<MockData> out = WritableModelOutput.create(context.file("a.txt"))) {
+            MockData.put(out, "Hello0", "Hello1", "Hello2");
+        }
+        Configuration conf = conf("/", "*.txt", MockFilterObject.class, null, "filter=Hello1");
+
+        Map<Integer, String> results = collect(conf);
+        assertThat(results.keySet(), hasSize(2));
+        assertThat(results, hasEntry(0, "Hello0"));
         assertThat(results, hasEntry(2, "Hello2"));
     }
 
@@ -115,5 +159,41 @@ public class DirectFileInputFormatTest {
             }
         });
         return results;
+    }
+
+    /**
+     * filters by path.
+     */
+    public static class MockFilterPath extends DataFilter<Object> {
+
+        private Pattern pattern;
+
+        @Override
+        public void initialize(DataFilter.Context context) {
+            pattern = Pattern.compile(context.getBatchArguments().get("filter"));
+        }
+
+        @Override
+        public boolean acceptsPath(String path) {
+            return pattern.matcher(path).matches() == false;
+        }
+    }
+
+    /**
+     * filters by object.
+     */
+    public static class MockFilterObject extends DataFilter<MockData> {
+
+        private Pattern pattern;
+
+        @Override
+        public void initialize(DataFilter.Context context) {
+            pattern = Pattern.compile(context.getBatchArguments().get("filter"));
+        }
+
+        @Override
+        public boolean acceptsData(MockData data) {
+            return pattern.matcher(data.getValue()).matches() == false;
+        }
     }
 }

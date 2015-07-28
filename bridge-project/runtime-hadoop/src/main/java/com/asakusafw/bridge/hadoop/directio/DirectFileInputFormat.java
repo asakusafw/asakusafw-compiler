@@ -92,14 +92,18 @@ public class DirectFileInputFormat extends InputFormat<NullWritable, Object> {
 
     @Override
     public List<InputSplit> getSplits(JobContext context) throws IOException, InterruptedException {
+        Configuration conf = Compatibility.getConfiguration(context);
+        StageInfo stage = getStageInfo(conf);
         DirectFileInputInfo<?> info = extractInfo(context);
         DirectDataSourceRepository repository = getDataSourceRepository(context);
         String containerPath = repository.getContainerPath(info.basePath);
         List<DirectInputFragment> fragments = findFragments(info, repository);
         List<InputSplit> results = new ArrayList<>();
         for (DirectInputFragment fragment : fragments) {
-            DirectFileInputSplit split = new DirectFileInputSplit(containerPath, info.definition, fragment);
-            ReflectionUtils.setConf(split, Compatibility.getConfiguration(context));
+            DirectFileInputSplit split = new DirectFileInputSplit(
+                    containerPath, info.definition, fragment,
+                    stage.getBatchArguments());
+            ReflectionUtils.setConf(split, conf);
             results.add(split);
         }
         if (results.isEmpty()) {
