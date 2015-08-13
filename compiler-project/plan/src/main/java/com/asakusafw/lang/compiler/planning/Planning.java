@@ -399,6 +399,7 @@ public final class Planning {
      * <p>
      * First, we introduce a several terms:
      * </p>
+     * <!-- CHECKSTYLE:OFF JavadocStyle -->
      * <dl>
      * <dt> <em>gathering operator</em> </dt>
      * <dd>
@@ -419,6 +420,7 @@ public final class Planning {
      *   from {@code BROADCAST} plan markers, is a <em>broadcast consumer</em>.
      * </dd>
      * </dl>
+     * <!-- CHECKSTYLE:ON JavadocStyle -->
      *
      * <p>
      * The specified operator graph must satisfy following preconditions:

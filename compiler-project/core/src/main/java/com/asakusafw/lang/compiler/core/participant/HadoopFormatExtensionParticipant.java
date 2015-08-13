@@ -30,6 +30,7 @@ import com.asakusafw.lang.compiler.model.info.BatchInfo;
  * <p>
  * This participant recognize the following compiler properties:
  * </p>
+ * <!-- CHECKSTYLE:OFF JavadocStyle -->
  * <dl>
  * <dt> {@code hadoop.format.input} ({@link #KEY_INPUT_FORMAT}) </dt>
  *   <dd> Hadoop input format class name </dd>
@@ -39,6 +40,7 @@ import com.asakusafw.lang.compiler.model.info.BatchInfo;
  *   <dd> Hadoop output format class name </dd>
  *   <dd> default: {@code "com.asakusafw.runtime.stage.input.TemporaryOutputFormat"} </dd>
  * </dl>
+ * <!-- CHECKSTYLE:ON JavadocStyle -->
  */
 public class HadoopFormatExtensionParticipant extends AbstractCompilerParticipant {
 
