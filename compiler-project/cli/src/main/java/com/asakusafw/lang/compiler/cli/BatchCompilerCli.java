@@ -75,6 +75,7 @@ import com.asakusafw.lang.compiler.packaging.ResourceUtil;
  * Command line interface for {@link BatchCompiler}.
  *
  * <h3> Program Arguments </h3>
+ * <!-- CHECKSTYLE:OFF JavadocStyle -->
  * <dl>
  * <dt><code>--explore &lt;/path/to/lib1[:/path/to/lib2[:..]]&gt;</code></dt>
  * <dd>library paths with batch classes</dd>
@@ -145,6 +146,7 @@ import com.asakusafw.lang.compiler.packaging.ResourceUtil;
  * <dd>default: {@link BasicClassAnalyzer}</dd>
  *
  * </dl>
+ * <!-- CHECKSTYLE:ON JavadocStyle -->
  */
 public final class BatchCompilerCli {
 

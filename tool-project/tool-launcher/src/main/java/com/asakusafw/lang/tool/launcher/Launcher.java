@@ -39,16 +39,18 @@ import java.util.TreeMap;
  * This application requires just the one argument, which denotes the path to the <em>launch script</em>.
  * Each launch script must be a Java properties file with following entries:
  * </p>
+ * <!-- CHECKSTYLE:OFF JavadocStyle -->
  * <dl id="launch-script">
- *   <dt> {@code "main"}
- *     <dd> The application main class.
- *     <dd> It must have a valid <em>main method</em>.
- *   <dt> {@code "classpath.<integer>"}
- *     <dd> The classpath entry.
- *     <dd> It must be a valid path on the local file system.
- *   <dt> {@code "argument.<integer>"}
- *     <dd> The application argument.
+ *   <dt> {@code "main"} </dt>
+ *     <dd> The application main class. </dd>
+ *     <dd> It must have a valid <em>main method</em>. </dd>
+ *   <dt> {@code "classpath.<integer>"} </dt>
+ *     <dd> The classpath entry. </dd>
+ *     <dd> It must be a valid path on the local file system. </dd>
+ *   <dt> {@code "argument.<integer>"} </dt>
+ *     <dd> The application argument. </dd>
  * </dl>
+ * <!-- CHECKSTYLE:ON JavadocStyle -->
  */
 public final class Launcher {
 

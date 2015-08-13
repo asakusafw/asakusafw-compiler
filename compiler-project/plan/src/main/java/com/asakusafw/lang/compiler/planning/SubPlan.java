@@ -26,6 +26,7 @@ import com.asakusafw.lang.compiler.model.graph.Operator;
  * <p>
  * Terminology:
  * </p>
+ * <!-- CHECKSTYLE:OFF JavadocStyle -->
  * <dl>
  * <dt> <em>member operator</em> </dt>
  * <dd>
@@ -44,6 +45,7 @@ import com.asakusafw.lang.compiler.model.graph.Operator;
  *   each member operator other than <em>input operator</em> and <em>output operator</em>.
  * </dd>
  * </dl>
+ * <!-- CHECKSTYLE:ON JavadocStyle -->
  *
  * <p>
  * Each {@link SubPlan} object must satisfy following invariants:
