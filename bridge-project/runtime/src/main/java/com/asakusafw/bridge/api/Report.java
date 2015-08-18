@@ -15,22 +15,28 @@
  */
 package com.asakusafw.bridge.api;
 
-import java.text.MessageFormat;
+import java.io.IOException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import com.asakusafw.bridge.broker.ResourceBroker;
+import com.asakusafw.runtime.core.Report.FailedException;
 import com.asakusafw.runtime.core.Report.Level;
+import com.asakusafw.runtime.core.ResourceConfiguration;
 
 /**
  * Provides reporting feature for Asakusa applications.
  * <p>
  * Clients can use this class <em>only in operator methods</em>.
  * </p>
+ *
+ * <h3> requirements </h3>
+ * <p>
+ * This API requires that {@link ResourceConfiguration a Asakusa configuration} object has been registered to
+ * {@link ResourceBroker}.
+ * </p>
+ * @since 0.1.0
+ * @version 0.1.1
  */
 public final class Report {
-
-    static final Logger LOG = LoggerFactory.getLogger(Report.class);
 
     private Report() {
         return;
@@ -41,7 +47,11 @@ public final class Report {
      * @param message the message
      */
     public static void info(String message) {
-        report(Level.INFO, message);
+        try {
+            ReportAdapter.delegate().report(Level.INFO, message);
+        } catch (IOException e) {
+            throw new FailedException(e);
+        }
     }
 
     /**
@@ -50,7 +60,11 @@ public final class Report {
      * @param throwable attached exception object (nullable)
      */
     public static void info(String message, Throwable throwable) {
-        report(Level.INFO, message, throwable);
+        try {
+            ReportAdapter.delegate().report(Level.INFO, message, throwable);
+        } catch (IOException e) {
+            throw new FailedException(e);
+        }
     }
 
     /**
@@ -58,7 +72,11 @@ public final class Report {
      * @param message the message
      */
     public static void warn(String message) {
-        report(Level.WARN, message);
+        try {
+            ReportAdapter.delegate().report(Level.WARN, message);
+        } catch (IOException e) {
+            throw new FailedException(e);
+        }
     }
 
     /**
@@ -67,7 +85,11 @@ public final class Report {
      * @param throwable attached exception object (nullable)
      */
     public static void warn(String message, Throwable throwable) {
-        report(Level.WARN, message, throwable);
+        try {
+            ReportAdapter.delegate().report(Level.WARN, message, throwable);
+        } catch (IOException e) {
+            throw new FailedException(e);
+        }
     }
 
     /**
@@ -75,7 +97,11 @@ public final class Report {
      * @param message the message
      */
     public static void error(String message) {
-        report(Level.ERROR, message);
+        try {
+            ReportAdapter.delegate().report(Level.ERROR, message);
+        } catch (IOException e) {
+            throw new FailedException(e);
+        }
     }
 
     /**
@@ -84,34 +110,10 @@ public final class Report {
      * @param throwable attached exception object (nullable)
      */
     public static void error(String message, Throwable throwable) {
-        report(Level.ERROR, message, throwable);
-    }
-
-    private static void report(Level level, String message) {
-        if (level == Level.ERROR) {
-            if (LOG.isErrorEnabled()) {
-                LOG.error(message, new Exception("error"));
-            }
-        } else if (level == Level.WARN) {
-            if (LOG.isWarnEnabled()) {
-                LOG.warn(message, new Exception("warn"));
-            }
-        } else if (level == Level.INFO) {
-            LOG.info(message);
-        } else {
-            LOG.error(MessageFormat.format("Unknown level \"{0}\": {1}", level, message));
-        }
-    }
-
-    private static void report(Level level, String message, Throwable throwable) {
-        if (level == Level.ERROR) {
-            LOG.error(message, throwable);
-        } else if (level == Level.WARN) {
-            LOG.warn(message, throwable);
-        } else if (level == Level.INFO) {
-            LOG.info(message, throwable);
-        } else {
-            LOG.error(MessageFormat.format("Unknown level \"{0}\": {1}", level, message), throwable);
+        try {
+            ReportAdapter.delegate().report(Level.ERROR, message, throwable);
+        } catch (IOException e) {
+            throw new FailedException(e);
         }
     }
 }
