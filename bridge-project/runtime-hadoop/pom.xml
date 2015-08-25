@@ -7,7 +7,7 @@
   <parent>
     <artifactId>project</artifactId>
     <groupId>com.asakusafw.bridge</groupId>
-    <version>0.1.1-SNAPSHOT</version>
+    <version>0.1.1</version>
   </parent>
 
   <description>Asakusa Hadoop Bridge API</description>
