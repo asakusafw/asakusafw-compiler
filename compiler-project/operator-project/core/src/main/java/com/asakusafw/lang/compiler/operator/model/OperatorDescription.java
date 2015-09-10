@@ -362,7 +362,7 @@ public class OperatorDescription {
 
         /**
          * Return the operator specific information.
-         * @return the the operator specific information
+         * @return the operator specific information
          */
         public String getInfo() {
             return info;

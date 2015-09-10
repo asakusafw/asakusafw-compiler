@@ -49,17 +49,17 @@ public abstract class Callback {
     private Error error;
 
     /**
-     * current compiling environment.
+     * The current compiling environment.
      */
     public CompileEnvironment env;
 
     /**
-     * type utilities.
+     * The type utilities.
      */
     public Types types;
 
     /**
-     * element utilities.
+     * The element utilities.
      */
     public Elements elements;
 
@@ -97,7 +97,6 @@ public abstract class Callback {
      * @param pEnv processing environment
      * @param rEnv rounding environment
      * @param annotations target annotations
-     * @throws IllegalArgumentException if some parameters were {@code null}
      */
     public void run(ProcessingEnvironment pEnv, RoundEnvironment rEnv, Set<? extends TypeElement> annotations) {
         this.env = createCompileEnvironment(pEnv);

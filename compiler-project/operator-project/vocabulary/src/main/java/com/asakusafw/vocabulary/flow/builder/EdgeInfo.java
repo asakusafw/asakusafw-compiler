@@ -92,20 +92,4 @@ public abstract class EdgeInfo<TSelf> {
         this.extern = newValue;
         return getSelf();
     }
-
-    /**
-     * Represents a port direction.
-     */
-    public enum Direction {
-
-        /**
-         * input ports.
-         */
-        INPUT,
-
-        /**
-         * output ports.
-         */
-        OUTPUT,
-    }
 }

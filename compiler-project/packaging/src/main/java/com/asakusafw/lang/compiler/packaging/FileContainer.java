@@ -83,7 +83,7 @@ public class FileContainer implements ResourceContainer, ResourceRepository {
     /**
      * Adds a new resource with contents from the content provider.
      * @param location the resource path (relative from the container root)
-     * @param contents the the callback object for preparing resource contents
+     * @param contents the callback object for preparing resource contents
      * @throws IOException if failed to accept the resource by I/O error
      */
     public void addResource(Location location, ContentProvider contents) throws IOException {
