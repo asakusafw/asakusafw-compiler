@@ -7,7 +7,7 @@
   <parent>
     <artifactId>project</artifactId>
     <groupId>com.asakusafw.bridge</groupId>
-    <version>0.1.2-SNAPSHOT</version>
+    <version>0.1.2</version>
   </parent>
 
   <description>Asakusa Bridge Runtime Bundles</description>

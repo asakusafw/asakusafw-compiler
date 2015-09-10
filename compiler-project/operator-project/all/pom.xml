@@ -7,7 +7,7 @@
   <parent>
     <artifactId>project</artifactId>
     <groupId>com.asakusafw.lang.compiler.operator</groupId>
-    <version>0.1.2-SNAPSHOT</version>
+    <version>0.1.2</version>
   </parent>
 
   <description>Asakusa Operator DSL Compiler Bundles</description>
