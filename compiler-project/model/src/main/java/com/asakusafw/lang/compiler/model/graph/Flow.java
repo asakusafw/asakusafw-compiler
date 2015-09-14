@@ -23,7 +23,7 @@ import com.asakusafw.lang.compiler.model.description.ClassDescription;
 public interface Flow {
 
     /**
-     * Returns the the original flow description class.
+     * Returns the original flow description class.
      * @return the flow description class
      */
     ClassDescription getDescriptionClass();
