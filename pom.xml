@@ -4,7 +4,7 @@
   <name>Asakusa Framework Language Project</name>
   <groupId>com.asakusafw.lang</groupId>
   <artifactId>project</artifactId>
-  <version>0.2.0</version>
+  <version>0.2.1-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <description>Asakusa Framework Language Project</description>
@@ -27,7 +27,7 @@
     <connection>scm:git:git@github.com:asakusafw/asakusafw-compiler.git</connection>
     <developerConnection>scm:git:git@github.com:asakusafw/asakusafw-compiler.git</developerConnection>
     <url>https://github.com/asakusafw/asakusafw-compiler</url>
-    <tag>0.2.0</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <properties>
