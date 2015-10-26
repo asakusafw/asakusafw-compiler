@@ -256,7 +256,7 @@ public class OperatorDescription {
             RETURN,
 
             /**
-             * Represents a operator specific reference.
+             * Represents an operator specific reference.
              */
             SPECIAL,
         }

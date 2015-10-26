@@ -25,7 +25,7 @@ import com.asakusafw.lang.compiler.model.info.ExternalInputInfo;
 public interface InputFormatInfoSupport {
 
     /**
-     * Resolves external input and returns a information about suitable {@code InputFormat} to access the input.
+     * Resolves external input and returns information about suitable {@code InputFormat} to access the input.
      * @param context the current context
      * @param name the target input name
      * @param info the structural information of the target external input
