@@ -78,7 +78,7 @@ public final class SummarizedModelUtil {
     }
 
     /**
-     * Extracts property mappings from a operator with <em>summarized models</em>.
+     * Extracts property mappings from an operator with <em>summarized models</em>.
      * @param classLoader the class loader to resolve target operator
      * @param operator the target operator
      * @return the property mappings

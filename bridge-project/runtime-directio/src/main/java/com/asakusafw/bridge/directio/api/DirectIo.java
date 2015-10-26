@@ -36,7 +36,7 @@ import com.asakusafw.runtime.io.ModelInput;
  * <h3> requirements </h3>
  * <p>
  * This API requires that either {@link Configuration a Hadoop configuration} object or
- * {@link ResourceConfiguration a Asakusa configuration} object has been registered to {@link ResourceBroker}.
+ * {@link ResourceConfiguration Asakusa configuration} object has been registered to {@link ResourceBroker}.
  * </p>
  */
 public final class DirectIo {

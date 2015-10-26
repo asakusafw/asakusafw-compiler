@@ -21,7 +21,7 @@ import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ExecutableElement;
 
 /**
- * Represents a operator method/constructor.
+ * Represents an operator method/constructor.
  */
 public class OperatorElement {
 

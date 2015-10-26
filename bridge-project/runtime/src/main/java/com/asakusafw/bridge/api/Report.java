@@ -30,7 +30,7 @@ import com.asakusafw.runtime.core.ResourceConfiguration;
  *
  * <h3> requirements </h3>
  * <p>
- * This API requires that {@link ResourceConfiguration a Asakusa configuration} object has been registered to
+ * This API requires that {@link ResourceConfiguration Asakusa configuration} object has been registered to
  * {@link ResourceBroker}.
  * </p>
  * @since 0.1.0
