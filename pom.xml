@@ -7,7 +7,6 @@
   <version>0.2.1-SNAPSHOT</version>
   <packaging>pom</packaging>
 
-  <description>Asakusa Framework Language Project</description>
   <url>http://asakusafw.com</url>
   <licenses>
     <license>
