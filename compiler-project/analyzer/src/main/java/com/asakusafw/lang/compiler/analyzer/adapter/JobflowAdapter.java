@@ -44,6 +44,8 @@ import com.asakusafw.vocabulary.flow.Out;
 
 /**
  * A DSL adapter for jobflows.
+ * @since 0.1.0
+ * @version 0.3.0
  */
 public class JobflowAdapter {
 
@@ -175,6 +177,18 @@ public class JobflowAdapter {
         LOG.debug("analyzing jobflow info: {}", aClass.getName()); //$NON-NLS-1$
         JobflowInfo info = analyzeInfo(aClass);
         LOG.debug("jobflow info: {}", info); //$NON-NLS-1$
+        return analyze(info, aClass);
+    }
+
+    /**
+     * Analyzes the target <em>jobflow class</em> and returns its DSL adapter object.
+     * @param info the target jobflow info
+     * @param aClass the target class
+     * @return the DSL adapter for the target <em>jobflow class</em>
+     * @throws DiagnosticException if the target class is not a valid <em>jobflow class</em>
+     * @since 0.3.0
+     */
+    public static JobflowAdapter analyze(JobflowInfo info, Class<?> aClass) {
         Constructor<? extends FlowDescription> constructor = detectConstructor(aClass);
         List<JobflowAdapter.Parameter> parameters = analyzeParameters(constructor);
         JobflowAdapter adapter = new JobflowAdapter(info, constructor, parameters);

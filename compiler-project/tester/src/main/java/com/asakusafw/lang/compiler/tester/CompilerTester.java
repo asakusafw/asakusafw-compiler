@@ -42,7 +42,7 @@ import com.asakusafw.lang.compiler.core.ProjectRepository;
 import com.asakusafw.lang.compiler.core.ToolRepository;
 import com.asakusafw.lang.compiler.core.basic.AbstractCompilerParticipant;
 import com.asakusafw.lang.compiler.core.basic.BasicBatchCompiler;
-import com.asakusafw.lang.compiler.core.basic.BasicClassAnalyzer;
+import com.asakusafw.lang.compiler.core.util.CompositeClassAnalyzer;
 import com.asakusafw.lang.compiler.core.util.CompositeCompilerParticipant;
 import com.asakusafw.lang.compiler.model.description.Descriptions;
 import com.asakusafw.lang.compiler.model.graph.Batch;
@@ -115,7 +115,7 @@ public class CompilerTester implements Closeable {
      * @param compilerContext the compiler context
      */
     public CompilerTester(TesterContext testerContext, CompilerContext compilerContext) {
-        this(new BasicClassAnalyzer(), new BasicBatchCompiler(), testerContext, compilerContext);
+        this(new CompositeClassAnalyzer(), new BasicBatchCompiler(), testerContext, compilerContext);
     }
 
     /**

@@ -16,7 +16,9 @@
 package com.asakusafw.lang.compiler.analyzer;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,11 +28,15 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.asakusafw.lang.compiler.analyzer.OperatorAttributeAnalyzer.AttributeMap;
+import com.asakusafw.lang.compiler.analyzer.model.ConstructorParameter;
+import com.asakusafw.lang.compiler.analyzer.model.OperatorSource;
 import com.asakusafw.lang.compiler.common.BasicDiagnostic;
 import com.asakusafw.lang.compiler.common.Diagnostic;
 import com.asakusafw.lang.compiler.common.Diagnostic.Level;
@@ -50,6 +56,7 @@ import com.asakusafw.lang.compiler.model.graph.ExternalOutput;
 import com.asakusafw.lang.compiler.model.graph.FlowOperator;
 import com.asakusafw.lang.compiler.model.graph.Group;
 import com.asakusafw.lang.compiler.model.graph.Operator;
+import com.asakusafw.lang.compiler.model.graph.Operator.OperatorKind;
 import com.asakusafw.lang.compiler.model.graph.OperatorConstraint;
 import com.asakusafw.lang.compiler.model.graph.OperatorGraph;
 import com.asakusafw.lang.compiler.model.graph.OperatorInput;
@@ -61,6 +68,9 @@ import com.asakusafw.utils.graph.Graph;
 import com.asakusafw.utils.graph.Graphs;
 import com.asakusafw.vocabulary.external.ExporterDescription;
 import com.asakusafw.vocabulary.external.ImporterDescription;
+import com.asakusafw.vocabulary.flow.Export;
+import com.asakusafw.vocabulary.flow.FlowDescription;
+import com.asakusafw.vocabulary.flow.Import;
 import com.asakusafw.vocabulary.flow.graph.FlowBoundary;
 import com.asakusafw.vocabulary.flow.graph.FlowElement;
 import com.asakusafw.vocabulary.flow.graph.FlowElementDescription;
@@ -86,6 +96,8 @@ import com.asakusafw.vocabulary.operator.Restructure;
 /**
  * Generates {@link OperatorGraph} from the {@link FlowGraph}.
  * @see FlowGraphVerifier
+ * @since 0.1.0
+ * @version 0.3.0
  */
 public final class FlowGraphAnalyzer {
 
@@ -110,12 +122,27 @@ public final class FlowGraphAnalyzer {
 
     private final ExternalPortAnalyzer ioAnalyzer;
 
+    private final OperatorAttributeAnalyzer attributeAnalyzer;
+
     /**
      * Creates a new instance.
      * @param ioAnalyzer the external I/O analyzer
      */
     public FlowGraphAnalyzer(ExternalPortAnalyzer ioAnalyzer) {
+        this(ioAnalyzer, OperatorAttributeAnalyzer.NULL);
+    }
+
+    /**
+     * Creates a new instance.
+     * @param ioAnalyzer the external I/O analyzer
+     * @param attributeAnalyzer the attribute analyzer
+     * @since 0.3.0
+     */
+    public FlowGraphAnalyzer(ExternalPortAnalyzer ioAnalyzer, OperatorAttributeAnalyzer attributeAnalyzer) {
+        Objects.requireNonNull(ioAnalyzer);
+        Objects.requireNonNull(attributeAnalyzer);
         this.ioAnalyzer = ioAnalyzer;
+        this.attributeAnalyzer = attributeAnalyzer;
     }
 
     /**
@@ -124,7 +151,7 @@ public final class FlowGraphAnalyzer {
      * @return the equivalent operator graph
      */
     public OperatorGraph analyze(FlowGraph graph) {
-        Context root = new Context(null);
+        Context root = new Context(null, graph);
         OperatorGraph result = analyze0(root, graph);
         root.validate(ioAnalyzer);
         return result;
@@ -132,7 +159,7 @@ public final class FlowGraphAnalyzer {
 
     private OperatorGraph analyze0(Context parent, FlowGraph graph) {
         LOG.debug("analyzing flow graph: {}", graph.getDescription().getName()); //$NON-NLS-1$
-        Context context = new Context(parent);
+        Context context = new Context(parent, graph);
         Graph<FlowElement> dependencies = FlowElementUtil.toDependencyGraph(graph);
         Set<Set<FlowElement>> circuits = Graphs.findCircuit(dependencies);
         if (circuits.isEmpty() == false) {
@@ -170,6 +197,7 @@ public final class FlowGraphAnalyzer {
     private Operator convert(Context context, InputDescription description) {
         ImporterDescription extern = description.getImporterDescription();
         ExternalInputInfo info = null;
+        OperatorSource source = null;
         if (extern != null) {
             try {
                 info = ioAnalyzer.analyze(description.getName(), extern);
@@ -178,13 +206,15 @@ public final class FlowGraphAnalyzer {
                 return null;
             }
             context.registerExternalInput(description.getName(), info);
+            source = context.findInputSource(description.getName());
         }
-        return convert(description, ExternalInput.builder(description.getName(), info));
+        return convert(description, source, ExternalInput.builder(description.getName(), info));
     }
 
     private Operator convert(Context context, OutputDescription description) {
         ExporterDescription extern = description.getExporterDescription();
         ExternalOutputInfo info = null;
+        OperatorSource source = null;
         if (extern != null) {
             try {
                 info = ioAnalyzer.analyze(description.getName(), extern);
@@ -193,12 +223,14 @@ public final class FlowGraphAnalyzer {
                 return null;
             }
             context.registerExternalOutput(description.getName(), info);
+            source = context.findOutputSource(description.getName());
         }
-        return convert(description, ExternalOutput.builder(description.getName(), info));
+        return convert(description, source, ExternalOutput.builder(description.getName(), info));
     }
 
     private Operator convert(Context context, FlowPartDescription description) {
-        ClassDescription declaring = Descriptions.classOf(description.getFlowGraph().getDescription());
+        Class<? extends FlowDescription> flowClass = description.getFlowGraph().getDescription();
+        ClassDescription declaring = Descriptions.classOf(flowClass);
         OperatorGraph inner;
         try {
             inner = analyze0(context, description.getFlowGraph());
@@ -206,14 +238,15 @@ public final class FlowGraphAnalyzer {
             context.merge(e.getDiagnostics());
             return null;
         }
-        return convert(description, FlowOperator.builder(declaring, inner));
+        OperatorSource source = new OperatorSource(Operator.OperatorKind.FLOW, flowClass);
+        return convert(description, source, FlowOperator.builder(declaring, inner));
     }
 
     private Operator convert(Context context, OperatorDescription description) {
         OperatorDescription.Declaration declaration = description.getDeclaration();
         CoreOperator.CoreOperatorKind core = CORE_OPERATOR_KINDS.get(declaration.getAnnotationType());
         if (core != null) {
-            return convert(description, CoreOperator.builder(core));
+            return convert(description, null, CoreOperator.builder(core));
         }
         Method method = declaration.toMethod();
         if (method == null) {
@@ -233,10 +266,15 @@ public final class FlowGraphAnalyzer {
                     declaration.getName()));
             return null;
         }
-        return convert(description, UserOperator.builder(
+        OperatorSource source = getOperatorSource(method);
+        return convert(description, source, UserOperator.builder(
                 AnnotationDescription.of(annotation),
                 MethodDescription.of(method),
                 Descriptions.classOf(declaration.getImplementing())));
+    }
+
+    private OperatorSource getOperatorSource(Method method) {
+        return new OperatorSource(Operator.OperatorKind.USER, method);
     }
 
     private Annotation getOperatorAnnotation(Method method, Class<? extends Annotation> annotationType) {
@@ -258,13 +296,16 @@ public final class FlowGraphAnalyzer {
 
     private Operator convert(PseudElementDescription description) {
         if (isCheckpoint(description)) {
-            return convert(description, CoreOperator.builder(CoreOperator.CoreOperatorKind.CHECKPOINT));
+            return convert(description, null, CoreOperator.builder(CoreOperator.CoreOperatorKind.CHECKPOINT));
         }
         // non-reifiable operators
         return null;
     }
 
-    private static Operator convert(FlowElementDescription description, Operator.AbstractBuilder<?, ?> builder) {
+    private Operator convert(
+            FlowElementDescription description,
+            OperatorSource source,
+            Operator.AbstractBuilder<?, ?> builder) {
         for (FlowElementPortDescription port : description.getInputPorts()) {
             builder.input(port.getName(), typeOf(port.getDataType()), convert(port.getShuffleKey()));
         }
@@ -281,6 +322,10 @@ public final class FlowGraphAnalyzer {
             }
         }
         builder.constraint(convert(description.getAttribute(ObservationCount.class)));
+        if (source != null) {
+            AttributeMap map = attributeAnalyzer.analyze(source);
+            map.mergeTo(builder);
+        }
         return builder.build();
     }
 
@@ -362,7 +407,11 @@ public final class FlowGraphAnalyzer {
 
         private final Map<String, ExternalOutputInfo> outputs;
 
-        Context(Context parent) {
+        private final Map<String, OperatorSource> inputOrigins;
+
+        private final Map<String, OperatorSource> outputOrigins;
+
+        Context(Context parent, FlowGraph graph) {
             if (parent == null) {
                 this.inputs = new LinkedHashMap<>();
                 this.outputs = new LinkedHashMap<>();
@@ -370,6 +419,56 @@ public final class FlowGraphAnalyzer {
                 this.inputs = parent.inputs;
                 this.outputs = parent.outputs;
             }
+            this.inputOrigins = new HashMap<>();
+            this.outputOrigins = new HashMap<>();
+            collectOrigins(graph.getDescription(), inputOrigins, outputOrigins);
+        }
+
+        private static void collectOrigins(
+                Class<? extends FlowDescription> description,
+                Map<String, OperatorSource> inputs,
+                Map<String, OperatorSource> outputs) {
+            Constructor<?> constructor = findConstructor(description);
+            if (constructor == null) {
+                return;
+            }
+            Annotation[][] parameterAnnotations = constructor.getParameterAnnotations();
+            for (int i = 0; i < parameterAnnotations.length; i++) {
+                Annotation[] annotations = parameterAnnotations[i];
+                for (Annotation a : annotations) {
+                    Class<? extends Annotation> type = a.annotationType();
+                    if (type == Import.class) {
+                        String name = ((Import) a).name();
+                        ConstructorParameter origin = new ConstructorParameter(constructor, i);
+                        inputs.put(name, new OperatorSource(OperatorKind.INPUT, origin));
+                    } else if (type == Export.class) {
+                        String name = ((Export) a).name();
+                        ConstructorParameter origin = new ConstructorParameter(constructor, i);
+                        inputs.put(name, new OperatorSource(OperatorKind.OUTPUT, origin));
+                    }
+                }
+            }
+        }
+
+        private static Constructor<?> findConstructor(Class<? extends FlowDescription> description) {
+            for (Constructor<?> candidate : description.getConstructors()) {
+                if (Modifier.isPublic(candidate.getModifiers()) == false) {
+                    continue;
+                }
+                if (candidate.getParameterTypes().length == 0) {
+                    continue;
+                }
+                return candidate;
+            }
+            return null;
+        }
+
+        OperatorSource findInputSource(String name) {
+            return inputOrigins.get(name);
+        }
+
+        OperatorSource findOutputSource(String name) {
+            return outputOrigins.get(name);
         }
 
         public void validate(ExternalPortAnalyzer analyzer) {

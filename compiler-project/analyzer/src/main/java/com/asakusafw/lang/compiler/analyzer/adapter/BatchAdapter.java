@@ -128,7 +128,7 @@ public class BatchAdapter {
             throw new DiagnosticException(Diagnostic.Level.ERROR, MessageFormat.format(
                     "batch must be annotated with @{1} ({0})",
                     aClass.getName(),
-                    com.asakusafw.vocabulary.flow.JobFlow.class.getSimpleName()));
+                    com.asakusafw.vocabulary.batch.Batch.class.getSimpleName()));
         }
         if (BatchDescription.class.isAssignableFrom(aClass) == false) {
             throw new DiagnosticException(Diagnostic.Level.ERROR, MessageFormat.format(
