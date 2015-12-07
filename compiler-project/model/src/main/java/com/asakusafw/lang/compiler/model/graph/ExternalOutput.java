@@ -23,6 +23,8 @@ import com.asakusafw.lang.compiler.model.info.ExternalOutputInfo;
 
 /**
  * Represents an external/flow output operator.
+ * @since 0.1.0
+ * @version 0.3.0
  */
 public final class ExternalOutput extends ExternalPort {
 
@@ -124,6 +126,64 @@ public final class ExternalOutput extends ExternalPort {
                 .build();
     }
 
+    /**
+     * Creates a new builder with default {@link #getOperatorPort() operator port}.
+     * @param name the output name
+     * @param dataType the port type
+     * @param upstreams the optional upstream ports to connect to the created operator
+     * @return the created instance
+     * @see #newWithAttributes(String, ExternalOutputInfo, OperatorOutput...)
+     * @since 0.3.0
+     */
+    public static AttributeBuilder newWithAttributes(
+            String name, TypeDescription dataType, OperatorOutput... upstreams) {
+        return new AttributeBuilder(newInstance(name, dataType, upstreams));
+    }
+
+    /**
+     * Creates a new builder with default {@link #getOperatorPort() operator port}.
+     * @param name the output name
+     * @param upstream the mandatory upstream port to connect to the created operator
+     * @param upstreams the optional upstream ports to connect to the created operator
+     * @return the created instance
+     * @see #newWithAttributes(String, ExternalOutputInfo, OperatorOutput, OperatorOutput...)
+     * @since 0.3.0
+     */
+    public static AttributeBuilder newWithAttributes(
+            String name, OperatorOutput upstream, OperatorOutput... upstreams) {
+        return new AttributeBuilder(newInstance(name, upstream, upstreams));
+    }
+
+    /**
+     * Creates a new builder with default {@link #getOperatorPort() operator port}.
+     * @param name the output name
+     * @param info the structural exporter information (nullable if the port is not external)
+     * @param upstreams the optional upstream ports to connect to the created operator
+     * @return the created instance
+     * @since 0.3.0
+     */
+    public static AttributeBuilder newWithAttributes(
+            String name, ExternalOutputInfo info, OperatorOutput... upstreams) {
+        return new AttributeBuilder(newInstance(name, info, upstreams));
+    }
+
+    /**
+     * Creates a new builder with default {@link #getOperatorPort() operator port}.
+     * @param name the output name
+     * @param info the structural exporter information (nullable if the port is not external)
+     * @param upstream the mandatory upstream port to connect to the created operator
+     * @param upstreams the optional upstream ports to connect to the created operator
+     * @return the created instance
+     * @since 0.3.0
+     */
+    public static AttributeBuilder newWithAttributes(
+            String name,
+            ExternalOutputInfo info,
+            OperatorOutput upstream,
+            OperatorOutput... upstreams) {
+        return new AttributeBuilder(newInstance(name, info, upstream, upstreams));
+    }
+
     @Override
     public OperatorKind getOperatorKind() {
         return OperatorKind.OUTPUT;
@@ -180,6 +240,22 @@ public final class ExternalOutput extends ExternalPort {
                 throw new IllegalStateException();
             }
             return super.build();
+        }
+    }
+
+    /**
+     * A builder for declaring attributes.
+     * @since 0.3.0
+     */
+    public static final class AttributeBuilder extends BuilderBase<ExternalOutput, AttributeBuilder> {
+
+        AttributeBuilder(ExternalOutput owner) {
+            super(owner);
+        }
+
+        @Override
+        protected AttributeBuilder getSelf() {
+            return this;
         }
     }
 }

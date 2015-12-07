@@ -23,6 +23,8 @@ import com.asakusafw.lang.compiler.model.info.ExternalInputInfo;
 
 /**
  * Represents an external/flow input operator.
+ * @since 0.1.0
+ * @version 0.3.0
  */
 public final class ExternalInput extends ExternalPort {
 
@@ -72,7 +74,7 @@ public final class ExternalInput extends ExternalPort {
      * @param name the input name
      * @param dataType the port type
      * @return the created instance
-     * @see #newInstance
+     * @see #newInstance(String, ExternalInputInfo)
      */
     public static ExternalInput newInstance(String name, TypeDescription dataType) {
         return builder(name)
@@ -90,6 +92,29 @@ public final class ExternalInput extends ExternalPort {
         return builder(name, info)
                 .output(PORT_NAME, info.getDataModelClass())
                 .build();
+    }
+
+    /**
+     * Creates a new builder with default {@link #getOperatorPort() operator port}.
+     * @param name the input name
+     * @param dataType the port type
+     * @return the created instance
+     * @see #newWithAttributes(String, ExternalInputInfo)
+     * @since 0.3.0
+     */
+    public static AttributeBuilder newWithAttributes(String name, TypeDescription dataType) {
+        return new AttributeBuilder(newInstance(name, dataType));
+    }
+
+    /**
+     * Creates a new builder with default {@link #getOperatorPort() operator port}.
+     * @param name the input name
+     * @param info the structural importer information (nullable if the port is not external)
+     * @return the created instance
+     * @since 0.3.0
+     */
+    public static AttributeBuilder newWithAttributes(String name, ExternalInputInfo info) {
+        return new AttributeBuilder(newInstance(name, info));
     }
 
     @Override
@@ -148,6 +173,22 @@ public final class ExternalInput extends ExternalPort {
                 throw new IllegalStateException();
             }
             return super.build();
+        }
+    }
+
+    /**
+     * A builder for declaring attributes.
+     * @since 0.3.0
+     */
+    public static final class AttributeBuilder extends BuilderBase<ExternalInput, AttributeBuilder> {
+
+        AttributeBuilder(ExternalInput owner) {
+            super(owner);
+        }
+
+        @Override
+        protected AttributeBuilder getSelf() {
+            return this;
         }
     }
 }
