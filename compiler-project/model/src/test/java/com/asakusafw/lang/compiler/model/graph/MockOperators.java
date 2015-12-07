@@ -29,25 +29,36 @@ import java.util.Set;
 import com.asakusafw.lang.compiler.model.description.AnnotationDescription;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.description.Descriptions;
-import com.asakusafw.lang.compiler.model.description.ImmediateDescription;
 import com.asakusafw.lang.compiler.model.description.MethodDescription;
 import com.asakusafw.lang.compiler.model.description.TypeDescription;
-import com.asakusafw.lang.compiler.model.description.ValueDescription;
-import com.asakusafw.lang.compiler.model.description.ValueDescription.ValueKind;
+import com.asakusafw.lang.compiler.model.graph.ExternalInput;
+import com.asakusafw.lang.compiler.model.graph.ExternalOutput;
+import com.asakusafw.lang.compiler.model.graph.FlowOperator;
+import com.asakusafw.lang.compiler.model.graph.MarkerOperator;
+import com.asakusafw.lang.compiler.model.graph.Operator;
 import com.asakusafw.lang.compiler.model.graph.Operator.OperatorKind;
+import com.asakusafw.lang.compiler.model.graph.OperatorConstraint;
+import com.asakusafw.lang.compiler.model.graph.OperatorGraph;
+import com.asakusafw.lang.compiler.model.graph.OperatorInput;
+import com.asakusafw.lang.compiler.model.graph.OperatorOutput;
+import com.asakusafw.lang.compiler.model.graph.UserOperator;
+import com.asakusafw.lang.compiler.model.info.ExternalInputInfo;
+import com.asakusafw.lang.compiler.model.info.ExternalInputInfo.DataSize;
 
 /**
  * Mock operator graph builder.
  */
 public final class MockOperators {
 
-    private static final TypeDescription TYPE = Descriptions.typeOf(String.class);
+    private static final TypeDescription DEFAULT_DATA_TYPE = Descriptions.typeOf(String.class);
 
     private static final OperatorConstraint[] EMPTY_CONSTRAINTS = new OperatorConstraint[0];
 
+    private static final Object[] EMPTY_ATTRIBUTES = new Object[0];
+
     private static final AnnotationDescription ANNOTATION = new AnnotationDescription(classOf(Deprecated.class));
 
-    private static final String KEY_ARGUMENT = "ID"; //$NON-NLS-1$
+    private final TypeDescription commonDataType;
 
     private final Map<String, Operator> operators = new HashMap<>();
 
@@ -55,7 +66,15 @@ public final class MockOperators {
      * Creates a new instance.
      */
     public MockOperators() {
-        return;
+        this(DEFAULT_DATA_TYPE);
+    }
+
+    /**
+     * Creates a new instance.
+     * @param commonDataType the common data type
+     */
+    public MockOperators(TypeDescription commonDataType) {
+        this.commonDataType = commonDataType;
     }
 
     /**
@@ -63,6 +82,16 @@ public final class MockOperators {
      * @param operators operators which are created on other {@link MockOperators}
      */
     public MockOperators(Collection<? extends Operator> operators) {
+        this(DEFAULT_DATA_TYPE, operators);
+    }
+
+    /**
+     * Creates a new instance.
+     * @param commonDataType the common data type
+     * @param operators operators which are created on other {@link MockOperators}
+     */
+    public MockOperators(TypeDescription commonDataType, Collection<? extends Operator> operators) {
+        this(commonDataType);
         for (Operator operator : operators) {
             String id = id0(operator);
             if (id != null) {
@@ -72,13 +101,11 @@ public final class MockOperators {
     }
 
     /**
-     * Adds {@link ExternalInput}.
-     * @param id the operator ID
-     * @return this
+     * Returns the common data type.
+     * @return the common data type
      */
-    public MockOperators input(String id) {
-        operators.put(id, ExternalInput.newInstance(id, TYPE));
-        return this;
+    public TypeDescription getCommonDataType() {
+        return commonDataType;
     }
 
     /**
@@ -86,9 +113,67 @@ public final class MockOperators {
      * @param id the operator ID
      * @return this
      */
+    public MockOperators input(String id) {
+        return input(id, EMPTY_ATTRIBUTES);
+    }
+
+    /**
+     * Adds {@link ExternalInput}.
+     * @param id the operator ID
+     * @param dataSize the data size
+     * @return this
+     */
+    public MockOperators input(String id, DataSize dataSize) {
+        return input(id, dataSize, EMPTY_ATTRIBUTES);
+    }
+
+    /**
+     * Adds {@link ExternalInput}.
+     * @param id the operator ID
+     * @param attributes the extra attributes
+     * @return this
+     * @since 0.3.0
+     */
+    public MockOperators input(String id, Object... attributes) {
+        return bless(id, ExternalInput.builder(id).output(ExternalInput.PORT_NAME, commonDataType), attributes);
+    }
+
+    /**
+     * Adds {@link ExternalInput}.
+     * @param id the operator ID
+     * @param dataSize the data size
+     * @param attributes the extra attributes
+     * @return this
+     * @since 0.3.0
+     */
+    public MockOperators input(String id, DataSize dataSize, Object... attributes) {
+        ExternalInputInfo info = new ExternalInputInfo.Basic(
+                    new ClassDescription(id),
+                    id,
+                    (ClassDescription) commonDataType,
+                    dataSize);
+        return bless(id, ExternalInput.builder(id, info)
+                .output(ExternalInput.PORT_NAME, info.getDataModelClass()), attributes);
+    }
+
+    /**
+     * Adds {@link ExternalOutput}.
+     * @param id the operator ID
+     * @return this
+     */
     public MockOperators output(String id) {
-        operators.put(id, ExternalOutput.newInstance(id, TYPE));
-        return this;
+        return bless(id, ExternalOutput.builder(id).input(ExternalOutput.PORT_NAME, commonDataType));
+    }
+
+    /**
+     * Adds {@link ExternalOutput}.
+     * @param id the operator ID
+     * @param attributes the extra attributes
+     * @return this
+     * @since 0.3.0
+     */
+    public MockOperators output(String id, Object... attributes) {
+        return bless(id, ExternalOutput.builder(id).input(ExternalOutput.PORT_NAME, commonDataType), attributes);
     }
 
     /**
@@ -118,20 +203,90 @@ public final class MockOperators {
      * @param constraints operator constraints
      * @return this
      */
-    public MockOperators operator(String id, String inputNames, String outputNames, OperatorConstraint... constraints) {
+    public MockOperators operator(
+            String id, String inputNames, String outputNames,
+            OperatorConstraint... constraints) {
         UserOperator.Builder builder = UserOperator.builder(
                 ANNOTATION,
                 new MethodDescription(classOf(MockOperators.class), id),
                 classOf(MockOperators.class));
+        return operator(builder, id, inputNames, outputNames, constraints);
+    }
+
+    /**
+     * Adds {@link Operator}.
+     * @param id the operator ID
+     * @param inputNames comma separated input names
+     * @param outputNames comma separated output names
+     * @param attributes the extra attributes
+     * @return this
+     * @since 0.3.0
+     */
+    public MockOperators operator(
+            String id, String inputNames, String outputNames,
+            Object... attributes) {
+        UserOperator.Builder builder = UserOperator.builder(
+                ANNOTATION,
+                new MethodDescription(classOf(MockOperators.class), id),
+                classOf(MockOperators.class));
+        return operator(builder, id, inputNames, outputNames, attributes);
+    }
+
+    /**
+     * Adds {@link Operator}.
+     * @param builder the operator builder
+     * @param id the operator ID
+     * @param constraints operator constraints
+     * @return this
+     */
+    public MockOperators operator(
+            Operator.AbstractBuilder<?, ?> builder,
+            String id, OperatorConstraint... constraints) {
+        return operator(builder, id, "in", "out", constraints); //$NON-NLS-1$ //$NON-NLS-2$
+    }
+
+    /**
+     * Adds {@link Operator}.
+     * @param builder the operator builder
+     * @param id the operator ID
+     * @param inputNames comma separated input names
+     * @param outputNames comma separated output names
+     * @param constraints operator constraints
+     * @return this
+     */
+    public MockOperators operator(
+            Operator.AbstractBuilder<?, ?> builder,
+            String id, String inputNames, String outputNames, OperatorConstraint... constraints) {
         for (String name : inputNames.split(",")) { //$NON-NLS-1$
-            builder.input(name, TYPE);
+            builder.input(name, commonDataType);
         }
         for (String name : outputNames.split(",")) { //$NON-NLS-1$
-            builder.output(name, TYPE);
+            builder.output(name, commonDataType);
         }
         builder.constraint(constraints);
-        builder.argument(KEY_ARGUMENT, valueOf(id));
-        return bless(id, builder.build());
+        return bless(id, builder);
+    }
+
+    /**
+     * Adds {@link Operator}.
+     * @param builder the operator builder
+     * @param id the operator ID
+     * @param inputNames comma separated input names
+     * @param outputNames comma separated output names
+     * @param attributes the extra attributes
+     * @return this
+     * @since 0.3.0
+     */
+    public MockOperators operator(
+            Operator.AbstractBuilder<?, ?> builder,
+            String id, String inputNames, String outputNames, Object... attributes) {
+        for (String name : inputNames.split(",")) { //$NON-NLS-1$
+            builder.input(name, commonDataType);
+        }
+        for (String name : outputNames.split(",")) { //$NON-NLS-1$
+            builder.output(name, commonDataType);
+        }
+        return bless(id, builder, attributes);
     }
 
     /**
@@ -141,6 +296,18 @@ public final class MockOperators {
      * @return this
      */
     public MockOperators flow(String id, OperatorGraph subGraph) {
+        return flow(id, subGraph, EMPTY_ATTRIBUTES);
+    }
+
+    /**
+     * Adds a {@link FlowOperator}.
+     * @param id the operator ID
+     * @param subGraph internal graph
+     * @param attributes the extra attributes
+     * @return this
+     * @since 0.3.0
+     */
+    public MockOperators flow(String id, OperatorGraph subGraph, Object... attributes) {
         FlowOperator.Builder builder = FlowOperator.builder(new ClassDescription(id), subGraph);
         for (ExternalInput port : subGraph.getInputs().values()) {
             builder.input(port.getName(), port.getDataType());
@@ -148,7 +315,7 @@ public final class MockOperators {
         for (ExternalOutput port : subGraph.getOutputs().values()) {
             builder.output(port.getName(), port.getDataType());
         }
-        return bless(id, builder.build());
+        return bless(id, builder, attributes);
     }
 
     /**
@@ -157,10 +324,18 @@ public final class MockOperators {
      * @return this
      */
     public MockOperators marker(String id) {
-        MarkerOperator operator = MarkerOperator.builder(TYPE)
-                .attribute(String.class, id)
-                .build();
-        return bless(id, operator);
+        return bless(id, MarkerOperator.builder(commonDataType));
+    }
+
+    /**
+     * Adds {@link MarkerOperator}.
+     * @param id the operator ID
+     * @param attributes the extra attributes
+     * @return this
+     * @since 0.3.0
+     */
+    public MockOperators marker(String id, Object... attributes) {
+        return bless(id, MarkerOperator.builder(commonDataType), attributes);
     }
 
     /**
@@ -171,11 +346,43 @@ public final class MockOperators {
      * @return this
      */
     public <T extends Enum<T>> MockOperators marker(String id, T constant) {
-        MarkerOperator operator = MarkerOperator.builder(TYPE)
-                .attribute(String.class, id)
-                .attribute(constant.getDeclaringClass(), constant)
-                .build();
-        return bless(id, operator);
+        return bless(id, MarkerOperator.builder(commonDataType).attribute(constant.getDeclaringClass(), constant));
+    }
+
+    /**
+     * Adds {@link Operator}.
+     * @param id the operator ID
+     * @param builder the operator builder
+     * @return this
+     */
+    public MockOperators bless(String id, Operator.BuilderBase<?, ?> builder) {
+        return bless(id, builder, EMPTY_ATTRIBUTES);
+    }
+
+    /**
+     * Adds {@link Operator}.
+     * @param id the operator ID
+     * @param builder the operator builder
+     * @param attributes the extra attributes
+     * @return this
+     * @since 0.3.0
+     */
+    public MockOperators bless(String id, Operator.BuilderBase<?, ?> builder, Object... attributes) {
+        for (Object attribute : attributes) {
+            Class<?> type;
+            if (attribute instanceof Enum<?>) {
+                type = ((Enum<?>) attribute).getDeclaringClass();
+            } else {
+                type = attribute.getClass();
+            }
+            put(builder, type, attribute);
+        }
+        builder.attribute(Id.class, new Id(id));
+        return bless(id, builder.build());
+    }
+
+    private <T> void put(Operator.BuilderBase<?, ?> builder, Class<T> type, Object attribute) {
+        builder.attribute(type, type.cast(attribute));
     }
 
     /**
@@ -350,30 +557,21 @@ public final class MockOperators {
         return results;
     }
 
-    private String id0(Operator operator) {
-        switch (operator.getOperatorKind()) {
-        case INPUT:
-            return ((ExternalInput) operator).getName();
-        case OUTPUT:
-            return ((ExternalOutput) operator).getName();
-        case FLOW:
-            return ((FlowOperator) operator).getDescriptionClass().getBinaryName();
-        case MARKER:
-            return ((MarkerOperator) operator).getAttribute(String.class);
-        case USER: {
-            OperatorArgument arg = ((UserOperator) operator).findArgument(KEY_ARGUMENT);
-            if (arg == null) {
-                return null;
-            }
-            ValueDescription value = arg.getValue();
-            if (value.getValueKind() != ValueKind.IMMEDIATE
-                    || value.getValueType().equals(classOf(String.class)) == false) {
-                return null;
-            }
-            return (String) ((ImmediateDescription) value).getValue();
-        }
-        default:
-            throw new AssertionError(operator);
+    /**
+     * Returns the ID of the target operator.
+     * @param operator the target operator
+     * @return the related ID, or {@code null} if it is not defined
+     */
+    public static String getId(Operator operator) {
+        return id0(operator);
+    }
+
+    private static String id0(Operator operator) {
+        Id id = operator.getAttribute(Id.class);
+        if (id == null) {
+            return null;
+        } else {
+            return id.token;
         }
     }
 
@@ -383,5 +581,19 @@ public final class MockOperators {
      */
     public OperatorGraph toGraph() {
         return new OperatorGraph(operators.values());
+    }
+
+    private static class Id {
+
+        final String token;
+
+        public Id(String token) {
+            this.token = token;
+        }
+
+        @Override
+        public String toString() {
+            return token;
+        }
     }
 }

@@ -16,17 +16,14 @@
 package com.asakusafw.lang.compiler.model.graph;
 
 import java.text.MessageFormat;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 import com.asakusafw.lang.compiler.model.description.TypeDescription;
 
 /**
  * Represents a marker operator.
- * @see OperatorAttribute
+ * @since 0.1.0
+ * @version 0.3.0
  */
 public final class MarkerOperator extends Operator {
 
@@ -35,25 +32,13 @@ public final class MarkerOperator extends Operator {
      */
     public static final String PORT_NAME = "port"; //$NON-NLS-1$
 
-    final Map<Class<?>, Object> attributes = new LinkedHashMap<>();
-
     private MarkerOperator() {
         return;
     }
 
     @Override
     public MarkerOperator copy() {
-        MarkerOperator operator = new MarkerOperator();
-        for (Map.Entry<Class<?>, Object> entry : attributes.entrySet()) {
-            Class<?> key = entry.getKey();
-            Object value = entry.getValue();
-            if (value instanceof OperatorAttribute) {
-                value = ((OperatorAttribute) value).copy();
-                assert key.isInstance(value);
-            }
-            operator.attributes.put(key, value);
-        }
-        return copyAttributesTo(operator);
+        return copyAttributesTo(new MarkerOperator());
     }
 
     /**
@@ -101,29 +86,6 @@ public final class MarkerOperator extends Operator {
         return getInput().getDataType();
     }
 
-    /**
-     * Returns the all attribute types which this operator has.
-     * @return the all attribute types
-     */
-    public Set<Class<?>> getAttributeTypes() {
-        return Collections.unmodifiableSet(attributes.keySet());
-    }
-
-    /**
-     * Returns an attribute.
-     * @param <T> the attribute type
-     * @param attributeType the attribute type
-     * @return the attribute value, or {@code null} if the operator has no such an attribute
-     */
-    public <T> T getAttribute(Class<T> attributeType) {
-        Object value = attributes.get(attributeType);
-        if (value == null) {
-            return null;
-        } else {
-            return attributeType.cast(value);
-        }
-    }
-
     @Override
     public String toString() {
         if (attributes.isEmpty()) {
@@ -159,38 +121,18 @@ public final class MarkerOperator extends Operator {
 
     /**
      * A builder for {@link MarkerOperator}.
+     * @since 0.1.0
+     * @version 0.3.0
      */
-    public static final class Builder {
-
-        private final MarkerOperator owner;
+    public static final class Builder extends BuilderBase<MarkerOperator, Builder> {
 
         Builder(MarkerOperator owner) {
-            this.owner = owner;
+            super(owner);
         }
 
-        /**
-         * Adds an attribute to the building operator.
-         * When clients {@link MarkerOperator#copy() copy operators},
-         * only attributes implementing {@link OperatorAttribute}
-         * are also copied using {@link OperatorAttribute#copy()} method.
-         * @param attributeType attribute type
-         * @param attributeValue attribute value
-         * @param <T> attribute type
-         * @return this
-         */
-        public <T> Builder attribute(Class<T> attributeType, T attributeValue) {
-            Objects.requireNonNull(attributeType, "attributeType must not be null"); //$NON-NLS-1$
-            Objects.requireNonNull(attributeValue, "attributeValue must not be null"); //$NON-NLS-1$
-            owner.attributes.put(attributeType, attributeValue);
+        @Override
+        protected Builder getSelf() {
             return this;
-        }
-
-        /**
-         * Returns the built operator.
-         * @return the built operator
-         */
-        public MarkerOperator build() {
-            return owner;
         }
     }
 }

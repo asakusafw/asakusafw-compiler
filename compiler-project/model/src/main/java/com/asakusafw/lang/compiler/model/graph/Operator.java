@@ -19,7 +19,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -28,7 +31,10 @@ import com.asakusafw.lang.compiler.model.description.ValueDescription;
 
 /**
  * Represents an operator vertex.
+ * @see OperatorAttribute
  * @see Operators
+ * @since 0.1.0
+ * @version 0.3.0
  */
 public abstract class Operator {
 
@@ -39,6 +45,8 @@ public abstract class Operator {
     private long originalSerialNumber = serialNumber;
 
     final List<OperatorProperty> properties = new ArrayList<>();
+
+    final Map<Class<?>, Object> attributes = new LinkedHashMap<>();
 
     final Set<OperatorConstraint> constraints = EnumSet.noneOf(OperatorConstraint.class);
 
@@ -111,6 +119,15 @@ public abstract class Operator {
             default:
                 throw new AssertionError(property);
             }
+        }
+        for (Map.Entry<Class<?>, Object> entry : attributes.entrySet()) {
+            Class<?> key = entry.getKey();
+            Object value = entry.getValue();
+            if (value instanceof OperatorAttribute) {
+                value = ((OperatorAttribute) value).copy();
+                assert key.isInstance(value);
+            }
+            copy.attributes.put(key, value);
         }
         copy.constraints.addAll(constraints);
         return copy;
@@ -214,6 +231,29 @@ public abstract class Operator {
     }
 
     /**
+     * Returns the all attribute types which this operator has.
+     * @return the all attribute types
+     */
+    public Set<Class<?>> getAttributeTypes() {
+        return Collections.unmodifiableSet(attributes.keySet());
+    }
+
+    /**
+     * Returns an attribute.
+     * @param <T> the attribute type
+     * @param attributeType the attribute type
+     * @return the attribute value, or {@code null} if the operator has no such an attribute
+     */
+    public <T> T getAttribute(Class<T> attributeType) {
+        Object value = attributes.get(attributeType);
+        if (value == null) {
+            return null;
+        } else {
+            return attributeType.cast(value);
+        }
+    }
+
+    /**
      * Represents a kind of {@link Operator}.
      */
     public enum OperatorKind {
@@ -257,11 +297,12 @@ public abstract class Operator {
     }
 
     /**
-     * Builds an operator.
+     * The base implementation of operator builders.
      * @param <TOperator> the operator type
      * @param <TSelf> the actual builder type
+     * @since 0.3.0
      */
-    public abstract static class AbstractBuilder<TOperator extends Operator, TSelf> {
+    public abstract static class BuilderBase<TOperator extends Operator, TSelf> {
 
         private final TOperator owner;
 
@@ -269,7 +310,7 @@ public abstract class Operator {
          * Creates a new instance.
          * @param owner the target operator
          */
-        protected AbstractBuilder(TOperator owner) {
+        protected BuilderBase(TOperator owner) {
             this.owner = owner;
         }
 
@@ -296,6 +337,42 @@ public abstract class Operator {
         }
 
         /**
+         * Adds an attribute to the building operator.
+         * When clients {@link MarkerOperator#copy() copy operators},
+         * only attributes implementing {@link OperatorAttribute}
+         * are also copied using {@link OperatorAttribute#copy()} method.
+         * @param attributeType attribute type
+         * @param attributeValue attribute value
+         * @param <T> attribute type
+         * @return this
+         */
+        public <T> TSelf attribute(Class<T> attributeType, T attributeValue) {
+            Objects.requireNonNull(attributeType, "attributeType must not be null"); //$NON-NLS-1$
+            Objects.requireNonNull(attributeValue, "attributeValue must not be null"); //$NON-NLS-1$
+            owner.attributes.put(attributeType, attributeValue);
+            return getSelf();
+        }
+    }
+
+    /**
+     * An abstract implementation of operator builders.
+     * @param <TOperator> the operator type
+     * @param <TSelf> the actual builder type
+     * @since 0.1.0
+     * @version 0.3.0
+     */
+    public abstract static class AbstractBuilder<TOperator extends Operator, TSelf>
+            extends BuilderBase<TOperator, TSelf> {
+
+        /**
+         * Creates a new instance.
+         * @param owner the target operator
+         */
+        protected AbstractBuilder(TOperator owner) {
+            super(owner);
+        }
+
+        /**
          * Adds an input port to the building operator.
          * @param name the port name
          * @param dataType the data type on the port
@@ -316,6 +393,7 @@ public abstract class Operator {
          * @see Groups
          */
         public TSelf input(String name, TypeDescription dataType, Group group, OperatorOutput... upstreams) {
+            TOperator owner = getOwner();
             OperatorInput port = new OperatorInput(owner, name, dataType, group);
             owner.properties.add(port);
             for (OperatorOutput upstream : upstreams) {
@@ -358,6 +436,7 @@ public abstract class Operator {
          * @return this
          */
         public TSelf output(String name, TypeDescription dataType) {
+            TOperator owner = getOwner();
             owner.properties.add(new OperatorOutput(owner, name, dataType));
             return getSelf();
         }
@@ -369,6 +448,7 @@ public abstract class Operator {
          * @return this
          */
         public TSelf argument(String name, ValueDescription value) {
+            TOperator owner = getOwner();
             owner.properties.add(new OperatorArgument(name, value));
             return getSelf();
         }
@@ -379,6 +459,7 @@ public abstract class Operator {
          * @return this
          */
         public TSelf constraint(Collection<OperatorConstraint> constraints) {
+            TOperator owner = getOwner();
             owner.constraints.addAll(constraints);
             return getSelf();
         }
@@ -389,6 +470,7 @@ public abstract class Operator {
          * @return this
          */
         public TSelf constraint(OperatorConstraint... constraints) {
+            TOperator owner = getOwner();
             Collections.addAll(owner.constraints, constraints);
             return getSelf();
         }

@@ -59,8 +59,8 @@ import com.asakusafw.lang.compiler.core.CompilerParticipant;
 import com.asakusafw.lang.compiler.core.ProjectRepository;
 import com.asakusafw.lang.compiler.core.ToolRepository;
 import com.asakusafw.lang.compiler.core.basic.BasicBatchCompiler;
-import com.asakusafw.lang.compiler.core.basic.BasicClassAnalyzer;
 import com.asakusafw.lang.compiler.core.basic.JobflowPackager;
+import com.asakusafw.lang.compiler.core.util.CompositeClassAnalyzer;
 import com.asakusafw.lang.compiler.core.util.DiagnosticUtil;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.description.Descriptions;
@@ -143,10 +143,12 @@ import com.asakusafw.lang.compiler.packaging.ResourceUtil;
  *
  * <dt><code>--classAnalyzer &lt;class-name&gt;</code> <em>(optional)</em></dt>
  * <dd>custom class analyzer class</dd>
- * <dd>default: {@link BasicClassAnalyzer}</dd>
+ * <dd>default: {@link CompositeClassAnalyzer}</dd>
  *
  * </dl>
  * <!-- CHECKSTYLE:ON JavadocStyle -->
+ * @since 0.1.0
+ * @version 0.3.0
  */
 public final class BatchCompilerCli {
 
@@ -154,7 +156,7 @@ public final class BatchCompilerCli {
 
     static final ClassDescription DEFAULT_BATCH_COMPILER = Descriptions.classOf(BasicBatchCompiler.class);
 
-    static final ClassDescription DEFAULT_CLASS_ANALYZER = Descriptions.classOf(BasicClassAnalyzer.class);
+    static final ClassDescription DEFAULT_CLASS_ANALYZER = Descriptions.classOf(CompositeClassAnalyzer.class);
 
     /**
      * The default runtime working directory.

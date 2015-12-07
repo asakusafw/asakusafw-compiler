@@ -67,6 +67,7 @@
   <modules>
     <module>bridge-project</module>
     <module>compiler-project</module>
+    <module>iterative-project</module>
     <module>inspection-project</module>
     <module>tool-project</module>
   </modules>

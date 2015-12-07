@@ -25,6 +25,7 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import com.asakusafw.lang.compiler.analyzer.MockOperatorAttributeAnalyzer.MockAttribute;
 import com.asakusafw.lang.compiler.common.DiagnosticException;
 import com.asakusafw.lang.compiler.model.description.Descriptions;
 import com.asakusafw.lang.compiler.model.graph.CoreOperator.CoreOperatorKind;
@@ -418,7 +419,7 @@ public class FlowGraphAnalyzerTest {
      */
     @Test
     public void constraints() {
-        Map<String, Object> args = Collections.<String, Object>emptyMap();
+        Map<String, Object> args = Collections.emptyMap();
         FlowGraph g = new MockFlowGraph()
             .add("s0", new InputDescription("p", String.class))
             .operator("o0", Mock.class, "o0", args, ObservationCount.DONT_CARE)
@@ -446,6 +447,30 @@ public class FlowGraphAnalyzerTest {
         assertThat(inspector.get("o2").getConstraints(), containsInAnyOrder(OperatorConstraint.AT_MOST_ONCE));
         assertThat(inspector.get("o3").getConstraints(), containsInAnyOrder(
                 OperatorConstraint.AT_LEAST_ONCE, OperatorConstraint.AT_MOST_ONCE));
+    }
+
+    /**
+     * w/ attributes.
+     */
+    @Test
+    public void attribute() {
+        FlowGraph g = new MockFlowGraph()
+            .add("s0", new InputDescription("p", String.class))
+            .operator("o0", Mock.class, "o0")
+            .add("d0", new OutputDescription("p", String.class))
+            .connect("s0", "o0")
+            .connect("o0", "d0")
+            .toGraph();
+
+        FlowGraphAnalyzer converterWithAttr = new FlowGraphAnalyzer(
+                new MockExternalPortAnalyzer(),
+                new MockOperatorAttributeAnalyzer());
+        OperatorGraphInspector inspector = new OperatorGraphInspector(converterWithAttr.analyze(g))
+            .input("s0", "p")
+            .operator("o0", Mock.class, "o0")
+            .output("d0", "p");
+
+        assertThat(inspector.get("o0").getAttribute(MockAttribute.class), is(new MockAttribute("OK")));
     }
 
     /**

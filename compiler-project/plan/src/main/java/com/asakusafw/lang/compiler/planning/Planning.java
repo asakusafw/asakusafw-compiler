@@ -149,12 +149,13 @@ public final class Planning {
                 continue;
             }
             OperatorOutput orig = port.getOperatorPort();
-            ExternalInput enhanced = ExternalInput.builder(port.getName(), port.getInfo())
+            ExternalInput.Builder builder = ExternalInput.builder(port.getName(), port.getInfo())
                     .input(ExternalInput.PORT_NAME, port.getDataType()) // virtual
                     .output(orig.getName(), orig.getDataType())
                     .constraint(port.getConstraints())
-                    .constraint(OperatorConstraint.GENERATOR)
-                    .build();
+                    .constraint(OperatorConstraint.GENERATOR);
+            copyAttributes(port, builder);
+            ExternalInput enhanced = builder.build();
             Operators.connectAll(enhanced.getOperatorPort(), orig.getOpposites());
             graph.remove(port.disconnectAll());
             graph.add(enhanced);
@@ -164,16 +165,27 @@ public final class Planning {
                 continue;
             }
             OperatorInput orig = port.getOperatorPort();
-            ExternalOutput enhanced = ExternalOutput.builder(port.getName(), port.getInfo())
+            ExternalOutput.Builder builder = ExternalOutput.builder(port.getName(), port.getInfo())
                     .input(orig.getName(), orig.getDataType(), orig.getGroup())
                     .output(ExternalOutput.PORT_NAME, orig.getDataType()) // virtual
                     .constraint(port.getConstraints())
-                    .constraint(OperatorConstraint.AT_LEAST_ONCE)
-                    .build();
+                    .constraint(OperatorConstraint.AT_LEAST_ONCE);
+            copyAttributes(port, builder);
+            ExternalOutput enhanced = builder.build();
             Operators.connectAll(orig.getOpposites(), enhanced.getOperatorPort());
             graph.remove(port.disconnectAll());
             graph.add(enhanced);
         }
+    }
+
+    private static void copyAttributes(Operator operator, Operator.AbstractBuilder<?, ?> builder) {
+        for (Class<?> type : operator.getAttributeTypes()) {
+            putAttribtue(type, operator.getAttribute(type), builder);
+        }
+    }
+
+    private static <T> void putAttribtue(Class<T> type, Object value, Operator.AbstractBuilder<?, ?> builder) {
+        builder.attribute(type, type.cast(value));
     }
 
     private static void insertTerminatorsForPorts(OperatorGraph graph) {
