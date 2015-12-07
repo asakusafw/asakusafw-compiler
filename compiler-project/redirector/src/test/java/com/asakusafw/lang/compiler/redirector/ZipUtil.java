@@ -34,12 +34,9 @@ final class ZipUtil {
     }
 
     static byte[] consume(InputStream contents) throws IOException {
-        byte[] bytes;
-        try (ByteArrayOutputStream buf = new ByteArrayOutputStream()) {
-            Util.copy(contents, buf);
-            bytes = buf.toByteArray();
-        }
-        return bytes;
+        ByteArrayOutputStream buf = new ByteArrayOutputStream();
+        Util.copy(contents, buf);
+        return buf.toByteArray();
     }
 
     static Map<String, byte[]> dump(ZipInputStream input) throws IOException {

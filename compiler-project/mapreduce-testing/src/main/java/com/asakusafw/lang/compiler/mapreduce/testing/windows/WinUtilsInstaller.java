@@ -171,17 +171,14 @@ public final class WinUtilsInstaller {
         if (installer != null) {
             return installer;
         }
-        InputStream input = WinUtilsInstaller.class.getResourceAsStream(SOURCE);
-        if (input == null) {
-            throw new IllegalStateException(MessageFormat.format(
-                    "missing {0} in the classpath", //$NON-NLS-1$
-                    SOURCE));
-        }
-        try {
+        try (InputStream input = WinUtilsInstaller.class.getResourceAsStream(SOURCE)) {
+            if (input == null) {
+                throw new IllegalStateException(MessageFormat.format(
+                        "missing {0} in the classpath", //$NON-NLS-1$
+                        SOURCE));
+            }
             installer = TemporaryFileInstaller.newInstance(input, true);
             CACHE.compareAndSet(null, installer);
-        } finally {
-            input.close();
         }
         return CACHE.get();
     }

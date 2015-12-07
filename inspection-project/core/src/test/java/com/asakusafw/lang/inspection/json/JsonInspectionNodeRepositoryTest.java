@@ -183,15 +183,11 @@ public class JsonInspectionNodeRepositoryTest {
     }
 
     private InspectionNode restore(InspectionNode node) {
-        InspectionNodeRepository repo = new JsonInspectionNodeRepository();
-        byte[] bytes;
-        try (ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+        try {
+            InspectionNodeRepository repo = new JsonInspectionNodeRepository();
+            ByteArrayOutputStream output = new ByteArrayOutputStream();
             repo.store(output, node);
-            bytes = output.toByteArray();
-        } catch (IOException e) {
-            throw new AssertionError(e);
-        }
-        try (ByteArrayInputStream input = new ByteArrayInputStream(bytes)) {
+            ByteArrayInputStream input = new ByteArrayInputStream(output.toByteArray());
             return repo.load(input);
         } catch (IOException e) {
             throw new AssertionError(e);

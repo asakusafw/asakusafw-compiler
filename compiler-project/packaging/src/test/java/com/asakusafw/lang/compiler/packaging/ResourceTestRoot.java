@@ -129,17 +129,15 @@ public abstract class ResourceTestRoot {
     }
 
     private static byte[] dump(InputStream input) throws IOException {
-        try (ByteArrayOutputStream output = new ByteArrayOutputStream()) {
-            ResourceUtil.copy(input, output);
-            return output.toByteArray();
-        }
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        ResourceUtil.copy(input, output);
+        return output.toByteArray();
     }
 
     static byte[] dump(ContentProvider provider) throws IOException {
-        try (ByteArrayOutputStream output = new ByteArrayOutputStream()) {
-            provider.writeTo(output);
-            return output.toByteArray();
-        }
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        provider.writeTo(output);
+        return output.toByteArray();
     }
 
     /**

@@ -57,10 +57,9 @@ public final class ResourceUtil {
      * @throws IOException if failed to load resource contents from the input stream
      */
     public static ByteArrayItem toItem(Location location, InputStream contents) throws IOException {
-        try (ByteArrayOutputStream output = new ByteArrayOutputStream()) {
-            ResourceUtil.copy(contents, output);
-            return new ByteArrayItem(location, output.toByteArray());
-        }
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        ResourceUtil.copy(contents, output);
+        return new ByteArrayItem(location, output.toByteArray());
     }
 
     /**
@@ -70,7 +69,8 @@ public final class ResourceUtil {
      * @return the created item
      */
     public static ByteArrayItem toItem(Location location, Properties properties) {
-        try (ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        try {
             properties.store(output, null);
             return new ByteArrayItem(location, output.toByteArray());
         } catch (IOException e) {

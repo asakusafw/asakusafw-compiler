@@ -52,20 +52,15 @@ public final class TemporaryFileInstaller {
      */
     public static TemporaryFileInstaller newInstance(InputStream contents, boolean executable) throws IOException {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
-        try {
-            byte[] buf = new byte[256];
-            while (true) {
-                int read = contents.read(buf);
-                if (read < 0) {
-                    break;
-                }
-                output.write(buf, 0, read);
+        byte[] buf = new byte[256];
+        while (true) {
+            int read = contents.read(buf);
+            if (read < 0) {
+                break;
             }
-        } finally {
-            output.close();
+            output.write(buf, 0, read);
         }
-        byte[] bytes = output.toByteArray();
-        return new TemporaryFileInstaller(bytes, executable);
+        return new TemporaryFileInstaller(output.toByteArray(), executable);
     }
 
     /**
@@ -83,22 +78,15 @@ public final class TemporaryFileInstaller {
                     "failed to create a file: {0}",
                     target));
         }
-        RandomAccessFile file = new RandomAccessFile(target, "rw"); //$NON-NLS-1$
-        try {
-            FileLock lock = file.getChannel().lock(0, 0, false);
-            try {
-                if (reuse && isReusable(target, file)) {
-                    LOG.debug("we reuse a temporary file: {}", target); //$NON-NLS-1$
-                    return false;
-                }
-                LOG.debug("creating a temporary file: {}", target); //$NON-NLS-1$
-                doInstall(target, file);
-                return true;
-            } finally {
-                lock.release();
+        try (RandomAccessFile file = new RandomAccessFile(target, "rw"); //$NON-NLS-1$
+                FileLock lock = file.getChannel().lock(0, 0, false)) {
+            if (reuse && isReusable(target, file)) {
+                LOG.debug("we reuse a temporary file: {}", target); //$NON-NLS-1$
+                return false;
             }
-        } finally {
-            file.close();
+            LOG.debug("creating a temporary file: {}", target); //$NON-NLS-1$
+            doInstall(target, file);
+            return true;
         }
     }
 

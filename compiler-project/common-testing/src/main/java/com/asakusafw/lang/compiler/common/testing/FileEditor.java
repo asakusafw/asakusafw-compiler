@@ -274,14 +274,13 @@ public final class FileEditor {
      * @return the contents in bytes
      */
     public static byte[] dump(File source) {
-        try (ByteArrayOutputStream output = new ByteArrayOutputStream()) {
-            try (InputStream in = open(source)) {
-                copyStream(in, output);
-            }
-            return output.toByteArray();
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        try (InputStream in = open(source)) {
+            copyStream(in, output);
         } catch (IOException e) {
             throw new IOError(e);
         }
+        return output.toByteArray();
     }
 
     /**
@@ -290,12 +289,13 @@ public final class FileEditor {
      * @return the contents in bytes
      */
     public static byte[] dump(InputStream source) {
-        try (ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        try {
             copyStream(source, output);
-            return output.toByteArray();
         } catch (IOException e) {
             throw new IOError(e);
         }
+        return output.toByteArray();
     }
 
     /**

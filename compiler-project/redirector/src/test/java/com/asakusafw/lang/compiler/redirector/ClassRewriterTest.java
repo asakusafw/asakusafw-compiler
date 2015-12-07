@@ -76,15 +76,11 @@ public class ClassRewriterTest {
         ClassRewriter rewriter = new ClassRewriter(rule);
 
         byte[] contents = VolatileClassLoader.dump(MockCaller.class);
-        byte[] results;
-        try (ByteArrayInputStream input = new ByteArrayInputStream(contents);
-                ByteArrayOutputStream output = new ByteArrayOutputStream()) {
-            rewriter.rewrite(input, output);
-            results = output.toByteArray();
-        }
-
+        ByteArrayInputStream input = new ByteArrayInputStream(contents);
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        rewriter.rewrite(input, output);
         VolatileClassLoader loader = new VolatileClassLoader(getClass().getClassLoader());
-        Class<?> aClass = loader.forceLoad(results);
+        Class<?> aClass = loader.forceLoad(output.toByteArray());
         try {
             return aClass.newInstance().toString();
         } catch (ReflectiveOperationException e) {

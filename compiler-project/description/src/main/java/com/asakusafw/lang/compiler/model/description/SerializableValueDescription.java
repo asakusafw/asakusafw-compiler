@@ -56,18 +56,15 @@ public class SerializableValueDescription implements ValueDescription {
      */
     public static SerializableValueDescription of(Object value) {
         Class<?> type = value.getClass();
-        byte[] bytes;
-        try (ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-                ObjectOutputStream output = new ObjectOutputStream(buffer)) {
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        try (ObjectOutputStream output = new ObjectOutputStream(buffer)) {
             output.writeObject(value);
-            output.close();
-            bytes = buffer.toByteArray();
         } catch (IOException e) {
             throw new IllegalArgumentException(MessageFormat.format(
                     "failed to serialize a value: {0}", //$NON-NLS-1$
                     value));
         }
-        return new SerializableValueDescription(ReifiableTypeDescription.of(type), bytes, false);
+        return new SerializableValueDescription(ReifiableTypeDescription.of(type), buffer.toByteArray(), false);
     }
 
     @Override
