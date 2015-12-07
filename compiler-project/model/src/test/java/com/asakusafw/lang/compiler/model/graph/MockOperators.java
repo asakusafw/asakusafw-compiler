@@ -135,7 +135,7 @@ public final class MockOperators {
      * @since 0.3.0
      */
     public MockOperators input(String id, Object... attributes) {
-        return bless(id, ExternalInput.builder(id).output(ExternalInput.PORT_NAME, commonDataType), attributes);
+        return bless(id, ExternalInput.newWithAttributes(id, commonDataType), attributes);
     }
 
     /**
@@ -152,8 +152,7 @@ public final class MockOperators {
                     id,
                     (ClassDescription) commonDataType,
                     dataSize);
-        return bless(id, ExternalInput.builder(id, info)
-                .output(ExternalInput.PORT_NAME, info.getDataModelClass()), attributes);
+        return bless(id, ExternalInput.newWithAttributes(id, info), attributes);
     }
 
     /**
@@ -162,7 +161,7 @@ public final class MockOperators {
      * @return this
      */
     public MockOperators output(String id) {
-        return bless(id, ExternalOutput.builder(id).input(ExternalOutput.PORT_NAME, commonDataType));
+        return bless(id, ExternalOutput.newWithAttributes(id, commonDataType));
     }
 
     /**
@@ -173,7 +172,7 @@ public final class MockOperators {
      * @since 0.3.0
      */
     public MockOperators output(String id, Object... attributes) {
-        return bless(id, ExternalOutput.builder(id).input(ExternalOutput.PORT_NAME, commonDataType), attributes);
+        return bless(id, ExternalOutput.newWithAttributes(id, commonDataType), attributes);
     }
 
     /**
