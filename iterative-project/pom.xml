@@ -16,5 +16,8 @@
     <module>vocabulary</module>
     <module>model</module>
     <module>analyzer</module>
+    <module>common</module>
+    <module>launch</module>
+    <module>yaess</module>
   </modules>
 </project>
