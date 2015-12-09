@@ -57,10 +57,9 @@ public class ResourceItemSink implements ResourceSink {
 
     @Override
     public void add(Location location, ContentProvider provider) throws IOException {
-        try (ByteArrayOutputStream output = new ByteArrayOutputStream()) {
-            provider.writeTo(output);
-            items.put(location, new ByteArrayItem(location, output.toByteArray()));
-        }
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        provider.writeTo(output);
+        items.put(location, new ByteArrayItem(location, output.toByteArray()));
     }
 
     @Override

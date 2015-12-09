@@ -69,15 +69,16 @@ public class ListProcessorTest {
 
     private Set<String> process(InspectionNode node) {
         ListProcessor proc = new ListProcessor();
-        byte[] bytes;
-        try (ByteArrayOutputStream buf = new ByteArrayOutputStream()) {
+        ByteArrayOutputStream buf = new ByteArrayOutputStream();
+        try {
             proc.process(new Context(), node, buf);
-            bytes = buf.toByteArray();
         } catch (IOException e) {
             throw new AssertionError();
         }
         Set<String> elements = new HashSet<>();
-        try (Scanner scanner = new Scanner(new ByteArrayInputStream(bytes), ListProcessor.ENCODING.name())) {
+        try (Scanner scanner = new Scanner(
+                new ByteArrayInputStream(buf.toByteArray()),
+                ListProcessor.ENCODING.name())) {
             while (scanner.hasNextLine()) {
                 String s = scanner.nextLine();
                 if (s.isEmpty() == false) {
