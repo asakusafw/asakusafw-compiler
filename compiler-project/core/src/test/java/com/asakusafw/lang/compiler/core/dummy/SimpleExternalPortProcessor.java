@@ -141,6 +141,7 @@ public class SimpleExternalPortProcessor implements ExternalPortProcessor {
                 "testing",
                 Location.of("simple.sh"),
                 Collections.<CommandToken>emptyList(),
+                Collections.<String>emptySet(),
                 Collections.<TaskReference>emptyList()));
     }
 

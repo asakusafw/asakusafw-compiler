@@ -266,6 +266,7 @@ public class YaessBatchProcessorTest {
                             CommandToken.EXECUTION_ID,
                             CommandToken.BATCH_ARGUMENTS,
                     }),
+                    Arrays.asList("e1", "e2"),
                     Collections.<TaskReference>emptyList()));
         BatchReference batch = batch("B", jobflow("F", tasks));
 
@@ -282,6 +283,7 @@ public class YaessBatchProcessorTest {
                 "F", // flow ID,
                 ExecutionScript.PLACEHOLDER_EXECUTION_ID,
                 ExecutionScript.PLACEHOLDER_ARGUMENTS));
+        assertThat(cmd.getSupportedExtensions(), containsInAnyOrder("e1", "e2"));
         assertThat(cmd.getEnvironmentVariables().keySet(), is(empty()));
     }
 
@@ -293,6 +295,7 @@ public class YaessBatchProcessorTest {
         MockTaskReferenceMap tasks = new MockTaskReferenceMap()
             .add(Phase.MAIN, new HadoopTaskReference(
                     new ClassDescription("HADOOP"),
+                    Arrays.asList("e1", "e2"),
                     Collections.<TaskReference>emptyList()));
         BatchReference batch = batch("B", jobflow("F", tasks));
 
@@ -302,6 +305,7 @@ public class YaessBatchProcessorTest {
 
         ExecutionScript s0 = flatten(f.getScripts()).get(0);
         assertThat(s0.getKind(), is(ExecutionScript.Kind.HADOOP));
+        assertThat(s0.getSupportedExtensions(), containsInAnyOrder("e1", "e2"));
 
         HadoopScript h0 = (HadoopScript) s0;
         assertThat(h0.getClassName(), is("HADOOP"));
@@ -377,6 +381,7 @@ public class YaessBatchProcessorTest {
                 "dummy",
                 Location.of("dummy/command.sh"),
                 args,
+                Collections.<String>emptySet(),
                 Arrays.asList(blockers));
     }
 }

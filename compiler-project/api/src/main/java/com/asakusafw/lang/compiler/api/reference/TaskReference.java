@@ -20,9 +20,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Represents a task in runtime.
+ * @since 0.3.0
  */
 public interface TaskReference extends BlockingReference<TaskReference> {
 
@@ -32,6 +34,13 @@ public interface TaskReference extends BlockingReference<TaskReference> {
      * @return the module name
      */
     String getModuleName();
+
+    /**
+     * Returns the acceptable extension names for this task.
+     * @return the acceptable extension names
+     * @since 0.3.0
+     */
+    Set<String> getExtensions();
 
     /**
      * Returns tasks which must be executed before this task.

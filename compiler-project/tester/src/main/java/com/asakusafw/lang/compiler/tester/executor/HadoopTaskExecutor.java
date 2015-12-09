@@ -71,6 +71,7 @@ public class HadoopTaskExecutor implements TaskExecutor {
                 hadoop.getModuleName(),
                 PATH_YAESS_HADOOP,
                 arguments,
+                task.getExtensions(),
                 Collections.<TaskReference>emptyList());
         delegate.execute(context, commandTask);
     }

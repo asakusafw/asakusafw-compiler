@@ -238,6 +238,7 @@ public class JobflowExecutorTest {
                 "testing",
                 Location.of(id),
                 Collections.<CommandToken>emptyList(),
+                Collections.<String>emptySet(),
                 Arrays.asList(blockers));
     }
 

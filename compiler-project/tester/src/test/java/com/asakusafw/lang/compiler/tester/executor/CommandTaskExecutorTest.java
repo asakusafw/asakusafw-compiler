@@ -204,6 +204,7 @@ public class CommandTaskExecutorTest {
                 "testing",
                 Location.of(path),
                 Arrays.asList(args),
+                Collections.<String>emptySet(),
                 Collections.<TaskReference>emptyList());
     }
 

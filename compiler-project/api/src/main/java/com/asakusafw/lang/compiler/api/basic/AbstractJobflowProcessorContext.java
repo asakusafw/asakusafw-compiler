@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import com.asakusafw.lang.compiler.api.JobflowProcessor;
@@ -113,7 +114,7 @@ public abstract class AbstractJobflowProcessorContext extends BasicExtensionCont
             Location command,
             List<? extends CommandToken> arguments,
             TaskReference... blockers) {
-        return addTask(tasks.getMainTaskContainer(), moduleName, profileName, command, arguments, blockers);
+        return addTask(moduleName, profileName, command, arguments, Collections.<String>emptySet(), blockers);
     }
 
     @Override
@@ -123,7 +124,29 @@ public abstract class AbstractJobflowProcessorContext extends BasicExtensionCont
             Location command,
             List<? extends CommandToken> arguments,
             TaskReference... blockers) {
-        return addTask(tasks.getFinalizeTaskContainer(), moduleName, profileName, command, arguments, blockers);
+        return addFinalizer(moduleName, profileName, command, arguments, Collections.<String>emptySet(), blockers);
+    }
+
+    @Override
+    public TaskReference addTask(
+            String moduleName, String profileName,
+            Location command, List<? extends CommandToken> arguments, Collection<String> extensions,
+            TaskReference... blockers) {
+        return addTask(tasks.getMainTaskContainer(),
+                moduleName, profileName,
+                command, arguments, extensions,
+                blockers);
+    }
+
+    @Override
+    public TaskReference addFinalizer(
+            String moduleName, String profileName,
+            Location command, List<? extends CommandToken> arguments, Collection<String> extensions,
+            TaskReference... blockers) {
+        return addTask(tasks.getFinalizeTaskContainer(),
+                moduleName, profileName,
+                command, arguments, extensions,
+                blockers);
     }
 
     private TaskReference addTask(
@@ -132,10 +155,11 @@ public abstract class AbstractJobflowProcessorContext extends BasicExtensionCont
             String profileName,
             Location command,
             List<? extends CommandToken> arguments,
+            Collection<String> extensions,
             TaskReference... blockers) {
         CommandTaskReference task = new CommandTaskReference(
                 moduleName, profileName,
-                command, arguments,
+                command, arguments, extensions,
                 Arrays.asList(blockers));
         container.add(task);
         return task;

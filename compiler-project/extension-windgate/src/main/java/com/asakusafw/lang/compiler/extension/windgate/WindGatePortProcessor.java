@@ -178,6 +178,7 @@ public class WindGatePortProcessor
                             CommandToken.EXECUTION_ID,
                             CommandToken.BATCH_ARGUMENTS,
                     }),
+                    Collections.<String>emptySet(),
                     Collections.<TaskReference>emptyList()));
         }
         if (doExport) {
@@ -195,6 +196,7 @@ public class WindGatePortProcessor
                             CommandToken.EXECUTION_ID,
                             CommandToken.BATCH_ARGUMENTS,
                     }),
+                    Collections.<String>emptySet(),
                     Collections.<TaskReference>emptyList()));
         }
         LOG.debug("registering WindGate finalize: {}", profileName); //$NON-NLS-1$
@@ -208,6 +210,7 @@ public class WindGatePortProcessor
                         CommandToken.FLOW_ID,
                         CommandToken.EXECUTION_ID,
                 }),
+                Collections.<String>emptySet(),
                 Collections.<TaskReference>emptyList()));
     }
 
