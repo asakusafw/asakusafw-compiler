@@ -48,6 +48,8 @@ public interface JobflowProcessor {
 
     /**
      * Represents a context object for {@link JobflowProcessor}.
+     * @since 0.1.0
+     * @version 0.3.0
      */
     public interface Context extends ExtensionContainer {
 
@@ -153,6 +155,26 @@ public interface JobflowProcessor {
                 TaskReference... blockers);
 
         /**
+         * Adds a sub-application to execute in this application.
+         * @param moduleName the target module name only consists of lower-letters and digits
+         *    (like as {@code "windgate"}, {@code "spark"}, etc.)
+         * @param profileName the profile name where the command is running on
+         * @param command command path (relative from {@code ASAKUSA_HOME})
+         * @param arguments command arguments
+         * @param extensions the acceptable extension names
+         * @param blockers the blocker sub-applications
+         * @return a symbol that represents the added sub-application
+         * @since 0.3.0
+         */
+        TaskReference addTask(
+                String moduleName,
+                String profileName,
+                Location command,
+                List<? extends CommandToken> arguments,
+                Collection<String> extensions,
+                TaskReference... blockers);
+
+        /**
          * Adds a sub-application to execute in finalize phase.
          * @param moduleName the target module name only consists of lower-letters and digits
          *    (like as {@code "windgate"}, {@code "spark"}, etc.)
@@ -167,6 +189,26 @@ public interface JobflowProcessor {
                 String profileName,
                 Location command,
                 List<? extends CommandToken> arguments,
+                TaskReference... blockers);
+
+        /**
+         * Adds a sub-application to execute in finalize phase.
+         * @param moduleName the target module name only consists of lower-letters and digits
+         *    (like as {@code "windgate"}, {@code "spark"}, etc.)
+         * @param profileName the profile name where the command is running on
+         * @param command command path (relative from {@code ASAKUSA_HOME})
+         * @param arguments command arguments
+         * @param extensions the acceptable extension names
+         * @param blockers the blocker sub-applications
+         * @return a symbol that represents the added sub-application
+         * @since 0.3.0
+         */
+        TaskReference addFinalizer(
+                String moduleName,
+                String profileName,
+                Location command,
+                List<? extends CommandToken> arguments,
+                Collection<String> extensions,
                 TaskReference... blockers);
     }
 }

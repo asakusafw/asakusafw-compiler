@@ -71,6 +71,7 @@ public class TaskDriverTest {
                 "local",
                 Location.of("hello/world"),
                 Arrays.asList(CommandToken.of("a"), CommandToken.EXECUTION_ID),
+                Collections.<String>emptySet(),
                 Collections.<TaskReference>emptyList());
 
         InspectionNode node = driver.inspect("t", ref);
@@ -364,6 +365,7 @@ public class TaskDriverTest {
                 "local",
                 Location.of("sh"),
                 Collections.<CommandToken>emptyList(),
+                Collections.<String>emptySet(),
                 Arrays.asList(blockers));
         ref.putAttribute(Bless.class, new Bless());
         return ref;
@@ -418,6 +420,11 @@ public class TaskDriverTest {
         @Override
         public String getModuleName() {
             return "mock";
+        }
+
+        @Override
+        public Set<String> getExtensions() {
+            return Collections.emptySet();
         }
 
         @Override

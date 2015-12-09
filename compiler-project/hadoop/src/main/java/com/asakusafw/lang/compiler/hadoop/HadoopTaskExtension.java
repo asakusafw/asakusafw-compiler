@@ -15,11 +15,15 @@
  */
 package com.asakusafw.lang.compiler.hadoop;
 
+import java.util.Collection;
+
 import com.asakusafw.lang.compiler.api.reference.TaskReference;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 
 /**
  * An extension for using Hadoop tasks.
+ * @since 0.1.0
+ * @version 0.3.0
  */
 public interface HadoopTaskExtension {
 
@@ -31,4 +35,19 @@ public interface HadoopTaskExtension {
      * @return a symbol that represents the added sub-application
      */
     TaskReference addTask(TaskReference.Phase phase, ClassDescription mainClass, TaskReference... blockers);
+
+    /**
+     * Adds a Hadoop sub-application to execute in this application.
+     * @param phase the execution phase
+     * @param mainClass the main class
+     * @param extensions the acceptable extension names
+     * @param blockers the blocker sub-applications
+     * @return a symbol that represents the added sub-application
+     * @since 0.3.0
+     */
+    TaskReference addTask(
+            TaskReference.Phase phase,
+            ClassDescription mainClass,
+            Collection<String> extensions,
+            TaskReference... blockers);
 }

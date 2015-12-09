@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import com.asakusafw.lang.compiler.api.CompilerOptions;
@@ -137,8 +138,7 @@ public class JobflowProcessorAdapter implements JobflowProcessor.Context {
             Location command,
             List<? extends CommandToken> arguments,
             TaskReference... blockers) {
-        TaskContainer container = delegate.getTaskContainerMap().getMainTaskContainer();
-        return addTask(container, moduleName, profileName, command, arguments, blockers);
+        return addTask(moduleName, profileName, command, arguments, Collections.<String>emptySet(), blockers);
     }
 
     @Override
@@ -148,8 +148,31 @@ public class JobflowProcessorAdapter implements JobflowProcessor.Context {
             Location command,
             List<? extends CommandToken> arguments,
             TaskReference... blockers) {
+        return addFinalizer(moduleName, profileName, command, arguments, Collections.<String>emptySet(), blockers);
+    }
+
+    @Override
+    public TaskReference addTask(
+            String moduleName,
+            String profileName,
+            Location command,
+            List<? extends CommandToken> arguments,
+            Collection<String> extensions,
+            TaskReference... blockers) {
+        TaskContainer container = delegate.getTaskContainerMap().getMainTaskContainer();
+        return addTask(container, moduleName, profileName, command, arguments, extensions, blockers);
+    }
+
+    @Override
+    public TaskReference addFinalizer(
+            String moduleName,
+            String profileName,
+            Location command,
+            List<? extends CommandToken> arguments,
+            Collection<String> extensions,
+            TaskReference... blockers) {
         TaskContainer container = delegate.getTaskContainerMap().getFinalizeTaskContainer();
-        return addTask(container, moduleName, profileName, command, arguments, blockers);
+        return addTask(container, moduleName, profileName, command, arguments, extensions, blockers);
     }
 
     private TaskReference addTask(
@@ -158,9 +181,12 @@ public class JobflowProcessorAdapter implements JobflowProcessor.Context {
             String profileName,
             Location command,
             List<? extends CommandToken> arguments,
+            Collection<String> extensions,
             TaskReference... blockers) {
-        CommandTaskReference reference =
-                new CommandTaskReference(moduleName, profileName, command, arguments, Arrays.asList(blockers));
+        CommandTaskReference reference = new CommandTaskReference(
+                moduleName, profileName,
+                command, arguments, extensions,
+                Arrays.asList(blockers));
         container.add(reference);
         return reference;
     }

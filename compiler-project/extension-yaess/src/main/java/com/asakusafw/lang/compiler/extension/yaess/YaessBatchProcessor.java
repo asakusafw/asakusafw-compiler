@@ -176,7 +176,11 @@ public class YaessBatchProcessor implements BatchProcessor {
         Set<String> blockerIds = toStageIds(task.getBlockers(), idMap);
         List<String> command = resolveCommandLine(batch, jobflow, phase, task);
         Map<String, String> envs = Collections.<String, String>emptyMap();
-        return new CommandScript(stageId, blockerIds, task.getProfileName(), task.getModuleName(), command, envs);
+        Set<String> extensions = task.getExtensions();
+        return new CommandScript(
+                stageId, blockerIds,
+                task.getProfileName(), task.getModuleName(),
+                command, envs, extensions);
     }
 
     private List<String> resolveCommandLine(
@@ -220,7 +224,8 @@ public class YaessBatchProcessor implements BatchProcessor {
         String className = task.getMainClass().getBinaryName();
         Map<String, String> props = Collections.emptyMap();
         Map<String, String> envs = Collections.emptyMap();
-        return new HadoopScript(stageId, blockerIds, className, props, envs);
+        Set<String> extensions = task.getExtensions();
+        return new HadoopScript(stageId, blockerIds, className, props, envs, extensions);
     }
 
     private Set<String> toStageIds(Collection<? extends TaskReference> tasks, Map<TaskReference, String> idMap) {

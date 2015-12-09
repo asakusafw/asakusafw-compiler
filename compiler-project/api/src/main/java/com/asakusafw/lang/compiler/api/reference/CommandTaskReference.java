@@ -17,8 +17,11 @@ package com.asakusafw.lang.compiler.api.reference;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import com.asakusafw.lang.compiler.common.BasicAttributeContainer;
@@ -26,6 +29,8 @@ import com.asakusafw.lang.compiler.common.Location;
 
 /**
  * A symbol of task with any command.
+ * @since 0.1.0
+ * @version 0.3.0
  */
 public class CommandTaskReference extends BasicAttributeContainer implements TaskReference {
 
@@ -38,6 +43,8 @@ public class CommandTaskReference extends BasicAttributeContainer implements Tas
     private final Location command;
 
     private final List<CommandToken> arguments;
+
+    private final Set<String> extensions;
 
     private final List<TaskReference> blockerTasks;
 
@@ -55,6 +62,26 @@ public class CommandTaskReference extends BasicAttributeContainer implements Tas
             Location command,
             List<? extends CommandToken> arguments,
             List<? extends TaskReference> blockerTasks) {
+        this(moduleName, profileName, command, arguments, Collections.<String>emptySet(), blockerTasks);
+    }
+
+    /**
+     * Creates a new instance.
+     * @param moduleName the target module name only consists of lower-letters and digits
+     * @param profileName the profile name where the command is running
+     * @param command the command path (relative from {@code ASAKUSA_HOME})
+     * @param arguments the command arguments
+     * @param extensions the acceptable extension names
+     * @param blockerTasks the blocker tasks
+     * @since 0.3.0
+     */
+    public CommandTaskReference(
+            String moduleName,
+            String profileName,
+            Location command,
+            List<? extends CommandToken> arguments,
+            Collection<String> extensions,
+            List<? extends TaskReference> blockerTasks) {
         if (PATTERN_MODULE_NAME.matcher(moduleName).matches() == false) {
             throw new IllegalArgumentException(MessageFormat.format(
                     "module name must consist of lower-case alphabets and digits: \"{0}\"", //$NON-NLS-1$
@@ -64,12 +91,18 @@ public class CommandTaskReference extends BasicAttributeContainer implements Tas
         this.profileName = profileName;
         this.command = command;
         this.arguments = Collections.unmodifiableList(new ArrayList<>(arguments));
+        this.extensions = Collections.unmodifiableSet(new LinkedHashSet<>(extensions));
         this.blockerTasks = Collections.unmodifiableList(new ArrayList<>(blockerTasks));
     }
 
     @Override
     public String getModuleName() {
         return moduleName;
+    }
+
+    @Override
+    public Set<String> getExtensions() {
+        return extensions;
     }
 
     @Override

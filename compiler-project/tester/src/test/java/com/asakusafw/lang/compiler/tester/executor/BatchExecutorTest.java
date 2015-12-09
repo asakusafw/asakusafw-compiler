@@ -179,6 +179,7 @@ public class BatchExecutorTest {
                 "testing",
                 Location.of(id),
                 Collections.<CommandToken>emptyList(),
+                Collections.<String>emptySet(),
                 Collections.<TaskReference>emptyList());
     }
 
