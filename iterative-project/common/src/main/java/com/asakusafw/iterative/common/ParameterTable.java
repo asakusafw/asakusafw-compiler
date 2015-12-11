@@ -103,7 +103,7 @@ public interface ParameterTable extends Iterable<ParameterSet> {
         Builder next();
 
         /**
-         * Adds a parameter name and its value into the current row
+         * Adds a parameter name and its value into the current row.
          * @param name the parameter name
          * @param value the parameter value
          * @return this
@@ -113,7 +113,7 @@ public interface ParameterTable extends Iterable<ParameterSet> {
         Builder put(String name, String value);
 
         /**
-         * Adds a parameter map into the current row
+         * Adds a parameter map into the current row.
          * @param parameters the parameter map
          * @return this
          * @throws IllegalStateException if building the row is not started
