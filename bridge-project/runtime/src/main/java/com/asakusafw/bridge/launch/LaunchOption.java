@@ -39,7 +39,7 @@ public interface LaunchOption<V> {
 
     /**
      * Returns the option value.
-     * @return the option value, or {@code null} if it is not set
+     * @return the option value, or {@code null} if it is not set and this option is not mandatory
      * @throws LaunchConfigurationException if this option is incomplete
      */
     V resolve() throws LaunchConfigurationException;
