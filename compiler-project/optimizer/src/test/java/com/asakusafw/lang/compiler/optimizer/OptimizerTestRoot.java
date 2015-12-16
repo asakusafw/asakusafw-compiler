@@ -41,6 +41,7 @@ import com.asakusafw.lang.compiler.model.info.ExternalInputInfo;
 import com.asakusafw.lang.compiler.model.info.ExternalInputInfo.DataSize;
 import com.asakusafw.lang.compiler.model.info.ExternalOutputInfo;
 import com.asakusafw.lang.compiler.optimizer.adapter.OperatorEstimatorAdapter;
+import com.asakusafw.lang.compiler.optimizer.testing.MockCustomOperator;
 import com.asakusafw.lang.compiler.optimizer.testing.MockOptimizerContext;
 
 /**
@@ -115,6 +116,18 @@ public abstract class OptimizerTestRoot {
         AnnotationDescription annotation = new AnnotationDescription(annotationType);
         MethodDescription method = new MethodDescription(annotationType, "testing");
         return UserOperator.builder(annotation, method, annotationType)
+                .input("p", typeOf(String.class))
+                .output("p", typeOf(String.class))
+                .build();
+    }
+
+    /**
+     * Creates a custom operator.
+     * @param category the category tag
+     * @return the operator
+     */
+    public static Operator custom(String category) {
+        return MockCustomOperator.builder(category)
                 .input("p", typeOf(String.class))
                 .output("p", typeOf(String.class))
                 .build();

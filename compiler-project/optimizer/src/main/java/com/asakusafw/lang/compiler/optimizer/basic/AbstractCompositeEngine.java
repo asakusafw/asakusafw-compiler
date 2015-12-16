@@ -22,6 +22,7 @@ import java.util.Map;
 
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.graph.CoreOperator;
+import com.asakusafw.lang.compiler.model.graph.CustomOperator;
 import com.asakusafw.lang.compiler.model.graph.CoreOperator.CoreOperatorKind;
 import com.asakusafw.lang.compiler.model.graph.ExternalInput;
 import com.asakusafw.lang.compiler.model.graph.ExternalOutput;
@@ -35,6 +36,8 @@ import com.asakusafw.lang.compiler.optimizer.EngineBinding;
 /**
  * Composition of engines.
  * @param <T> the engine type
+ * @since 0.1.0
+ * @version 0.3.0
  */
 public abstract class AbstractCompositeEngine<T> {
 
@@ -50,19 +53,23 @@ public abstract class AbstractCompositeEngine<T> {
 
     private final Map<ClassDescription, ? extends T> users;
 
+    private final Map<String, ? extends T> customs;
+
     AbstractCompositeEngine(
             T defaultElement,
             Map<OperatorKind, ? extends T> kinds,
             Map<String, ? extends T> inputs,
             Map<String, ? extends T> outputs,
             Map<CoreOperatorKind, ? extends T> cores,
-            Map<ClassDescription, ? extends T> users) {
+            Map<ClassDescription, ? extends T> users,
+            Map<String, ? extends T> customs) {
         this.defaultElement = defaultElement;
         this.kinds = kinds;
         this.inputs = inputs;
         this.outputs = outputs;
         this.cores = cores;
         this.users = users;
+        this.customs = customs;
     }
 
     /**
@@ -76,6 +83,8 @@ public abstract class AbstractCompositeEngine<T> {
             return findFromCores((CoreOperator) operator);
         case USER:
             return findFromUsers((UserOperator) operator);
+        case CUSTOM:
+            return findFromCustoms((CustomOperator) operator);
         case INPUT:
             return findFromInputs((ExternalInput) operator);
         case OUTPUT:
@@ -95,6 +104,14 @@ public abstract class AbstractCompositeEngine<T> {
 
     private T findFromUsers(UserOperator operator) {
         T found = users.get(operator.getAnnotation().getDeclaringClass());
+        if (found != null) {
+            return found;
+        }
+        return findFromDefaults(operator);
+    }
+
+    private T findFromCustoms(CustomOperator operator) {
+        T found = customs.get(operator.getCategory());
         if (found != null) {
             return found;
         }
@@ -157,6 +174,8 @@ public abstract class AbstractCompositeEngine<T> {
 
         private final Map<ClassDescription, TElement> users = new HashMap<>();
 
+        private final Map<String, TElement> customs = new HashMap<>();
+
         /**
          * Returns the implementation type.
          * @return this
@@ -174,6 +193,7 @@ public abstract class AbstractCompositeEngine<T> {
          * @param outputElements elements for output operators
          * @param coreElements elements for core operators
          * @param userElements elements for user operators
+         * @param customElements elements for custom operators
          * @return the built instance
          */
         protected abstract TElement doBuild(
@@ -182,7 +202,8 @@ public abstract class AbstractCompositeEngine<T> {
                 Map<String, TElement> inputElements,
                 Map<String, TElement> outputElements,
                 Map<CoreOperatorKind, TElement> coreElements,
-                Map<ClassDescription, TElement> userElements);
+                Map<ClassDescription, TElement> userElements,
+                Map<String, TElement> customElements);
 
         /**
          * Sets elements from via SPI.
@@ -207,6 +228,9 @@ public abstract class AbstractCompositeEngine<T> {
             assert element != null;
             for (ClassDescription type : binding.getTargetOperators()) {
                 withUser(type, element);
+            }
+            for (String category : binding.getTargetCategories()) {
+                withCustom(category, element);
             }
             for (String name : binding.getTargetInputs()) {
                 withInput(name, element);
@@ -337,6 +361,19 @@ public abstract class AbstractCompositeEngine<T> {
         }
 
         /**
+         * Sets the operator element for the target custom operator.
+         * @param category the custom category tag
+         * @param element the element
+         * @return this
+         * @see CustomOperator#getCategory()
+         * @since 0.3.0
+         */
+        public TSelf withCustom(String category, TElement element) {
+            customs.put(category, element);
+            return getSelf();
+        }
+
+        /**
          * Sets the default marker operator element.
          * @param element the element
          * @return this
@@ -350,7 +387,7 @@ public abstract class AbstractCompositeEngine<T> {
          * @return the built instance
          */
         public TElement build() {
-            return doBuild(root, defaults, inputs, outputs, cores, users);
+            return doBuild(root, defaults, inputs, outputs, cores, users, customs);
         }
 
         private TSelf withDefault(OperatorKind kind, TElement element) {

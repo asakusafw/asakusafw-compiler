@@ -255,6 +255,8 @@ public abstract class Operator {
 
     /**
      * Represents a kind of {@link Operator}.
+     * @since 0.1.0
+     * @version 0.3.0
      */
     public enum OperatorKind {
 
@@ -294,6 +296,14 @@ public abstract class Operator {
          * @see MarkerOperator
          */
         MARKER,
+
+        /**
+         * Custom operators.
+         * This will be appeared in some optimization phases.
+         * @see CustomOperator
+         * @since 0.3.0
+         */
+        CUSTOM,
     }
 
     /**

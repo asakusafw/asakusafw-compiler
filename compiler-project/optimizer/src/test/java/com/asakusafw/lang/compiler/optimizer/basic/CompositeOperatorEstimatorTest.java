@@ -176,6 +176,25 @@ public class CompositeOperatorEstimatorTest extends OptimizerTestRoot {
     }
 
     /**
+     * custom operators.
+     */
+    @Test
+    public void custom() {
+        OperatorEstimator estimator = CompositeOperatorEstimator.builder()
+                .withCustom("mock", engine("a"))
+                .build();
+
+        Operator o0 = custom("mock");
+        Operator o1 = custom("other");
+
+        OperatorEstimate e0 = perform(context(), estimator, o0);
+        OperatorEstimate e1 = perform(context(), estimator, o1);
+
+        assertThat(e0, hasMark("a"));
+        assertThat(e1, hasMark(null));
+    }
+
+    /**
      * bindings.
      */
     @Test
@@ -183,27 +202,7 @@ public class CompositeOperatorEstimatorTest extends OptimizerTestRoot {
         OperatorEstimator estimator = CompositeOperatorEstimator.builder()
                 .withBinding(new MockBinding())
                 .build();
-
-        Operator o0 = user(clazz("a"));
-        Operator o1 = user(clazz("b"));
-        Operator o2 = input("b");
-        Operator o3 = input("c");
-        Operator o4 = output("c");
-        Operator o5 = output("d");
-
-        OperatorEstimate e0 = perform(context(), estimator, o0);
-        OperatorEstimate e1 = perform(context(), estimator, o1);
-        OperatorEstimate e2 = perform(context(), estimator, o2);
-        OperatorEstimate e3 = perform(context(), estimator, o3);
-        OperatorEstimate e4 = perform(context(), estimator, o4);
-        OperatorEstimate e5 = perform(context(), estimator, o5);
-
-        assertThat(e0, hasMark("binding"));
-        assertThat(e1, hasMark(null));
-        assertThat(e2, hasMark("binding"));
-        assertThat(e3, hasMark(null));
-        assertThat(e4, hasMark("binding"));
-        assertThat(e5, hasMark(null));
+        doCheck(estimator);
     }
 
     /**
@@ -221,13 +220,18 @@ public class CompositeOperatorEstimatorTest extends OptimizerTestRoot {
                     .load(loader, MockBindingSpi.class)
                     .build();
         }
+        doCheck(estimator);
+    }
 
+    private void doCheck(OperatorEstimator estimator) {
         Operator o0 = user(clazz("a"));
         Operator o1 = user(clazz("b"));
         Operator o2 = input("b");
         Operator o3 = input("c");
         Operator o4 = output("c");
         Operator o5 = output("d");
+        Operator o6 = custom("d");
+        Operator o7 = custom("e");
 
         OperatorEstimate e0 = perform(context(), estimator, o0);
         OperatorEstimate e1 = perform(context(), estimator, o1);
@@ -235,6 +239,8 @@ public class CompositeOperatorEstimatorTest extends OptimizerTestRoot {
         OperatorEstimate e3 = perform(context(), estimator, o3);
         OperatorEstimate e4 = perform(context(), estimator, o4);
         OperatorEstimate e5 = perform(context(), estimator, o5);
+        OperatorEstimate e6 = perform(context(), estimator, o6);
+        OperatorEstimate e7 = perform(context(), estimator, o7);
 
         assertThat(e0, hasMark("binding"));
         assertThat(e1, hasMark(null));
@@ -242,6 +248,8 @@ public class CompositeOperatorEstimatorTest extends OptimizerTestRoot {
         assertThat(e3, hasMark(null));
         assertThat(e4, hasMark("binding"));
         assertThat(e5, hasMark(null));
+        assertThat(e6, hasMark("binding"));
+        assertThat(e7, hasMark(null));
     }
 
     static OperatorEstimator engine(final String mark) {
@@ -284,6 +292,11 @@ public class CompositeOperatorEstimatorTest extends OptimizerTestRoot {
         @Override
         public Collection<String> getTargetOutputs() {
             return Arrays.asList("c");
+        }
+
+        @Override
+        public Collection<String> getTargetCategories() {
+            return Arrays.asList("d");
         }
 
         @Override

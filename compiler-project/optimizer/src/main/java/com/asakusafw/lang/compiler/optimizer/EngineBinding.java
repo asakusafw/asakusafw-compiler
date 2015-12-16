@@ -23,6 +23,8 @@ import com.asakusafw.lang.compiler.model.description.ClassDescription;
 /**
  * Represents bindings between engine and its target operators.
  * @param <T> the engine type
+ * @since 0.1.0
+ * @version 0.3.0
  */
 public interface EngineBinding<T> {
 
@@ -31,6 +33,12 @@ public interface EngineBinding<T> {
      * @return the target operator annotation types
      */
     Collection<ClassDescription> getTargetOperators();
+
+    /**
+     * Returns the target custom operator categories.
+     * @return the category tags
+     */
+    Collection<String> getTargetCategories();
 
     /**
      * Returns the target external input module name.
@@ -58,6 +66,11 @@ public interface EngineBinding<T> {
 
         @Override
         public Collection<ClassDescription> getTargetOperators() {
+            return Collections.emptySet();
+        }
+
+        @Override
+        public Collection<String> getTargetCategories() {
             return Collections.emptySet();
         }
 
