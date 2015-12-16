@@ -36,9 +36,10 @@ public final class CompositeOperatorEstimator
             Map<String, OperatorEstimator> inputs,
             Map<String, OperatorEstimator> outputs,
             Map<CoreOperatorKind, OperatorEstimator> cores,
-            Map<ClassDescription, OperatorEstimator> users) {
+            Map<ClassDescription, OperatorEstimator> users,
+            Map<String, OperatorEstimator> customs) {
         super(defaultElement == null ? OperatorEstimator.NULL : defaultElement,
-                defaults, inputs, outputs, cores, users);
+                defaults, inputs, outputs, cores, users, customs);
     }
 
     /**
@@ -68,11 +69,12 @@ public final class CompositeOperatorEstimator
                 Map<String, OperatorEstimator> inputElements,
                 Map<String, OperatorEstimator> outputElements,
                 Map<CoreOperatorKind, OperatorEstimator> coreElements,
-                Map<ClassDescription, OperatorEstimator> userElements) {
+                Map<ClassDescription, OperatorEstimator> userElements,
+                Map<String, OperatorEstimator> customElements) {
             return new CompositeOperatorEstimator(
                     defaultElement, kindElements,
                     inputElements, outputElements,
-                    coreElements, userElements);
+                    coreElements, userElements, customElements);
         }
     }
 }

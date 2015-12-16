@@ -38,8 +38,9 @@ public final class CompositeOperatorCharacterizer<T extends OperatorCharacterist
             Map<String, OperatorCharacterizer<? extends T>> inputs,
             Map<String, OperatorCharacterizer<? extends T>> outputs,
             Map<CoreOperatorKind, OperatorCharacterizer<? extends T>> cores,
-            Map<ClassDescription, OperatorCharacterizer<? extends T>> users) {
-        super(safe(defaultElement), kinds, inputs, outputs, cores, users);
+            Map<ClassDescription, OperatorCharacterizer<? extends T>> users,
+            Map<String, OperatorCharacterizer<? extends T>> customs) {
+        super(safe(defaultElement), kinds, inputs, outputs, cores, users, customs);
     }
 
     private static <T extends OperatorCharacteristics> OperatorCharacterizer<? extends T> safe(
@@ -80,11 +81,12 @@ public final class CompositeOperatorCharacterizer<T extends OperatorCharacterist
                 Map<String, OperatorCharacterizer<? extends T>> inputElements,
                 Map<String, OperatorCharacterizer<? extends T>> outputElements,
                 Map<CoreOperatorKind, OperatorCharacterizer<? extends T>> coreElements,
-                Map<ClassDescription, OperatorCharacterizer<? extends T>> userElements) {
+                Map<ClassDescription, OperatorCharacterizer<? extends T>> userElements,
+                Map<String, OperatorCharacterizer<? extends T>> customElements) {
             return new CompositeOperatorCharacterizer<>(
                     defaultElement, kindElements,
                     inputElements, outputElements,
-                    coreElements, userElements);
+                    coreElements, userElements, customElements);
         }
     }
 }
