@@ -130,6 +130,20 @@ public class WindGatePortProcessor
     }
 
     @Override
+    protected Set<String> analyzeInputParameterNames(
+            AnalyzeContext context, String name, WindGateImporterDescription description) {
+        // TODO add helper to original DSL
+        return Collections.emptySet();
+    }
+
+    @Override
+    protected Set<String> analyzeOutputParameterNames(
+            AnalyzeContext context, String name, WindGateExporterDescription description) {
+        // TODO add helper to original DSL
+        return Collections.emptySet();
+    }
+
+    @Override
     protected Set<String> computeInputPaths(Context context, String name, ExternalInputInfo info) {
         String path = getTemporaryPath(context, Phase.IMPORT, Location.of(name));
         return Collections.singleton(path);

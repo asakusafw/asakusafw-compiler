@@ -15,11 +15,15 @@
  */
 package com.asakusafw.lang.compiler.model.info;
 
+import java.util.Set;
+
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.description.ValueDescription;
 
 /**
  * Structural information of external inputs/outputs.
+ * @since 0.1.0
+ * @version 0.3.0
  */
 public interface ExternalPortInfo extends DescriptionInfo {
 
@@ -41,6 +45,13 @@ public interface ExternalPortInfo extends DescriptionInfo {
      * @return the importer module name
      */
     String getModuleName();
+
+    /**
+     * Returns the set of parameter names which are required in runtime.
+     * @return the required parameter names, or an empty set if they are not sure
+     * @since 0.3.0
+     */
+    Set<String> getParameterNames();
 
     /**
      * Returns the processor specific contents.

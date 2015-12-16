@@ -35,6 +35,8 @@ import com.asakusafw.vocabulary.external.ImporterDescription;
  * An abstract implementation of {@link ExternalPortProcessor}.
  * @param <TInput> the importer description type
  * @param <TOutput> the exporter description type
+ * @since 0.1.0
+ * @version 0.3.0
  */
 public abstract class AbstractExternalPortProcessor<
             TInput extends ImporterDescription,
@@ -80,6 +82,28 @@ public abstract class AbstractExternalPortProcessor<
             AnalyzeContext context, String name, TOutput description);
 
     /**
+     * Returns the parameter names of the target importer description.
+     * @param context  the current context
+     * @param name the input name
+     * @param description the target description
+     * @return the parameter names
+     * @since 0.3.0
+     */
+    protected abstract Set<String> analyzeInputParameterNames(
+            AnalyzeContext context, String name, TInput description);
+
+    /**
+     * Returns the parameter names of the target exporter description.
+     * @param context  the current context
+     * @param name the input name
+     * @param description the target description
+     * @return the parameter names
+     * @since 0.3.0
+     */
+    protected abstract Set<String> analyzeOutputParameterNames(
+            AnalyzeContext context, String name, TOutput description);
+
+    /**
      * Returns input paths, which will be used in main phase, of the target external input.
      * @param context  the current context
      * @param name the input name
@@ -117,12 +141,14 @@ public abstract class AbstractExternalPortProcessor<
             throw new IllegalArgumentException();
         }
         TInput desc = type.cast(description);
+        Set<String> parameters = analyzeInputParameterNames(context, name, desc);
         ValueDescription properties = analyzeInputProperties(context, name, desc);
         return new ExternalInputInfo.Basic(
                 Descriptions.classOf(desc.getClass()),
                 getModuleName(),
                 Descriptions.classOf(desc.getModelType()),
                 convert(desc.getDataSize()),
+                parameters,
                 properties);
     }
 
@@ -133,11 +159,13 @@ public abstract class AbstractExternalPortProcessor<
             throw new IllegalArgumentException();
         }
         TOutput desc = type.cast(description);
+        Set<String> parameters = analyzeOutputParameterNames(context, name, desc);
         ValueDescription properties = analyzeOutputProperties(context, name, desc);
         return new ExternalOutputInfo.Basic(
                 Descriptions.classOf(desc.getClass()),
                 getModuleName(),
                 Descriptions.classOf(desc.getModelType()),
+                parameters,
                 properties);
     }
 

@@ -75,6 +75,11 @@ public class ExternalOutputReference extends BasicAttributeContainer
     }
 
     @Override
+    public Set<String> getParameterNames() {
+        return info.getParameterNames();
+    }
+
+    @Override
     public ValueDescription getContents() {
         return info.getContents();
     }

@@ -16,7 +16,10 @@
 package com.asakusafw.lang.compiler.model.info;
 
 import java.text.MessageFormat;
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.Objects;
+import java.util.Set;
 
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.description.ValueDescription;
@@ -29,6 +32,8 @@ public interface ExternalOutputInfo extends ExternalPortInfo {
     /**
      * A basic implementation of {@link ExternalOutputInfo}.
      * Clients can inherit this class.
+     * @since 0.1.0
+     * @version 0.3.0
      */
     public static class Basic implements ExternalOutputInfo {
 
@@ -37,6 +42,8 @@ public interface ExternalOutputInfo extends ExternalPortInfo {
         private final ClassDescription dataModelClass;
 
         private final String moduleName;
+
+        private final Set<String> parameterNames;
 
         private final ValueDescription contents;
 
@@ -50,7 +57,7 @@ public interface ExternalOutputInfo extends ExternalPortInfo {
                 ClassDescription descriptionClass,
                 String moduleName,
                 ClassDescription dataModelClass) {
-            this(descriptionClass, moduleName, dataModelClass, null);
+            this(descriptionClass, moduleName, dataModelClass, Collections.<String>emptySet(), null);
         }
 
         /**
@@ -65,9 +72,44 @@ public interface ExternalOutputInfo extends ExternalPortInfo {
                 String moduleName,
                 ClassDescription dataModelClass,
                 ValueDescription contents) {
+            this(descriptionClass, moduleName, dataModelClass, Collections.<String>emptySet(), contents);
+        }
+
+        /**
+         * Creates a new instance.
+         * @param descriptionClass the original exporter description class
+         * @param moduleName the exporter module name
+         * @param dataModelClass the target data model class
+         * @param parameterNames the required parameter names
+         * @since 0.3.0
+         */
+        public Basic(
+                ClassDescription descriptionClass,
+                String moduleName,
+                ClassDescription dataModelClass,
+                Set<String> parameterNames) {
+            this(descriptionClass, moduleName, dataModelClass, Collections.<String>emptySet(), null);
+        }
+
+        /**
+         * Creates a new instance.
+         * @param descriptionClass the original exporter description class
+         * @param moduleName the exporter module name
+         * @param dataModelClass the target data model class
+         * @param parameterNames the required parameter names
+         * @param contents the processor specific contents (nullable)
+         * @since 0.3.0
+         */
+        public Basic(
+                ClassDescription descriptionClass,
+                String moduleName,
+                ClassDescription dataModelClass,
+                Set<String> parameterNames,
+                ValueDescription contents) {
             this.descriptionClass = descriptionClass;
             this.dataModelClass = dataModelClass;
             this.moduleName = moduleName;
+            this.parameterNames = Collections.unmodifiableSet(new LinkedHashSet<>(parameterNames));
             this.contents = contents;
         }
 
@@ -76,7 +118,8 @@ public interface ExternalOutputInfo extends ExternalPortInfo {
          * @param info the original information
          */
         public Basic(ExternalOutputInfo info) {
-            this(info.getDescriptionClass(), info.getModuleName(), info.getDataModelClass(), info.getContents());
+            this(info.getDescriptionClass(), info.getModuleName(), info.getDataModelClass(),
+                    info.getParameterNames(), info.getContents());
         }
 
         @Override
@@ -95,6 +138,11 @@ public interface ExternalOutputInfo extends ExternalPortInfo {
         }
 
         @Override
+        public Set<String> getParameterNames() {
+            return parameterNames;
+        }
+
+        @Override
         public ValueDescription getContents() {
             return contents;
         }
@@ -106,6 +154,7 @@ public interface ExternalOutputInfo extends ExternalPortInfo {
             result = prime * result + descriptionClass.hashCode();
             result = prime * result + moduleName.hashCode();
             result = prime * result + dataModelClass.hashCode();
+            result = prime * result + parameterNames.hashCode();
             result = prime * result + Objects.hashCode(contents);
             return result;
         }
@@ -129,6 +178,9 @@ public interface ExternalOutputInfo extends ExternalPortInfo {
                 return false;
             }
             if (!dataModelClass.equals(other.dataModelClass)) {
+                return false;
+            }
+            if (!parameterNames.equals(other.parameterNames)) {
                 return false;
             }
             if (!Objects.equals(contents, other.contents)) {

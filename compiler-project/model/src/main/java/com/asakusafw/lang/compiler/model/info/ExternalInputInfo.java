@@ -16,7 +16,10 @@
 package com.asakusafw.lang.compiler.model.info;
 
 import java.text.MessageFormat;
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.Objects;
+import java.util.Set;
 
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.description.ValueDescription;
@@ -61,6 +64,8 @@ public interface ExternalInputInfo extends ExternalPortInfo {
     /**
      * A basic implementation of {@link ExternalInputInfo}.
      * Clients can inherit this class.
+     * @since 0.1.0
+     * @version 0.3.0
      */
     public static class Basic implements ExternalInputInfo {
 
@@ -74,6 +79,8 @@ public interface ExternalInputInfo extends ExternalPortInfo {
 
         private final DataSize dataSize;
 
+        private final Set<String> parameterNames;
+
         /**
          * Creates a new instance.
          * @param descriptionClass the original importer description class
@@ -86,7 +93,7 @@ public interface ExternalInputInfo extends ExternalPortInfo {
                 String moduleName,
                 ClassDescription dataModelClass,
                 DataSize dataSize) {
-            this(descriptionClass, moduleName, dataModelClass, dataSize, null);
+            this(descriptionClass, moduleName, dataModelClass, dataSize, Collections.<String>emptySet(), null);
         }
 
         /**
@@ -103,10 +110,49 @@ public interface ExternalInputInfo extends ExternalPortInfo {
                 ClassDescription dataModelClass,
                 DataSize dataSize,
                 ValueDescription contents) {
+            this(descriptionClass, moduleName, dataModelClass, dataSize, Collections.<String>emptySet(), contents);
+        }
+
+        /**
+         * Creates a new instance.
+         * @param descriptionClass the original importer description class
+         * @param dataModelClass the target data model class
+         * @param moduleName the importer module name
+         * @param dataSize the estimated data size
+         * @param parameterNames the required parameter names
+         * @since 0.3.0
+         */
+        public Basic(
+                ClassDescription descriptionClass,
+                String moduleName,
+                ClassDescription dataModelClass,
+                DataSize dataSize,
+                Set<String> parameterNames) {
+            this(descriptionClass, moduleName, dataModelClass, dataSize, parameterNames, null);
+        }
+
+        /**
+         * Creates a new instance.
+         * @param descriptionClass the original importer description class
+         * @param dataModelClass the target data model class
+         * @param moduleName the importer module name
+         * @param dataSize the estimated data size
+         * @param parameterNames the required parameter names
+         * @param contents the processor specific contents (nullable)
+         * @since 0.3.0
+         */
+        public Basic(
+                ClassDescription descriptionClass,
+                String moduleName,
+                ClassDescription dataModelClass,
+                DataSize dataSize,
+                Set<String> parameterNames,
+                ValueDescription contents) {
             this.descriptionClass = descriptionClass;
             this.dataModelClass = dataModelClass;
             this.moduleName = moduleName;
             this.dataSize = dataSize;
+            this.parameterNames = Collections.unmodifiableSet(new LinkedHashSet<>(parameterNames));
             this.contents = contents;
         }
 
@@ -116,7 +162,7 @@ public interface ExternalInputInfo extends ExternalPortInfo {
          */
         public Basic(ExternalInputInfo info) {
             this(info.getDescriptionClass(), info.getModuleName(), info.getDataModelClass(),
-                    info.getDataSize(), info.getContents());
+                    info.getDataSize(), info.getParameterNames(), info.getContents());
         }
 
         @Override
@@ -145,6 +191,11 @@ public interface ExternalInputInfo extends ExternalPortInfo {
         }
 
         @Override
+        public Set<String> getParameterNames() {
+            return parameterNames;
+        }
+
+        @Override
         public String toString() {
             return MessageFormat.format(
                     "ExternalInput(module={0}, description={1})", //$NON-NLS-1$
@@ -160,6 +211,7 @@ public interface ExternalInputInfo extends ExternalPortInfo {
             result = prime * result + moduleName.hashCode();
             result = prime * result + dataModelClass.hashCode();
             result = prime * result + dataSize.hashCode();
+            result = prime * result + parameterNames.hashCode();
             result = prime * result + Objects.hashCode(contents);
             return result;
         }
@@ -186,6 +238,9 @@ public interface ExternalInputInfo extends ExternalPortInfo {
                 return false;
             }
             if (dataSize != other.dataSize) {
+                return false;
+            }
+            if (!parameterNames.equals(other.parameterNames)) {
                 return false;
             }
             if (!Objects.equals(contents, other.contents)) {

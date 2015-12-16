@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +46,7 @@ import com.asakusafw.lang.compiler.extension.directio.emitter.OutputStageInfo;
 import com.asakusafw.lang.compiler.extension.externalio.AbstractExternalPortProcessor;
 import com.asakusafw.lang.compiler.extension.externalio.ExternalPortStageInfo;
 import com.asakusafw.lang.compiler.extension.externalio.Naming;
+import com.asakusafw.lang.compiler.extension.externalio.ParameterAnalyzer;
 import com.asakusafw.lang.compiler.hadoop.HadoopFormatExtension;
 import com.asakusafw.lang.compiler.hadoop.HadoopTaskReference;
 import com.asakusafw.lang.compiler.javac.JavaSourceExtension;
@@ -151,6 +153,46 @@ public class DirectFileIoPortProcessor
         assertPresent(validate, description.getDeletePatterns(), "getDeletePatterns"); //$NON-NLS-1$
         validate.raiseException();
         return new DirectFileOutputModel(description);
+    }
+
+    @Override
+    protected Set<String> analyzeInputParameterNames(
+            AnalyzeContext context,
+            String name,
+            DirectFileInputDescription description) {
+        try {
+            // FIXME collect parameter names from filters
+            Set<String> results = new HashSet<>();
+            results.addAll(ParameterAnalyzer.collectVariableNames(description.getBasePath()));
+            results.addAll(ParameterAnalyzer.collectVariableNames(description.getResourcePattern()));
+            return results;
+        } catch (NullPointerException | IllegalArgumentException e) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("error occurred while analyzing: {}", description, e); //$NON-NLS-1$
+            }
+            return Collections.emptySet();
+        }
+    }
+
+    @Override
+    protected Set<String> analyzeOutputParameterNames(
+            AnalyzeContext context,
+            String name,
+            DirectFileOutputDescription description) {
+        try {
+            Set<String> results = new HashSet<>();
+            results.addAll(ParameterAnalyzer.collectVariableNames(description.getBasePath()));
+            results.addAll(ParameterAnalyzer.collectVariableNames(description.getResourcePattern()));
+            for (String s : description.getDeletePatterns()) {
+                results.addAll(ParameterAnalyzer.collectVariableNames(s));
+            }
+            return results;
+        } catch (NullPointerException | IllegalArgumentException e) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("error occurred while analyzing: {}", description, e); //$NON-NLS-1$
+            }
+            return Collections.emptySet();
+        }
     }
 
     private void assertPresent(ValidateContext context, Object value, String method) {
