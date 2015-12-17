@@ -130,6 +130,32 @@ public class WindGatePortProcessor
     }
 
     @Override
+    protected Set<String> analyzeInputParameterNames(
+            AnalyzeContext context, String name, WindGateImporterDescription description) {
+        try {
+            return new DescriptionModel(description).getDriverScript().getParameterNames();
+        } catch (IllegalStateException e) {
+            throw new DiagnosticException(Diagnostic.Level.ERROR, MessageFormat.format(
+                    "importer description \"{0}\" is not valid: {1}",
+                    name,
+                    e.getMessage()));
+        }
+    }
+
+    @Override
+    protected Set<String> analyzeOutputParameterNames(
+            AnalyzeContext context, String name, WindGateExporterDescription description) {
+        try {
+            return new DescriptionModel(description).getDriverScript().getParameterNames();
+        } catch (IllegalStateException e) {
+            throw new DiagnosticException(Diagnostic.Level.ERROR, MessageFormat.format(
+                    "exporter description \"{0}\" is not valid: {1}",
+                    name,
+                    e.getMessage()));
+        }
+    }
+
+    @Override
     protected Set<String> computeInputPaths(Context context, String name, ExternalInputInfo info) {
         String path = getTemporaryPath(context, Phase.IMPORT, Location.of(name));
         return Collections.singleton(path);

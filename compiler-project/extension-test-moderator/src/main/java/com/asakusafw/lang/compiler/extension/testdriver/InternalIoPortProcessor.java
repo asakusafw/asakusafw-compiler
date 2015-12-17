@@ -29,6 +29,9 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.asakusafw.lang.compiler.api.ExternalPortProcessor;
 import com.asakusafw.lang.compiler.api.reference.ExternalInputReference;
 import com.asakusafw.lang.compiler.api.reference.ExternalOutputReference;
@@ -51,12 +54,15 @@ import com.asakusafw.lang.compiler.model.description.ValueDescription;
 import com.asakusafw.lang.compiler.model.info.ExternalInputInfo;
 import com.asakusafw.lang.compiler.model.info.ExternalOutputInfo;
 import com.asakusafw.lang.compiler.model.info.ExternalPortInfo;
+import com.asakusafw.runtime.util.VariableTable;
 
 /**
  * An implementation of {@link ExternalPortProcessor} for internal I/O.
  */
 public class InternalIoPortProcessor
         extends AbstractExternalPortProcessor<InternalImporterDescription, InternalExporterDescription> {
+
+    static final Logger LOG = LoggerFactory.getLogger(InternalIoPortProcessor.class);
 
     private static final String MODULE_NAME = "internal"; //$NON-NLS-1$
 
@@ -113,6 +119,32 @@ public class InternalIoPortProcessor
     protected ValueDescription analyzeOutputProperties(
             AnalyzeContext context, String name, InternalExporterDescription description) {
         return Descriptions.valueOf(description.getPathPrefix());
+    }
+
+    @Override
+    protected Set<String> analyzeInputParameterNames(
+            AnalyzeContext context, String name, InternalImporterDescription description) {
+        try {
+            return VariableTable.collectVariableNames(description.getPathPrefix());
+        } catch (NullPointerException | IllegalArgumentException e) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("error occurred while analyzing: {}", description, e); //$NON-NLS-1$
+            }
+            return Collections.emptySet();
+        }
+    }
+
+    @Override
+    protected Set<String> analyzeOutputParameterNames(
+            AnalyzeContext context, String name, InternalExporterDescription description) {
+        try {
+            return VariableTable.collectVariableNames(description.getPathPrefix());
+        } catch (NullPointerException | IllegalArgumentException e) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("error occurred while analyzing: {}", description, e); //$NON-NLS-1$
+            }
+            return Collections.emptySet();
+        }
     }
 
     @Override
