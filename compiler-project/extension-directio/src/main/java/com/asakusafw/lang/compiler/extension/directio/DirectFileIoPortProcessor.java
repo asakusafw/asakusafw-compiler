@@ -46,7 +46,6 @@ import com.asakusafw.lang.compiler.extension.directio.emitter.OutputStageInfo;
 import com.asakusafw.lang.compiler.extension.externalio.AbstractExternalPortProcessor;
 import com.asakusafw.lang.compiler.extension.externalio.ExternalPortStageInfo;
 import com.asakusafw.lang.compiler.extension.externalio.Naming;
-import com.asakusafw.lang.compiler.extension.externalio.ParameterAnalyzer;
 import com.asakusafw.lang.compiler.hadoop.HadoopFormatExtension;
 import com.asakusafw.lang.compiler.hadoop.HadoopTaskReference;
 import com.asakusafw.lang.compiler.javac.JavaSourceExtension;
@@ -65,6 +64,7 @@ import com.asakusafw.runtime.directio.DataFormat;
 import com.asakusafw.runtime.directio.DirectDataSourceConstants;
 import com.asakusafw.runtime.directio.FilePattern;
 import com.asakusafw.runtime.directio.FilePattern.PatternElementKind;
+import com.asakusafw.runtime.util.VariableTable;
 import com.asakusafw.vocabulary.directio.DirectFileInputDescription;
 import com.asakusafw.vocabulary.directio.DirectFileOutputDescription;
 
@@ -163,8 +163,8 @@ public class DirectFileIoPortProcessor
         try {
             // FIXME collect parameter names from filters
             Set<String> results = new HashSet<>();
-            results.addAll(ParameterAnalyzer.collectVariableNames(description.getBasePath()));
-            results.addAll(ParameterAnalyzer.collectVariableNames(description.getResourcePattern()));
+            results.addAll(VariableTable.collectVariableNames(description.getBasePath()));
+            results.addAll(VariableTable.collectVariableNames(description.getResourcePattern()));
             return results;
         } catch (NullPointerException | IllegalArgumentException e) {
             if (LOG.isDebugEnabled()) {
@@ -181,10 +181,10 @@ public class DirectFileIoPortProcessor
             DirectFileOutputDescription description) {
         try {
             Set<String> results = new HashSet<>();
-            results.addAll(ParameterAnalyzer.collectVariableNames(description.getBasePath()));
-            results.addAll(ParameterAnalyzer.collectVariableNames(description.getResourcePattern()));
+            results.addAll(VariableTable.collectVariableNames(description.getBasePath()));
+            results.addAll(VariableTable.collectVariableNames(description.getResourcePattern()));
             for (String s : description.getDeletePatterns()) {
-                results.addAll(ParameterAnalyzer.collectVariableNames(s));
+                results.addAll(VariableTable.collectVariableNames(s));
             }
             return results;
         } catch (NullPointerException | IllegalArgumentException e) {

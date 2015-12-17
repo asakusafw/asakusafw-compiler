@@ -41,7 +41,6 @@ import com.asakusafw.lang.compiler.common.Diagnostic;
 import com.asakusafw.lang.compiler.common.DiagnosticException;
 import com.asakusafw.lang.compiler.extension.externalio.AbstractExternalPortProcessor;
 import com.asakusafw.lang.compiler.extension.externalio.Naming;
-import com.asakusafw.lang.compiler.extension.externalio.ParameterAnalyzer;
 import com.asakusafw.lang.compiler.hadoop.HadoopFormatExtension;
 import com.asakusafw.lang.compiler.hadoop.HadoopTaskReference;
 import com.asakusafw.lang.compiler.javac.JavaSourceExtension;
@@ -55,6 +54,7 @@ import com.asakusafw.lang.compiler.model.description.ValueDescription;
 import com.asakusafw.lang.compiler.model.info.ExternalInputInfo;
 import com.asakusafw.lang.compiler.model.info.ExternalOutputInfo;
 import com.asakusafw.lang.compiler.model.info.ExternalPortInfo;
+import com.asakusafw.runtime.util.VariableTable;
 
 /**
  * An implementation of {@link ExternalPortProcessor} for internal I/O.
@@ -125,7 +125,7 @@ public class InternalIoPortProcessor
     protected Set<String> analyzeInputParameterNames(
             AnalyzeContext context, String name, InternalImporterDescription description) {
         try {
-            return ParameterAnalyzer.collectVariableNames(description.getPathPrefix());
+            return VariableTable.collectVariableNames(description.getPathPrefix());
         } catch (NullPointerException | IllegalArgumentException e) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("error occurred while analyzing: {}", description, e); //$NON-NLS-1$
@@ -138,7 +138,7 @@ public class InternalIoPortProcessor
     protected Set<String> analyzeOutputParameterNames(
             AnalyzeContext context, String name, InternalExporterDescription description) {
         try {
-            return ParameterAnalyzer.collectVariableNames(description.getPathPrefix());
+            return VariableTable.collectVariableNames(description.getPathPrefix());
         } catch (NullPointerException | IllegalArgumentException e) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("error occurred while analyzing: {}", description, e); //$NON-NLS-1$

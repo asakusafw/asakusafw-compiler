@@ -141,8 +141,8 @@ public abstract class AbstractExternalPortProcessor<
             throw new IllegalArgumentException();
         }
         TInput desc = type.cast(description);
-        Set<String> parameters = analyzeInputParameterNames(context, name, desc);
         ValueDescription properties = analyzeInputProperties(context, name, desc);
+        Set<String> parameters = analyzeInputParameterNames(context, name, desc);
         return new ExternalInputInfo.Basic(
                 Descriptions.classOf(desc.getClass()),
                 getModuleName(),
@@ -159,8 +159,8 @@ public abstract class AbstractExternalPortProcessor<
             throw new IllegalArgumentException();
         }
         TOutput desc = type.cast(description);
-        Set<String> parameters = analyzeOutputParameterNames(context, name, desc);
         ValueDescription properties = analyzeOutputProperties(context, name, desc);
+        Set<String> parameters = analyzeOutputParameterNames(context, name, desc);
         return new ExternalOutputInfo.Basic(
                 Descriptions.classOf(desc.getClass()),
                 getModuleName(),
