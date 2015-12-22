@@ -31,7 +31,7 @@
               <relocations>
                 <relocation>
                   <pattern>com.fasterxml.jackson</pattern>
-                  <shadedPattern>com.asakusafw.shaded.com.fasterxml.jackson</shadedPattern>
+                  <shadedPattern>com.asakusafw.yaess.shaded.com.fasterxml.jackson</shadedPattern>
                 </relocation>
               </relocations>
               <transformers>
@@ -61,7 +61,6 @@
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-core</artifactId>
-      <version>2.6.3</version>
     </dependency>
     <dependency>
       <groupId>org.hamcrest</groupId>
