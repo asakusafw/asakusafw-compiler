@@ -22,9 +22,13 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.MessageFormat;
+import java.util.Enumeration;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
@@ -167,8 +171,27 @@ public class Main implements Runnable {
     }
 
     private InspectionNode loadFile(File file) throws IOException {
-        try (InputStream input = new FileInputStream(file)) {
-            return repository.load(input);
+        String name = file.getName();
+        if (name.endsWith(".zip") || name.endsWith(".jar")) {
+            try (ZipFile zip = new ZipFile(file)) {
+                Enumeration<? extends ZipEntry> entries = zip.entries();
+                while (entries.hasMoreElements()) {
+                    ZipEntry entry = entries.nextElement();
+                    if (entry.isDirectory() || entry.getName().endsWith("/plan.json") == false) {
+                        continue;
+                    }
+                    try (InputStream input = zip.getInputStream(entry)) {
+                        return repository.load(input);
+                    }
+                }
+            }
+            throw new FileNotFoundException(MessageFormat.format(
+                    "missing \"*/plan.json\" in archive: {0}",
+                    file));
+        } else {
+            try (InputStream input = new FileInputStream(file)) {
+                return repository.load(input);
+            }
         }
     }
 
