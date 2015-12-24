@@ -16,7 +16,6 @@
 package com.asakusafw.lang.compiler.analyzer.model;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;
 import java.text.MessageFormat;
@@ -26,7 +25,7 @@ import java.util.Objects;
  * Represents a constructor parameter.
  * @since 0.3.0
  */
-public class ConstructorParameter implements AnnotatedElement {
+public class ConstructorParameter extends AbstractAnnotatedElement {
 
     private final Constructor<?> constructor;
 
@@ -34,23 +33,25 @@ public class ConstructorParameter implements AnnotatedElement {
 
     private final Type type;
 
-    private final Annotation[] annotations;
-
     /**
      * Creates a new instance.
      * @param constructor the target constructor
      * @param parameterIndex the target parameter index in the constructor
      */
     public ConstructorParameter(Constructor<?> constructor, int parameterIndex) {
+        super(pick(constructor, parameterIndex));
+        this.constructor = constructor;
+        this.parameterIndex = parameterIndex;
+        this.type = constructor.getGenericParameterTypes()[parameterIndex];
+    }
+
+    private static Annotation[] pick(Constructor<?> constructor, int parameterIndex) {
         Objects.requireNonNull(constructor);
-        Type[] parameterTypes = constructor.getGenericParameterTypes();
+        Class<?>[] parameterTypes = constructor.getParameterTypes();
         if (parameterIndex < 0 || parameterIndex >= parameterTypes.length) {
             throw new IllegalArgumentException();
         }
-        this.constructor = constructor;
-        this.parameterIndex = parameterIndex;
-        this.type = parameterTypes[parameterIndex];
-        this.annotations = constructor.getParameterAnnotations()[parameterIndex];
+        return constructor.getParameterAnnotations()[parameterIndex];
     }
 
     /**
@@ -75,31 +76,6 @@ public class ConstructorParameter implements AnnotatedElement {
      */
     public Type getType() {
         return type;
-    }
-
-    @Override
-    public boolean isAnnotationPresent(Class<? extends Annotation> annotationClass) {
-        return getAnnotation(annotationClass) != null;
-    }
-
-    @Override
-    public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {
-        for (Annotation a : annotations) {
-            if (a.annotationType() == annotationClass) {
-                return annotationClass.cast(a);
-            }
-        }
-        return null;
-    }
-
-    @Override
-    public Annotation[] getAnnotations() {
-        return annotations.clone();
-    }
-
-    @Override
-    public Annotation[] getDeclaredAnnotations() {
-        return getAnnotations();
     }
 
     @Override

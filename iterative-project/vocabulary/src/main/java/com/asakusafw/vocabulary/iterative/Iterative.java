@@ -69,6 +69,7 @@ public abstract class Something {
 @Target({
     ElementType.PARAMETER, // @Import, @Export
     ElementType.METHOD, // operator methods
+    ElementType.TYPE, // operator classes, importer/exporter descriptions
 })
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
