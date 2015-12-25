@@ -119,6 +119,41 @@ public class IterativeStageInfoTest {
         assertThat(c.next(), is(false));
     }
 
+    /**
+     * overrides the original batch arguments.
+     */
+    @Test
+    public void override_origin() {
+        StageInfo stage = stage("a", "A");
+        ParameterTable table = IterativeExtensions.builder()
+            .next().put("a", "A0")
+            .next()
+            .next().put("a", "A2")
+            .build();
+        IterativeStageInfo info = new IterativeStageInfo(stage, table);
+
+        assertThat(info.getOrigin().getBatchArguments(), is(map("a", "A")));
+        assertThat(info.getParameterTable().getAvailable(), containsInAnyOrder("a"));
+
+        assertThat(info.isIterative(), is(true));
+        assertThat(info.getRoundCount(), is(3));
+        assertThat(info.getAvailableParameters(), containsInAnyOrder("a"));
+        assertThat(info.getConstantParameters(), is(empty()));
+        assertThat(info.getPartialParameters(), is(empty()));
+
+        Cursor c = info.newCursor();
+        assertThat(c.next(), is(true));
+        assertThat(c.get().getBatchArguments(), is(map("a", "A0")));
+
+        assertThat(c.next(), is(true));
+        assertThat(c.get().getBatchArguments(), is(map("a", "A")));
+
+        assertThat(c.next(), is(true));
+        assertThat(c.get().getBatchArguments(), is(map("a", "A2")));
+
+        assertThat(c.next(), is(false));
+    }
+
     private StageInfo stage(String... pairs) {
         return new StageInfo(
                 "u",
