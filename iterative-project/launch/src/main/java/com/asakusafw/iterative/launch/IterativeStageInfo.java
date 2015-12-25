@@ -148,8 +148,8 @@ public class IterativeStageInfo {
         String originalStageId = origin.getStageId() == null ? DEFAULT_STAGE_ID_PREFIX : origin.getStageId();
         String newStageId = String.format("%s_%d", originalStageId, round); //$NON-NLS-1$
         Map<String, String> newBatchArguments = new LinkedHashMap<>();
-        newBatchArguments.putAll(parameters.toMap());
         newBatchArguments.putAll(origin.getBatchArguments());
+        newBatchArguments.putAll(parameters.toMap());
         return new StageInfo(
                 origin.getUserName(),
                 origin.getBatchId(),
