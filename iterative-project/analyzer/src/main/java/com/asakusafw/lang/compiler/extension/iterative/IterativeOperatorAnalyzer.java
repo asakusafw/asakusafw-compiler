@@ -15,6 +15,8 @@
  */
 package com.asakusafw.lang.compiler.extension.iterative;
 
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Member;
 import java.text.MessageFormat;
 import java.util.Set;
 
@@ -25,6 +27,8 @@ import com.asakusafw.lang.compiler.common.DiagnosticException;
 import com.asakusafw.lang.compiler.common.util.EnumUtil;
 import com.asakusafw.lang.compiler.model.graph.Operator.OperatorKind;
 import com.asakusafw.lang.compiler.model.iterative.IterativeExtension;
+import com.asakusafw.vocabulary.flow.Export;
+import com.asakusafw.vocabulary.flow.Import;
 import com.asakusafw.vocabulary.iterative.Iterative;
 
 /**
@@ -37,7 +41,7 @@ public class IterativeOperatorAnalyzer implements OperatorAttributeAnalyzer {
 
     @Override
     public AttributeMap analyze(OperatorSource source) throws DiagnosticException {
-        Iterative annotation = source.getOrigin().getAnnotation(Iterative.class);
+        Iterative annotation = findIterative(source);
         if (annotation == null) {
             return new AttributeMap();
         }
@@ -50,5 +54,39 @@ public class IterativeOperatorAnalyzer implements OperatorAttributeAnalyzer {
         }
         String[] parameterNames = annotation.value();
         return new AttributeMap().put(IterativeExtension.class, new IterativeExtension(parameterNames));
+    }
+
+    private Iterative findIterative(OperatorSource source) {
+        AnnotatedElement origin = source.getOrigin();
+        Iterative found = origin.getAnnotation(Iterative.class);
+        if (found != null) {
+            return found;
+        }
+        OperatorKind kind = source.getOperatorKind();
+        if (kind == OperatorKind.USER) {
+            if (origin instanceof Member) {
+                Iterative parent = ((Member) origin).getDeclaringClass().getAnnotation(Iterative.class);
+                if (parent != null) {
+                    return parent;
+                }
+            }
+        } else if (kind == OperatorKind.INPUT) {
+            Import desc = origin.getAnnotation(Import.class);
+            if (desc != null) {
+                Iterative parent = desc.description().getAnnotation(Iterative.class);
+                if (parent != null) {
+                    return parent;
+                }
+            }
+        } else if (kind == OperatorKind.OUTPUT) {
+            Export desc = origin.getAnnotation(Export.class);
+            if (desc != null) {
+                Iterative parent = desc.description().getAnnotation(Iterative.class);
+                if (parent != null) {
+                    return parent;
+                }
+            }
+        }
+        return null;
     }
 }
