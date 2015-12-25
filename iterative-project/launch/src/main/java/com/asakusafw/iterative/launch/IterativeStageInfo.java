@@ -16,6 +16,7 @@
 package com.asakusafw.iterative.launch;
 
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -23,15 +24,17 @@ import java.util.Objects;
 import java.util.Set;
 
 import com.asakusafw.bridge.stage.StageInfo;
+import com.asakusafw.iterative.common.BaseCursor;
 import com.asakusafw.iterative.common.IterativeExtensions;
 import com.asakusafw.iterative.common.ParameterSet;
 import com.asakusafw.iterative.common.ParameterTable;
+import com.asakusafw.iterative.common.basic.CursorUtil;
 
 /**
  * Provides {@link StageInfo} for each round.
  * @since 0.3.0
  */
-public class IterativeStageInfo {
+public class IterativeStageInfo implements Iterable<StageInfo> {
 
     static final String DEFAULT_STAGE_ID_PREFIX = "round"; //$NON-NLS-1$
 
@@ -144,6 +147,11 @@ public class IterativeStageInfo {
         }
     }
 
+    @Override
+    public Iterator<StageInfo> iterator() {
+        return CursorUtil.toIterator(newCursor());
+    }
+
     static StageInfo merge(StageInfo origin, int round, ParameterSet parameters) {
         String originalStageId = origin.getStageId() == null ? DEFAULT_STAGE_ID_PREFIX : origin.getStageId();
         String newStageId = String.format("%s_%d", originalStageId, round); //$NON-NLS-1$
@@ -163,7 +171,7 @@ public class IterativeStageInfo {
      * A cursor over {@link IterativeStageInfo}.
      * @since 0.3.0
      */
-    public static class Cursor {
+    public static class Cursor implements BaseCursor<StageInfo> {
 
         private static final int INITIAL_INDEX = 0;
 
@@ -184,6 +192,7 @@ public class IterativeStageInfo {
          * Advances this cursor to point to the next round, and returns whether or not the next round exists.
          * @return {@code true} if the next stage exists, otherwise {@code false}
          */
+        @Override
         public boolean next() {
             if (parameters.next()) {
                 index++;
@@ -199,6 +208,7 @@ public class IterativeStageInfo {
          * @return the stage information
          * @throws IllegalStateException if the cursor does not point to any elements
          */
+        @Override
         public StageInfo get() {
             checkRound();
             ParameterSet current = parameters.get();
