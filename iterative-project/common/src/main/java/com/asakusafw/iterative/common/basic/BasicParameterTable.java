@@ -47,21 +47,7 @@ public class BasicParameterTable implements ParameterTable {
 
     @Override
     public Iterator<ParameterSet> iterator() {
-        final Iterator<Map<String, String>> iterator = entity.iterator();
-        return new Iterator<ParameterSet>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
-            @Override
-            public ParameterSet next() {
-                return new BasicParameterSet(iterator.next());
-            }
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
-        };
+        return CursorUtil.toIterator(newCursor());
     }
 
     @Override

@@ -66,19 +66,12 @@ public interface ParameterTable extends Iterable<ParameterSet> {
      * A cursor over {@link ParameterTable}.
      * @since 0.3.0
      */
-    public interface Cursor {
+    public interface Cursor extends BaseCursor<ParameterSet> {
 
-        /**
-         * Advances this cursor and returns whether the next element exists or not.
-         * @return {@code true} if the next element exists, otherwise {@code false}
-         */
+        @Override
         boolean next();
 
-        /**
-         * Returns the current element on this cursor.
-         * @return the current element
-         * @throws IllegalStateException if the cursor does not point to any elements
-         */
+        @Override
         ParameterSet get();
 
         /**
