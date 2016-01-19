@@ -13,9 +13,9 @@
 
   <dependencies>
     <dependency>
-      <groupId>${project.groupId}</groupId>
+      <groupId>com.asakusafw</groupId>
       <artifactId>asakusa-iterative-common</artifactId>
-      <version>${project.version}</version>
+      <version>${asakusafw.version}</version>
     </dependency>
     <dependency>
       <groupId>com.asakusafw.bridge</groupId>
