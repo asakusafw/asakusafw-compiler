@@ -27,7 +27,7 @@ import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -267,7 +267,7 @@ public class ToolRepositoryTest {
         services.mkdirs();
         File service = new File(services, base.getName());
         try (OutputStream output = new FileOutputStream(service, true);
-                PrintWriter writer = new PrintWriter(new OutputStreamWriter(output, Charset.forName("UTF-8")))) {
+                PrintWriter writer = new PrintWriter(new OutputStreamWriter(output, StandardCharsets.UTF_8))) {
             writer.println(impl.getName());
         } catch (IOException e) {
             throw new AssertionError(e);

@@ -27,7 +27,6 @@ import org.junit.Test;
 import com.asakusafw.lang.inspection.InspectionNode;
 import com.asakusafw.lang.inspection.InspectionNode.Port;
 import com.asakusafw.lang.inspection.InspectionNode.PortReference;
-import com.asakusafw.lang.inspection.processor.DotProcessor;
 import com.asakusafw.lang.inspection.processor.InspectionNodeProcessor.Context;
 
 /**

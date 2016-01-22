@@ -31,17 +31,7 @@ import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.description.Descriptions;
 import com.asakusafw.lang.compiler.model.description.MethodDescription;
 import com.asakusafw.lang.compiler.model.description.TypeDescription;
-import com.asakusafw.lang.compiler.model.graph.ExternalInput;
-import com.asakusafw.lang.compiler.model.graph.ExternalOutput;
-import com.asakusafw.lang.compiler.model.graph.FlowOperator;
-import com.asakusafw.lang.compiler.model.graph.MarkerOperator;
-import com.asakusafw.lang.compiler.model.graph.Operator;
 import com.asakusafw.lang.compiler.model.graph.Operator.OperatorKind;
-import com.asakusafw.lang.compiler.model.graph.OperatorConstraint;
-import com.asakusafw.lang.compiler.model.graph.OperatorGraph;
-import com.asakusafw.lang.compiler.model.graph.OperatorInput;
-import com.asakusafw.lang.compiler.model.graph.OperatorOutput;
-import com.asakusafw.lang.compiler.model.graph.UserOperator;
 import com.asakusafw.lang.compiler.model.info.ExternalInputInfo;
 import com.asakusafw.lang.compiler.model.info.ExternalInputInfo.DataSize;
 

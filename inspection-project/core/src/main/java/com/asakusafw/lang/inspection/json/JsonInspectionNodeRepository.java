@@ -21,6 +21,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import com.asakusafw.lang.inspection.InspectionNode;
 import com.asakusafw.lang.inspection.InspectionNodeRepository;
@@ -36,7 +37,7 @@ import com.google.gson.stream.JsonWriter;
  */
 public class JsonInspectionNodeRepository implements InspectionNodeRepository {
 
-    private static final Charset ENCODING = Charset.forName("UTF-8"); //$NON-NLS-1$
+    private static final Charset ENCODING = StandardCharsets.UTF_8;
 
     private final Gson gson = new GsonBuilder()
         .registerTypeAdapter(InspectionNode.class, new NodeAdapter())

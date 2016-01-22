@@ -29,7 +29,6 @@ import org.junit.Test;
 import com.asakusafw.lang.inspection.InspectionNode;
 import com.asakusafw.lang.inspection.InspectionNodeRepository;
 import com.asakusafw.lang.inspection.json.JsonInspectionNodeRepository;
-import com.asakusafw.lang.inspection.processor.StoreProcessor;
 import com.asakusafw.lang.inspection.processor.InspectionNodeProcessor.Context;
 
 /**
