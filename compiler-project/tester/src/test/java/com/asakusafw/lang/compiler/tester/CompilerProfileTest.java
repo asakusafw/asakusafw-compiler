@@ -21,6 +21,7 @@ import static org.junit.Assert.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -61,7 +62,7 @@ import com.asakusafw.lang.compiler.tester.executor.JobflowExecutor;
  */
 public class CompilerProfileTest {
 
-    private static final Charset ENCODING = Charset.forName("UTF-8");
+    private static final Charset ENCODING = StandardCharsets.UTF_8;
     /**
      * temporary folder for testing.
      */

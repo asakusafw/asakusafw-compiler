@@ -23,10 +23,6 @@ import java.util.Set;
 
 import org.junit.Test;
 
-import com.asakusafw.lang.compiler.inspection.BasicObjectInspector;
-import com.asakusafw.lang.compiler.inspection.ObjectInspector;
-import com.asakusafw.lang.compiler.inspection.PlanDriver;
-import com.asakusafw.lang.compiler.inspection.Util;
 import com.asakusafw.lang.compiler.model.testing.MockOperators;
 import com.asakusafw.lang.compiler.planning.Plan;
 import com.asakusafw.lang.compiler.planning.PlanBuilder;

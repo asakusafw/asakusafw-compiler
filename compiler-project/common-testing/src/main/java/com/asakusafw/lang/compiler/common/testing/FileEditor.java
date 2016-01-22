@@ -27,6 +27,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +40,7 @@ import java.util.zip.ZipInputStream;
  */
 public final class FileEditor {
 
-    private static final Charset ENCODING = Charset.forName("UTF-8"); //$NON-NLS-1$
+    private static final Charset ENCODING = StandardCharsets.UTF_8;
 
     private FileEditor() {
         return;

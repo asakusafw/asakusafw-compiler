@@ -25,7 +25,6 @@ import org.junit.Test;
 import com.asakusafw.lang.compiler.common.BasicExtensionContainer;
 import com.asakusafw.lang.compiler.common.ExtensionContainer;
 import com.asakusafw.lang.compiler.common.Location;
-import com.asakusafw.lang.compiler.inspection.InspectionExtension;
 
 /**
  * Test for {@link InspectionExtension}.

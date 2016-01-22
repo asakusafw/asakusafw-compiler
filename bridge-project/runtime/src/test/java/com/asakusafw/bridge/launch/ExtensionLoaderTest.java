@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -37,7 +38,7 @@ import org.junit.rules.TemporaryFolder;
  */
 public class ExtensionLoaderTest {
 
-    private static final Charset ENCODING = Charset.forName("UTF-8");
+    private static final Charset ENCODING = StandardCharsets.UTF_8;
 
     /**
      * temporary folder.

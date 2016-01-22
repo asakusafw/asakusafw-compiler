@@ -25,8 +25,8 @@ import com.asakusafw.bridge.broker.ResourceBroker;
 import com.asakusafw.bridge.broker.ResourceBrokerContext;
 import com.asakusafw.runtime.core.Report.Default;
 import com.asakusafw.runtime.core.Report.Delegate;
-import com.asakusafw.runtime.report.CommonsLoggingReport;
 import com.asakusafw.runtime.core.ResourceConfiguration;
+import com.asakusafw.runtime.report.CommonsLoggingReport;
 
 /**
  * Test for {@link ReportAdapter}.

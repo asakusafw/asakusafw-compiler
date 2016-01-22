@@ -28,9 +28,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import com.asakusafw.lang.compiler.extension.testdriver.InternalExporterDescription;
-import com.asakusafw.lang.compiler.extension.testdriver.InternalExporterRetriever;
-import com.asakusafw.lang.compiler.extension.testdriver.InternalImporterPreparator;
 import com.asakusafw.lang.compiler.extension.testdriver.mock.MockTextDefinition;
 import com.asakusafw.lang.compiler.mapreduce.testing.windows.WindowsConfigurator;
 import com.asakusafw.runtime.io.ModelInput;

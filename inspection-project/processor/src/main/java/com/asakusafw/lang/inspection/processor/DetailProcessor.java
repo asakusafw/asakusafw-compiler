@@ -21,6 +21,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Map;
@@ -34,7 +35,7 @@ import com.asakusafw.lang.inspection.InspectionNode.PortReference;
  */
 public class DetailProcessor implements InspectionNodeProcessor {
 
-    static final Charset ENCODING = Charset.forName("UTF-8"); //$NON-NLS-1$
+    static final Charset ENCODING = StandardCharsets.UTF_8;
 
     @Override
     public void process(Context context, InspectionNode node, OutputStream output) throws IOException {

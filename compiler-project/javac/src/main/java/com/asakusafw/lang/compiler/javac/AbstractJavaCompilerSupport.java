@@ -22,6 +22,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -54,7 +55,7 @@ public abstract class AbstractJavaCompilerSupport implements JavaCompilerSupport
 
     static final String JAVA_EXTENSION = ".java"; //$NON-NLS-1$
 
-    static final Charset DEFAULT_ENCODING = Charset.forName("UTF-8"); //$NON-NLS-1$
+    static final Charset DEFAULT_ENCODING = StandardCharsets.UTF_8;
 
     static final String DEFAULT_COMPLIANT_VERSION = "1.7"; //$NON-NLS-1$
 

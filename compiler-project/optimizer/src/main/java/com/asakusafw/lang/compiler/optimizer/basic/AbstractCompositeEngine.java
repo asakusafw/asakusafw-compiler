@@ -22,8 +22,8 @@ import java.util.Map;
 
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.graph.CoreOperator;
-import com.asakusafw.lang.compiler.model.graph.CustomOperator;
 import com.asakusafw.lang.compiler.model.graph.CoreOperator.CoreOperatorKind;
+import com.asakusafw.lang.compiler.model.graph.CustomOperator;
 import com.asakusafw.lang.compiler.model.graph.ExternalInput;
 import com.asakusafw.lang.compiler.model.graph.ExternalOutput;
 import com.asakusafw.lang.compiler.model.graph.Operator;

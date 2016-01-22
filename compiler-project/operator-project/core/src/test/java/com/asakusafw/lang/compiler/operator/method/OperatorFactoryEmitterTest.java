@@ -61,8 +61,8 @@ import com.asakusafw.vocabulary.flow.graph.FlowBoundary;
 import com.asakusafw.vocabulary.flow.graph.FlowElement;
 import com.asakusafw.vocabulary.flow.graph.FlowElementOutput;
 import com.asakusafw.vocabulary.flow.graph.FlowElementPortDescription;
-import com.asakusafw.vocabulary.flow.graph.OperatorHelper;
 import com.asakusafw.vocabulary.flow.graph.OperatorDescription.Parameter;
+import com.asakusafw.vocabulary.flow.graph.OperatorHelper;
 import com.asakusafw.vocabulary.flow.graph.PortConnection;
 
 /**

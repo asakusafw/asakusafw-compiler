@@ -24,10 +24,6 @@ import java.util.Set;
 
 import org.junit.Test;
 
-import com.asakusafw.lang.compiler.inspection.BasicObjectInspector;
-import com.asakusafw.lang.compiler.inspection.DslDriver;
-import com.asakusafw.lang.compiler.inspection.ObjectInspector;
-import com.asakusafw.lang.compiler.inspection.Util;
 import com.asakusafw.lang.compiler.model.description.AnnotationDescription;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.description.MethodDescription;

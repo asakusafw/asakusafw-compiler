@@ -28,7 +28,6 @@ import java.util.Set;
 import org.junit.Test;
 
 import com.asakusafw.lang.inspection.InspectionNode;
-import com.asakusafw.lang.inspection.processor.ListProcessor;
 import com.asakusafw.lang.inspection.processor.InspectionNodeProcessor.Context;
 
 /**

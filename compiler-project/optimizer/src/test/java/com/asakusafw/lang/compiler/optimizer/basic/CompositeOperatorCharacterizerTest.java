@@ -27,8 +27,8 @@ import org.hamcrest.Matcher;
 import org.junit.Test;
 
 import com.asakusafw.lang.compiler.common.DiagnosticException;
-import com.asakusafw.lang.compiler.model.graph.Operator;
 import com.asakusafw.lang.compiler.model.graph.CoreOperator.CoreOperatorKind;
+import com.asakusafw.lang.compiler.model.graph.Operator;
 import com.asakusafw.lang.compiler.optimizer.OperatorCharacteristics;
 import com.asakusafw.lang.compiler.optimizer.OperatorCharacterizer;
 import com.asakusafw.lang.compiler.optimizer.OperatorCharacterizers;

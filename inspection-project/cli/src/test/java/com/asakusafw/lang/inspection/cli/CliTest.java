@@ -30,7 +30,6 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import com.asakusafw.lang.inspection.InspectionNode;
-import com.asakusafw.lang.inspection.cli.Cli;
 import com.asakusafw.lang.inspection.cli.Cli.Configuration;
 import com.asakusafw.lang.inspection.json.JsonInspectionNodeRepository;
 import com.asakusafw.lang.inspection.processor.StoreProcessor;
