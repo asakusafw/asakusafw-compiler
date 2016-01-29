@@ -299,6 +299,7 @@ public final class Operators {
             if (saw.contains(operator)) {
                 continue;
             }
+            saw.add(operator);
             if (predicate.apply(operator)) {
                 if (inclusive) {
                     results.add(operator);
