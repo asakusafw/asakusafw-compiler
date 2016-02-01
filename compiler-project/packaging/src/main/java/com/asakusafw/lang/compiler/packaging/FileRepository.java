@@ -19,6 +19,8 @@ import java.io.File;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -51,9 +53,7 @@ public class FileRepository implements ResourceRepository {
 
     @Override
     public Cursor createCursor() throws IOException {
-        List<FileItem> results = new ArrayList<>();
-        collect(results, null, root);
-        return new ResourceItemRepository.ItemCursor(results.iterator());
+        return createCursor(root);
     }
 
     /**
@@ -67,6 +67,12 @@ public class FileRepository implements ResourceRepository {
         }
         List<FileItem> results = new ArrayList<>();
         collect(results, null, root);
+        Collections.sort(results, new Comparator<FileItem>() {
+            @Override
+            public int compare(FileItem o1, FileItem o2) {
+                return o1.getLocation().compareTo(o2.getLocation());
+            }
+        });
         return new ResourceItemRepository.ItemCursor(results.iterator());
     }
 
