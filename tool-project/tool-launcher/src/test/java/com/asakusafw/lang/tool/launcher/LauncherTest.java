@@ -22,26 +22,42 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
 import java.util.Properties;
 
+import javax.tools.Diagnostic;
+import javax.tools.DiagnosticCollector;
+import javax.tools.JavaCompiler;
+import javax.tools.JavaCompiler.CompilationTask;
+import javax.tools.JavaFileObject;
+import javax.tools.StandardJavaFileManager;
+import javax.tools.StandardLocation;
+import javax.tools.ToolProvider;
+
+import org.junit.Assume;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-
-import com.asakusafw.lang.compiler.javac.testing.JavaCompiler;
-import com.asakusafw.lang.compiler.model.description.ClassDescription;
 
 /**
  * Creates a new instance.
  */
 public class LauncherTest {
 
-    /**
-     * Java compiler for testing.
-     */
-    @Rule
-    public final JavaCompiler javac = new JavaCompiler();
+    private static final String DIR_SOURCE = "src";
+
+    private static final String DIR_OBJECT = "bin";
+
+    private static final Charset ENCODING = StandardCharsets.UTF_8;
 
     /**
      * Temporary folder for testing.
@@ -55,7 +71,7 @@ public class LauncherTest {
      */
     @Test
     public void simple() throws Throwable {
-        ClassDescription main = java("com.example.Hello", new String[] {
+        String main = java("com.example.Hello", new String[] {
                 "public class Hello {",
                 "  public static void main(String[] args) {",
                 "    System.out.println(\"Hello, launcher!\");",
@@ -73,7 +89,7 @@ public class LauncherTest {
      */
     @Test
     public void arguments() throws Throwable {
-        ClassDescription main = java("com.example.Hello", new String[] {
+        String main = java("com.example.Hello", new String[] {
                 "public class Hello {",
                 "  public static void main(String[] args) {",
                 "    assertThat(Arrays.asList(args), contains(\"A\", \"B\", \"C\"));",
@@ -90,7 +106,7 @@ public class LauncherTest {
      */
     @Test(expected = UnsupportedOperationException.class)
     public void raise_exception() throws Throwable {
-        ClassDescription main = java("com.example.Hello", new String[] {
+        String main = java("com.example.Hello", new String[] {
                 "public class Hello {",
                 "  public static void main(String[] args) {",
                 "    throw new UnsupportedOperationException();",
@@ -107,7 +123,7 @@ public class LauncherTest {
      */
     @Test
     public void check_class_loader() throws Throwable {
-        ClassDescription main = java("com.example.Check", new String[] {
+        String main = java("com.example.Check", new String[] {
                 "public class Check {",
                 "  public static void main(String[] args) {",
                 "    assertThat(ClassLoader.getSystemClassLoader(),",
@@ -151,7 +167,7 @@ public class LauncherTest {
                 "  public static void main(String[] args) {}",
                 "}",
         });
-        File script = script(new ClassDescription("com.example.MISSING"));
+        File script = script("com.example.MISSING");
         Launcher.main(script.getAbsolutePath());
     }
 
@@ -161,7 +177,7 @@ public class LauncherTest {
      */
     @Test(expected = LauncherException.class)
     public void invalid_missing_main() throws Throwable {
-        ClassDescription main = java("com.example.Hello", new String[] {
+        String main = java("com.example.Hello", new String[] {
                 "public class Hello {",
                 "}",
         });
@@ -169,10 +185,17 @@ public class LauncherTest {
         Launcher.main(script.getAbsolutePath());
     }
 
-    ClassDescription java(String className, String[] sourceLines) {
-        ClassDescription aClass = new ClassDescription(className);
-        try (PrintWriter writer = new PrintWriter(javac.addJavaFile(aClass))) {
-            writer.printf("package %s;%n", aClass.getPackageName());
+    String java(String className, String[] sourceLines) {
+        File src = new File(temporary.getRoot(), DIR_SOURCE);
+        File file = new File(src, className.replace('.', '/') + ".java");
+        File parent = file.getParentFile();
+        assertThat(parent.mkdirs() || parent.isDirectory(), is(true));
+
+        int lastDot = className.lastIndexOf('.');
+        String packageName = className.substring(0, lastDot);
+
+        try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(file), ENCODING))) {
+            writer.printf("package %s;%n", packageName);
             writer.println("import static org.junit.Assert.*;");
             writer.println("import static org.hamcrest.Matchers.*;");
             writer.println("import java.util.*;");
@@ -182,14 +205,17 @@ public class LauncherTest {
         } catch (IOException e) {
             throw new AssertionError(e);
         }
-        return aClass;
+        return className;
     }
 
-    private File script(ClassDescription main, String... args) {
+    private File script(String main, String... args) {
         try {
-            File classes = javac.compile();
+            File source = new File(temporary.getRoot(), DIR_SOURCE);
+            File classes = new File(temporary.getRoot(), DIR_OBJECT);
+            assertThat(classes.mkdirs() || classes.isDirectory(), is(true));
+            compile(source, classes);
             Properties script = new Properties();
-            script.setProperty(Launcher.KEY_MAIN_CLASS, main.getBinaryName());
+            script.setProperty(Launcher.KEY_MAIN_CLASS, main);
             script.setProperty(Launcher.KEY_CLASSPATH_PREFIX + 0, classes.getAbsolutePath());
             for (int i = 0; i < args.length; i++) {
                 script.setProperty(Launcher.KEY_ARGUMENT_PREFIX + i, args[i]);
@@ -202,6 +228,63 @@ public class LauncherTest {
             return result;
         } catch (IOException e) {
             throw new AssertionError(e);
+        }
+    }
+
+    private void compile(File source, File classes) throws IOException {
+        JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+        Assume.assumeNotNull(compiler);
+        DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
+        try (StandardJavaFileManager files = compiler.getStandardFileManager(
+                diagnostics, Locale.getDefault(), ENCODING)) {
+            files.setLocation(StandardLocation.SOURCE_PATH, Arrays.asList(source));
+            files.setLocation(StandardLocation.CLASS_OUTPUT, Arrays.asList(classes));
+
+            List<String> arguments = new ArrayList<>();
+            Collections.addAll(arguments, "-encoding", ENCODING.name());
+
+            List<File> sources = new ArrayList<>();
+            collectSourceFiles(sources, source);
+
+            StringWriter errors = new StringWriter();
+            boolean success;
+            try (PrintWriter pw = new PrintWriter(errors)) {
+                CompilationTask task = compiler.getTask(
+                        pw,
+                        files,
+                        diagnostics,
+                        arguments,
+                        Collections.<String>emptyList(),
+                        files.getJavaFileObjectsFromFiles(sources));
+                success = task.call();
+            }
+            for (Diagnostic<? extends JavaFileObject> diagnostic : diagnostics.getDiagnostics()) {
+                switch (diagnostic.getKind()) {
+                case ERROR:
+                case MANDATORY_WARNING:
+                    throw new AssertionError(diagnostic);
+                default:
+                    System.out.println(diagnostic);
+                    break;
+                }
+            }
+            assertThat(success, is(true));
+        }
+    }
+
+    private void collectSourceFiles(List<File> sink, File file) {
+        String name = file.getName();
+        if (name.startsWith(".")) {
+            return;
+        }
+        if (file.isDirectory()) {
+            for (File child : file.listFiles()) {
+                collectSourceFiles(sink, child);
+            }
+        } else if (file.isFile()) {
+            if (name.endsWith(".java")) {
+                sink.add(file);
+            }
         }
     }
 }
