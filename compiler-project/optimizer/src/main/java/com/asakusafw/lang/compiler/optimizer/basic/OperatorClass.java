@@ -205,6 +205,11 @@ public class OperatorClass implements OperatorCharacteristics {
         SORTED,
 
         /**
+         * Each input group may be escaped from heap memory.
+         */
+        ESCAPED,
+
+        /**
          * Each input group will be aggregated.
          */
         AGGREATE,
