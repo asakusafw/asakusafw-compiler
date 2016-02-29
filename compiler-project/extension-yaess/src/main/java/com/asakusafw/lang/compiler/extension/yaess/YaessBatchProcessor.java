@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -43,6 +44,7 @@ import com.asakusafw.lang.compiler.api.reference.TaskReference;
 import com.asakusafw.lang.compiler.common.Diagnostic;
 import com.asakusafw.lang.compiler.common.DiagnosticException;
 import com.asakusafw.lang.compiler.common.Location;
+import com.asakusafw.lang.compiler.hadoop.HadoopCommandRequired;
 import com.asakusafw.lang.compiler.hadoop.HadoopTaskReference;
 import com.asakusafw.yaess.core.BatchScript;
 import com.asakusafw.yaess.core.CommandScript;
@@ -118,7 +120,13 @@ public class YaessBatchProcessor implements BatchProcessor {
             ExecutionPhase execution = convert(phase);
             scripts.put(execution, processPhase(batch, jobflow, phase));
         }
-        return new FlowScript(jobflow.getFlowId(), blockerIds, scripts);
+        Set<ExecutionScript.Kind> enables = EnumSet.allOf(ExecutionScript.Kind.class);
+        if (isHadoopCommandRequired(jobflow) == false) {
+            LOG.debug("jobflow \"{}.{}\" does not require Hadoop command", //$NON-NLS-1$
+                    batch.getBatchId(), jobflow.getFlowId());
+            enables.remove(ExecutionScript.Kind.HADOOP);
+        }
+        return new FlowScript(jobflow.getFlowId(), blockerIds, scripts, enables);
     }
 
     private List<ExecutionScript> processPhase(
@@ -226,6 +234,20 @@ public class YaessBatchProcessor implements BatchProcessor {
         Map<String, String> envs = Collections.emptyMap();
         Set<String> extensions = task.getExtensions();
         return new HadoopScript(stageId, blockerIds, className, props, envs, extensions);
+    }
+
+    private boolean isHadoopCommandRequired(JobflowReference jobflow) {
+        for (TaskReference.Phase phase : TaskReference.Phase.values()) {
+            for (TaskReference task : jobflow.getTasks(phase)) {
+                if (task instanceof HadoopTaskReference) {
+                    return true;
+                }
+                if (HadoopCommandRequired.get(task)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private Set<String> toStageIds(Collection<? extends TaskReference> tasks, Map<TaskReference, String> idMap) {
