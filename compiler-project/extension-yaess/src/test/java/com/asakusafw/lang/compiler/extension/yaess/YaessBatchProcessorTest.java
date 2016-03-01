@@ -47,6 +47,7 @@ import com.asakusafw.lang.compiler.api.reference.TaskReferenceMap;
 import com.asakusafw.lang.compiler.api.testing.MockBatchProcessorContext;
 import com.asakusafw.lang.compiler.api.testing.MockTaskReferenceMap;
 import com.asakusafw.lang.compiler.common.Location;
+import com.asakusafw.lang.compiler.hadoop.HadoopCommandRequired;
 import com.asakusafw.lang.compiler.hadoop.HadoopTaskReference;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.info.BatchInfo;
@@ -97,6 +98,7 @@ public class YaessBatchProcessorTest {
         assertThat(f0, is(notNullValue()));
         assertThat(f0.getId(), is("f0"));
         assertThat(f0.getBlockerIds(), is(empty()));
+        assertThat(f0.getEnabledScriptKinds(), hasItem(ExecutionScript.Kind.HADOOP));
 
         assertThat(flatten(f0.getScripts()), hasSize(1));
         List<ExecutionScript> f0main = list(f0.getScripts().get(ExecutionPhase.MAIN));
@@ -130,21 +132,25 @@ public class YaessBatchProcessorTest {
         assertThat(f0, is(notNullValue()));
         assertThat(f0.getId(), is("f0"));
         assertThat(f0.getBlockerIds(), is(empty()));
+        assertThat(f0.getEnabledScriptKinds(), hasItem(ExecutionScript.Kind.HADOOP));
 
         FlowScript f1 = script.findFlow("f1");
         assertThat(f1, is(notNullValue()));
         assertThat(f1.getId(), is("f1"));
         assertThat(f1.getBlockerIds(), containsInAnyOrder("f0"));
+        assertThat(f1.getEnabledScriptKinds(), hasItem(ExecutionScript.Kind.HADOOP));
 
         FlowScript f2 = script.findFlow("f2");
         assertThat(f2, is(notNullValue()));
         assertThat(f2.getId(), is("f2"));
         assertThat(f2.getBlockerIds(), containsInAnyOrder("f0"));
+        assertThat(f1.getEnabledScriptKinds(), hasItem(ExecutionScript.Kind.HADOOP));
 
         FlowScript f3 = script.findFlow("f3");
         assertThat(f3, is(notNullValue()));
         assertThat(f3.getId(), is("f3"));
         assertThat(f3.getBlockerIds(), containsInAnyOrder("f1", "f2"));
+        assertThat(f1.getEnabledScriptKinds(), hasItem(ExecutionScript.Kind.HADOOP));
     }
 
     /**
@@ -166,6 +172,7 @@ public class YaessBatchProcessorTest {
         assertThat(script.getAllFlows(), hasSize(1));
         FlowScript f0 = script.findFlow("f0");
         assertThat(f0, is(notNullValue()));
+        assertThat(f0.getEnabledScriptKinds(), hasItem(ExecutionScript.Kind.HADOOP));
 
         assertThat(flatten(f0.getScripts()), hasSize(7));
 
@@ -227,6 +234,7 @@ public class YaessBatchProcessorTest {
         assertThat(f0, is(notNullValue()));
         assertThat(f0.getId(), is("f0"));
         assertThat(f0.getBlockerIds(), is(empty()));
+        assertThat(f0.getEnabledScriptKinds(), hasItem(ExecutionScript.Kind.HADOOP));
         assertThat(flatten(f0.getScripts()), hasSize(4));
 
         List<ExecutionScript> p0 = list(f0.getScripts().get(ExecutionPhase.MAIN));
@@ -272,6 +280,7 @@ public class YaessBatchProcessorTest {
 
         BatchScript script = execute(context, batch);
         FlowScript f = script.findFlow("F");
+        assertThat(f.getEnabledScriptKinds(), hasItem(ExecutionScript.Kind.HADOOP));
         CommandScript cmd = find(flatten(f.getScripts()), "m");
 
         assertThat(cmd.getModuleName(), is("m"));
@@ -301,6 +310,7 @@ public class YaessBatchProcessorTest {
 
         BatchScript script = execute(batch);
         FlowScript f = script.findFlow("F");
+        assertThat(f.getEnabledScriptKinds(), hasItem(ExecutionScript.Kind.HADOOP));
         assertThat(flatten(f.getScripts()), hasSize(1));
 
         ExecutionScript s0 = flatten(f.getScripts()).get(0);
@@ -310,6 +320,24 @@ public class YaessBatchProcessorTest {
         HadoopScript h0 = (HadoopScript) s0;
         assertThat(h0.getClassName(), is("HADOOP"));
         assertThat(h0.getEnvironmentVariables().keySet(), is(empty()));
+    }
+
+    /**
+     * w/o hadoop command.
+     */
+    @Test
+    public void no_hadoop_required() {
+        JobflowReference sf0 = jobflow("f0", new MockTaskReferenceMap()
+                .add(Phase.MAIN, HadoopCommandRequired.put(task("t0"), false)));
+        BatchReference batch = batch("b", sf0);
+        BatchScript script = execute(batch);
+        assertThat(script.getAllFlows(), hasSize(1));
+
+        FlowScript f0 = script.findFlow("f0");
+        assertThat(f0, is(notNullValue()));
+        assertThat(f0.getId(), is("f0"));
+        assertThat(f0.getBlockerIds(), is(empty()));
+        assertThat(f0.getEnabledScriptKinds(), not(hasItem(ExecutionScript.Kind.HADOOP)));
     }
 
     private <T> List<T> list(Collection<? extends T> collection) {
