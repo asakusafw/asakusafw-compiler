@@ -104,6 +104,6 @@ public class ExternalInputReference extends BasicAttributeContainer
     public String toString() {
         return MessageFormat.format(
                 "ExternalInput(name={0}, paths={1})", //$NON-NLS-1$
-                paths);
+                name, paths);
     }
 }

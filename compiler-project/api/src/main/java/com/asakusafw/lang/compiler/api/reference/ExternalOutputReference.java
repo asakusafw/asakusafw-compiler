@@ -100,6 +100,6 @@ public class ExternalOutputReference extends BasicAttributeContainer
     public String toString() {
         return MessageFormat.format(
                 "ExternalOutput(name={0}, paths={1})", //$NON-NLS-1$
-                paths);
+                name, paths);
     }
 }
