@@ -89,4 +89,9 @@ public class BasicBatchReference extends BasicAttributeContainer implements Batc
     public Set<JobflowReference> getJobflows() {
         return new LinkedHashSet<>(jobflows.getJobflows());
     }
+
+    @Override
+    public String toString() {
+        return info.toString();
+    }
 }
