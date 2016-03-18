@@ -32,6 +32,7 @@ import com.asakusafw.lang.compiler.common.DiagnosticException;
 import com.asakusafw.lang.compiler.core.ClassAnalyzer;
 import com.asakusafw.lang.compiler.model.graph.Batch;
 import com.asakusafw.lang.compiler.model.graph.Jobflow;
+import com.asakusafw.lang.compiler.model.graph.OperatorGraph;
 
 /**
  * Composition of {@link ClassAnalyzer}.
@@ -90,6 +91,16 @@ public class CompositeClassAnalyzer implements ClassAnalyzer {
     }
 
     @Override
+    public boolean isFlowObject(Context context, Object object) {
+        for (ClassAnalyzer element : getElements(context)) {
+            if (element.isFlowObject(context, object)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
     public Batch analyzeBatch(Context context, Class<?> batchClass) {
         for (ClassAnalyzer element : getElements(context)) {
             if (element.isBatchClass(context, batchClass)) {
@@ -111,6 +122,18 @@ public class CompositeClassAnalyzer implements ClassAnalyzer {
         throw new DiagnosticException(Diagnostic.Level.ERROR, MessageFormat.format(
                 "unsupported jobflow class: {0}",
                 jobflowClass.getName()));
+    }
+
+    @Override
+    public OperatorGraph analyzeFlow(Context context, Object flowObject) {
+        for (ClassAnalyzer element : getElements(context)) {
+            if (element.isFlowObject(context, flowObject)) {
+                return element.analyzeFlow(context, flowObject);
+            }
+        }
+        throw new DiagnosticException(Diagnostic.Level.ERROR, MessageFormat.format(
+                "unsupported flow oject: {0}",
+                flowObject));
     }
 
     @Override

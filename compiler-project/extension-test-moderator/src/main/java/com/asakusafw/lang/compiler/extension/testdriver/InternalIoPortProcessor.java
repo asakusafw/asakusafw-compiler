@@ -43,6 +43,8 @@ import com.asakusafw.lang.compiler.extension.externalio.AbstractExternalPortProc
 import com.asakusafw.lang.compiler.extension.externalio.Naming;
 import com.asakusafw.lang.compiler.hadoop.HadoopFormatExtension;
 import com.asakusafw.lang.compiler.hadoop.HadoopTaskReference;
+import com.asakusafw.lang.compiler.internalio.InternalExporterDescription;
+import com.asakusafw.lang.compiler.internalio.InternalImporterDescription;
 import com.asakusafw.lang.compiler.javac.JavaSourceExtension;
 import com.asakusafw.lang.compiler.mapreduce.CopyStageEmitter;
 import com.asakusafw.lang.compiler.mapreduce.CopyStageInfo;

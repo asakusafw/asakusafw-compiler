@@ -90,7 +90,18 @@ public class FlowPartDriver {
      * @throws DiagnosticException if failed to analyze flow DSL
      */
     public OperatorGraph build(FlowDescription description) {
-        FlowGraph flowGraph = descriptionAnalyzer.analyze(description);
+        return build(description, descriptionAnalyzer);
+    }
+
+    /**
+     * Builds an {@link OperatorGraph}.
+     * @param description the target flow description
+     * @param analyzer the driver for {@link FlowDescription}
+     * @return the built operator graph
+     * @throws DiagnosticException if failed to analyze flow DSL
+     */
+    public OperatorGraph build(FlowDescription description, FlowDescriptionAnalyzer analyzer) {
+        FlowGraph flowGraph = analyzer.analyze(description);
         FlowGraphVerifier.verify(flowGraph);
         OperatorGraph graph = graphAnalyzer.analyze(flowGraph);
         return graph;

@@ -26,6 +26,7 @@ import com.asakusafw.lang.compiler.core.adapter.ExternalPortAnalyzerAdapter;
 import com.asakusafw.lang.compiler.model.graph.Batch;
 import com.asakusafw.lang.compiler.model.graph.BatchElement;
 import com.asakusafw.lang.compiler.model.graph.Jobflow;
+import com.asakusafw.lang.compiler.model.graph.OperatorGraph;
 import com.asakusafw.vocabulary.iterative.IterativeBatch;
 
 /**
@@ -45,6 +46,11 @@ public class IterativeBatchClassAnalyzer implements ClassAnalyzer {
     }
 
     @Override
+    public boolean isFlowObject(Context context, Object object) {
+        return false;
+    }
+
+    @Override
     public Batch analyzeBatch(Context context, Class<?> batchClass) {
         return createBatchAnalyzer(context).analyze(batchClass);
     }
@@ -55,6 +61,11 @@ public class IterativeBatchClassAnalyzer implements ClassAnalyzer {
         Set<BatchElement> elements = batch.getElements();
         assert elements.size() == 1;
         return elements.iterator().next().getJobflow();
+    }
+
+    @Override
+    public OperatorGraph analyzeFlow(Context context, Object flowObject) {
+        throw new UnsupportedOperationException();
     }
 
     static IterativeBatchAnalyzer createBatchAnalyzer(AnalyzerContext context) {

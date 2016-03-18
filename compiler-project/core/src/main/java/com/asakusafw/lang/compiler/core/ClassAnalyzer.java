@@ -18,6 +18,7 @@ package com.asakusafw.lang.compiler.core;
 import com.asakusafw.lang.compiler.common.DiagnosticException;
 import com.asakusafw.lang.compiler.model.graph.Batch;
 import com.asakusafw.lang.compiler.model.graph.Jobflow;
+import com.asakusafw.lang.compiler.model.graph.OperatorGraph;
 
 /**
  * Analyzes Asakusa DSL classes.
@@ -41,6 +42,15 @@ public interface ClassAnalyzer {
     boolean isJobflowClass(Context context, Class<?> aClass);
 
     /**
+     * Returns whether the target object represents a flow or not.
+     * @param context the current context
+     * @param object the target object
+     * @return {@code true} if the target class represents a flow, otherwise {@code false}
+     * @since 0.3.0
+     */
+    boolean isFlowObject(Context context, Object object);
+
+    /**
      * Analyzes batch class.
      * @param context the current context
      * @param batchClass the target batch class
@@ -57,6 +67,17 @@ public interface ClassAnalyzer {
      * @throws DiagnosticException if the target jobflow class is not valid
      */
     Jobflow analyzeJobflow(Context context, Class<?> jobflowClass);
+
+    /**
+     * Analyzes a flow object.
+     * @param context the current context
+     * @param flowObject the target flow object
+     * @return the analyzed element
+     * @throws DiagnosticException if the target jobflow class is not valid
+     * @see #isFlowObject(Context, Object)
+     * @since 0.3.0
+     */
+    OperatorGraph analyzeFlow(Context context, Object flowObject);
 
     /**
      * A context for {@link ClassAnalyzer}.

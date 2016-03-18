@@ -30,7 +30,6 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import com.asakusafw.lang.compiler.api.basic.BasicJobflowReference;
-import com.asakusafw.lang.compiler.api.basic.ExternalPortContainer;
 import com.asakusafw.lang.compiler.api.basic.TaskContainerMap;
 import com.asakusafw.lang.compiler.api.reference.CommandTaskReference;
 import com.asakusafw.lang.compiler.api.reference.CommandToken;
@@ -41,6 +40,7 @@ import com.asakusafw.lang.compiler.common.Location;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.info.BatchInfo;
 import com.asakusafw.lang.compiler.model.info.JobflowInfo;
+import com.asakusafw.lang.compiler.tester.ExternalPortMap;
 import com.asakusafw.lang.compiler.tester.JobflowArtifact;
 import com.asakusafw.lang.compiler.tester.TesterContext;
 import com.asakusafw.lang.compiler.tester.executor.JobflowExecutor.Action;
@@ -229,7 +229,7 @@ public class JobflowExecutorTest {
         return new JobflowArtifact(
                 new BatchInfo.Basic("BID", new ClassDescription("BID")),
                 reference,
-                new ExternalPortContainer());
+                new ExternalPortMap());
     }
 
     private TaskReference task(String id, TaskReference... blockers) {
