@@ -32,7 +32,6 @@ import org.junit.rules.TemporaryFolder;
 
 import com.asakusafw.lang.compiler.api.basic.BasicBatchReference;
 import com.asakusafw.lang.compiler.api.basic.BasicJobflowReference;
-import com.asakusafw.lang.compiler.api.basic.ExternalPortContainer;
 import com.asakusafw.lang.compiler.api.basic.TaskContainerMap;
 import com.asakusafw.lang.compiler.api.reference.CommandTaskReference;
 import com.asakusafw.lang.compiler.api.reference.CommandToken;
@@ -43,6 +42,7 @@ import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.info.BatchInfo;
 import com.asakusafw.lang.compiler.model.info.JobflowInfo;
 import com.asakusafw.lang.compiler.tester.BatchArtifact;
+import com.asakusafw.lang.compiler.tester.ExternalPortMap;
 import com.asakusafw.lang.compiler.tester.JobflowArtifact;
 import com.asakusafw.lang.compiler.tester.TesterContext;
 import com.asakusafw.lang.compiler.tester.executor.BatchExecutor.Action;
@@ -157,7 +157,7 @@ public class BatchExecutorTest {
                 Arrays.asList(jobflows));
         List<JobflowArtifact> elements = new ArrayList<>();
         for (JobflowReference jobflow : jobflows) {
-            elements.add(new JobflowArtifact(reference, jobflow, new ExternalPortContainer()));
+            elements.add(new JobflowArtifact(reference, jobflow, new ExternalPortMap()));
         }
         BatchArtifact result = new BatchArtifact(reference, elements);
         return result;

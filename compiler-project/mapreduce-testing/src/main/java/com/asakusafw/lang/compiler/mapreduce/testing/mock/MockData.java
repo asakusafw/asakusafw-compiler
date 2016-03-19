@@ -30,11 +30,12 @@ import com.asakusafw.runtime.value.DateOption;
 import com.asakusafw.runtime.value.DateTimeOption;
 import com.asakusafw.runtime.value.IntOption;
 import com.asakusafw.runtime.value.StringOption;
+import com.google.common.base.Objects;
 
 /**
  * Mock data model class.
  * @since 0.1.0
- * @version 0.1.1
+ * @version 0.3.0
  */
 public class MockData implements DataModel<MockData>, Writable {
 
@@ -193,5 +194,49 @@ public class MockData implements DataModel<MockData>, Writable {
         stringValue.readFields(input);
         dateValue.readFields(input);
         datetimeValue.readFields(input);
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + Objects.hashCode(intValue);
+        result = prime * result + Objects.hashCode(stringValue);
+        result = prime * result + Objects.hashCode(dateValue);
+        result = prime * result + Objects.hashCode(datetimeValue);
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        MockData other = (MockData) obj;
+        if (!Objects.equal(intValue, other.intValue)) {
+            return false;
+        }
+        if (!Objects.equal(stringValue, other.stringValue)) {
+            return false;
+        }
+        if (!Objects.equal(dateValue, other.dateValue)) {
+            return false;
+        }
+        if (!Objects.equal(datetimeValue, other.datetimeValue)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("{int=%s, string=%s, date=%s, datetime=%s}", //$NON-NLS-1$
+                intValue, stringValue, dateValue, datetimeValue);
     }
 }

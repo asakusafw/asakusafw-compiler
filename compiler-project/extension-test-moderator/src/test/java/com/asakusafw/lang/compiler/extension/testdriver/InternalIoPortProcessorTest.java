@@ -51,6 +51,8 @@ import com.asakusafw.lang.compiler.common.DiagnosticException;
 import com.asakusafw.lang.compiler.common.testing.FileEditor;
 import com.asakusafw.lang.compiler.extension.testdriver.mock.MockData;
 import com.asakusafw.lang.compiler.hadoop.HadoopTaskReference;
+import com.asakusafw.lang.compiler.internalio.InternalExporterDescription;
+import com.asakusafw.lang.compiler.internalio.InternalImporterDescription;
 import com.asakusafw.lang.compiler.javac.JavaSourceExtension;
 import com.asakusafw.lang.compiler.javac.testing.JavaCompiler;
 import com.asakusafw.lang.compiler.mapreduce.testing.MapReduceRunner;

@@ -15,19 +15,24 @@
  */
 package com.asakusafw.lang.compiler.core.basic;
 
+import java.text.MessageFormat;
+
 import com.asakusafw.lang.compiler.analyzer.BatchAnalyzer;
 import com.asakusafw.lang.compiler.analyzer.ExternalPortAnalyzer;
 import com.asakusafw.lang.compiler.analyzer.FlowGraphAnalyzer;
 import com.asakusafw.lang.compiler.analyzer.FlowPartBuilder;
-import com.asakusafw.lang.compiler.analyzer.FlowPartDriver;
 import com.asakusafw.lang.compiler.analyzer.JobflowAnalyzer;
 import com.asakusafw.lang.compiler.analyzer.adapter.BatchAdapter;
 import com.asakusafw.lang.compiler.analyzer.adapter.JobflowAdapter;
+import com.asakusafw.lang.compiler.common.Diagnostic;
+import com.asakusafw.lang.compiler.common.DiagnosticException;
 import com.asakusafw.lang.compiler.core.AnalyzerContext;
 import com.asakusafw.lang.compiler.core.ClassAnalyzer;
 import com.asakusafw.lang.compiler.core.adapter.ExternalPortAnalyzerAdapter;
 import com.asakusafw.lang.compiler.model.graph.Batch;
 import com.asakusafw.lang.compiler.model.graph.Jobflow;
+import com.asakusafw.lang.compiler.model.graph.OperatorGraph;
+import com.asakusafw.vocabulary.flow.graph.FlowGraph;
 
 /**
  * Analyzes Asakusa DSL elements.
@@ -45,6 +50,11 @@ public class BasicClassAnalyzer implements ClassAnalyzer {
     }
 
     @Override
+    public boolean isFlowObject(Context context, Object object) {
+        return object instanceof OperatorGraph || object instanceof FlowGraph;
+    }
+
+    @Override
     public Batch analyzeBatch(Context context, Class<?> batchClass) {
         return createBatchAnalyzer(context).analyze(batchClass);
     }
@@ -54,13 +64,18 @@ public class BasicClassAnalyzer implements ClassAnalyzer {
         return createJobflowAnalyzer(context).analyze(jobflowClass);
     }
 
-    /**
-     * Creates a new {@link FlowPartDriver}.
-     * @param context the current context
-     * @return the created builder
-     */
-    public static FlowPartDriver newFlowPartDriver(AnalyzerContext context) {
-        return new FlowPartDriver(createFlowGraphAnalyzer(context));
+    @Override
+    public OperatorGraph analyzeFlow(Context context, Object flowObject) {
+        if (flowObject instanceof OperatorGraph) {
+            return (OperatorGraph) flowObject;
+        } else if (flowObject instanceof FlowGraph) {
+            FlowGraphAnalyzer analyzer = createFlowGraphAnalyzer(context);
+            return analyzer.analyze((FlowGraph) flowObject);
+        } else {
+            throw new DiagnosticException(Diagnostic.Level.ERROR, MessageFormat.format(
+                    "unsupported flow object: {0}",
+                    flowObject));
+        }
     }
 
     /**

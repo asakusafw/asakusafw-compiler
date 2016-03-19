@@ -32,6 +32,7 @@
     <!-- utilities -->
     <module>javac</module>
     <module>hadoop</module>
+    <module>internalio</module>
     <module>mapreduce</module>
     <module>inspection</module>
     <module>redirector</module>
@@ -52,6 +53,7 @@
     <module>mapreduce-testing</module>
     <module>api-testing</module>
     <module>tester</module>
+    <module>test-adapter</module>
 
     <!-- sub projects -->
     <module>operator-project</module>

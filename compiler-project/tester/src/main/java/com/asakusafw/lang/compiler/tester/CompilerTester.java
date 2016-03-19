@@ -29,7 +29,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.asakusafw.lang.compiler.api.reference.BatchReference;
-import com.asakusafw.lang.compiler.api.reference.ExternalPortReferenceMap;
 import com.asakusafw.lang.compiler.api.reference.JobflowReference;
 import com.asakusafw.lang.compiler.common.DiagnosticException;
 import com.asakusafw.lang.compiler.core.BatchCompiler;
@@ -94,6 +93,8 @@ try (CompilerTester compiler = ...) {
  * @see CompilerProfile
  * @see BatchArtifact
  * @see JobflowArtifact
+ * @since 0.1.0
+ * @version 0.3.0
  */
 public class CompilerTester implements Closeable {
 
@@ -324,7 +325,7 @@ public class CompilerTester implements Closeable {
 
         private BatchArtifact artifact;
 
-        private final Map<String, ExternalPortReferenceMap> externalPorts = new LinkedHashMap<>();
+        private final Map<String, ExternalPortMap> externalPorts = new LinkedHashMap<>();
 
         ResultCollector() {
             return;
@@ -349,7 +350,7 @@ public class CompilerTester implements Closeable {
         @Override
         public void afterJobflow(JobflowCompiler.Context context, BatchInfo batch, Jobflow jobflow) {
             assert externalPorts.containsKey(jobflow.getFlowId()) == false;
-            ExternalPortReferenceMap ports = context.getExternalPorts();
+            ExternalPortMap ports = ExternalPortMap.analyze(jobflow.getOperatorGraph(), context.getExternalPorts());
             externalPorts.put(jobflow.getFlowId(), ports);
         }
 
@@ -358,7 +359,7 @@ public class CompilerTester implements Closeable {
             assert artifact == null;
             List<JobflowArtifact> jobflows = new ArrayList<>();
             for (JobflowReference jobflow : reference.getJobflows()) {
-                ExternalPortReferenceMap ports = externalPorts.get(jobflow.getFlowId());
+                ExternalPortMap ports = externalPorts.get(jobflow.getFlowId());
                 assert ports != null;
                 jobflows.add(new JobflowArtifact(reference, jobflow, ports));
             }

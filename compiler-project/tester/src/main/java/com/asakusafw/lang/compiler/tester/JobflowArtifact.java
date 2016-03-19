@@ -15,7 +15,6 @@
  */
 package com.asakusafw.lang.compiler.tester;
 
-import com.asakusafw.lang.compiler.api.reference.ExternalPortReferenceMap;
 import com.asakusafw.lang.compiler.api.reference.JobflowReference;
 import com.asakusafw.lang.compiler.model.info.BatchInfo;
 
@@ -28,7 +27,7 @@ public class JobflowArtifact {
 
     private final JobflowReference reference;
 
-    private final ExternalPortReferenceMap externalPorts;
+    private final ExternalPortMap externalPorts;
 
     /**
      * Creates a new instance.
@@ -36,7 +35,7 @@ public class JobflowArtifact {
      * @param reference the compilation result
      * @param externalPorts the external port map
      */
-    public JobflowArtifact(BatchInfo batch, JobflowReference reference, ExternalPortReferenceMap externalPorts) {
+    public JobflowArtifact(BatchInfo batch, JobflowReference reference, ExternalPortMap externalPorts) {
         this.batch = batch;
         this.reference = reference;
         this.externalPorts = externalPorts;
@@ -62,7 +61,7 @@ public class JobflowArtifact {
      * Returns the external port map for this jobflow.
      * @return the external port map
      */
-    public ExternalPortReferenceMap getExternalPorts() {
+    public ExternalPortMap getExternalPorts() {
         return externalPorts;
     }
 }

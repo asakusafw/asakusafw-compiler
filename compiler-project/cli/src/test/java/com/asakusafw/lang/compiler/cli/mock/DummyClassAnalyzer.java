@@ -45,6 +45,11 @@ public class DummyClassAnalyzer implements ClassAnalyzer {
     }
 
     @Override
+    public boolean isFlowObject(Context context, Object object) {
+        return object instanceof OperatorGraph;
+    }
+
+    @Override
     public Batch analyzeBatch(Context context, Class<?> batchClass) {
         BatchInfo info = BatchAdapter.analyzeInfo(batchClass);
         Batch result = new Batch(info);
@@ -56,6 +61,14 @@ public class DummyClassAnalyzer implements ClassAnalyzer {
     public Jobflow analyzeJobflow(Context context, Class<?> jobflowClass) {
         JobflowInfo info = JobflowAdapter.analyzeInfo(jobflowClass);
         return newJobflow(info);
+    }
+
+    @Override
+    public OperatorGraph analyzeFlow(Context context, Object flowObject) {
+        if (flowObject instanceof OperatorGraph) {
+            return (OperatorGraph) flowObject;
+        }
+        throw new IllegalArgumentException();
     }
 
     private Jobflow newJobflow(JobflowInfo info) {
