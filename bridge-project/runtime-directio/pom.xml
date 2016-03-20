@@ -44,6 +44,11 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>jcl-over-slf4j</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
       <groupId>com.asakusafw.lang.compiler</groupId>
       <artifactId>asakusa-compiler-mapreduce-testing</artifactId>
       <version>${project.version}</version>
