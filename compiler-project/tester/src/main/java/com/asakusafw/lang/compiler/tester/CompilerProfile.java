@@ -70,6 +70,8 @@ import com.asakusafw.lang.compiler.packaging.ResourceUtil;
  *   </ul>
  * </li>
  * </ul>
+ * @since 0.1.0
+ * @version 0.3.0
  */
 public final class CompilerProfile {
 
@@ -88,6 +90,8 @@ public final class CompilerProfile {
     private final Map<String, String> environmentVariables = new LinkedHashMap<>();
 
     private File explicitFrameworkHome;
+
+    private boolean frameworkHomeEnabled = true;
 
     /**
      * Creates a new instance.
@@ -179,11 +183,14 @@ public final class CompilerProfile {
 
     /**
      * Declares to use the specified Asakusa framework installation, instead of <em>volatile installation</em>.
-     * @param path the installation path
+     * If the {@code path} is {@code null}, the framework installation is disabled (an empty installation will be
+     * provided).
+     * @param path the installation path, or {@code null} to disable framework installation
      * @return this
      * @see <a href="#installation"> framework installations </a>
      */
     public CompilerProfile withFrameworkInstallation(File path) {
+        this.frameworkHomeEnabled = path != null;
         this.explicitFrameworkHome = path;
         return this;
     }
@@ -253,6 +260,13 @@ public final class CompilerProfile {
     }
 
     private void buildOnTheFlyInstallation(TesterContext context) throws IOException {
+        if (frameworkHomeEnabled == false) {
+            LOG.debug("Asakusa framework installation is disabled");
+            if (frameworkInstallation.isEmpty() == false) {
+                LOG.warn("ignored some framework installation files (installation is disabled)");
+            }
+            return;
+        }
         File home = context.getFrameworkHome();
         if (frameworkInstallation.isEmpty()) {
             if (explicitFrameworkHome == null) {

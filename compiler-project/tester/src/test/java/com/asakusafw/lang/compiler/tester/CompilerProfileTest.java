@@ -173,6 +173,23 @@ public class CompilerProfileTest {
     }
 
     /**
+     * w/o framework installation.
+     * @throws Exception if failed
+     */
+    @Test
+    public void disable_framework() throws Exception {
+        CompilerProfile profile = newProfile();
+        profile.withFrameworkInstallation(null);
+        profile.forFrameworkInstallation()
+            .add(item("TESTING", "Hello, world!"));
+
+        try (CompilerTester compiler = profile.build()) {
+            File home = compiler.getTesterContext().getFrameworkHome();
+            assertThat(new File(home, "TESTING").exists(), is(false));
+        }
+    }
+
+    /**
      * w/ edit.
      * @throws Exception if failed
      */

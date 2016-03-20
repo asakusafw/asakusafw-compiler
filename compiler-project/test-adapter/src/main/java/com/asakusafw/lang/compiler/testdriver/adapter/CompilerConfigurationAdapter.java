@@ -46,23 +46,33 @@ class CompilerConfigurationAdapter extends BasicCompilerConfiguration {
     public CompilerTester start(Class<?> target) throws IOException {
         ClassLoader cl = getClassLoader();
         CompilerProfile profile = new CompilerProfile(cl);
+
+        // disables framework installation
+        profile.withFrameworkInstallation(null);
+
         profile.forCompilerOptions()
             .withRuntimeWorkingDirectory(Util.createStagePath(), false)
             .withProperties(getOptions());
+
         profile.forProjectRepository()
             .embed(ResourceUtil.findLibraryByClass(target));
+
         profile.forToolRepository()
             .useDefaults();
+
         if (getDebugLevel().compareTo(DebugLevel.NORMAL) >= 0) {
             profile.forCompilerOptions()
                 .withProperty(LoggingOperatorRemover.KEY_LOG_LEVEL, Logging.Level.DEBUG.name());
         }
+
         for (CompilerProfile.Edit edit : edits) {
             profile.apply(edit);
         }
+
         for (CompilerProfileInitializer initializer : ServiceLoader.load(CompilerProfileInitializer.class, cl)) {
             initializer.initialize(profile, this);
         }
+
         return profile.build();
     }
 }
