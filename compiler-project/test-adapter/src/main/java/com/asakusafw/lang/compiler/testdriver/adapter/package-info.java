@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 /**
- * Adapter implementations of Asakusa DSL compiler API for testing.
+ * Adapter implementations of Asakusa DSL TestKit Compiler API.
  */
 package com.asakusafw.lang.compiler.testdriver.adapter;

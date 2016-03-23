@@ -27,8 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.apache.commons.io.FileUtils;
-
 import com.asakusafw.lang.compiler.api.reference.CommandTaskReference;
 import com.asakusafw.lang.compiler.api.reference.JobflowReference;
 import com.asakusafw.lang.compiler.api.reference.TaskReference;
@@ -60,6 +58,8 @@ import com.asakusafw.testdriver.compiler.basic.BasicHadoopTaskMirror;
 import com.asakusafw.testdriver.compiler.basic.BasicJobflowMirror;
 import com.asakusafw.testdriver.compiler.basic.BasicPortMirror;
 import com.asakusafw.testdriver.compiler.basic.BasicTaskMirror;
+import com.asakusafw.testdriver.compiler.util.DeploymentUtil;
+import com.asakusafw.testdriver.compiler.util.DeploymentUtil.DeployOption;
 import com.asakusafw.vocabulary.external.ExporterDescription;
 import com.asakusafw.vocabulary.external.ImporterDescription;
 import com.asakusafw.vocabulary.flow.FlowDescription;
@@ -132,7 +132,7 @@ class CompilerSessionAdapter implements CompilerSession {
         File batchapps = tester.getTesterContext().getBatchApplicationHome();
         File source = new File(batchapps, batch.getBatchId());
         File destination = new File(configuration.getWorkingDirectory(), UUID.randomUUID().toString());
-        FileUtils.moveDirectory(source, destination);
+        DeploymentUtil.deploy(source, destination, DeployOption.DELETE_SOURCE);
         return destination;
     }
 
