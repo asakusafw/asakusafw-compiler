@@ -179,7 +179,7 @@ public class Group {
     /**
      * Represents a kind of ordering direction.
      */
-    public static enum Direction {
+    public enum Direction {
 
         /**
          * Ascendant order.
@@ -194,7 +194,7 @@ public class Group {
 
         private final String operator;
 
-        private Direction(String symbol) {
+        Direction(String symbol) {
             this.operator = symbol;
         }
 

@@ -138,7 +138,7 @@ public class SerializableValueDescription implements ValueDescription {
 
         private final ClassLoader loader;
 
-        public ResolveObjectInputStream(InputStream in, ClassLoader loader) throws IOException {
+        ResolveObjectInputStream(InputStream in, ClassLoader loader) throws IOException {
             super(in);
             this.loader = loader;
         }

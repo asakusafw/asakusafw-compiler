@@ -65,7 +65,7 @@ public class ClassRewriter {
 
     private class ClassEditor extends ClassVisitor {
 
-        public ClassEditor(ClassVisitor forward) {
+        ClassEditor(ClassVisitor forward) {
             super(Opcodes.ASM5, forward);
         }
 
@@ -78,7 +78,7 @@ public class ClassRewriter {
 
     private class MethodEditor extends MethodVisitor {
 
-        public MethodEditor(MethodVisitor forward) {
+        MethodEditor(MethodVisitor forward) {
             super(Opcodes.ASM5, forward);
         }
 

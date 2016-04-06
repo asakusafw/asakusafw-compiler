@@ -109,7 +109,7 @@ final class DslBuilder {
 
     private final ElementRef unknownRef;
 
-    public DslBuilder(OperatorDriver.Context context) {
+    DslBuilder(OperatorDriver.Context context) {
         Objects.requireNonNull(context, "context must not be null"); //$NON-NLS-1$
         this.environment = context.getEnvironment();
         this.method = context.getMethod();

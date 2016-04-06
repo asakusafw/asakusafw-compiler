@@ -29,7 +29,7 @@ public interface Data {
     /**
      * Kind of data.
      */
-    public enum Kind {
+    enum Kind {
 
         /**
          * Constant value.

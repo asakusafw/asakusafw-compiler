@@ -37,7 +37,7 @@ public interface BatchCompiler {
     /**
      * A context for {@link BatchCompiler}.
      */
-    public static class Context extends CompilerContext.Basic {
+    class Context extends CompilerContext.Basic {
 
         private final FileContainer output;
 

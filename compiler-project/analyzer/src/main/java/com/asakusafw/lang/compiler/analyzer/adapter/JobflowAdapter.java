@@ -433,7 +433,7 @@ public class JobflowAdapter {
 
         final Export exportInfo;
 
-        public ParameterCandidate(
+        ParameterCandidate(
                 Constructor<? extends FlowDescription> constructor,
                 int index, TypeInfo type,
                 Import importInfo, Export exportInfo) {
@@ -535,7 +535,7 @@ public class JobflowAdapter {
 
         private final String description;
 
-        private Direction(Class<?> rawClass, String description) {
+        Direction(Class<?> rawClass, String description) {
             this.rawClass = rawClass;
             this.description = description;
         }

@@ -62,7 +62,7 @@ public interface EngineBinding<T> {
      * An abstract implementation of {@link EngineBinding}.
      * @param <T> the engine type
      */
-    public abstract class Abstract<T> implements EngineBinding<T> {
+    abstract class Abstract<T> implements EngineBinding<T> {
 
         @Override
         public Collection<ClassDescription> getTargetOperators() {

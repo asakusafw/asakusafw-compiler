@@ -121,7 +121,7 @@ public class BuildLogParticipant extends AbstractCompilerParticipant {
 
         private final PrintWriter writer;
 
-        public Editor(OutputStream output) {
+        Editor(OutputStream output) {
             writer = new PrintWriter(new OutputStreamWriter(output, ENCODING));
         }
 

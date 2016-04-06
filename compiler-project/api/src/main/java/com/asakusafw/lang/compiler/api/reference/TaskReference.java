@@ -52,7 +52,7 @@ public interface TaskReference extends BlockingReference<TaskReference> {
     /**
      * Phases each task replies on.
      */
-    public enum Phase {
+    enum Phase {
 
         /**
          * Initialization.

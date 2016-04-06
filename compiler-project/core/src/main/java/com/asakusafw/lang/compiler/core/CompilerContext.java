@@ -41,7 +41,7 @@ public interface CompilerContext extends AnalyzerContext, ExtensionContainer {
      * A basic implementation of {@link CompilerContext}.
      * Clients can inherit this class.
      */
-    public static class Basic extends BasicExtensionContainer implements CompilerContext {
+    class Basic extends BasicExtensionContainer implements CompilerContext {
 
         private final CompilerOptions options;
 

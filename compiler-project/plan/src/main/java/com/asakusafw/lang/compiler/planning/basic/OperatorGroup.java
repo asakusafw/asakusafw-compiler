@@ -51,7 +51,7 @@ final class OperatorGroup {
 
     private final Set<Attribute> attributes;
 
-    public OperatorGroup(
+    OperatorGroup(
             BasicSubPlan owner, Set<Operator> operators,
             BitSet broadcastInputIndices, Set<Attribute> attributes) {
         this.owner = owner;
@@ -533,7 +533,7 @@ final class OperatorGroup {
 
         final Set<Attribute> attributes;
 
-        public GroupInfo(Object id, BitSet broadcastInputIndices, Set<Attribute> attributes) {
+        GroupInfo(Object id, BitSet broadcastInputIndices, Set<Attribute> attributes) {
             this.id = id;
             this.broadcastInputIndices = broadcastInputIndices;
             this.attributes = attributes;

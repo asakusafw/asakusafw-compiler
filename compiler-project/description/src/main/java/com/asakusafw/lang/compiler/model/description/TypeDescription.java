@@ -35,7 +35,7 @@ public interface TypeDescription extends Description {
     /**
      * Represents a kind of {@link TypeDescription}.
      */
-    public static enum TypeKind {
+    enum TypeKind {
 
         /**
          * basic types.

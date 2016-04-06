@@ -77,7 +77,7 @@ public class ZipSink implements ResourceSink {
 
         private boolean closed = false;
 
-        public ZipEntryOutputStream(ZipOutputStream zipped) {
+        ZipEntryOutputStream(ZipOutputStream zipped) {
             this.zipped = zipped;
         }
 

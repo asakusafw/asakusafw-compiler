@@ -38,7 +38,7 @@ public interface ExternalInputInfo extends ExternalPortInfo {
     /**
      * Represents a kind of estimated input data size.
      */
-    public enum DataSize {
+    enum DataSize {
 
         /**
          * unknown or not estimated.
@@ -67,7 +67,7 @@ public interface ExternalInputInfo extends ExternalPortInfo {
      * @since 0.1.0
      * @version 0.3.0
      */
-    public static class Basic implements ExternalInputInfo {
+    class Basic implements ExternalInputInfo {
 
         private final ClassDescription descriptionClass;
 

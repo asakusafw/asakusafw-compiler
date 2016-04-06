@@ -55,7 +55,7 @@ final class BasicSubPlanEditor {
      * @param target the target sub-plan
      * @param equivalence tester for operator isomorphism
      */
-    public BasicSubPlanEditor(BasicSubPlan target, OperatorEquivalence equivalence) {
+    BasicSubPlanEditor(BasicSubPlan target, OperatorEquivalence equivalence) {
         this.target = target;
         this.groupMap = computeGroupMap(target, equivalence);
         Graph<OperatorGroup> graph = computeOperatorGroups(target, groupMap);

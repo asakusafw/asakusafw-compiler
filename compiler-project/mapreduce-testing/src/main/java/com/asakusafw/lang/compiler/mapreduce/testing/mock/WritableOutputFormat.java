@@ -45,7 +45,7 @@ public class WritableOutputFormat<T extends Writable> extends FileOutputFormat<N
 
         private final ModelOutput<T> output;
 
-        public Writer(ModelOutput<T> output) {
+        Writer(ModelOutput<T> output) {
             this.output = output;
         }
 

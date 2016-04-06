@@ -64,7 +64,7 @@ public interface BatchInfo extends DescriptionInfo {
     /**
      * Attributes for Asakusa batches.
      */
-    public enum Attribute {
+    enum Attribute {
 
         /**
          * Denies parameters other than defined.
@@ -75,7 +75,7 @@ public interface BatchInfo extends DescriptionInfo {
     /**
      * Parameter definition for Asakusa batches.
      */
-    public static class Parameter {
+    class Parameter {
 
         private final String key;
 
@@ -151,7 +151,7 @@ public interface BatchInfo extends DescriptionInfo {
     /**
      * A basic implementation of {@link BatchInfo}.
      */
-    public static class Basic implements BatchInfo {
+    class Basic implements BatchInfo {
 
         private final String batchId;
 

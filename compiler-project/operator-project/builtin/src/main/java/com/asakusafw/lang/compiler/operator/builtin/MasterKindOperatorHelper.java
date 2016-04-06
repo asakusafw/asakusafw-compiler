@@ -273,7 +273,7 @@ final class MasterKindOperatorHelper {
 
         private static final long serialVersionUID = 1L;
 
-        public ResolveException(String message) {
+        ResolveException(String message) {
             super(message);
         }
     }

@@ -168,7 +168,7 @@ public class BuiltInOperatorEstimator
 
         private final double scale;
 
-        public CustomEstimator(double scale) {
+        CustomEstimator(double scale) {
             this.scale = scale;
         }
 

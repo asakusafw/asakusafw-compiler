@@ -43,7 +43,7 @@ final class BasicPlanEditor {
      * @param target the target plan
      * @param equivalence tester for operator isomorphism
      */
-    public BasicPlanEditor(BasicPlan target, OperatorEquivalence equivalence) {
+    BasicPlanEditor(BasicPlan target, OperatorEquivalence equivalence) {
         this.target = target;
         Map<SubPlan, BasicSubPlanEditor> editors = new HashMap<>();
         for (BasicSubPlan s : target.getElements()) {

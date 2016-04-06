@@ -39,7 +39,7 @@ public interface InspectionNodeProcessor {
     /**
      * Represents a context for {@link InspectionNodeProcessor}.
      */
-    public static class Context {
+    class Context {
 
         private final Map<String, String> options;
 

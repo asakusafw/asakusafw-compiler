@@ -67,7 +67,7 @@ public final class CoreOperator extends Operator {
     /**
      * Represents a kind of core operator.
      */
-    public static enum CoreOperatorKind {
+    public enum CoreOperatorKind {
 
         /**
          * Checkpoint operators.
@@ -94,11 +94,11 @@ public final class CoreOperator extends Operator {
 
         private final ClassDescription annotationType;
 
-        private CoreOperatorKind(String simpleName) {
+        CoreOperatorKind(String simpleName) {
             this(new ClassDescription(PREFIX_ANNOTATION_TYPE + simpleName));
         }
 
-        private CoreOperatorKind(ClassDescription annotationType) {
+        CoreOperatorKind(ClassDescription annotationType) {
             this.annotationType = annotationType;
         }
 

@@ -158,7 +158,7 @@ public class ZipRepository implements ResourceRepository {
 
         private boolean closed = false;
 
-        public ZipEntryInputStream(ZipInputStream zipped) {
+        ZipEntryInputStream(ZipInputStream zipped) {
             this.zipped = zipped;
         }
 

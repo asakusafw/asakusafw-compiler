@@ -36,7 +36,7 @@ public interface AnalyzerContext {
      * A basic implementation of {@link AnalyzerContext}.
      * Clients can inherit this class.
      */
-    public static class Basic implements AnalyzerContext {
+    class Basic implements AnalyzerContext {
 
         private final ProjectRepository project;
 

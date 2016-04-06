@@ -52,7 +52,7 @@ public interface OperatorAttributeAnalyzer {
     /**
      * Represents a map of attributes.
      */
-    public static class AttributeMap {
+    class AttributeMap {
 
         private final Map<Class<?>, Object> entity = new LinkedHashMap<>();
 

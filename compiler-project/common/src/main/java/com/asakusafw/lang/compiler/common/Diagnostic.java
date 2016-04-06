@@ -43,7 +43,7 @@ public interface Diagnostic extends Serializable {
     /**
      * Represents severity of {@link Diagnostic}.
      */
-    public static enum Level {
+    enum Level {
 
         /**
          * Information.
