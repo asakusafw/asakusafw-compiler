@@ -588,7 +588,7 @@ public final class MockOperators {
 
         final String token;
 
-        public Id(String token) {
+        Id(String token) {
             this.token = token;
         }
 

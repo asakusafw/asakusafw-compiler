@@ -28,7 +28,7 @@ class FlowPortMapAdapter implements FlowPortMap {
 
     private final FlowDescriptionAnalyzer analyzer = new FlowDescriptionAnalyzer();
 
-    public FlowPortMapAdapter() {
+    FlowPortMapAdapter() {
         return;
     }
 

@@ -67,7 +67,7 @@ public abstract class ExternalPort extends Operator {
     /**
      * Represents a kind of port.
      */
-    public static enum PortKind {
+    public enum PortKind {
 
         /**
          * input port.

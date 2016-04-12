@@ -41,7 +41,7 @@ public interface JobflowCompiler {
     /**
      * A context for {@link JobflowCompiler}.
      */
-    public static class Context extends CompilerContext.Basic {
+    class Context extends CompilerContext.Basic {
 
         private final FileContainer output;
 

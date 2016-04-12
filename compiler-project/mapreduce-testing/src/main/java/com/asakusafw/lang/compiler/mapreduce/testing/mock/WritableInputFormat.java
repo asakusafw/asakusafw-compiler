@@ -49,7 +49,7 @@ public class WritableInputFormat<T extends Writable> extends FileInputFormat<Nul
 
         private T buffer;
 
-        public Reader() {
+        Reader() {
             return;
         }
 

@@ -75,7 +75,7 @@ public class ExternalPortAnalyzerAdapter implements ExternalPortAnalyzer {
 
         private final DataModelLoader dataModelLoader;
 
-        public ContextAdapter(AnalyzerContext delegate) {
+        ContextAdapter(AnalyzerContext delegate) {
             this.delegate = delegate;
             this.dataModelLoader = new DataModelLoaderAdapter(delegate);
         }

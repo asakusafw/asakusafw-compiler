@@ -177,7 +177,7 @@ public class OperatorEstimatorAdapter
 
         final BasicOperatorEstimate estimate = new BasicOperatorEstimate();
 
-        public Session(Operator target) {
+        Session(Operator target) {
             this.target = target;
         }
     }

@@ -63,7 +63,7 @@ public interface OperatorDriver {
     /**
      * Represents processing context.
      */
-    public static final class Context {
+    final class Context {
 
         private final CompileEnvironment environment;
 

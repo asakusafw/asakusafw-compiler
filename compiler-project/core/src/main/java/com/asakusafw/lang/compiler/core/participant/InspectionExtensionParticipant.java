@@ -124,7 +124,7 @@ public class InspectionExtensionParticipant extends AbstractCompilerParticipant 
 
         private final ResourceContainer delegate;
 
-        public Extension(ResourceContainer delegate) {
+        Extension(ResourceContainer delegate) {
             this.delegate = delegate;
         }
 

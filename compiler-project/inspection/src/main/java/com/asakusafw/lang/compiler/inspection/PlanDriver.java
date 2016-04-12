@@ -122,7 +122,7 @@ public class PlanDriver {
 
         final Map<SubPlan.Output, InspectionNode.Port> outputs = new LinkedHashMap<>();
 
-        public SubPlanInfo(SubPlan target, InspectionNode node, Map<Operator, InspectionNode> elements) {
+        SubPlanInfo(SubPlan target, InspectionNode node, Map<Operator, InspectionNode> elements) {
             this.target = target;
             this.node = node;
             this.elements = elements;

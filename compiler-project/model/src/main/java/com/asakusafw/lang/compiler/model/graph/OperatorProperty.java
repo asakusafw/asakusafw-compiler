@@ -35,7 +35,7 @@ public interface OperatorProperty {
     /**
      * Represents a kind of {@link OperatorProperty}.
      */
-    public enum PropertyKind {
+    enum PropertyKind {
 
         /**
          * operator input.

@@ -188,7 +188,7 @@ public final class ProjectionOperatorUtil {
         return results;
     }
 
-    private static enum MappingKind {
+    private enum MappingKind {
 
         WIDENING,
 
@@ -203,7 +203,7 @@ public final class ProjectionOperatorUtil {
 
         final PropertyReference destination;
 
-        public MappingElement(PropertyReference source, PropertyReference destination) {
+        MappingElement(PropertyReference source, PropertyReference destination) {
             this.source = source;
             this.destination = destination;
         }

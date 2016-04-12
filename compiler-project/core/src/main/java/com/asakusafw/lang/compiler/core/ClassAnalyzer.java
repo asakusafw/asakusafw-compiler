@@ -82,7 +82,7 @@ public interface ClassAnalyzer {
     /**
      * A context for {@link ClassAnalyzer}.
      */
-    public static class Context extends AnalyzerContext.Basic {
+    class Context extends AnalyzerContext.Basic {
 
         /**
          * Creates a new instance.

@@ -44,7 +44,7 @@ public interface ValueDescription extends Description {
     /**
      * Represents a kind of {@link ValueDescription}.
      */
-    public static enum ValueKind {
+    enum ValueKind {
 
         /**
          * immediate values.

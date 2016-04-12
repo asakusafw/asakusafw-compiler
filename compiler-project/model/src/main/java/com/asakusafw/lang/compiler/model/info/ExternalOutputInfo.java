@@ -35,7 +35,7 @@ public interface ExternalOutputInfo extends ExternalPortInfo {
      * @since 0.1.0
      * @version 0.3.0
      */
-    public static class Basic implements ExternalOutputInfo {
+    class Basic implements ExternalOutputInfo {
 
         private final ClassDescription descriptionClass;
 

@@ -132,7 +132,7 @@ public class CommandToken {
      * Represents a token.
      */
     @SuppressWarnings("hiding")
-    public static enum TokenKind {
+    public enum TokenKind {
 
         /**
          * immediate text.

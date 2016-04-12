@@ -174,7 +174,7 @@ public final class SummarizedModelUtil {
 
         final PropertyFolding.Aggregation aggregation;
 
-        public FoldingElement(PropertyName source, PropertyName destination, PropertyFolding.Aggregation aggregation) {
+        FoldingElement(PropertyName source, PropertyName destination, PropertyFolding.Aggregation aggregation) {
             this.source = source;
             this.destination = destination;
             this.aggregation = aggregation;

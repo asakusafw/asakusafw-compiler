@@ -149,7 +149,7 @@ final class Util {
 
         private final Set<? extends Operator> members;
 
-        public IsMember(Set<? extends Operator> operators) {
+        IsMember(Set<? extends Operator> operators) {
             this.members = operators;
         }
 

@@ -118,7 +118,7 @@ public class ResourceAssembler {
 
         private final Set<Predicate<? super Location>> predicates = new HashSet<>();
 
-        public RepositoryInfo(ResourceRepository repository) {
+        RepositoryInfo(ResourceRepository repository) {
             this.repository = repository;
         }
 
@@ -168,7 +168,7 @@ public class ResourceAssembler {
 
         private final Predicate<? super Location> predicate;
 
-        public AssemblyRepository(ResourceRepository repository, Predicate<? super Location> predicate) {
+        AssemblyRepository(ResourceRepository repository, Predicate<? super Location> predicate) {
             this.repository = repository;
             this.predicate = predicate;
         }
@@ -192,7 +192,7 @@ public class ResourceAssembler {
 
         private final Predicate<? super Location> predicate;
 
-        public AssemblyCusor(ResourceRepository repository, Predicate<? super Location> predicate) throws IOException {
+        AssemblyCusor(ResourceRepository repository, Predicate<? super Location> predicate) throws IOException {
             this.repository = repository;
             this.cursor = repository.createCursor();
             this.predicate = predicate;
@@ -237,7 +237,7 @@ public class ResourceAssembler {
 
         private final List<AssemblyRepository> elements;
 
-        public CompositeRepository(List<AssemblyRepository> elements) {
+        CompositeRepository(List<AssemblyRepository> elements) {
             this.elements = elements;
         }
 

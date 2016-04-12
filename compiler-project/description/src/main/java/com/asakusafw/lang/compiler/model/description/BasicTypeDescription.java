@@ -160,7 +160,7 @@ public class BasicTypeDescription extends ReifiableTypeDescription {
 
         private Class<?> wrapperType;
 
-        private BasicTypeKind(char descriptor, Class<?> reflectiveObject, Class<?> wrapperType) {
+        BasicTypeKind(char descriptor, Class<?> reflectiveObject, Class<?> wrapperType) {
             assert reflectiveObject != null;
             assert reflectiveObject.isPrimitive();
             this.reflectiveObject = reflectiveObject;

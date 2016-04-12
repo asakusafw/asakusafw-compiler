@@ -41,7 +41,7 @@ public interface JobflowInfo extends DescriptionInfo {
      * A basic implementation of {@link JobflowInfo}.
      * Clients can inherit this class.
      */
-    public static class Basic implements JobflowInfo {
+    class Basic implements JobflowInfo {
 
         private final String flowId;
 

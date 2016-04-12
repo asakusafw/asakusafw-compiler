@@ -123,7 +123,7 @@ public class BasicDataModelReference extends BasicAttributeContainer implements 
 
         final TypeDescription type;
 
-        public PropertyInfo(MethodDescription declaration, TypeDescription type) {
+        PropertyInfo(MethodDescription declaration, TypeDescription type) {
             this.declaration = declaration;
             this.type = type;
         }

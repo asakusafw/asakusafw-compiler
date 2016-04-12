@@ -51,7 +51,7 @@ public interface TaskExecutor {
     /**
      * Represents a context of {@link TaskExecutor}.
      */
-    public final class Context {
+    final class Context {
 
         private final TesterContext testerContext;
 

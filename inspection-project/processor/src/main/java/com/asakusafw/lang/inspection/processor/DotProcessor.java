@@ -273,7 +273,7 @@ public class DotProcessor implements InspectionNodeProcessor {
 
         final String destinationId;
 
-        public NodeArc(String sourceId, String destinationId) {
+        NodeArc(String sourceId, String destinationId) {
             this.sourceId = sourceId;
             this.destinationId = destinationId;
         }

@@ -226,7 +226,7 @@ public final class JoinedModelUtil {
 
         final PropertyName destination;
 
-        public MappingElement(PropertyName source, PropertyName destination) {
+        MappingElement(PropertyName source, PropertyName destination) {
             this.source = source;
             this.destination = destination;
         }

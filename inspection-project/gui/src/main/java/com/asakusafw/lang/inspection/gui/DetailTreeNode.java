@@ -72,7 +72,7 @@ public class DetailTreeNode extends AbstractTreeNode<InspectionNode> {
 
         private final List<TreeNode> elements = new ArrayList<>();
 
-        public ContainerNode(TreeNode parent, Object userObject) {
+        ContainerNode(TreeNode parent, Object userObject) {
             super(parent, userObject);
         }
 

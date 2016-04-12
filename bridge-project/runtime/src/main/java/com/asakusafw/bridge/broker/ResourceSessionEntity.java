@@ -46,7 +46,7 @@ final class ResourceSessionEntity implements ResourceSession {
 
     volatile boolean closed = false;
 
-    public ResourceSessionEntity() {
+    ResourceSessionEntity() {
         if (LOG.isDebugEnabled()) {
             LOG.debug("start session: {}", toString()); //$NON-NLS-1$
         }

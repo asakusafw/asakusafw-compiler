@@ -82,7 +82,7 @@ class CompilerSessionAdapter implements CompilerSession {
 
     private final CompilerConfigurationAdapter configuration;
 
-    public CompilerSessionAdapter(CompilerConfigurationAdapter configuration) {
+    CompilerSessionAdapter(CompilerConfigurationAdapter configuration) {
         this.configuration = configuration;
     }
 

@@ -91,7 +91,7 @@ final class ReportAdapter implements Closeable {
      * @param configuration the report configuration
      * @param delegate the delegation target
      */
-    public ReportAdapter(ResourceConfiguration configuration, Delegate delegate) {
+    ReportAdapter(ResourceConfiguration configuration, Delegate delegate) {
         this.configuration = configuration;
         this.delegate = delegate;
     }

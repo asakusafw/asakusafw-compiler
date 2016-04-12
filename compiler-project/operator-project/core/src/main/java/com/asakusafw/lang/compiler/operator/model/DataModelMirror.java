@@ -77,7 +77,7 @@ public interface DataModelMirror {
     /**
      * Kinds of data models.
      */
-    public enum Kind {
+    enum Kind {
 
         /**
          * A concrete data model.
