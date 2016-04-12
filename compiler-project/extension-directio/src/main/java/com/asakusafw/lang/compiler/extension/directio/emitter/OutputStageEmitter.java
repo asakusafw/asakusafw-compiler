@@ -241,6 +241,7 @@ public final class OutputStageEmitter {
         importer.resolvePackageMember(f.newSimpleName(aClass.getSimpleName()));
         List<Expression> arguments = new ArrayList<>();
         arguments.add(f.newClassLiteral(resolve(importer, operation.dataModel)));
+        arguments.add(Models.toLiteral(f, operation.name));
         arguments.add(Models.toLiteral(f, operation.basePath));
         arguments.add(Models.toLiteral(f, operation.resourcePattern.getResourcePatternString()));
         arguments.add(f.newClassLiteral(resolve(importer, operation.dataFormatClass)));
@@ -266,6 +267,7 @@ public final class OutputStageEmitter {
                 ClassDescription orderingClass = getOrderingClass(operation);
                 List<Expression> arguments = new ArrayList<>();
                 arguments.add(f.newClassLiteral(resolve(importer, operation.dataModel)));
+                arguments.add(Models.toLiteral(f, operation.name));
                 arguments.add(Models.toLiteral(f, operation.basePath));
                 arguments.add(f.newClassLiteral(resolve(importer, operation.dataFormatClass)));
                 arguments.add(f.newClassLiteral(resolve(importer, stringTemplateClass)));
