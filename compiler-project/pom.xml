@@ -45,6 +45,7 @@
     <module>extension-cleanup</module>
     <module>extension-redirector</module>
     <module>extension-test-moderator</module>
+    <module>extension-trace</module>
 
     <!-- testing utilities -->
     <module>common-testing</module>

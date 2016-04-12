@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <name>Adapter of Asakusa DSL TestKit Compiler API</name>
-  <artifactId>asakusa-compiler-test-adapter</artifactId>
+  <name>Asakusa DSL Compiler Extension for Test Moderator</name>
+  <artifactId>asakusa-compiler-extension-trace</artifactId>
   <parent>
     <artifactId>project</artifactId>
     <groupId>com.asakusafw.lang.compiler</groupId>
@@ -14,22 +14,12 @@
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>asakusa-compiler-tester</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>asakusa-compiler-extension-test-moderator</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>asakusa-compiler-extension-trace</artifactId>
+      <artifactId>asakusa-compiler-optimizer</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>${asakusafw.groupId}</groupId>
-      <artifactId>asakusa-test-compiler</artifactId>
+      <artifactId>asakusa-runtime</artifactId>
       <version>${asakusafw.version}</version>
       <scope>provided</scope>
     </dependency>
@@ -41,7 +31,7 @@
     </dependency>
     <dependency>
       <groupId>${asakusafw.groupId}</groupId>
-      <artifactId>asakusa-runtime</artifactId>
+      <artifactId>java-dom</artifactId>
       <version>${asakusafw.version}</version>
       <scope>provided</scope>
     </dependency>
@@ -49,6 +39,11 @@
       <groupId>${asakusafw.groupId}</groupId>
       <artifactId>asakusa-test-trace-model</artifactId>
       <version>${asakusafw.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-client</artifactId>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -67,31 +62,8 @@
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>asakusa-compiler-api-testing</artifactId>
+      <artifactId>asakusa-compiler-model-testing</artifactId>
       <version>${project.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>asakusa-compiler-mapreduce-testing</artifactId>
-      <version>${project.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>${asakusafw.groupId}</groupId>
-      <artifactId>simple-graph</artifactId>
-      <version>${asakusafw.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>${asakusafw.groupId}</groupId>
-      <artifactId>java-dom</artifactId>
-      <version>${asakusafw.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.hadoop</groupId>
-      <artifactId>hadoop-client</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
