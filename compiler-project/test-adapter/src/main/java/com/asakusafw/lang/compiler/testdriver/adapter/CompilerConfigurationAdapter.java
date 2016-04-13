@@ -21,10 +21,14 @@ import java.util.List;
 import java.util.ServiceLoader;
 
 import com.asakusafw.lang.compiler.analyzer.builtin.LoggingOperatorRemover;
+import com.asakusafw.lang.compiler.extension.trace.TraceOperatorWeaver;
 import com.asakusafw.lang.compiler.packaging.ResourceUtil;
 import com.asakusafw.lang.compiler.tester.CompilerProfile;
 import com.asakusafw.lang.compiler.tester.CompilerTester;
 import com.asakusafw.testdriver.compiler.basic.BasicCompilerConfiguration;
+import com.asakusafw.trace.io.TraceSettingSerializer;
+import com.asakusafw.trace.model.TraceSetting;
+import com.asakusafw.trace.model.TraceSettingList;
 import com.asakusafw.vocabulary.operator.Logging;
 
 class CompilerConfigurationAdapter extends BasicCompilerConfiguration {
@@ -65,6 +69,11 @@ class CompilerConfigurationAdapter extends BasicCompilerConfiguration {
                 .withProperty(LoggingOperatorRemover.KEY_LOG_LEVEL, Logging.Level.DEBUG.name());
         }
 
+        TraceSettingList trace = getExtension(TraceSettingList.class);
+        if (trace != null) {
+            install(profile, trace);
+        }
+
         for (CompilerProfile.Edit edit : edits) {
             profile.apply(edit);
         }
@@ -74,5 +83,15 @@ class CompilerConfigurationAdapter extends BasicCompilerConfiguration {
         }
 
         return profile.build();
+    }
+
+    private void install(CompilerProfile profile, TraceSettingList trace) {
+        List<TraceSetting> elements = trace.getElements();
+        if (elements.isEmpty()) {
+            return;
+        }
+        String conf = TraceSettingSerializer.serialize(elements);
+        profile.forCompilerOptions()
+            .withProperty(TraceOperatorWeaver.KEY_COMPILER_OPTION, conf);
     }
 }
