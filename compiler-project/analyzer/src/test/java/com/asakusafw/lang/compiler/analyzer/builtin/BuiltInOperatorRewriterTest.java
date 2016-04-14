@@ -28,10 +28,12 @@ import com.asakusafw.lang.compiler.model.graph.ExternalInput;
 import com.asakusafw.lang.compiler.model.graph.ExternalOutput;
 import com.asakusafw.lang.compiler.model.graph.Operator;
 import com.asakusafw.lang.compiler.model.graph.OperatorGraph;
+import com.asakusafw.lang.compiler.model.testing.MockOperators;
 import com.asakusafw.lang.compiler.model.testing.OperatorExtractor;
 import com.asakusafw.lang.compiler.optimizer.OperatorRewriter;
 import com.asakusafw.lang.compiler.optimizer.OptimizerContext;
 import com.asakusafw.vocabulary.operator.Logging;
+import com.asakusafw.vocabulary.operator.MasterJoinUpdate;
 
 /**
  * Test for {@link BuiltInOperatorRewriter}.
@@ -77,10 +79,35 @@ public class BuiltInOperatorRewriterTest extends BuiltInOptimizerTestRoot {
         assertThat(graph, not(hasOperator("debug")));
     }
 
+    /**
+     * {@link EmptyMasterJoinRemover} is enabled.
+     */
+    @Test
+    public void empty_master_join_remover() {
+        MockOperators mock = new MockOperators()
+                .marker("transaction")
+                .bless("join", OperatorExtractor.extract(MasterJoinUpdate.class, Ops.class, "join")
+                        .input("master", typeOf(String.class))
+                        .input("transaction", typeOf(String.class))
+                        .output("updated", typeOf(String.class))
+                        .output("missed", typeOf(String.class)))
+                .marker("joined")
+                .marker("missed")
+                .connect("transaction", "join.transaction")
+                .connect("join.updated", "joined")
+                .connect("join.missed", "missed");
+        OperatorGraph graph = mock.toGraph();
+        apply(context(EmptyMasterJoinRemover.KEY_REMOVE_EMPTY_MASTER, "true"), optimizer, graph);
+        assertThat(graph, not(hasOperator("join")));
+    }
+
     @SuppressWarnings("javadoc")
     public abstract static class Ops {
 
         @Logging(Logging.Level.DEBUG)
         public abstract void logging(String value);
+
+        @MasterJoinUpdate
+        public abstract void join();
     }
 }
