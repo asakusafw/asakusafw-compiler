@@ -23,10 +23,13 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
  * Represents DAG of operators.
+ * @since 0.1.0
+ * @version 0.3.1
  */
 public class OperatorGraph {
 
@@ -184,6 +187,15 @@ public class OperatorGraph {
     }
 
     /**
+     * Returns a new current snapshot for this object.
+     * @return the created snapshot
+     * @since 0.3.1
+     */
+    public Snapshot getSnapshot() {
+        return Snapshot.of(operators);
+    }
+
+    /**
      * Returns all operators which are reachable from the specified operators.
      * @param operators the operators
      * @return the all operators
@@ -245,5 +257,109 @@ public class OperatorGraph {
         return MessageFormat.format(
                 "OperatorGraph({0}operators)", //$NON-NLS-1$
                 operators.size());
+    }
+
+    /**
+     * Represents a snapshot of {@link OperatorGraph}.
+     * @since 0.3.1
+     */
+    public static final class Snapshot {
+
+        private final Set<Operator> vertices;
+
+        private final Set<Edge> edges;
+
+        private Snapshot(Set<Operator> vertices, Set<Edge> edges) {
+            this.vertices = vertices;
+            this.edges = edges;
+        }
+
+        static Snapshot of(Collection<? extends Operator> operators) {
+            Set<Operator> vertices = new HashSet<>();
+            Set<Edge> edges = new HashSet<>();
+            for (Operator operator : operators) {
+                vertices.add(operator);
+                for (OperatorOutput upstream : operator.getOutputs()) {
+                    for (OperatorInput downstream : upstream.getOpposites()) {
+                        edges.add(new Edge(upstream, downstream));
+                    }
+                }
+            }
+            return new Snapshot(vertices, edges);
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + Objects.hashCode(vertices);
+            result = prime * result + Objects.hashCode(edges);
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            Snapshot other = (Snapshot) obj;
+            if (!Objects.equals(vertices, other.vertices)) {
+                return false;
+            }
+            if (!Objects.equals(edges, other.edges)) {
+                return false;
+            }
+            return true;
+        }
+    }
+
+    private static class Edge {
+
+        final OperatorOutput upstream;
+
+        final OperatorInput downstream;
+
+        Edge(OperatorOutput upstream, OperatorInput downstream) {
+            assert upstream != null;
+            assert downstream != null;
+            this.upstream = upstream;
+            this.downstream = downstream;
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + Objects.hashCode(upstream);
+            result = prime * result + Objects.hashCode(downstream);
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            Edge other = (Edge) obj;
+            if (!Objects.equals(upstream, other.upstream)) {
+                return false;
+            }
+            if (!Objects.equals(downstream, other.downstream)) {
+                return false;
+            }
+            return true;
+        }
     }
 }
