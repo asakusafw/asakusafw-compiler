@@ -27,6 +27,7 @@ public class BuiltInOperatorRewriter implements OperatorRewriter {
     private static final OperatorRewriter DELEGATE = CompositeOperatorRewriter.builder()
             .add(new LoggingOperatorRemover())
             .add(new CheckpointOperatorRemover())
+            .add(new EmptyMasterJoinRemover())
             .build();
 
     @Override
