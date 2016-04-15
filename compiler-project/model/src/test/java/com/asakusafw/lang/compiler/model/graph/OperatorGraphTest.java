@@ -22,6 +22,8 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import com.asakusafw.lang.compiler.model.graph.OperatorGraph.Snapshot;
+
 /**
  * Test for {@link OperatorGraph}.
  */
@@ -33,7 +35,7 @@ public class OperatorGraphTest {
     @Test
     public void simple() {
         MockOperators operators = new MockOperators()
-                .operator("a", "in", "out");
+                .operator("a");
 
         OperatorGraph graph = new OperatorGraph();
         assertThat(graph.toString(), graph.getOperators(), hasSize(0));
@@ -52,11 +54,11 @@ public class OperatorGraphTest {
     @Test
     public void rebuild() {
         MockOperators operators = new MockOperators()
-                .operator("a", "p", "p")
-                .operator("b", "p", "p")
-                .operator("c", "p", "p")
-                .connect("a.p", "b.p")
-                .connect("b.p", "c.p");
+                .operator("a")
+                .operator("b")
+                .operator("c")
+                .connect("a", "b")
+                .connect("b", "c");
 
         OperatorGraph graph = new OperatorGraph();
         graph.add(operators.get("b"));
@@ -99,13 +101,13 @@ public class OperatorGraphTest {
     @Test
     public void copy() {
         MockOperators operators = new MockOperators()
-                .operator("a", "p", "p")
-                .operator("b", "p", "p")
-                .operator("c", "p", "p")
-                .operator("d", "p", "p")
-                .connect("a.p", "b.p")
-                .connect("b.p", "c.p")
-                .connect("c.p", "d.p");
+                .operator("a")
+                .operator("b")
+                .operator("c")
+                .operator("d")
+                .connect("a", "b")
+                .connect("b", "c")
+                .connect("c", "d");
 
         OperatorGraph graph = new OperatorGraph();
         graph.add(operators.get("b"));
@@ -113,9 +115,9 @@ public class OperatorGraphTest {
 
         MockOperators copy = new MockOperators(graph.copy().rebuild().getOperators());
         assertThat(OperatorGraph.getAllOperators(copy.all()), hasSize(4));
-        copy.assertConnected("a.p", "b.p");
-        copy.assertConnected("b.p", "c.p");
-        copy.assertConnected("c.p", "d.p");
+        copy.assertConnected("a", "b");
+        copy.assertConnected("b", "c");
+        copy.assertConnected("c", "d");
     }
 
     /**
@@ -124,13 +126,13 @@ public class OperatorGraphTest {
     @Test
     public void copy_range() {
         MockOperators operators = new MockOperators()
-                .operator("a", "p", "p")
-                .operator("b", "p", "p")
-                .operator("c", "p", "p")
-                .operator("d", "p", "p")
-                .connect("a.p", "b.p")
-                .connect("b.p", "c.p")
-                .connect("c.p", "d.p");
+                .operator("a")
+                .operator("b")
+                .operator("c")
+                .operator("d")
+                .connect("a", "b")
+                .connect("b", "c")
+                .connect("c", "d");
 
         OperatorGraph graph = new OperatorGraph();
         graph.add(operators.get("b"));
@@ -140,7 +142,7 @@ public class OperatorGraphTest {
                 OperatorGraph.getAllOperators(
                         OperatorGraph.copy(graph.getOperators()).values()));
         assertThat(OperatorGraph.getAllOperators(copy.all()), hasSize(2));
-        copy.assertConnected("b.p", "c.p");
+        copy.assertConnected("b", "c");
     }
 
     /**
@@ -150,10 +152,10 @@ public class OperatorGraphTest {
     public void inputs() {
         MockOperators operators = new MockOperators()
                 .input("i0")
-                .operator("u0", "in", "out")
+                .operator("u0")
                 .output("o0")
                 .input("i1")
-                .operator("u1", "in", "out")
+                .operator("u1")
                 .output("o1");
 
         OperatorGraph graph = new OperatorGraph(operators.all());
@@ -170,10 +172,10 @@ public class OperatorGraphTest {
     public void outputs() {
         MockOperators operators = new MockOperators()
                 .input("i0")
-                .operator("u0", "in", "out")
+                .operator("u0")
                 .output("o0")
                 .input("i1")
-                .operator("u1", "in", "out")
+                .operator("u1")
                 .output("o1");
 
         OperatorGraph graph = new OperatorGraph(operators.all());
@@ -190,10 +192,10 @@ public class OperatorGraphTest {
     public void clear() {
         MockOperators operators = new MockOperators()
                 .input("i0")
-                .operator("u0", "in", "out")
+                .operator("u0")
                 .output("o0")
                 .input("i1")
-                .operator("u1", "in", "out")
+                .operator("u1")
                 .output("o1");
 
         OperatorGraph graph = new OperatorGraph(operators.all());
@@ -201,5 +203,116 @@ public class OperatorGraphTest {
 
         graph.clear();
         assertThat(graph.getOperators(), hasSize(0));
+    }
+
+    /**
+     * snapshots.
+     */
+    @Test
+    public void snapshot_eq() {
+        MockOperators mock = new MockOperators()
+                .input("i0")
+                .input("i1")
+                .operator("x0")
+                .operator("x1")
+                .output("o0")
+                .output("o1")
+                .connect("i0", "x0")
+                .connect("i1", "x0")
+                .connect("x0", "o0")
+                .connect("x0", "o1");
+        Snapshot s0 = mock.toGraph().getSnapshot();
+        Snapshot s1 = mock.toGraph().getSnapshot();
+        assertThat(s1, equalTo(s0));
+    }
+
+    /**
+     * snapshots.
+     */
+    @Test
+    public void snapshot_more_op() {
+        MockOperators mock = new MockOperators()
+                .input("i0")
+                .input("i1")
+                .operator("x0")
+                .operator("x1")
+                .output("o0")
+                .output("o1")
+                .connect("i0", "x0")
+                .connect("i1", "x0")
+                .connect("x0", "o0")
+                .connect("x0", "o1");
+        OperatorGraph g = mock.toGraph();
+        Snapshot s0 = g.getSnapshot();
+        Snapshot s1 = mock.operator("x2").toGraph().getSnapshot();
+        assertThat(s1, not(equalTo(s0)));
+    }
+
+    /**
+     * snapshots.
+     */
+    @Test
+    public void snapshot_less_op() {
+        MockOperators mock = new MockOperators()
+                .input("i0")
+                .input("i1")
+                .operator("x0")
+                .operator("x1")
+                .output("o0")
+                .output("o1")
+                .connect("i0", "x0")
+                .connect("i1", "x0")
+                .connect("x0", "o0")
+                .connect("x0", "o1");
+        OperatorGraph g = mock.toGraph();
+        Snapshot s0 = g.getSnapshot();
+        g.remove(mock.get("x1"));
+        Snapshot s1 = g.getSnapshot();
+        assertThat(s1, not(equalTo(s0)));
+    }
+
+    /**
+     * snapshots.
+     */
+    @Test
+    public void snapshot_more_conn() {
+        MockOperators mock = new MockOperators()
+                .input("i0")
+                .input("i1")
+                .operator("x0")
+                .operator("x1")
+                .output("o0")
+                .output("o1")
+                .connect("i0", "x0")
+                .connect("i1", "x0")
+                .connect("x0", "o0")
+                .connect("x0", "o1");
+        OperatorGraph g = mock.toGraph();
+        Snapshot s0 = g.getSnapshot();
+        Snapshot s1 = mock.connect("i1", "x1").toGraph().getSnapshot();
+        assertThat(s1, not(equalTo(s0)));
+    }
+
+    /**
+     * snapshots.
+     */
+    @Test
+    public void snapshot_less_conn() {
+        MockOperators mock = new MockOperators()
+                .input("i0")
+                .input("i1")
+                .operator("x0")
+                .operator("x1")
+                .output("o0")
+                .output("o1")
+                .connect("i0", "x0")
+                .connect("i1", "x0")
+                .connect("x0", "o0")
+                .connect("x0", "o1");
+        OperatorGraph g = mock.toGraph();
+        Snapshot s0 = g.getSnapshot();
+        mock.get("o1").disconnectAll();
+        Snapshot s1 = g.getSnapshot();
+        assertThat(s1, not(equalTo(s0)));
     }
 }
