@@ -4,12 +4,12 @@ This project provides a compiler framework for the [Asakusa DSL](https://github.
 
 ## How to build
 ```sh
-mvn clean package
+./mvnw clean package
 ```
 
 ## How to import projects into Eclipse
 ```sh
-mvn install eclipse:eclipse -DskipTests
+./mvnw install eclipse:eclipse -DskipTests
 ```
 
 And then import projects from Eclipse
