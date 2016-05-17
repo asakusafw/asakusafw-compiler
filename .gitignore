@@ -6,4 +6,6 @@
 /.classpath
 /.settings
 /bin
-
+/.idea
+*.iml
+*~
