@@ -24,12 +24,14 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.Map;
+import java.util.ServiceLoader;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.asakusafw.lang.compiler.api.ExtensionInfo;
 import com.asakusafw.lang.compiler.api.reference.BatchReference;
 import com.asakusafw.lang.compiler.common.Location;
 import com.asakusafw.lang.compiler.core.BatchCompiler;
@@ -98,6 +100,13 @@ public class BuildLogParticipant extends AbstractCompilerParticipant {
         editor.put("compiler.jobflowProcessor", info(tools.getJobflowProcessor())); //$NON-NLS-1$
         editor.put("compiler.batchProcessor", info(tools.getBatchProcessor())); //$NON-NLS-1$
         editor.put("compiler.participant", info(tools.getParticipant())); //$NON-NLS-1$
+
+        for (ExtensionInfo extension : ServiceLoader.load(ExtensionInfo.class, context.getProject().getClassLoader())) {
+            String name = extension.getName();
+            String info = DiagnosticUtil.getArtifactInfo(extension.getClass());
+            LOG.debug("compiler extension: {}={}", name, info);
+            editor.put(String.format("compiler.extension.%s", name), info);
+        }
     }
 
     private String info(Object object) {
