@@ -39,14 +39,16 @@ final class Util {
         return;
     }
 
-    static void checkDependencies(ClassLoader loader) {
+    static boolean isAvailable(ClassLoader loader) {
         LOG.debug("checking if hive dependencies are available");
         try {
             REQUIRED_CLASS.resolve(loader);
             LOG.debug("hive dependencies are available: {}", REQUIRED_CLASS);
+            return true;
         } catch (ClassNotFoundException e) {
             // if dependencies are not available, then the application cannot contain hive related features
             LOG.debug("hive dependencies are not available: {}", REQUIRED_CLASS, e);
+            return false;
         }
     }
 

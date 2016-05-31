@@ -54,7 +54,9 @@ public class HiveSchemaAggregatorProcessor implements BatchProcessor {
 
     @Override
     public void process(Context context, BatchReference source) throws IOException {
-        Util.checkDependencies(context.getClassLoader());
+        if (Util.isAvailable(context.getClassLoader()) == false) {
+            return;
+        }
         LOG.debug("aggregating hive schema information: {}", source.getBatchId());
         List<InputInfo> inputs = new ArrayList<>();
         List<OutputInfo> outputs = new ArrayList<>();
