@@ -17,10 +17,12 @@ package com.asakusafw.lang.compiler.api.testing;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 
 import com.asakusafw.lang.compiler.api.CompilerOptions;
 import com.asakusafw.lang.compiler.api.basic.AbstractBatchProcessorContext;
+import com.asakusafw.lang.compiler.api.reference.JobflowReference;
 import com.asakusafw.lang.compiler.common.BasicResourceContainer;
 import com.asakusafw.lang.compiler.common.Location;
 
@@ -74,5 +76,10 @@ public class MockBatchProcessorContext extends AbstractBatchProcessorContext imp
     @Override
     public OutputStream addResourceFile(Location location) throws IOException {
         return resources.addResource(location);
+    }
+
+    @Override
+    public InputStream findResourceFile(JobflowReference jobflow, Location location) throws IOException {
+        return null;
     }
 }

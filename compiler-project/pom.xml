@@ -41,6 +41,7 @@
     <module>extension-externalio</module>
     <module>extension-directio</module>
     <module>extension-windgate</module>
+    <module>extension-hive</module>
     <module>extension-yaess</module>
     <module>extension-cleanup</module>
     <module>extension-redirector</module>
