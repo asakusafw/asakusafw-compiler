@@ -62,7 +62,9 @@ public class HiveSchemaCollectorProcessor implements JobflowProcessor {
     @Override
     public void process(Context context, Jobflow source) throws IOException {
         ClassLoader loader = context.getClassLoader();
-        Util.checkDependencies(loader);
+        if (Util.isAvailable(loader) == false) {
+            return;
+        }
         LOG.debug("collecting Hive inputs: {}", source.getFlowId());
         List<InputInfo> inputs = collectInputs(loader, source.getOperatorGraph().getInputs().values());
         List<OutputInfo> outputs = collectOutputs(loader, source.getOperatorGraph().getOutputs().values());
