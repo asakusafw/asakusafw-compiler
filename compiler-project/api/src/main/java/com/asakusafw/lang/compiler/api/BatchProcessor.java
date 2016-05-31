@@ -16,9 +16,11 @@
 package com.asakusafw.lang.compiler.api;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 
 import com.asakusafw.lang.compiler.api.reference.BatchReference;
+import com.asakusafw.lang.compiler.api.reference.JobflowReference;
 import com.asakusafw.lang.compiler.common.DiagnosticException;
 import com.asakusafw.lang.compiler.common.ExtensionContainer;
 import com.asakusafw.lang.compiler.common.Location;
@@ -39,6 +41,8 @@ public interface BatchProcessor {
 
     /**
      * Represents a context object for {@link BatchProcessor}.
+     * @since 0.1.0
+     * @version 0.3.1
      */
     public interface Context extends ExtensionContainer {
 
@@ -61,5 +65,15 @@ public interface BatchProcessor {
          * @throws IOException if failed to create a new file
          */
         OutputStream addResourceFile(Location location) throws IOException;
+
+        /**
+         * Returns a resource in a jobflow package.
+         * @param jobflow the target jobflow reference
+         * @param location the resource location in the target package
+         * @return the jobflow resource, or {@code null} if it does not exist
+         * @throws IOException if failed to open the file
+         * @since 0.3.1
+         */
+        InputStream findResourceFile(JobflowReference jobflow, Location location) throws IOException;
     }
 }

@@ -15,13 +15,21 @@
  */
 package com.asakusafw.lang.compiler.core.adapter;
 
+import java.io.File;
+import java.io.FilterInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import com.asakusafw.lang.compiler.api.BatchProcessor;
 import com.asakusafw.lang.compiler.api.CompilerOptions;
+import com.asakusafw.lang.compiler.api.reference.JobflowReference;
 import com.asakusafw.lang.compiler.common.Location;
 import com.asakusafw.lang.compiler.core.BatchCompiler;
+import com.asakusafw.lang.compiler.core.basic.JobflowPackager;
+import com.asakusafw.lang.compiler.packaging.FileContainer;
 
 /**
  * An adapter for {@link BatchProcessor}.
@@ -51,6 +59,38 @@ public class BatchProcessorAdapter implements BatchProcessor.Context {
     @Override
     public OutputStream addResourceFile(Location location) throws IOException {
         return delegate.getOutput().addResource(location);
+    }
+
+    @Override
+    public InputStream findResourceFile(JobflowReference jobflow, Location location) throws IOException {
+        FileContainer root = delegate.getOutput();
+        File library = root.toFile(JobflowPackager.getLibraryLocation(jobflow.getFlowId()));
+        if (library.isFile() == false) {
+            return null;
+        }
+        final ZipFile zip = new ZipFile(library);
+        boolean success = false;
+        try {
+            ZipEntry entry = zip.getEntry(location.toPath());
+            if (entry == null) {
+                return null;
+            }
+            success = true;
+            return new FilterInputStream(zip.getInputStream(entry)) {
+                @Override
+                public void close() throws IOException {
+                    try {
+                        super.close();
+                    } finally {
+                        zip.close();
+                    }
+                }
+            };
+        } finally {
+            if (success == false) {
+                zip.close();
+            }
+        }
     }
 
     @Override
