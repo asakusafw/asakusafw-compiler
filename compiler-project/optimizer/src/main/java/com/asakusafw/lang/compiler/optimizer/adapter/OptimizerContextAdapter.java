@@ -25,13 +25,19 @@ import com.asakusafw.lang.compiler.api.JobflowProcessor.Context;
 import com.asakusafw.lang.compiler.common.Location;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.optimizer.OptimizerContext;
+import com.asakusafw.lang.compiler.optimizer.OptimizerToolkit;
+import com.asakusafw.lang.compiler.optimizer.basic.BasicOptimizerToolkit;
 
 /**
  * Adapter for {@link OptimizerContext}.
+ * @since 0.1.0
+ * @version 0.3.1
  */
 public class OptimizerContextAdapter implements OptimizerContext {
 
     private final JobflowProcessor.Context delegate;
+
+    private final OptimizerToolkit toolkit;
 
     private final String flowId;
 
@@ -41,8 +47,20 @@ public class OptimizerContextAdapter implements OptimizerContext {
      * @param flowId the compiling flow ID
      */
     public OptimizerContextAdapter(Context delegate, String flowId) {
+        this(delegate, flowId, null);
+    }
+
+    /**
+     * Creates a new instance.
+     * @param delegate the delegation target
+     * @param flowId the compiling flow ID
+     * @param toolkit the optimizer toolkit (nullable)
+     * @since 0.3.1
+     */
+    public OptimizerContextAdapter(Context delegate, String flowId, OptimizerToolkit toolkit) {
         this.delegate = delegate;
         this.flowId = flowId;
+        this.toolkit = toolkit == null ? new BasicOptimizerToolkit() : toolkit;
     }
 
     @Override
@@ -68,6 +86,11 @@ public class OptimizerContextAdapter implements OptimizerContext {
     @Override
     public DataModelLoader getDataModelLoader() {
         return delegate.getDataModelLoader();
+    }
+
+    @Override
+    public OptimizerToolkit getToolkit() {
+        return toolkit;
     }
 
     @Override
