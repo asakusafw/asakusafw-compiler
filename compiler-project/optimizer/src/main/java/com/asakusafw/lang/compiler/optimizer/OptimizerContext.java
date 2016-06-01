@@ -26,6 +26,8 @@ import com.asakusafw.lang.compiler.model.description.ClassDescription;
 
 /**
  * Context for optimizers.
+ * @since 0.1.0
+ * @version 0.3.1
  */
 public interface OptimizerContext extends ExtensionContainer {
 
@@ -58,6 +60,13 @@ public interface OptimizerContext extends ExtensionContainer {
      * @return the data model loader
      */
     DataModelLoader getDataModelLoader();
+
+    /**
+     * Returns the optimizer toolkit.
+     * @return the optimizer toolkit
+     * @since 0.3.1
+     */
+    OptimizerToolkit getToolkit();
 
     /**
      * Adds a new Java class file and returns its output stream.

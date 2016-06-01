@@ -23,9 +23,12 @@ import com.asakusafw.lang.compiler.api.DataModelLoader;
 import com.asakusafw.lang.compiler.common.Location;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.optimizer.OptimizerContext;
+import com.asakusafw.lang.compiler.optimizer.OptimizerToolkit;
 
 /**
  * Forwarding {@link OptimizerContext}.
+ * @since 0.1.0
+ * @version 0.3.1
  */
 public abstract class ForwardingOptimizerContext implements OptimizerContext {
 
@@ -62,6 +65,11 @@ public abstract class ForwardingOptimizerContext implements OptimizerContext {
     @Override
     public DataModelLoader getDataModelLoader() {
         return delegate.getDataModelLoader();
+    }
+
+    @Override
+    public OptimizerToolkit getToolkit() {
+        return delegate.getToolkit();
     }
 
     @Override

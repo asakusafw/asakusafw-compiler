@@ -26,6 +26,8 @@ import com.asakusafw.lang.compiler.common.Location;
 import com.asakusafw.lang.compiler.common.ResourceContainer;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.optimizer.OptimizerContext;
+import com.asakusafw.lang.compiler.optimizer.OptimizerToolkit;
+import com.asakusafw.lang.compiler.optimizer.basic.BasicOptimizerToolkit;
 
 /**
  * Mock implementation of {@link com.asakusafw.lang.compiler.api.JobflowProcessor.Context}.
@@ -43,6 +45,8 @@ public class MockOptimizerContext extends BasicExtensionContainer implements Opt
     private final ClassLoader classLoader;
 
     private final DataModelLoader dataModels;
+
+    private final OptimizerToolkit toolkit = new BasicOptimizerToolkit();
 
     private final ResourceContainer resources;
 
@@ -111,6 +115,11 @@ public class MockOptimizerContext extends BasicExtensionContainer implements Opt
     @Override
     public DataModelLoader getDataModelLoader() {
         return dataModels;
+    }
+
+    @Override
+    public OptimizerToolkit getToolkit() {
+        return toolkit;
     }
 
     @Override

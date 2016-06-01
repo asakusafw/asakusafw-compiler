@@ -27,6 +27,7 @@ import com.asakusafw.lang.compiler.model.graph.OperatorInput;
 import com.asakusafw.lang.compiler.model.graph.OperatorOutput;
 import com.asakusafw.lang.compiler.model.graph.Operators;
 import com.asakusafw.lang.compiler.optimizer.OperatorRewriter;
+import com.asakusafw.lang.compiler.optimizer.OptimizerToolkit;
 
 /**
  * Removes empty {@code master-join} like operators.
@@ -52,13 +53,15 @@ public class EmptyMasterJoinRemover implements OperatorRewriter {
 
     @Override
     public void perform(Context context, OperatorGraph graph) {
+        boolean changed = false;
         if (context.getOptions().get(KEY_REMOVE_EMPTY_MASTER, DEFAULT_REMOVE_EMPTY_MASTER)) {
             LOG.debug("applying empty join remover: flow={}, port=master", context.getFlowId());
             for (Operator operator : graph.getOperators()) {
                 if (MasterJoinOperatorUtil.isSupported(operator)) {
-                    boolean removed = removeEmptyJoinMaster(operator);
+                    boolean removed = removeEmptyJoinMaster(context.getToolkit(), operator);
                     if (removed) {
                         graph.remove(operator);
+                        changed = true;
                     }
                 }
             }
@@ -66,19 +69,23 @@ public class EmptyMasterJoinRemover implements OperatorRewriter {
         if (context.getOptions().get(KEY_REMOVE_EMPTY_TRANACTION, DEFAULT_REMOVE_EMPTY_TRANSACTION)) {
             LOG.debug("applying empty join remover: flow={}, port=transaction", context.getFlowId());
             for (Operator operator : graph.getOperators()) {
-                boolean removed = removeEmptyJoinTransaction(operator);
+                boolean removed = removeEmptyJoinTransaction(context.getToolkit(), operator);
                 if (removed) {
                     graph.remove(operator);
+                    changed = true;
                 }
             }
         }
+        if (changed) {
+            context.getToolkit().repair(graph);
+        }
     }
 
-    private boolean removeEmptyJoinMaster(Operator operator) {
+    private boolean removeEmptyJoinMaster(OptimizerToolkit toolkit, Operator operator) {
         if (MasterJoinOperatorUtil.isSupported(operator) == false) {
             return false;
         }
-        if (MasterJoinOperatorUtil.getMasterInput(operator).hasOpposites()) {
+        if (toolkit.hasEffectiveOpposites(MasterJoinOperatorUtil.getMasterInput(operator))) {
             return false;
         }
         if (MasterJoinOperatorUtil.hasSelection(operator)) {
@@ -97,11 +104,11 @@ public class EmptyMasterJoinRemover implements OperatorRewriter {
         return true;
     }
 
-    private boolean removeEmptyJoinTransaction(Operator operator) {
+    private boolean removeEmptyJoinTransaction(OptimizerToolkit toolkit, Operator operator) {
         if (MasterJoinOperatorUtil.isSupported(operator) == false) {
             return false;
         }
-        if (MasterJoinOperatorUtil.getTransactionInput(operator).hasOpposites()) {
+        if (toolkit.hasEffectiveOpposites(MasterJoinOperatorUtil.getTransactionInput(operator))) {
             return false;
         }
         LOG.debug("removing empty join: {}", operator);
