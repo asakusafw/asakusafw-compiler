@@ -16,6 +16,7 @@
 package com.asakusafw.lang.compiler.model.graph;
 
 import java.text.MessageFormat;
+import java.util.Collections;
 import java.util.List;
 
 import com.asakusafw.lang.compiler.model.description.TypeDescription;
@@ -24,7 +25,7 @@ import com.asakusafw.lang.compiler.model.info.ExternalOutputInfo;
 /**
  * Represents an external/flow output operator.
  * @since 0.1.0
- * @version 0.3.0
+ * @version 0.3.1
  */
 public final class ExternalOutput extends ExternalPort {
 
@@ -103,8 +104,12 @@ public final class ExternalOutput extends ExternalPort {
      * @return the created instance
      */
     public static ExternalOutput newInstance(String name, ExternalOutputInfo info, OperatorOutput... upstreams) {
+        boolean generator = info != null && info.isGenerator();
         return builder(name, info)
                 .input(PORT_NAME, info.getDataModelClass(), upstreams)
+                .constraint(generator
+                        ? Collections.singleton(OperatorConstraint.GENERATOR)
+                        : Collections.<OperatorConstraint>emptySet())
                 .build();
     }
 

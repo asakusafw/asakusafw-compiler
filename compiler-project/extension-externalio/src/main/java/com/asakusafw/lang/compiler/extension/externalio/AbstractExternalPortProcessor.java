@@ -16,6 +16,7 @@
 package com.asakusafw.lang.compiler.extension.externalio;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
@@ -36,7 +37,7 @@ import com.asakusafw.vocabulary.external.ImporterDescription;
  * @param <TInput> the importer description type
  * @param <TOutput> the exporter description type
  * @since 0.1.0
- * @version 0.3.0
+ * @version 0.3.1
  */
 public abstract class AbstractExternalPortProcessor<
             TInput extends ImporterDescription,
@@ -63,7 +64,7 @@ public abstract class AbstractExternalPortProcessor<
 
     /**
      * Returns the properties of the target importer description.
-     * @param context  the current context
+     * @param context the current context
      * @param name the input name
      * @param description the target description
      * @return the extracted properties, or {@code null} if the input does not have any additional properties
@@ -73,7 +74,7 @@ public abstract class AbstractExternalPortProcessor<
 
     /**
      * Returns the properties of the target exporter description.
-     * @param context  the current context
+     * @param context the current context
      * @param name the input name
      * @param description the target description
      * @return the extracted properties, or {@code null} if the output does not have any additional properties
@@ -82,26 +83,52 @@ public abstract class AbstractExternalPortProcessor<
             AnalyzeContext context, String name, TOutput description);
 
     /**
+     * Returns the extra attributes of the target importer description.
+     * @param context the current context
+     * @param name the input name
+     * @param description the target description
+     * @return the extracted attributes, or {@code null} if the input does not have any attributes
+     * @since 0.3.1
+     */
+    protected Set<InputAttribute> analyzeInputAttributes(AnalyzeContext context, String name, TInput description) {
+        return Collections.emptySet();
+    }
+
+    /**
+     * Returns the extra attributes of the target exporter description.
+     * @param context the current context
+     * @param name the input name
+     * @param description the target description
+     * @return the extracted attributes, or {@code null} if the output does not have any attributes
+     * @since 0.3.1
+     */
+    protected Set<OutputAttribute> analyzeOutputAttributes(AnalyzeContext context, String name, TOutput description) {
+        return Collections.emptySet();
+    }
+
+    /**
      * Returns the parameter names of the target importer description.
-     * @param context  the current context
+     * @param context the current context
      * @param name the input name
      * @param description the target description
      * @return the parameter names
      * @since 0.3.0
      */
-    protected abstract Set<String> analyzeInputParameterNames(
-            AnalyzeContext context, String name, TInput description);
+    protected Set<String> analyzeInputParameterNames(AnalyzeContext context, String name, TInput description) {
+        return Collections.emptySet();
+    }
 
     /**
      * Returns the parameter names of the target exporter description.
-     * @param context  the current context
-     * @param name the input name
+     * @param context the current context
+     * @param name the output name
      * @param description the target description
      * @return the parameter names
      * @since 0.3.0
      */
-    protected abstract Set<String> analyzeOutputParameterNames(
-            AnalyzeContext context, String name, TOutput description);
+    protected Set<String> analyzeOutputParameterNames(AnalyzeContext context, String name, TOutput description) {
+        return Collections.emptySet();
+    }
 
     /**
      * Returns input paths, which will be used in main phase, of the target external input.
@@ -160,11 +187,13 @@ public abstract class AbstractExternalPortProcessor<
         }
         TOutput desc = type.cast(description);
         ValueDescription properties = analyzeOutputProperties(context, name, desc);
+        Set<OutputAttribute> attributes = analyzeOutputAttributes(context, name, desc);
         Set<String> parameters = analyzeOutputParameterNames(context, name, desc);
         return new ExternalOutputInfo.Basic(
                 Descriptions.classOf(desc.getClass()),
                 getModuleName(),
                 Descriptions.classOf(desc.getModelType()),
+                attributes.contains(OutputAttribute.GENERATOR),
                 parameters,
                 properties);
     }
@@ -223,5 +252,26 @@ public abstract class AbstractExternalPortProcessor<
         default:
             return ExternalInputInfo.DataSize.UNKNOWN;
         }
+    }
+
+    /**
+     * Attributes of external inputs.
+     * @since 0.3.1
+     */
+    public enum InputAttribute {
+
+        // no special members
+    }
+
+    /**
+     * Attributes of external outputs.
+     * @since 0.3.1
+     */
+    public enum OutputAttribute {
+
+        /**
+         * The output has generator constraint.
+         */
+        GENERATOR,
     }
 }

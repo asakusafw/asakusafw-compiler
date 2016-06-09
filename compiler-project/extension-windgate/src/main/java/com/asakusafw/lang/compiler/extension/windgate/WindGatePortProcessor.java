@@ -21,6 +21,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -127,6 +128,13 @@ public class WindGatePortProcessor
                     name,
                     e.getMessage()));
         }
+    }
+
+    @Override
+    protected Set<OutputAttribute> analyzeOutputAttributes(
+            AnalyzeContext context, String name, WindGateExporterDescription description) {
+        // WindGate outputs must be GENERATOR for truncating target outputs
+        return EnumSet.of(OutputAttribute.GENERATOR);
     }
 
     @Override

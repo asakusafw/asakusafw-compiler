@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -156,6 +157,17 @@ public class DirectFileIoPortProcessor
         assertPresent(validate, description.getDeletePatterns(), "getDeletePatterns"); //$NON-NLS-1$
         validate.raiseException();
         return new DirectFileOutputModel(description);
+    }
+
+    @Override
+    protected Set<OutputAttribute> analyzeOutputAttributes(
+            AnalyzeContext context, String name, DirectFileOutputDescription description) {
+        // Direct I/O file output must be GENERATOR only if it declares delete-patterns
+        if (description.getDeletePatterns().isEmpty()) {
+            return Collections.emptySet();
+        } else {
+            return EnumSet.of(OutputAttribute.GENERATOR);
+        }
     }
 
     @Override
