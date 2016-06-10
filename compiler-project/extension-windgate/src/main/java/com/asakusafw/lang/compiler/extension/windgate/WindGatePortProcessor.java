@@ -322,9 +322,16 @@ public class WindGatePortProcessor
                     "failed to resolve data model type: {0}",
                     reference.getDataModelClass()), e);
         }
-        DriverScript source = new DriverScript(
-                Constants.HADOOP_FILE_RESOURCE_NAME,
-                Collections.singletonMap(FileProcess.FILE.key(), locations));
+        DriverScript source;
+        if (locations.isEmpty()) {
+            source = new DriverScript(
+                    Constants.VOID_RESOURCE_NAME,
+                    Collections.<String, String>emptyMap());
+        } else {
+            source = new DriverScript(
+                    Constants.HADOOP_FILE_RESOURCE_NAME,
+                    Collections.singletonMap(FileProcess.FILE.key(), locations));
+        }
         DriverScript drain = model.getDriverScript();
         return createProcessScript(reference.getName(), dataModelType, source, drain);
     }
