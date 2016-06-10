@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -225,7 +226,12 @@ public final class FlowGraphAnalyzer {
             context.registerExternalOutput(description.getName(), info);
             source = context.findOutputSource(description.getName());
         }
-        return convert(description, source, ExternalOutput.builder(description.getName(), info));
+        Set<OperatorConstraint> constraints = EnumSet.noneOf(OperatorConstraint.class);
+        if (info != null && info.isGenerator()) {
+            constraints.add(OperatorConstraint.GENERATOR);
+        }
+        return convert(description, source, ExternalOutput.builder(description.getName(), info)
+                .constraint(constraints));
     }
 
     private Operator convert(Context context, FlowPartDescription description) {

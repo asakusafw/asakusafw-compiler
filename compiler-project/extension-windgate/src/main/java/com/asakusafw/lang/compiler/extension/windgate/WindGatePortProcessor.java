@@ -21,6 +21,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -127,6 +128,13 @@ public class WindGatePortProcessor
                     name,
                     e.getMessage()));
         }
+    }
+
+    @Override
+    protected Set<OutputAttribute> analyzeOutputAttributes(
+            AnalyzeContext context, String name, WindGateExporterDescription description) {
+        // WindGate outputs must be GENERATOR for truncating target outputs
+        return EnumSet.of(OutputAttribute.GENERATOR);
     }
 
     @Override
@@ -314,9 +322,16 @@ public class WindGatePortProcessor
                     "failed to resolve data model type: {0}",
                     reference.getDataModelClass()), e);
         }
-        DriverScript source = new DriverScript(
-                Constants.HADOOP_FILE_RESOURCE_NAME,
-                Collections.singletonMap(FileProcess.FILE.key(), locations));
+        DriverScript source;
+        if (locations.isEmpty()) {
+            source = new DriverScript(
+                    Constants.VOID_RESOURCE_NAME,
+                    Collections.<String, String>emptyMap());
+        } else {
+            source = new DriverScript(
+                    Constants.HADOOP_FILE_RESOURCE_NAME,
+                    Collections.singletonMap(FileProcess.FILE.key(), locations));
+        }
         DriverScript drain = model.getDriverScript();
         return createProcessScript(reference.getName(), dataModelType, source, drain);
     }

@@ -23,17 +23,26 @@ import java.util.Set;
 
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.description.ValueDescription;
+import com.asakusafw.lang.compiler.model.graph.OperatorConstraint;
 
 /**
  * Structural information of external inputs.
+ * @since 0.1.0
+ * @version 0.3.1
  */
 public interface ExternalOutputInfo extends ExternalPortInfo {
+
+    /**
+     * Returns whether this output has {@link OperatorConstraint#GENERATOR generator} constraint or not.
+     * @return {@code true} if this output has generator constraint, otherwise {@code false}
+     */
+    boolean isGenerator();
 
     /**
      * A basic implementation of {@link ExternalOutputInfo}.
      * Clients can inherit this class.
      * @since 0.1.0
-     * @version 0.3.0
+     * @version 0.3.1
      */
     class Basic implements ExternalOutputInfo {
 
@@ -42,6 +51,8 @@ public interface ExternalOutputInfo extends ExternalPortInfo {
         private final ClassDescription dataModelClass;
 
         private final String moduleName;
+
+        private final boolean generator;
 
         private final Set<String> parameterNames;
 
@@ -106,9 +117,48 @@ public interface ExternalOutputInfo extends ExternalPortInfo {
                 ClassDescription dataModelClass,
                 Set<String> parameterNames,
                 ValueDescription contents) {
+            this(descriptionClass, moduleName, dataModelClass, false, parameterNames, contents);
+        }
+
+        /**
+         * Creates a new instance.
+         * @param descriptionClass the original exporter description class
+         * @param moduleName the exporter module name
+         * @param dataModelClass the target data model class
+         * @param generator {@code true} if this output has generator constraint, otherwise {@code false}
+         * @param parameterNames the required parameter names
+         * @since 0.3.1
+         */
+        public Basic(
+                ClassDescription descriptionClass,
+                String moduleName,
+                ClassDescription dataModelClass,
+                boolean generator,
+                Set<String> parameterNames) {
+            this(descriptionClass, moduleName, dataModelClass, generator, Collections.<String>emptySet(), null);
+        }
+
+        /**
+         * Creates a new instance.
+         * @param descriptionClass the original exporter description class
+         * @param moduleName the exporter module name
+         * @param dataModelClass the target data model class
+         * @param generator {@code true} if this output has generator constraint, otherwise {@code false}
+         * @param parameterNames the required parameter names
+         * @param contents the processor specific contents (nullable)
+         * @since 0.3.1
+         */
+        public Basic(
+                ClassDescription descriptionClass,
+                String moduleName,
+                ClassDescription dataModelClass,
+                boolean generator,
+                Set<String> parameterNames,
+                ValueDescription contents) {
             this.descriptionClass = descriptionClass;
             this.dataModelClass = dataModelClass;
             this.moduleName = moduleName;
+            this.generator = generator;
             this.parameterNames = Collections.unmodifiableSet(new LinkedHashSet<>(parameterNames));
             this.contents = contents;
         }
@@ -138,6 +188,11 @@ public interface ExternalOutputInfo extends ExternalPortInfo {
         }
 
         @Override
+        public boolean isGenerator() {
+            return generator;
+        }
+
+        @Override
         public Set<String> getParameterNames() {
             return parameterNames;
         }
@@ -154,6 +209,7 @@ public interface ExternalOutputInfo extends ExternalPortInfo {
             result = prime * result + descriptionClass.hashCode();
             result = prime * result + moduleName.hashCode();
             result = prime * result + dataModelClass.hashCode();
+            result = prime * result + (generator ? 1 : 0);
             result = prime * result + parameterNames.hashCode();
             result = prime * result + Objects.hashCode(contents);
             return result;
@@ -178,6 +234,9 @@ public interface ExternalOutputInfo extends ExternalPortInfo {
                 return false;
             }
             if (!dataModelClass.equals(other.dataModelClass)) {
+                return false;
+            }
+            if (generator != other.generator) {
                 return false;
             }
             if (!parameterNames.equals(other.parameterNames)) {

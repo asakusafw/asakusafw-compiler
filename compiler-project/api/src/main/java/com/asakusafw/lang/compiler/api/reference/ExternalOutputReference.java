@@ -75,6 +75,11 @@ public class ExternalOutputReference extends BasicAttributeContainer
     }
 
     @Override
+    public boolean isGenerator() {
+        return info.isGenerator();
+    }
+
+    @Override
     public Set<String> getParameterNames() {
         return info.getParameterNames();
     }
