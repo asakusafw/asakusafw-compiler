@@ -17,7 +17,9 @@ package com.asakusafw.lang.compiler.model.graph;
 
 import java.text.MessageFormat;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 
 import com.asakusafw.lang.compiler.model.description.TypeDescription;
 import com.asakusafw.lang.compiler.model.info.ExternalOutputInfo;
@@ -104,12 +106,9 @@ public final class ExternalOutput extends ExternalPort {
      * @return the created instance
      */
     public static ExternalOutput newInstance(String name, ExternalOutputInfo info, OperatorOutput... upstreams) {
-        boolean generator = info != null && info.isGenerator();
         return builder(name, info)
                 .input(PORT_NAME, info.getDataModelClass(), upstreams)
-                .constraint(generator
-                        ? Collections.singleton(OperatorConstraint.GENERATOR)
-                        : Collections.<OperatorConstraint>emptySet())
+                .constraint(getConstraints(info))
                 .build();
     }
 
@@ -128,7 +127,19 @@ public final class ExternalOutput extends ExternalPort {
             OperatorOutput... upstreams) {
         return builder(name, info)
                 .input(PORT_NAME, upstream, upstreams)
+                .constraint(getConstraints(info))
                 .build();
+    }
+
+    private static Set<OperatorConstraint> getConstraints(ExternalOutputInfo info) {
+        if (info == null) {
+            return Collections.emptySet();
+        }
+        Set<OperatorConstraint> results = EnumSet.noneOf(OperatorConstraint.class);
+        if (info.isGenerator()) {
+            results.add(OperatorConstraint.GENERATOR);
+        }
+        return results;
     }
 
     /**
