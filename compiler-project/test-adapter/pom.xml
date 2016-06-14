@@ -28,25 +28,25 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>${asakusafw.groupId}</groupId>
+      <groupId>com.asakusafw</groupId>
       <artifactId>asakusa-test-compiler</artifactId>
       <version>${asakusafw.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>${asakusafw.groupId}</groupId>
+      <groupId>com.asakusafw</groupId>
       <artifactId>asakusa-dsl-vocabulary</artifactId>
       <version>${asakusafw.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>${asakusafw.groupId}</groupId>
+      <groupId>com.asakusafw</groupId>
       <artifactId>asakusa-runtime</artifactId>
       <version>${asakusafw.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>${asakusafw.groupId}</groupId>
+      <groupId>com.asakusafw</groupId>
       <artifactId>asakusa-test-trace-model</artifactId>
       <version>${asakusafw.version}</version>
       <scope>provided</scope>
@@ -78,13 +78,13 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>${asakusafw.groupId}</groupId>
+      <groupId>com.asakusafw</groupId>
       <artifactId>simple-graph</artifactId>
       <version>${asakusafw.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>${asakusafw.groupId}</groupId>
+      <groupId>com.asakusafw</groupId>
       <artifactId>java-dom</artifactId>
       <version>${asakusafw.version}</version>
       <scope>test</scope>

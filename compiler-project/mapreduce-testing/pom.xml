@@ -23,13 +23,13 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>${asakusafw.groupId}</groupId>
+      <groupId>com.asakusafw</groupId>
       <artifactId>asakusa-runtime</artifactId>
       <version>${asakusafw.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>${asakusafw.groupId}</groupId>
+      <groupId>com.asakusafw</groupId>
       <artifactId>asakusa-runtime-inprocess</artifactId>
       <version>${asakusafw.version}</version>
       <scope>provided</scope>

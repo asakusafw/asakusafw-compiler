@@ -13,7 +13,7 @@
 
   <dependencies>
     <dependency>
-      <groupId>${asakusafw.groupId}</groupId>
+      <groupId>com.asakusafw</groupId>
       <artifactId>asakusa-dsl-vocabulary</artifactId>
       <version>${asakusafw.version}</version>
       <scope>provided</scope>

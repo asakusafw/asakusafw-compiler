@@ -18,13 +18,13 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>${asakusafw.groupId}</groupId>
+      <groupId>com.asakusafw</groupId>
       <artifactId>asakusa-runtime</artifactId>
       <version>${asakusafw.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>${asakusafw.groupId}.sandbox</groupId>
+      <groupId>com.asakusafw.sandbox</groupId>
       <artifactId>asakusa-directio-runtime-ext</artifactId>
       <version>${asakusafw.version}</version>
       <scope>provided</scope>

@@ -31,25 +31,25 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>${asakusafw.groupId}</groupId>
+      <groupId>com.asakusafw</groupId>
       <artifactId>asakusa-hive-info</artifactId>
       <version>${asakusafw.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>${asakusafw.groupId}</groupId>
+      <groupId>com.asakusafw</groupId>
       <artifactId>simple-graph</artifactId>
       <version>${asakusafw.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>${asakusafw.groupId}</groupId>
+      <groupId>com.asakusafw</groupId>
       <artifactId>asakusa-directio-vocabulary</artifactId>
       <version>${asakusafw.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>${asakusafw.groupId}</groupId>
+      <groupId>com.asakusafw</groupId>
       <artifactId>asakusa-runtime</artifactId>
       <version>${asakusafw.version}</version>
       <scope>provided</scope>
@@ -78,7 +78,7 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>${asakusafw.groupId}</groupId>
+      <groupId>com.asakusafw</groupId>
       <artifactId>java-dom</artifactId>
       <version>${asakusafw.version}</version>
       <scope>test</scope>

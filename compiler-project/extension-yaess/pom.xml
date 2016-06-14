@@ -23,7 +23,7 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>${asakusafw.groupId}</groupId>
+      <groupId>com.asakusafw</groupId>
       <artifactId>asakusa-yaess-core</artifactId>
       <version>${asakusafw.version}</version>
       <scope>provided</scope>
