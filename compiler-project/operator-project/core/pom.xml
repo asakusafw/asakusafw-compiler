@@ -34,12 +34,12 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>${asakusafw.groupId}</groupId>
+      <groupId>com.asakusafw</groupId>
       <artifactId>jsr269-bridge</artifactId>
       <version>${asakusafw.version}</version>
     </dependency>
     <dependency>
-      <groupId>${asakusafw.groupId}</groupId>
+      <groupId>com.asakusafw</groupId>
       <artifactId>javadoc-parser</artifactId>
       <version>${asakusafw.version}</version>
     </dependency>
@@ -64,19 +64,19 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>${asakusafw.groupId}</groupId>
+      <groupId>com.asakusafw</groupId>
       <artifactId>asakusa-dsl-vocabulary</artifactId>
       <version>${asakusafw.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>${asakusafw.groupId}</groupId>
+      <groupId>com.asakusafw</groupId>
       <artifactId>asakusa-runtime</artifactId>
       <version>${asakusafw.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>${asakusafw.groupId}</groupId>
+      <groupId>com.asakusafw</groupId>
       <artifactId>jsr199-testing</artifactId>
       <version>${asakusafw.version}</version>
       <scope>test</scope>
