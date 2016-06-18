@@ -16,12 +16,10 @@
 package com.asakusafw.bridge.broker;
 
 import java.io.Closeable;
-import java.io.IOException;
 import java.text.MessageFormat;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -41,6 +39,8 @@ final class ResourceSessionEntity implements ResourceSession {
     private final Set<Reference> references = new LinkedHashSet<>();
 
     private final Map<Class<?>, Object> resources = new HashMap<>();
+
+    private final LinkedList<AutoCloseable> closables = new LinkedList<>();
 
     private final Map<Class<?>, ReadWriteLock> resourceLocks = new WeakHashMap<>();
 
@@ -79,9 +79,16 @@ final class ResourceSessionEntity implements ResourceSession {
                         "target resource is already exists in this session: {0}",
                         type.getName()));
             }
-            resources.put(type, resource);
+            put0(type, resource);
         } finally {
             lock.unlock();
+        }
+    }
+
+    private <T> void put0(Class<T> type, T resource) {
+        resources.put(type, resource);
+        if (resource instanceof Closeable) {
+            schedule((Closeable) resource);
         }
     }
 
@@ -105,7 +112,7 @@ final class ResourceSessionEntity implements ResourceSession {
                 return type.cast(value);
             }
             T result = supplier.call();
-            resources.put(type, result);
+            put0(type, result);
             return result;
         } catch (Exception e) {
             throw new IllegalStateException(MessageFormat.format(
@@ -113,6 +120,12 @@ final class ResourceSessionEntity implements ResourceSession {
                     type.getName()), e);
         } finally {
             lock.unlock();
+        }
+    }
+
+    void schedule(AutoCloseable closer) {
+        synchronized (closables) {
+            closables.addFirst(closer);
         }
     }
 
@@ -152,20 +165,23 @@ final class ResourceSessionEntity implements ResourceSession {
         }
         LOG.debug("close session: {}", this); //$NON-NLS-1$
         references.clear();
-        List<Object> values = new ArrayList<>(resources.values());
         resources.clear();
-        for (Object object : values) {
-            if (object instanceof Closeable) {
+        resourceLocks.clear();
+        synchronized (closables) {
+            while (closables.isEmpty() == false) {
+                @SuppressWarnings("resource")
+                AutoCloseable closable = closables.removeFirst();
                 try {
-                    ((Closeable) object).close();
-                } catch (IOException e) {
+                    closable.close();
+                } catch (Error e) {
+                    throw e;
+                } catch (Throwable e) {
                     LOG.warn(MessageFormat.format(
                             "failed to close a registered resource: {0}",
-                            object), e);
+                            closable), e);
                 }
             }
         }
-        resourceLocks.clear();
         closed = true;
     }
 
