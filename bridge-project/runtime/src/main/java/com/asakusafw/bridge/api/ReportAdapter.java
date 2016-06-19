@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.asakusafw.bridge.broker.ResourceBroker;
+import com.asakusafw.bridge.broker.ResourceCacheStorage;
 import com.asakusafw.runtime.core.Report.Default;
 import com.asakusafw.runtime.core.Report.Delegate;
 import com.asakusafw.runtime.core.ResourceConfiguration;
@@ -32,12 +33,15 @@ import com.asakusafw.runtime.core.ResourceConfiguration;
 /**
  * An adapter implementation of core Report API.
  * @since 0.1.1
+ * @version 0.3.1
  */
 final class ReportAdapter implements Closeable {
 
     static final Logger LOG = LoggerFactory.getLogger(ReportAdapter.class);
 
     static final String CLASS_DELEGATE = "com.asakusafw.runtime.core.Report.Delegate"; //$NON-NLS-1$
+
+    private static final ResourceCacheStorage<Delegate> CACHE = new ResourceCacheStorage<>();
 
     private static final Callable<ReportAdapter> SUPPLIER = new Callable<ReportAdapter>() {
 
@@ -102,8 +106,12 @@ final class ReportAdapter implements Closeable {
      * @throws IllegalStateException if resource session has not been started yet
      */
     public static Delegate delegate() {
+        Delegate cached = CACHE.find();
+        if (cached != null) {
+            return cached;
+        }
         ReportAdapter self = ResourceBroker.get(ReportAdapter.class, SUPPLIER);
-        return self.delegate;
+        return CACHE.put(self.delegate);
     }
 
     @Override

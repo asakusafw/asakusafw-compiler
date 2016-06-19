@@ -19,6 +19,7 @@ import java.text.MessageFormat;
 import java.util.Objects;
 
 import com.asakusafw.bridge.broker.ResourceBroker;
+import com.asakusafw.bridge.broker.ResourceCacheStorage;
 import com.asakusafw.bridge.stage.StageInfo;
 import com.asakusafw.runtime.stage.StageConstants;
 
@@ -33,8 +34,12 @@ import com.asakusafw.runtime.stage.StageConstants;
  * This API requires that {@link StageInfo} object has been registered to {@link ResourceBroker}.
  * </p>
  * @see com.asakusafw.runtime.core.BatchContext
+ * @since 0.1.0
+ * @version 0.3.1
  */
 public final class BatchContext {
+
+    private static final ResourceCacheStorage<StageInfo> CACHE = new ResourceCacheStorage<>();
 
     private BatchContext() {
         return;
@@ -49,17 +54,26 @@ public final class BatchContext {
      */
     public static String get(String name) {
         Objects.requireNonNull(name);
+        StageInfo info = getStageInfo();
+        String reserved = getReserved(name, info);
+        if (reserved != null) {
+            return reserved;
+        }
+        return info.getBatchArguments().get(name);
+    }
+
+    private static StageInfo getStageInfo() {
+        StageInfo cached = CACHE.find();
+        if (cached != null) {
+            return cached;
+        }
         StageInfo info = ResourceBroker.find(StageInfo.class);
         if (info == null) {
             throw new IllegalStateException(MessageFormat.format(
                     "required resource has not been prepared yet: {0}",
                     StageInfo.class.getName()));
         }
-        String reserved = getReserved(name, info);
-        if (reserved != null) {
-            return reserved;
-        }
-        return info.getBatchArguments().get(name);
+        return CACHE.put(info);
     }
 
     private static String getReserved(String name, StageInfo info) {
