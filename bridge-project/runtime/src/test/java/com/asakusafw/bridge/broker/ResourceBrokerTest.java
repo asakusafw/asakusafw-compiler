@@ -18,7 +18,9 @@ package com.asakusafw.bridge.broker;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
+import java.io.Closeable;
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.Test;
 
@@ -56,6 +58,64 @@ public class ResourceBrokerTest {
             ResourceBroker.put(String.class, "Hello, world!");
             assertThat(session.get(String.class), is("Hello, world!"));
         }
+    }
+
+    /**
+     * schedule.
+     * @throws Exception if failed
+     */
+    @Test
+    public void schedule() throws Exception {
+        final AtomicBoolean done = new AtomicBoolean();
+        try (ResourceSession session = ResourceBroker.start()) {
+            ResourceBroker.schedule(new Closeable() {
+                @Override
+                public void close() throws IOException {
+                    done.set(true);
+                }
+            });
+            assertThat(done.get(), is(false));
+        }
+        assertThat(done.get(), is(true));
+    }
+
+    /**
+     * schedule.
+     * @throws Exception if failed
+     */
+    @Test
+    public void schedule_auto() throws Exception {
+        final AtomicBoolean done = new AtomicBoolean();
+        try (ResourceSession session = ResourceBroker.start()) {
+            ResourceBroker.put(Closeable.class, new Closeable() {
+                @Override
+                public void close() throws IOException {
+                    done.set(true);
+                }
+            });
+            assertThat(done.get(), is(false));
+        }
+        assertThat(done.get(), is(true));
+    }
+
+    /**
+     * schedule.
+     * @throws Exception if failed
+     */
+    @Test
+    public void schedule_suppress_exception() throws Exception {
+        final AtomicBoolean done = new AtomicBoolean();
+        try (ResourceSession session = ResourceBroker.start()) {
+            ResourceBroker.schedule(new Closeable() {
+                @Override
+                public void close() throws IOException {
+                    done.set(true);
+                    throw new IOException();
+                }
+            });
+            assertThat(done.get(), is(false));
+        }
+        assertThat(done.get(), is(true));
     }
 
     /**

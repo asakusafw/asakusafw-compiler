@@ -25,6 +25,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Brokers resources between the framework and user applications.
+ * @since 0.1.0
+ * @version 0.3.1
  */
 public final class ResourceBroker {
 
@@ -126,6 +128,8 @@ public final class ResourceBroker {
 
     /**
      * Returns a registered resource, or registers a new resource.
+     * If the supplied resource has {@link AutoCloseable} interface,
+     * it will be closed when the current session was closed.
      * @param <T> the resource type
      * @param type the resource type
      * @param supplier the resource supplier, which will be called only if there is no such a resource
@@ -138,6 +142,7 @@ public final class ResourceBroker {
 
     /**
      * Registers a resource.
+     * If the resource has {@link AutoCloseable} interface, it will be closed when the current session was closed.
      * @param <T> the resource type
      * @param type the resource type
      * @param resource the target resource
@@ -145,6 +150,17 @@ public final class ResourceBroker {
      */
     public static <T> void put(Class<T> type, T resource) {
         getCurrentSession().put(type, resource);
+    }
+
+    /**
+     * Adds a object to be closed.
+     * {@link AutoCloseable#close() closer.close()} will be invoked when the current session was closed.
+     * Note that, exceptions occurred in {@code close()} method will be suppressed.
+     * @param closer the closable object
+     * @since 0.3.1
+     */
+    public static void schedule(AutoCloseable closer) {
+        getCurrentSession().schedule(closer);
     }
 
     private static ResourceSession start(Scope scope, Initializer initializer, boolean strict) throws IOException {
