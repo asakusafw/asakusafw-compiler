@@ -77,11 +77,6 @@ public class DirectFileIoPortProcessor
 
     static final Logger LOG = LoggerFactory.getLogger(DirectFileIoPortProcessor.class);
 
-    /**
-     * The module name of Direct file I/O.
-     */
-    public static final String MODULE_NAME = "directio"; //$NON-NLS-1$
-
     static final TaskReference.Phase PHASE_INPUT = TaskReference.Phase.PROLOGUE;
 
     static final TaskReference.Phase PHASE_OUTPUT = TaskReference.Phase.EPILOGUE;
@@ -108,7 +103,7 @@ public class DirectFileIoPortProcessor
 
     @Override
     protected String getModuleName() {
-        return MODULE_NAME;
+        return DirectFileIoConstants.MODULE_NAME;
     }
 
     @Override
