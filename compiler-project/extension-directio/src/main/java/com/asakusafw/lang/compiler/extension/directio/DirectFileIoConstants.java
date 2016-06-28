@@ -22,8 +22,16 @@ import com.asakusafw.runtime.stage.output.BridgeOutputFormat;
 
 /**
  * Constants for Direct file I/Os.
+ * @since 0.1.0
+ * @version 0.3.1
  */
 public final class DirectFileIoConstants {
+
+    /**
+     * The module name of Direct file I/O.
+     * @since 0.3.1
+     */
+    public static final String MODULE_NAME = "directio"; //$NON-NLS-1$
 
     /**
      * Hadoop input format class for direct file inputs.

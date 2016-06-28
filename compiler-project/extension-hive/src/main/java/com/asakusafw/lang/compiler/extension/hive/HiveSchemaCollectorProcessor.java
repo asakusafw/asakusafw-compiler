@@ -31,7 +31,7 @@ import com.asakusafw.directio.hive.info.TableInfo;
 import com.asakusafw.lang.compiler.api.JobflowProcessor;
 import com.asakusafw.lang.compiler.common.Location;
 import com.asakusafw.lang.compiler.extension.directio.DirectFileInputModel;
-import com.asakusafw.lang.compiler.extension.directio.DirectFileIoPortProcessor;
+import com.asakusafw.lang.compiler.extension.directio.DirectFileIoModels;
 import com.asakusafw.lang.compiler.extension.directio.DirectFileOutputModel;
 import com.asakusafw.lang.compiler.model.graph.ExternalInput;
 import com.asakusafw.lang.compiler.model.graph.ExternalOutput;
@@ -108,17 +108,12 @@ public class HiveSchemaCollectorProcessor implements JobflowProcessor {
             return null;
         }
         ExternalInputInfo info = port.getInfo();
-        if (info.getModuleName().equals(DirectFileIoPortProcessor.MODULE_NAME) == false) {
+        if (DirectFileIoModels.isSupported(info) == false) {
             LOG.trace("not direct I/O: {}", info);
             return null;
         }
         try {
-            Object contents = info.getContents().resolve(classLoader);
-            if ((contents instanceof DirectFileInputModel) == false) {
-                LOG.trace("not direct file I/O: {}", info);
-                return null;
-            }
-            DirectFileInputModel model = (DirectFileInputModel) contents;
+            DirectFileInputModel model = DirectFileIoModels.resolve(info);
             Object format = model.getFormatClass()
                     .resolve(classLoader)
                     .newInstance();
@@ -129,7 +124,7 @@ public class HiveSchemaCollectorProcessor implements JobflowProcessor {
             return new InputInfo(
                     new LocationInfo(model.getBasePath(), model.getResourcePattern()),
                     ((TableInfo.Provider) format).getSchema());
-        } catch (ReflectiveOperationException e) {
+        } catch (IllegalArgumentException | ReflectiveOperationException e) {
             LOG.debug("failed to resolve external port model: {}", info, e);
             return null;
         }
@@ -141,17 +136,12 @@ public class HiveSchemaCollectorProcessor implements JobflowProcessor {
             return null;
         }
         ExternalOutputInfo info = port.getInfo();
-        if (info.getModuleName().equals(DirectFileIoPortProcessor.MODULE_NAME) == false) {
+        if (DirectFileIoModels.isSupported(info) == false) {
             LOG.trace("not direct I/O: {}", info);
             return null;
         }
         try {
-            Object contents = info.getContents().resolve(classLoader);
-            if ((contents instanceof DirectFileOutputModel) == false) {
-                LOG.trace("not direct file I/O: {}", info);
-                return null;
-            }
-            DirectFileOutputModel model = (DirectFileOutputModel) contents;
+            DirectFileOutputModel model = DirectFileIoModels.resolve(info);
             Object format = model.getFormatClass()
                     .resolve(classLoader)
                     .newInstance();
