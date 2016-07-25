@@ -45,7 +45,7 @@ import com.asakusafw.lang.compiler.packaging.ResourceUtil;
  * <li> {@code javac.version} (optional)
  *   <ul>
  *   <li> the compiler compliance version (a.k.a. {@code -source, -target}) </li>
- *   <li> <em>default value</em>: {@code "1.7"} </li>
+ *   <li> <em>default value</em>: {@code "1.8"} </li>
  *   </ul>
  * </li>
  * <li> {@code javac.bootclasspath} (optional)
