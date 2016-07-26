@@ -57,7 +57,7 @@ public abstract class AbstractJavaCompilerSupport implements JavaCompilerSupport
 
     static final Charset DEFAULT_ENCODING = StandardCharsets.UTF_8;
 
-    static final String DEFAULT_COMPLIANT_VERSION = "1.7"; //$NON-NLS-1$
+    static final String DEFAULT_COMPLIANT_VERSION = "1.8"; //$NON-NLS-1$
 
     @Override
     public final Writer addJavaFile(ClassDescription aClass) throws IOException {

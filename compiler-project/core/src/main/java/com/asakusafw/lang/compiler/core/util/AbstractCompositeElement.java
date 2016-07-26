@@ -27,7 +27,7 @@ public abstract class AbstractCompositeElement<E> implements CompositeElement<E>
 
     @Override
     public Iterator<E> iterator() {
-        return Collections.unmodifiableCollection(getElements()).iterator();
+        return Collections.<E>unmodifiableCollection(getElements()).iterator();
     }
 
     @Override
