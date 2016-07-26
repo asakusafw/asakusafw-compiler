@@ -62,7 +62,7 @@ public class CommandTaskReference extends BasicAttributeContainer implements Tas
             Location command,
             List<? extends CommandToken> arguments,
             List<? extends TaskReference> blockerTasks) {
-        this(moduleName, profileName, command, arguments, Collections.<String>emptySet(), blockerTasks);
+        this(moduleName, profileName, command, arguments, Collections.emptySet(), blockerTasks);
     }
 
     /**

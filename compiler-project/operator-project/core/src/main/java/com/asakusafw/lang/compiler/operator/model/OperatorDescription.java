@@ -51,7 +51,7 @@ public class OperatorDescription {
             Document document,
             List<? extends Node> parameters,
             List<? extends Node> outputs) {
-        this(document, parameters, outputs, Collections.<EnumConstantDescription>emptyList());
+        this(document, parameters, outputs, Collections.emptyList());
     }
 
     /**

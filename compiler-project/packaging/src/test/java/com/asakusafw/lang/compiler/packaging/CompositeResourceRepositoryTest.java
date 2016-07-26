@@ -67,7 +67,7 @@ public class CompositeResourceRepositoryTest extends ResourceTestRoot {
      */
     @Test
     public void no_items() {
-        ResourceRepository repo = new CompositeResourceRepository(Collections.<ResourceRepository>emptyList());
+        ResourceRepository repo = new CompositeResourceRepository(Collections.emptyList());
         Map<String, String> results = dump(repo);
         assertThat(results.keySet(), hasSize(0));
     }

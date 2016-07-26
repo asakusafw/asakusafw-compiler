@@ -24,7 +24,6 @@ import java.util.Map;
 
 import com.asakusafw.lang.compiler.api.ExternalPortProcessor;
 import com.asakusafw.lang.compiler.api.reference.CommandTaskReference;
-import com.asakusafw.lang.compiler.api.reference.CommandToken;
 import com.asakusafw.lang.compiler.api.reference.ExternalInputReference;
 import com.asakusafw.lang.compiler.api.reference.ExternalOutputReference;
 import com.asakusafw.lang.compiler.api.reference.TaskReference;
@@ -140,9 +139,9 @@ public class SimpleExternalPortProcessor implements ExternalPortProcessor {
                 MODULE_NAME,
                 "testing",
                 Location.of("simple.sh"),
-                Collections.<CommandToken>emptyList(),
-                Collections.<String>emptySet(),
-                Collections.<TaskReference>emptyList()));
+                Collections.emptyList(),
+                Collections.emptySet(),
+                Collections.emptyList()));
     }
 
     @Override

@@ -87,7 +87,7 @@ public final class Groups {
      * @throws IllegalArgumentException if some expressions are unrecognized
      */
     public static Group parse(List<String> grouping) {
-        return parse(grouping, Collections.<String>emptyList());
+        return parse(grouping, Collections.emptyList());
     }
 
     /**

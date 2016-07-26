@@ -44,9 +44,7 @@ import com.asakusafw.lang.compiler.operator.model.OperatorClass;
 import com.asakusafw.lang.compiler.operator.util.DescriptionHelper;
 import com.asakusafw.utils.java.jsr269.bridge.Jsr269;
 import com.asakusafw.utils.java.model.syntax.ArrayType;
-import com.asakusafw.utils.java.model.syntax.Attribute;
 import com.asakusafw.utils.java.model.syntax.ClassDeclaration;
-import com.asakusafw.utils.java.model.syntax.Comment;
 import com.asakusafw.utils.java.model.syntax.CompilationUnit;
 import com.asakusafw.utils.java.model.syntax.FormalParameterDeclaration;
 import com.asakusafw.utils.java.model.syntax.MethodDeclaration;
@@ -145,7 +143,7 @@ public class OperatorImplementationEmitter {
                     imports.getPackageDeclaration(),
                     imports.toImportDeclarations(),
                     Collections.singletonList(typeDecl),
-                    Collections.<Comment>emptyList());
+                    Collections.emptyList());
         }
 
         private ClassDeclaration generateClass() {
@@ -169,7 +167,7 @@ public class OperatorImplementationEmitter {
                         .toAttributes(),
                     className,
                     imports.resolve(converter.convert(superClass)),
-                    Collections.<Type>emptyList(),
+                    Collections.emptyList(),
                     members);
         }
 
@@ -182,7 +180,7 @@ public class OperatorImplementationEmitter {
                         .Public()
                         .toAttributes(),
                     generateClassName(),
-                    Collections.<FormalParameterDeclaration>emptyList(),
+                    Collections.emptyList(),
                     Collections.singletonList(f.newReturnStatement()));
         }
 
@@ -213,7 +211,7 @@ public class OperatorImplementationEmitter {
                     f.newSimpleName(method.getSimpleName().toString()),
                     toParameters(method),
                     0,
-                    Collections.<Type>emptyList(),
+                    Collections.emptyList(),
                     f.newBlock(new TypeBuilder(f, imports.toType(UnsupportedOperationException.class))
                         .newObject()
                         .toThrowStatement()));
@@ -231,7 +229,7 @@ public class OperatorImplementationEmitter {
                     type = ((ArrayType) type).getComponentType();
                 }
                 results.add(f.newFormalParameterDeclaration(
-                        Collections.<Attribute>emptyList(),
+                        Collections.emptyList(),
                         imports.resolve(type),
                         varArgs,
                         f.newSimpleName(var.getSimpleName().toString()),

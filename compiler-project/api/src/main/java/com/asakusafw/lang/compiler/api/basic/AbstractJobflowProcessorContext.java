@@ -114,7 +114,7 @@ public abstract class AbstractJobflowProcessorContext extends BasicExtensionCont
             Location command,
             List<? extends CommandToken> arguments,
             TaskReference... blockers) {
-        return addTask(moduleName, profileName, command, arguments, Collections.<String>emptySet(), blockers);
+        return addTask(moduleName, profileName, command, arguments, Collections.emptySet(), blockers);
     }
 
     @Override
@@ -124,7 +124,7 @@ public abstract class AbstractJobflowProcessorContext extends BasicExtensionCont
             Location command,
             List<? extends CommandToken> arguments,
             TaskReference... blockers) {
-        return addFinalizer(moduleName, profileName, command, arguments, Collections.<String>emptySet(), blockers);
+        return addFinalizer(moduleName, profileName, command, arguments, Collections.emptySet(), blockers);
     }
 
     @Override

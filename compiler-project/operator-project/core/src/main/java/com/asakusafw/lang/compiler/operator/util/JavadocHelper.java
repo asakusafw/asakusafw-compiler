@@ -81,7 +81,7 @@ public class JavadocHelper {
             appendBlock(tag, block.getElements());
         }
         if (sawSummary == false) {
-            appendBlock("", Collections.<DocElement>emptyList()); //$NON-NLS-1$
+            appendBlock("", Collections.emptyList()); //$NON-NLS-1$
         }
     }
 
@@ -95,13 +95,13 @@ public class JavadocHelper {
             environment.getProcessingEnvironment().getMessager().printMessage(Diagnostic.Kind.WARNING,
                     e.getMessage(),
                     element);
-            return Models.getModelFactory().newJavadoc(Collections.<DocBlock>emptyList());
+            return Models.getModelFactory().newJavadoc(Collections.emptyList());
         }
     }
 
     private Javadoc parseJavadoc(String comment) throws JavadocParseException {
         if (comment == null) {
-            return Models.getModelFactory().newJavadoc(Collections.<DocBlock>emptyList());
+            return Models.getModelFactory().newJavadoc(Collections.emptyList());
         }
         String string = comment;
         if (comment.startsWith("/**") == false) { //$NON-NLS-1$

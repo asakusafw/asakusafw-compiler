@@ -212,8 +212,8 @@ public class WindGatePortProcessor
                             CommandToken.EXECUTION_ID,
                             CommandToken.BATCH_ARGUMENTS,
                     }),
-                    Collections.<String>emptySet(),
-                    Collections.<TaskReference>emptyList()));
+                    Collections.emptySet(),
+                    Collections.emptyList()));
         }
         if (doExport) {
             LOG.debug("registering WindGate export: {}", profileName); //$NON-NLS-1$
@@ -230,8 +230,8 @@ public class WindGatePortProcessor
                             CommandToken.EXECUTION_ID,
                             CommandToken.BATCH_ARGUMENTS,
                     }),
-                    Collections.<String>emptySet(),
-                    Collections.<TaskReference>emptyList()));
+                    Collections.emptySet(),
+                    Collections.emptyList()));
         }
         LOG.debug("registering WindGate finalize: {}", profileName); //$NON-NLS-1$
         context.addTask(TaskReference.Phase.FINALIZE, new CommandTaskReference(
@@ -244,8 +244,8 @@ public class WindGatePortProcessor
                         CommandToken.FLOW_ID,
                         CommandToken.EXECUTION_ID,
                 }),
-                Collections.<String>emptySet(),
-                Collections.<TaskReference>emptyList()));
+                Collections.emptySet(),
+                Collections.emptyList()));
     }
 
     private static String getScriptUri(boolean importer, String profileName) {
@@ -326,7 +326,7 @@ public class WindGatePortProcessor
         if (locations.isEmpty()) {
             source = new DriverScript(
                     Constants.VOID_RESOURCE_NAME,
-                    Collections.<String, String>emptyMap());
+                    Collections.emptyMap());
         } else {
             source = new DriverScript(
                     Constants.HADOOP_FILE_RESOURCE_NAME,

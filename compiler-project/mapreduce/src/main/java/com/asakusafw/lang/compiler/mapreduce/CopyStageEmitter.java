@@ -27,12 +27,9 @@ import com.asakusafw.lang.compiler.mapreduce.CopyStageInfo.Operation;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.description.Descriptions;
 import com.asakusafw.runtime.stage.preparator.PreparatorMapper;
-import com.asakusafw.utils.java.model.syntax.Comment;
 import com.asakusafw.utils.java.model.syntax.CompilationUnit;
-import com.asakusafw.utils.java.model.syntax.FormalParameterDeclaration;
 import com.asakusafw.utils.java.model.syntax.MethodDeclaration;
 import com.asakusafw.utils.java.model.syntax.ModelFactory;
-import com.asakusafw.utils.java.model.syntax.Type;
 import com.asakusafw.utils.java.model.syntax.TypeBodyDeclaration;
 import com.asakusafw.utils.java.model.syntax.TypeDeclaration;
 import com.asakusafw.utils.java.model.util.AttributeBuilder;
@@ -100,7 +97,7 @@ public final class CopyStageEmitter {
                 info.meta,
                 inputs,
                 outputs,
-                Collections.<MapReduceStageInfo.Resource>emptyList(),
+                Collections.emptyList(),
                 info.baseOutputPath);
     }
 
@@ -136,7 +133,7 @@ public final class CopyStageEmitter {
                     importer.getPackageDeclaration(),
                     importer.toImportDeclarations(),
                     Collections.singletonList(type),
-                    Collections.<Comment>emptyList());
+                    Collections.emptyList());
         }
 
         private TypeDeclaration generateType() {
@@ -151,7 +148,7 @@ public final class CopyStageEmitter {
                     f.newParameterizedType(
                             importer.toType(PreparatorMapper.class),
                             importer.toType(Object.class)),
-                    Collections.<Type>emptyList(),
+                    Collections.emptyList(),
                     members);
         }
 
@@ -164,7 +161,7 @@ public final class CopyStageEmitter {
                         .toAttributes(),
                     importer.toType(String.class),
                     f.newSimpleName(PreparatorMapper.NAME_GET_OUTPUT_NAME),
-                    Collections.<FormalParameterDeclaration>emptyList(),
+                    Collections.emptyList(),
                     Collections.singletonList(f.newReturnStatement(Models.toLiteral(f, operation.outputName))));
         }
     }

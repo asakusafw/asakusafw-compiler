@@ -137,7 +137,7 @@ public final class OutputPattern {
      * @return the compiled information
      */
     public static OutputPattern compile(DataModelReference dataModel, String resourcePattern) {
-        return compile(dataModel, resourcePattern, Collections.<String>emptyList());
+        return compile(dataModel, resourcePattern, Collections.emptyList());
     }
 
     /**

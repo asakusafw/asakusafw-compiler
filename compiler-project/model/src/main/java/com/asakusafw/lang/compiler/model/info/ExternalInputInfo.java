@@ -93,7 +93,7 @@ public interface ExternalInputInfo extends ExternalPortInfo {
                 String moduleName,
                 ClassDescription dataModelClass,
                 DataSize dataSize) {
-            this(descriptionClass, moduleName, dataModelClass, dataSize, Collections.<String>emptySet(), null);
+            this(descriptionClass, moduleName, dataModelClass, dataSize, Collections.emptySet(), null);
         }
 
         /**
@@ -110,7 +110,7 @@ public interface ExternalInputInfo extends ExternalPortInfo {
                 ClassDescription dataModelClass,
                 DataSize dataSize,
                 ValueDescription contents) {
-            this(descriptionClass, moduleName, dataModelClass, dataSize, Collections.<String>emptySet(), contents);
+            this(descriptionClass, moduleName, dataModelClass, dataSize, Collections.emptySet(), contents);
         }
 
         /**

@@ -65,7 +65,7 @@ public class MapReduceRunnerTest {
                 new Configuration(),
                 Descriptions.classOf(SimpleClient.class),
                 "testing",
-                Collections.<String, String>emptyMap());
+                Collections.emptyMap());
         assertThat("exit status code", status, is(0));
         assertThat(collect("output"), contains("Hello, world!"));
     }
@@ -80,7 +80,7 @@ public class MapReduceRunnerTest {
                 new Configuration(),
                 new ClassDescription("___MISSING___"),
                 "testing",
-                Collections.<String, String>emptyMap());
+                Collections.emptyMap());
     }
 
     private List<String> collect(String path) {

@@ -183,7 +183,7 @@ public class YaessBatchProcessor implements BatchProcessor {
         assert stageId != null;
         Set<String> blockerIds = toStageIds(task.getBlockers(), idMap);
         List<String> command = resolveCommandLine(batch, jobflow, phase, task);
-        Map<String, String> envs = Collections.<String, String>emptyMap();
+        Map<String, String> envs = Collections.emptyMap();
         Set<String> extensions = task.getExtensions();
         return new CommandScript(
                 stageId, blockerIds,

@@ -78,7 +78,7 @@ public class BatchExecutor implements ArtifactExecutor<BatchArtifact> {
 
     @Override
     public void execute(TesterContext context, BatchArtifact artifact) throws InterruptedException, IOException {
-        execute(context, artifact, Collections.<String, String>emptyMap());
+        execute(context, artifact, Collections.emptyMap());
     }
 
     @Override

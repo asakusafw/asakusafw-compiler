@@ -47,7 +47,7 @@ public interface InspectionNodeProcessor {
          * Creates a new instance w/ empty options.
          */
         public Context() {
-            this(Collections.<String, String>emptyMap());
+            this(Collections.emptyMap());
         }
 
         /**

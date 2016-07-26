@@ -191,7 +191,7 @@ public interface BatchInfo extends DescriptionInfo {
          */
         public Basic(String batchId, ClassDescription descriptionClass) {
             this(batchId, descriptionClass,
-                    null, Collections.<Parameter>emptyList(), Collections.<Attribute>emptyList());
+                    null, Collections.emptyList(), Collections.emptyList());
         }
 
         /**

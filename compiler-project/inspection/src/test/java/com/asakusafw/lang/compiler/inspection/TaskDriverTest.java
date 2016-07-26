@@ -67,8 +67,8 @@ public class TaskDriverTest {
                 "local",
                 Location.of("hello/world"),
                 Arrays.asList(CommandToken.of("a"), CommandToken.EXECUTION_ID),
-                Collections.<String>emptySet(),
-                Collections.<TaskReference>emptyList());
+                Collections.emptySet(),
+                Collections.emptyList());
 
         InspectionNode node = driver.inspect("t", ref);
         assertThat(node.getId(), is("t"));
@@ -81,7 +81,7 @@ public class TaskDriverTest {
     public void task_hadoop() {
         TaskReference ref = new HadoopTaskReference(
                 new ClassDescription("testing"),
-                Collections.<TaskReference>emptyList());
+                Collections.emptyList());
 
         InspectionNode node = driver.inspect("t", ref);
         assertThat(node.getId(), is("t"));
@@ -360,8 +360,8 @@ public class TaskDriverTest {
                 "testing",
                 "local",
                 Location.of("sh"),
-                Collections.<CommandToken>emptyList(),
-                Collections.<String>emptySet(),
+                Collections.emptyList(),
+                Collections.emptySet(),
                 Arrays.asList(blockers));
         ref.putAttribute(Bless.class, new Bless());
         return ref;

@@ -24,13 +24,10 @@ import com.asakusafw.lang.compiler.javac.JavaSourceExtension;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.runtime.stage.AbstractCleanupStageClient;
 import com.asakusafw.runtime.stage.BaseStageClient;
-import com.asakusafw.utils.java.model.syntax.Comment;
 import com.asakusafw.utils.java.model.syntax.CompilationUnit;
-import com.asakusafw.utils.java.model.syntax.FormalParameterDeclaration;
 import com.asakusafw.utils.java.model.syntax.Literal;
 import com.asakusafw.utils.java.model.syntax.MethodDeclaration;
 import com.asakusafw.utils.java.model.syntax.ModelFactory;
-import com.asakusafw.utils.java.model.syntax.Type;
 import com.asakusafw.utils.java.model.syntax.TypeBodyDeclaration;
 import com.asakusafw.utils.java.model.syntax.TypeDeclaration;
 import com.asakusafw.utils.java.model.util.AttributeBuilder;
@@ -78,7 +75,7 @@ public final class CleanupStageEmitter {
                 importer.getPackageDeclaration(),
                 importer.toImportDeclarations(),
                 Collections.singletonList(type),
-                Collections.<Comment>emptyList());
+                Collections.emptyList());
     }
 
     private TypeDeclaration generateType() {
@@ -92,7 +89,7 @@ public final class CleanupStageEmitter {
                     .toAttributes(),
                 f.newSimpleName(clientClass.getSimpleName()),
                 importer.toType(AbstractCleanupStageClient.class),
-                Collections.<Type>emptyList(),
+                Collections.emptyList(),
                 members);
     }
 
@@ -118,7 +115,7 @@ public final class CleanupStageEmitter {
                     .toAttributes(),
                 importer.toType(String.class),
                 f.newSimpleName(name),
-                Collections.<FormalParameterDeclaration>emptyList(),
+                Collections.emptyList(),
                 Collections.singletonList(f.newReturnStatement(literal)));
     }
 }

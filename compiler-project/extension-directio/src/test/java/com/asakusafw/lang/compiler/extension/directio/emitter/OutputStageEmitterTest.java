@@ -84,7 +84,7 @@ public class OutputStageEmitterTest {
                 Collections.singletonList(source("testing/input/file.bin", entries)),
                 "testing/output",
                 OutputPattern.compile(dataModel, "*.bin"),
-                Collections.<FilePattern>emptyList(),
+                Collections.emptyList(),
                 classOf(MockDataFormat.class));
         OutputStageInfo info = stage(operation);
         ClassDescription clientClass = OutputStageEmitter.emit(info, javac);
@@ -92,7 +92,7 @@ public class OutputStageEmitterTest {
                 context.newConfiguration(),
                 clientClass,
                 "testing",
-                Collections.<String, String>emptyMap(),
+                Collections.emptyMap(),
                 javac.compile());
         assertThat(status, is(0));
 
@@ -134,7 +134,7 @@ public class OutputStageEmitterTest {
                 context.newConfiguration(),
                 clientClass,
                 "testing",
-                Collections.<String, String>emptyMap(),
+                Collections.emptyMap(),
                 javac.compile());
         assertThat(status, is(0));
 
@@ -164,7 +164,7 @@ public class OutputStageEmitterTest {
                 Collections.singletonList(source("testing/input/file.bin", entries)),
                 "testing/output",
                 OutputPattern.compile(dataModel, "single.bin"),
-                Collections.<FilePattern>emptyList(),
+                Collections.emptyList(),
                 classOf(MockDataFormat.class));
         OutputStageInfo info = stage(operation);
         ClassDescription clientClass = OutputStageEmitter.emit(info, javac);
@@ -172,7 +172,7 @@ public class OutputStageEmitterTest {
                 context.newConfiguration(),
                 clientClass,
                 "testing",
-                Collections.<String, String>emptyMap(),
+                Collections.emptyMap(),
                 javac.compile());
         assertThat(status, is(0));
 
@@ -201,7 +201,7 @@ public class OutputStageEmitterTest {
                 Collections.singletonList(source("testing/input/file.bin", entries)),
                 "testing/output",
                 OutputPattern.compile(dataModel, "{stringValue}.bin", Arrays.asList("+intValue")),
-                Collections.<FilePattern>emptyList(),
+                Collections.emptyList(),
                 classOf(MockDataFormat.class));
         OutputStageInfo info = stage(operation);
         ClassDescription clientClass = OutputStageEmitter.emit(info, javac);
@@ -209,7 +209,7 @@ public class OutputStageEmitterTest {
                 context.newConfiguration(),
                 clientClass,
                 "testing",
-                Collections.<String, String>emptyMap(),
+                Collections.emptyMap(),
                 javac.compile());
         assertThat(status, is(0));
 
@@ -244,7 +244,7 @@ public class OutputStageEmitterTest {
                 Collections.singletonList(source),
                 "testing/o0",
                 OutputPattern.compile(dataModel, "*.bin"),
-                Collections.<FilePattern>emptyList(),
+                Collections.emptyList(),
                 classOf(MockDataFormat.class));
         OutputStageInfo.Operation o1 = new OutputStageInfo.Operation(
                 "t1",
@@ -252,7 +252,7 @@ public class OutputStageEmitterTest {
                 Collections.singletonList(source),
                 "testing/o1",
                 OutputPattern.compile(dataModel, "single.bin"),
-                Collections.<FilePattern>emptyList(),
+                Collections.emptyList(),
                 classOf(MockDataFormat.class));
         OutputStageInfo info = stage(o0, o1);
         ClassDescription clientClass = OutputStageEmitter.emit(info, javac);
@@ -260,7 +260,7 @@ public class OutputStageEmitterTest {
                 context.newConfiguration(),
                 clientClass,
                 "testing",
-                Collections.<String, String>emptyMap(),
+                Collections.emptyMap(),
                 javac.compile());
         assertThat(status, is(0));
 
@@ -276,7 +276,7 @@ public class OutputStageEmitterTest {
                 context.path(path).toString(),
                 classOf(MockData.class),
                 classOf(WritableInputFormat.class),
-                Collections.<String, String>emptyMap());
+                Collections.emptyMap());
     }
 
     private Map<Integer, String> collect(File file) throws IOException {

@@ -49,11 +49,9 @@ import com.asakusafw.runtime.stage.directio.DirectOutputReducer;
 import com.asakusafw.runtime.stage.directio.DirectOutputSpec;
 import com.asakusafw.utils.java.model.syntax.ArrayType;
 import com.asakusafw.utils.java.model.syntax.ClassDeclaration;
-import com.asakusafw.utils.java.model.syntax.Comment;
 import com.asakusafw.utils.java.model.syntax.CompilationUnit;
 import com.asakusafw.utils.java.model.syntax.ConstructorDeclaration;
 import com.asakusafw.utils.java.model.syntax.Expression;
-import com.asakusafw.utils.java.model.syntax.FormalParameterDeclaration;
 import com.asakusafw.utils.java.model.syntax.ModelFactory;
 import com.asakusafw.utils.java.model.syntax.Statement;
 import com.asakusafw.utils.java.model.syntax.Type;
@@ -362,7 +360,7 @@ public final class OutputStageEmitter {
                     .Public()
                     .toAttributes(),
                 f.newSimpleName(aClass.getSimpleName()),
-                Collections.<FormalParameterDeclaration>emptyList(),
+                Collections.emptyList(),
                 Collections.singletonList(ctorChain));
         ClassDeclaration typeDecl = f.newClassDeclaration(
                 null,
@@ -372,13 +370,13 @@ public final class OutputStageEmitter {
                     .toAttributes(),
                 f.newSimpleName(aClass.getSimpleName()),
                 importer.resolve(baseClass),
-                Collections.<Type>emptyList(),
+                Collections.emptyList(),
                 Collections.singletonList(ctorDecl));
         CompilationUnit source = f.newCompilationUnit(
                 importer.getPackageDeclaration(),
                 importer.toImportDeclarations(),
                 Collections.singletonList(typeDecl),
-                Collections.<Comment>emptyList());
+                Collections.emptyList());
         return JavaDomUtil.emit(source, javac);
     }
 
@@ -420,7 +418,7 @@ public final class OutputStageEmitter {
                 new StageInfo(stageInfo.meta.getBatchId(), stageInfo.meta.getFlowId(), stageInfo.meta.getStageId()),
                 inputs,
                 outputs,
-                Collections.<MapReduceStageInfo.Resource>emptyList(),
+                Collections.emptyList(),
                 shuffle,
                 stageInfo.baseOutputPath);
 

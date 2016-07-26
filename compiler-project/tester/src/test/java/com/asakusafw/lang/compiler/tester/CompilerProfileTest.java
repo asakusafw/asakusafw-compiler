@@ -32,7 +32,6 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import com.asakusafw.lang.compiler.api.JobflowProcessor;
-import com.asakusafw.lang.compiler.api.reference.CommandToken;
 import com.asakusafw.lang.compiler.api.reference.TaskReference;
 import com.asakusafw.lang.compiler.api.reference.TaskReferenceMap;
 import com.asakusafw.lang.compiler.api.testing.MockBatchProcessor;
@@ -85,7 +84,7 @@ public class CompilerProfileTest {
                 public void process(Context context, Jobflow source) throws IOException {
                     context.addTask(
                             "testing", "testing",
-                            Location.of("testing"), Collections.<CommandToken>emptyList());
+                            Location.of("testing"), Collections.emptyList());
                 }
             });
 

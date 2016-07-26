@@ -68,7 +68,7 @@ public interface ExternalOutputInfo extends ExternalPortInfo {
                 ClassDescription descriptionClass,
                 String moduleName,
                 ClassDescription dataModelClass) {
-            this(descriptionClass, moduleName, dataModelClass, Collections.<String>emptySet(), null);
+            this(descriptionClass, moduleName, dataModelClass, Collections.emptySet(), null);
         }
 
         /**
@@ -83,7 +83,7 @@ public interface ExternalOutputInfo extends ExternalPortInfo {
                 String moduleName,
                 ClassDescription dataModelClass,
                 ValueDescription contents) {
-            this(descriptionClass, moduleName, dataModelClass, Collections.<String>emptySet(), contents);
+            this(descriptionClass, moduleName, dataModelClass, Collections.emptySet(), contents);
         }
 
         /**
@@ -99,7 +99,7 @@ public interface ExternalOutputInfo extends ExternalPortInfo {
                 String moduleName,
                 ClassDescription dataModelClass,
                 Set<String> parameterNames) {
-            this(descriptionClass, moduleName, dataModelClass, Collections.<String>emptySet(), null);
+            this(descriptionClass, moduleName, dataModelClass, Collections.emptySet(), null);
         }
 
         /**
@@ -135,7 +135,7 @@ public interface ExternalOutputInfo extends ExternalPortInfo {
                 ClassDescription dataModelClass,
                 boolean generator,
                 Set<String> parameterNames) {
-            this(descriptionClass, moduleName, dataModelClass, generator, Collections.<String>emptySet(), null);
+            this(descriptionClass, moduleName, dataModelClass, generator, Collections.emptySet(), null);
         }
 
         /**

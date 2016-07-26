@@ -106,12 +106,7 @@ final class ReportAdapter implements Closeable {
      * @throws IllegalStateException if resource session has not been started yet
      */
     public static Delegate delegate() {
-        Delegate cached = CACHE.find();
-        if (cached != null) {
-            return cached;
-        }
-        ReportAdapter self = ResourceBroker.get(ReportAdapter.class, SUPPLIER);
-        return CACHE.put(self.delegate);
+        return CACHE.get(() -> ResourceBroker.get(ReportAdapter.class, SUPPLIER).delegate);
     }
 
     @Override

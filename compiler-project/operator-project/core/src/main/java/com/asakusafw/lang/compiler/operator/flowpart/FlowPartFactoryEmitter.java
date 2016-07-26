@@ -47,12 +47,10 @@ import com.asakusafw.lang.compiler.operator.util.JavadocHelper;
 import com.asakusafw.utils.java.jsr269.bridge.Jsr269;
 import com.asakusafw.utils.java.model.syntax.ClassDeclaration;
 import com.asakusafw.utils.java.model.syntax.ClassLiteral;
-import com.asakusafw.utils.java.model.syntax.Comment;
 import com.asakusafw.utils.java.model.syntax.CompilationUnit;
 import com.asakusafw.utils.java.model.syntax.ConstructorDeclaration;
 import com.asakusafw.utils.java.model.syntax.Expression;
 import com.asakusafw.utils.java.model.syntax.FieldDeclaration;
-import com.asakusafw.utils.java.model.syntax.FormalParameterDeclaration;
 import com.asakusafw.utils.java.model.syntax.Javadoc;
 import com.asakusafw.utils.java.model.syntax.MethodDeclaration;
 import com.asakusafw.utils.java.model.syntax.ModelFactory;
@@ -156,7 +154,7 @@ public class FlowPartFactoryEmitter {
                     imports.getPackageDeclaration(),
                     imports.toImportDeclarations(),
                     Collections.singletonList(typeDecl),
-                    Collections.<Comment>emptyList());
+                    Collections.emptyList());
         }
 
         private ClassDeclaration generateClass() {
@@ -180,7 +178,7 @@ public class FlowPartFactoryEmitter {
                         .toAttributes(),
                     className,
                     null,
-                    Collections.<Type>emptyList(),
+                    Collections.emptyList(),
                     members);
         }
 
@@ -225,7 +223,7 @@ public class FlowPartFactoryEmitter {
                     generateNodeClassName(element),
                     ElementHelper.toTypeParameters(environment, typeElement.getTypeParameters(), imports),
                     null,
-                    Collections.<Type>emptyList(),
+                    Collections.emptyList(),
                     members);
         }
 
@@ -301,7 +299,7 @@ public class FlowPartFactoryEmitter {
                     f.newSimpleName(Constants.NAME_FLOW_PART_FACTORY_METHOD),
                     ElementHelper.toParameters(environment, element, imports),
                     0,
-                    Collections.<Type>emptyList(),
+                    Collections.emptyList(),
                     f.newBlock(new TypeBuilder(f, nodeType)
                         .newObject(ElementHelper.toArguments(environment, element, imports))
                         .toReturnStatement()));
@@ -316,7 +314,7 @@ public class FlowPartFactoryEmitter {
                         .Public()
                         .toAttributes(),
                     generateClassName(),
-                    Collections.<FormalParameterDeclaration>emptyList(),
+                    Collections.emptyList(),
                     Collections.singletonList(f.newReturnStatement()));
         }
 

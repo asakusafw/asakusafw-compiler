@@ -553,7 +553,7 @@ public class DirectFileIoPortProcessor
                         DirectFileIoConstants.CLASS_INPUT_FORMAT,
                         inputAttributes),
                 HadoopFormatExtension.getOutputFormat(context),
-                Collections.<String, String>emptyMap());
+                Collections.emptyMap());
     }
 
     private Map<String, String> getInputAttributes(Context context, ResolvedInput resolved) {
@@ -595,7 +595,7 @@ public class DirectFileIoPortProcessor
                         reference.getPaths(),
                         reference.getDataModelClass(),
                         HadoopFormatExtension.getInputFormat(context),
-                        Collections.<String, String>emptyMap())),
+                        Collections.emptyMap())),
                 model.getBasePath(),
                 OutputPattern.compile(dataModel, model.getResourcePattern(), model.getOrder()),
                 deletePatterns,
@@ -607,7 +607,7 @@ public class DirectFileIoPortProcessor
         context.addTask(phase, new HadoopTaskReference(
                 getModuleName(),
                 clientClass,
-                Collections.<TaskReference>emptyList()));
+                Collections.emptyList()));
     }
 
     @Override

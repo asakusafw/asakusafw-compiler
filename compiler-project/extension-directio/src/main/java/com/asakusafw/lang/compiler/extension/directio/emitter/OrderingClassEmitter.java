@@ -32,12 +32,10 @@ import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.description.TypeDescription;
 import com.asakusafw.runtime.io.util.InvertOrder;
 import com.asakusafw.runtime.stage.directio.DirectOutputOrder;
-import com.asakusafw.utils.java.model.syntax.Comment;
 import com.asakusafw.utils.java.model.syntax.CompilationUnit;
 import com.asakusafw.utils.java.model.syntax.ConstructorDeclaration;
 import com.asakusafw.utils.java.model.syntax.Expression;
 import com.asakusafw.utils.java.model.syntax.FieldDeclaration;
-import com.asakusafw.utils.java.model.syntax.FormalParameterDeclaration;
 import com.asakusafw.utils.java.model.syntax.MethodDeclaration;
 import com.asakusafw.utils.java.model.syntax.ModelFactory;
 import com.asakusafw.utils.java.model.syntax.SimpleName;
@@ -45,7 +43,6 @@ import com.asakusafw.utils.java.model.syntax.Statement;
 import com.asakusafw.utils.java.model.syntax.Type;
 import com.asakusafw.utils.java.model.syntax.TypeBodyDeclaration;
 import com.asakusafw.utils.java.model.syntax.TypeDeclaration;
-import com.asakusafw.utils.java.model.syntax.TypeParameterDeclaration;
 import com.asakusafw.utils.java.model.util.AttributeBuilder;
 import com.asakusafw.utils.java.model.util.ExpressionBuilder;
 import com.asakusafw.utils.java.model.util.ImportBuilder;
@@ -100,7 +97,7 @@ public final class OrderingClassEmitter {
                 importer.getPackageDeclaration(),
                 importer.toImportDeclarations(),
                 Collections.singletonList(type),
-                Collections.<Comment>emptyList());
+                Collections.emptyList());
     }
 
     private TypeDeclaration createType() {
@@ -117,9 +114,9 @@ public final class OrderingClassEmitter {
                     .Final()
                     .toAttributes(),
                 name,
-                Collections.<TypeParameterDeclaration>emptyList(),
+                Collections.emptyList(),
                 t(DirectOutputOrder.class),
-                Collections.<Type>emptyList(),
+                Collections.emptyList(),
                 members);
     }
 
@@ -183,7 +180,7 @@ public final class OrderingClassEmitter {
                     .Public()
                     .toAttributes(),
                 f.newSimpleName(targetClass.getSimpleName()),
-                Collections.<FormalParameterDeclaration>emptyList(),
+                Collections.emptyList(),
                 statements);
     }
 

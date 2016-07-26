@@ -250,9 +250,9 @@ public class InternalIoPortProcessor
                                 port.getPaths(),
                                 port.getDataModelClass(),
                                 HadoopFormatExtension.getInputFormat(context),
-                                Collections.<String, String>emptyMap()),
+                                Collections.emptyMap()),
                         HadoopFormatExtension.getOutputFormat(context),
-                        Collections.<String, String>emptyMap());
+                        Collections.emptyMap());
                 operations.add(operation);
             }
             CopyStageInfo info = new CopyStageInfo(
@@ -267,7 +267,7 @@ public class InternalIoPortProcessor
             context.addTask(PHASE_OUTPUT, new HadoopTaskReference(
                     getModuleName(),
                     client,
-                    Collections.<TaskReference>emptyList()));
+                    Collections.emptyList()));
         }
     }
 

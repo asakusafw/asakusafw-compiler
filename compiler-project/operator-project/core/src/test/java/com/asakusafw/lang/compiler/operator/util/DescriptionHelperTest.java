@@ -42,13 +42,10 @@ import com.asakusafw.lang.compiler.operator.OperatorCompilerTestRoot;
 import com.asakusafw.lang.compiler.operator.mock.MockMarker;
 import com.asakusafw.lang.compiler.operator.mock.MockNested;
 import com.asakusafw.lang.compiler.operator.mock.MockSingleElement;
-import com.asakusafw.utils.java.model.syntax.Comment;
 import com.asakusafw.utils.java.model.syntax.Expression;
-import com.asakusafw.utils.java.model.syntax.FormalParameterDeclaration;
 import com.asakusafw.utils.java.model.syntax.MethodDeclaration;
 import com.asakusafw.utils.java.model.syntax.ModelFactory;
 import com.asakusafw.utils.java.model.syntax.Type;
-import com.asakusafw.utils.java.model.syntax.TypeBodyDeclaration;
 import com.asakusafw.utils.java.model.syntax.TypeDeclaration;
 import com.asakusafw.utils.java.model.util.AttributeBuilder;
 import com.asakusafw.utils.java.model.util.ImportBuilder;
@@ -225,7 +222,7 @@ public class DescriptionHelperTest extends OperatorCompilerTestRoot {
                         new AttributeBuilder(f).Public().toAttributes(),
                         imports.toType(Object.class),
                         f.newSimpleName("call"),
-                        Collections.<FormalParameterDeclaration>emptyList(),
+                        Collections.emptyList(),
                         Collections.singletonList(f.newReturnStatement(f.newClassLiteral(target))));
                 TypeDeclaration type = f.newClassDeclaration(
                         null,
@@ -240,7 +237,7 @@ public class DescriptionHelperTest extends OperatorCompilerTestRoot {
                         imports.getPackageDeclaration(),
                         imports.toImportDeclarations(),
                         Collections.singletonList(type),
-                        Collections.<Comment>emptyList()));
+                        Collections.emptyList()));
             }
         });
         try {
@@ -268,7 +265,7 @@ public class DescriptionHelperTest extends OperatorCompilerTestRoot {
                         new AttributeBuilder(f).Public().toAttributes(),
                         imports.toType(Object.class),
                         f.newSimpleName("call"),
-                        Collections.<FormalParameterDeclaration>emptyList(),
+                        Collections.emptyList(),
                         Collections.singletonList(f.newReturnStatement(target)));
                 TypeDeclaration type = f.newClassDeclaration(
                         null,
@@ -283,7 +280,7 @@ public class DescriptionHelperTest extends OperatorCompilerTestRoot {
                         imports.getPackageDeclaration(),
                         imports.toImportDeclarations(),
                         Collections.singletonList(type),
-                        Collections.<Comment>emptyList()));
+                        Collections.emptyList()));
             }
         });
         try {
@@ -319,13 +316,13 @@ public class DescriptionHelperTest extends OperatorCompilerTestRoot {
                             .toAttributes(),
                         f.newSimpleName("Work"),
                         null,
-                        Collections.<Type>emptyList(),
-                        Collections.<TypeBodyDeclaration>emptyList());
+                        Collections.emptyList(),
+                        Collections.emptyList());
                 env.emit(f.newCompilationUnit(
                         imports.getPackageDeclaration(),
                         imports.toImportDeclarations(),
                         Collections.singletonList(type),
-                        Collections.<Comment>emptyList()));
+                        Collections.emptyList()));
             }
         });
         try {

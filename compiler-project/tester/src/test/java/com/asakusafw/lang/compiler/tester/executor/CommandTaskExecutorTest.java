@@ -35,7 +35,6 @@ import org.junit.rules.TemporaryFolder;
 
 import com.asakusafw.lang.compiler.api.reference.CommandTaskReference;
 import com.asakusafw.lang.compiler.api.reference.CommandToken;
-import com.asakusafw.lang.compiler.api.reference.TaskReference;
 import com.asakusafw.lang.compiler.common.Location;
 import com.asakusafw.lang.compiler.common.testing.FileEditor;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
@@ -204,8 +203,8 @@ public class CommandTaskExecutorTest {
                 "testing",
                 Location.of(path),
                 Arrays.asList(args),
-                Collections.<String>emptySet(),
-                Collections.<TaskReference>emptyList());
+                Collections.emptySet(),
+                Collections.emptyList());
     }
 
     private Context context(File home) {
