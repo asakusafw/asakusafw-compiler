@@ -79,7 +79,7 @@ public class HadoopTaskReference extends BasicAttributeContainer implements Task
             String moduleName,
             ClassDescription mainClass,
             List<? extends TaskReference> blockerTasks) {
-        this(moduleName, mainClass, Collections.<String>emptySet(), blockerTasks);
+        this(moduleName, mainClass, Collections.emptySet(), blockerTasks);
     }
 
     /**

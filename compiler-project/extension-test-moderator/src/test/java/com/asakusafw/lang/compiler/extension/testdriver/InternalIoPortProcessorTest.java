@@ -393,7 +393,7 @@ public class InternalIoPortProcessorTest {
                 new Configuration(),
                 hadoop.getMainClass(),
                 "testing",
-                Collections.<String, String>emptyMap(),
+                Collections.emptyMap(),
                 classes);
         assertThat(MessageFormat.format(
                 "unexpected exit status on {0}",

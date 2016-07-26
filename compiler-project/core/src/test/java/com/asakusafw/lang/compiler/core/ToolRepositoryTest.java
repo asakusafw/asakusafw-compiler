@@ -285,7 +285,7 @@ public class ToolRepositoryTest {
     static Matcher<Object> hasIds(String... ids) {
         Matcher<? super List<? extends String>> sub;
         if (ids.length == 0) {
-            sub = Matchers.<String>empty();
+            sub = Matchers.empty();
         } else {
             sub = contains(ids);
         }

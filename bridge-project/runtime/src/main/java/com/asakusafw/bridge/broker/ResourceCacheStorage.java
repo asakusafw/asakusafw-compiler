@@ -16,22 +16,17 @@
 package com.asakusafw.bridge.broker;
 
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 
 /**
  * A thread-local resource cache storage for {@link ResourceBroker}.
  * @param <V> the value type
  * @since 0.3.1
+ * @version 0.9.0
  */
 public class ResourceCacheStorage<V> {
 
-    private final ThreadLocal<Entry<V>> storage = new ThreadLocal<Entry<V>>() {
-        @Override
-        protected ResourceCacheStorage.Entry<V> initialValue() {
-            return new Entry<>(null);
-        }
-    };
-
-    // TODO public V get(Supplier<V> defaultValue) = Optional.ofNullable(find()).orElseGet(() -> put(supplier.get))
+    private final ThreadLocal<Entry<V>> storage = ThreadLocal.withInitial(() -> new Entry<>(null));
 
     /**
      * Returns the cached value in this storage.
@@ -40,6 +35,22 @@ public class ResourceCacheStorage<V> {
      */
     public V find() {
         return storage.get().get();
+    }
+
+    /**
+     * Returns the cached value in this storage.
+     * If this storage is empty for this thread, this operation will put the default value to this storage and
+     * return the put value.
+     * @param defaultValue the default value
+     * @return the cached value, or the default value if the cached value does not exist
+     * @since 0.9.0
+     */
+    public V get(Supplier<? extends V> defaultValue) {
+        V found = find();
+        if (found != null) {
+            return found;
+        }
+        return put(defaultValue.get());
     }
 
     /**

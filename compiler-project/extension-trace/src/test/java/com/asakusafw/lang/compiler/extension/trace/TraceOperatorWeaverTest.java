@@ -58,7 +58,7 @@ public class TraceOperatorWeaverTest {
         settings.add(new TraceSetting(
                 new Tracepoint(Ops.class.getName(), "update", PortKind.INPUT, "in"),
                 Mode.IN_ORDER,
-                Collections.<String, String>emptyMap()));
+                Collections.emptyMap()));
 
         assertThat(graph.getOperators(), hasSize(1));
 
@@ -83,7 +83,7 @@ public class TraceOperatorWeaverTest {
         settings.add(new TraceSetting(
                 new Tracepoint(Ops.class.getName(), "update", PortKind.OUTPUT, "out"),
                 Mode.IN_ORDER,
-                Collections.<String, String>emptyMap()));
+                Collections.emptyMap()));
 
         assertThat(graph.getOperators(), hasSize(1));
 

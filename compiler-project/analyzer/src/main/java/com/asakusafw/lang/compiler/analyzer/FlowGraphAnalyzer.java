@@ -117,7 +117,7 @@ public final class FlowGraphAnalyzer {
     private static final Map<Class<?>, Collection<Class<? extends Annotation>>> OPERATOR_ANNOTATION_ALIASES;
     static {
         Map<Class<?>, Collection<Class<? extends Annotation>>> map = new HashMap<>();
-        map.put(CoGroup.class, Arrays.<Class<? extends Annotation>>asList(GroupSort.class));
+        map.put(CoGroup.class, Arrays.asList(GroupSort.class));
         OPERATOR_ANNOTATION_ALIASES = map;
     }
 

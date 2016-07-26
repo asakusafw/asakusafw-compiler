@@ -72,7 +72,7 @@ public class HadoopTaskExecutor implements TaskExecutor {
                 PATH_YAESS_HADOOP,
                 arguments,
                 task.getExtensions(),
-                Collections.<TaskReference>emptyList());
+                Collections.emptyList());
         delegate.execute(context, commandTask);
     }
 }

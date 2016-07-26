@@ -67,7 +67,7 @@ public class ValueHolder<T> implements Holder<T> {
     @Override
     public Iterator<T> iterator() {
         if (value == null) {
-            return Collections.<T>emptySet().iterator();
+            return Collections.emptyIterator();
         } else {
             return Collections.singleton(value).iterator();
         }

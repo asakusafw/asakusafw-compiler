@@ -73,7 +73,7 @@ public class CleanupStageEmitterTest {
                 new Configuration(),
                 client,
                 "testing",
-                Collections.<String, String>emptyMap(),
+                Collections.emptyMap(),
                 javac.compile());
         assertThat("exit status code", status, is(0));
 

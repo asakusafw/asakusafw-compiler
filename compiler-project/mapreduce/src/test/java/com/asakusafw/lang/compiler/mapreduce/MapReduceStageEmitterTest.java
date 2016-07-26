@@ -84,21 +84,21 @@ public class MapReduceStageEmitterTest {
                         classOf(Text.class),
                         classOf(TextInputFormat.class),
                         classOf(SimpleMapper.class),
-                        Collections.<String, String>emptyMap())),
+                        Collections.emptyMap())),
                 Arrays.asList(new MapReduceStageInfo.Output(
                         "out",
                         classOf(NullWritable.class),
                         classOf(Text.class),
                         classOf(TextOutputFormat.class),
-                        Collections.<String, String>emptyMap())),
-                Collections.<MapReduceStageInfo.Resource>emptyList(),
+                        Collections.emptyMap())),
+                Collections.emptyList(),
                 base.toString());
         MapReduceStageEmitter.emit(client, info, javac);
         int status = MapReduceRunner.execute(
                 new Configuration(),
                 client,
                 "testing",
-                Collections.<String, String>emptyMap(),
+                Collections.emptyMap(),
                 javac.compile());
         assertThat("exit status code", status, is(0));
         assertThat(collect("output"), contains("Hello, world!"));
@@ -121,14 +121,14 @@ public class MapReduceStageEmitterTest {
                         classOf(Text.class),
                         classOf(TextInputFormat.class),
                         classOf(Mapper.class),
-                        Collections.<String, String>emptyMap())),
+                        Collections.emptyMap())),
                 Arrays.asList(new MapReduceStageInfo.Output(
                         "out",
                         classOf(NullWritable.class),
                         classOf(Text.class),
                         classOf(TextOutputFormat.class),
-                        Collections.<String, String>emptyMap())),
-                Collections.<MapReduceStageInfo.Resource>emptyList(),
+                        Collections.emptyMap())),
+                Collections.emptyList(),
                 new MapReduceStageInfo.Shuffle(
                         classOf(LongWritable.class),
                         classOf(Text.class),
@@ -143,7 +143,7 @@ public class MapReduceStageEmitterTest {
                 new Configuration(),
                 client,
                 "testing",
-                Collections.<String, String>emptyMap(),
+                Collections.emptyMap(),
                 javac.compile());
         assertThat("exit status code", status, is(0));
         assertThat(collect("output"), contains("Hello, world!"));
@@ -167,13 +167,13 @@ public class MapReduceStageEmitterTest {
                         classOf(Text.class),
                         classOf(TextInputFormat.class),
                         classOf(ResourceMapper.class),
-                        Collections.<String, String>emptyMap())),
+                        Collections.emptyMap())),
                 Arrays.asList(new MapReduceStageInfo.Output(
                         "out",
                         classOf(NullWritable.class),
                         classOf(Text.class),
                         classOf(TextOutputFormat.class),
-                        Collections.<String, String>emptyMap())),
+                        Collections.emptyMap())),
                 Arrays.asList(new MapReduceStageInfo.Resource(
                         new Path(root, "resource/*.txt").toString(),
                         "resource")),
@@ -183,7 +183,7 @@ public class MapReduceStageEmitterTest {
                 new Configuration(),
                 client,
                 "testing",
-                Collections.<String, String>emptyMap(),
+                Collections.emptyMap(),
                 javac.compile());
         assertThat("exit status code", status, is(0));
         assertThat(collect("output"), contains("Hello, resource!"));

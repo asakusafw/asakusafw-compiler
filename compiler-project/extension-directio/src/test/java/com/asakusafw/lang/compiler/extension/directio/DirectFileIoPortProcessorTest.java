@@ -743,7 +743,7 @@ public class DirectFileIoPortProcessorTest {
 
         MockExternalPortProcessorContext mock = mock();
         DirectFileIoPortProcessor processor = new DirectFileIoPortProcessor();
-        processor.process(mock, inputs, Collections.<ExternalOutputReference>emptyList());
+        processor.process(mock, inputs, Collections.emptyList());
 
         checkTasks(mock.getTasks(), 1, 0);
 
@@ -772,7 +772,7 @@ public class DirectFileIoPortProcessorTest {
 
         MockExternalPortProcessorContext mock = mock();
         DirectFileIoPortProcessor processor = new DirectFileIoPortProcessor();
-        processor.process(mock, inputs, Collections.<ExternalOutputReference>emptyList());
+        processor.process(mock, inputs, Collections.emptyList());
 
         checkTasks(mock.getTasks(), 1, 0);
 
@@ -802,7 +802,7 @@ public class DirectFileIoPortProcessorTest {
         MockExternalPortProcessorContext mock = mock(
                 Collections.singletonMap(DirectFileIoPortProcessor.OPTION_FILTER_ENABLED, String.valueOf(false)));
         DirectFileIoPortProcessor processor = new DirectFileIoPortProcessor();
-        processor.process(mock, inputs, Collections.<ExternalOutputReference>emptyList());
+        processor.process(mock, inputs, Collections.emptyList());
 
         checkTasks(mock.getTasks(), 1, 0);
 
@@ -834,7 +834,7 @@ public class DirectFileIoPortProcessorTest {
         MockExternalPortProcessorContext mock = mock(
                 Collections.singletonMap(DirectFileIoPortProcessor.OPTION_FILTER_ENABLED, String.valueOf(false)));
         DirectFileIoPortProcessor processor = new DirectFileIoPortProcessor();
-        processor.process(mock, inputs, Collections.<ExternalOutputReference>emptyList());
+        processor.process(mock, inputs, Collections.emptyList());
 
         checkTasks(mock.getTasks(), 1, 0);
 
@@ -1036,7 +1036,7 @@ public class DirectFileIoPortProcessorTest {
     }
 
     private MockExternalPortProcessorContext mock() {
-        return mock(Collections.<String, String>emptyMap());
+        return mock(Collections.emptyMap());
     }
 
     private MockExternalPortProcessorContext mock(Map<String, String> options) {
@@ -1135,7 +1135,7 @@ public class DirectFileIoPortProcessorTest {
     }
 
     private void run(MockExternalPortProcessorContext mock, File classes, Phase phase) throws Exception {
-        run(mock, classes, phase, Collections.<String, String>emptyMap());
+        run(mock, classes, phase, Collections.emptyMap());
     }
 
     private void run(

@@ -130,7 +130,7 @@ public class ModelInputRecordReaderTest {
 
         @Override
         public List<InputSplit> getSplits(JobContext context) throws IOException, InterruptedException {
-            return Collections.<InputSplit>singletonList(new InputSplit() {
+            return Collections.singletonList(new InputSplit() {
                 @Override
                 public long getLength() throws IOException, InterruptedException {
                     return 0;

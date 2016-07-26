@@ -43,7 +43,6 @@ import com.asakusafw.vocabulary.flow.graph.FlowElementPortDescription;
 import com.asakusafw.vocabulary.flow.graph.FlowGraph;
 import com.asakusafw.vocabulary.flow.graph.FlowIn;
 import com.asakusafw.vocabulary.flow.graph.FlowOut;
-import com.asakusafw.vocabulary.flow.graph.FlowResourceDescription;
 import com.asakusafw.vocabulary.flow.graph.InputDescription;
 import com.asakusafw.vocabulary.flow.graph.OperatorDescription;
 import com.asakusafw.vocabulary.flow.graph.OutputDescription;
@@ -127,7 +126,7 @@ public class MockFlowGraph {
      * @return this
      */
     public MockFlowGraph operator(String id, Class<?> operatorClass, String methodName) {
-        return operator(id, operatorClass, methodName, Collections.<String, Object>emptyMap());
+        return operator(id, operatorClass, methodName, Collections.emptyMap());
     }
 
     /**
@@ -192,7 +191,7 @@ public class MockFlowGraph {
                         methodName, Arrays.asList(method.getParameterTypes())),
                 inputs,
                 outputs,
-                Collections.<FlowResourceDescription>emptyList(),
+                Collections.emptyList(),
                 arguments,
                 Arrays.asList(attributes));
         return add(id, description);

@@ -42,7 +42,7 @@ public class BasicHadoopTaskExtension implements HadoopTaskExtension {
 
     @Override
     public TaskReference addTask(Phase phase, ClassDescription mainClass, TaskReference... blockers) {
-        return addTask(phase, mainClass, Collections.<String>emptySet(), blockers);
+        return addTask(phase, mainClass, Collections.emptySet(), blockers);
     }
 
     @Override

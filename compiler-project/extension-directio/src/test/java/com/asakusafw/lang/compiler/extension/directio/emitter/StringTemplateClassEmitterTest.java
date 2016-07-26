@@ -36,7 +36,6 @@ import com.asakusafw.lang.compiler.mapreduce.testing.mock.MockData;
 import com.asakusafw.lang.compiler.mapreduce.testing.mock.MockDataFormat;
 import com.asakusafw.lang.compiler.mapreduce.testing.mock.WritableInputFormat;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
-import com.asakusafw.runtime.directio.FilePattern;
 import com.asakusafw.runtime.stage.directio.StringTemplate;
 
 /**
@@ -65,10 +64,10 @@ public class StringTemplateClassEmitterTest {
                         "testing/input/*.txt",
                         classOf(MockData.class),
                         classOf(WritableInputFormat.class),
-                        Collections.<String, String>emptyMap())),
+                        Collections.emptyMap())),
                 "testing/stage",
                 OutputPattern.compile(dataModel, "output/{intValue}/[100..999].txt"),
-                Collections.<FilePattern>emptyList(),
+                Collections.emptyList(),
                 classOf(MockDataFormat.class));
 
         ClassDescription targetClass = new ClassDescription("com.example.Template");

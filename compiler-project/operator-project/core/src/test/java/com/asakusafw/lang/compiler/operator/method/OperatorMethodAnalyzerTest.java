@@ -34,7 +34,6 @@ import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.operator.AbstractOperatorDriver;
 import com.asakusafw.lang.compiler.operator.Callback;
 import com.asakusafw.lang.compiler.operator.CompileEnvironment;
-import com.asakusafw.lang.compiler.operator.DataModelMirrorRepository;
 import com.asakusafw.lang.compiler.operator.OperatorCompilerTestRoot;
 import com.asakusafw.lang.compiler.operator.model.OperatorClass;
 import com.asakusafw.lang.compiler.operator.model.OperatorDescription;
@@ -244,7 +243,7 @@ public class OperatorMethodAnalyzerTest extends OperatorCompilerTestRoot {
                     Arrays.asList(
                             new MockDriver("com.example.Mock"),
                             new MockDriver("com.example.Conflict")),
-                    Collections.<DataModelMirrorRepository>emptyList());
+                    Collections.emptyList());
         }
 
         @Override

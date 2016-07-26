@@ -80,7 +80,7 @@ public class CleanupStageGeneratorTest {
                 new Configuration(),
                 client,
                 "testing",
-                Collections.<String, String>emptyMap(),
+                Collections.emptyMap(),
                 javac.compile());
         assertThat("exit status code", status, is(0));
         assertThat(file.exists(), is(false));

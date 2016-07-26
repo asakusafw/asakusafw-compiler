@@ -37,7 +37,6 @@ import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.operator.Callback;
 import com.asakusafw.lang.compiler.operator.CompileEnvironment;
 import com.asakusafw.lang.compiler.operator.OperatorCompilerTestRoot;
-import com.asakusafw.lang.compiler.operator.OperatorDriver;
 import com.asakusafw.lang.compiler.operator.StringDataModelMirrorRepository;
 import com.asakusafw.lang.compiler.operator.model.OperatorClass;
 import com.asakusafw.lang.compiler.operator.model.OperatorDescription;
@@ -427,7 +426,7 @@ public class FlowPartAnalyzerTest extends OperatorCompilerTestRoot {
         protected CompileEnvironment createCompileEnvironment(ProcessingEnvironment processingEnv) {
             return new CompileEnvironment(
                     processingEnv,
-                    Collections.<OperatorDriver>emptyList(),
+                    Collections.emptyList(),
                     Arrays.asList(new StringDataModelMirrorRepository())).withFlowpartExternalIo(true);
         }
 

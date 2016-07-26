@@ -275,7 +275,7 @@ public class YaessBatchProcessorTest {
                             CommandToken.BATCH_ARGUMENTS,
                     }),
                     Arrays.asList("e1", "e2"),
-                    Collections.<TaskReference>emptyList()));
+                    Collections.emptyList()));
         BatchReference batch = batch("B", jobflow("F", tasks));
 
         BatchScript script = execute(context, batch);
@@ -305,7 +305,7 @@ public class YaessBatchProcessorTest {
             .add(Phase.MAIN, new HadoopTaskReference(
                     new ClassDescription("HADOOP"),
                     Arrays.asList("e1", "e2"),
-                    Collections.<TaskReference>emptyList()));
+                    Collections.emptyList()));
         BatchReference batch = batch("B", jobflow("F", tasks));
 
         BatchScript script = execute(batch);
@@ -400,7 +400,7 @@ public class YaessBatchProcessorTest {
     }
 
     private CommandTaskReference task(String module, TaskReference... blockers) {
-        return task(module, Collections.<CommandToken>emptyList(), blockers);
+        return task(module, Collections.emptyList(), blockers);
     }
 
     private CommandTaskReference task(String module, List<? extends CommandToken> args, TaskReference... blockers) {
@@ -409,7 +409,7 @@ public class YaessBatchProcessorTest {
                 "dummy",
                 Location.of("dummy/command.sh"),
                 args,
-                Collections.<String>emptySet(),
+                Collections.emptySet(),
                 Arrays.asList(blockers));
     }
 }

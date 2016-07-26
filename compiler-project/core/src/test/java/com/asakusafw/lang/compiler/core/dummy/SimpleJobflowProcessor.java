@@ -22,7 +22,6 @@ import java.util.Collections;
 
 import com.asakusafw.lang.compiler.api.JobflowProcessor;
 import com.asakusafw.lang.compiler.api.reference.CommandTaskReference;
-import com.asakusafw.lang.compiler.api.reference.CommandToken;
 import com.asakusafw.lang.compiler.api.reference.TaskReference;
 import com.asakusafw.lang.compiler.common.Location;
 import com.asakusafw.lang.compiler.core.BatchCompiler;
@@ -112,7 +111,7 @@ public class SimpleJobflowProcessor implements JobflowProcessor {
                 MODULE_NAME,
                 "testing",
                 Location.of("simple.sh"),
-                Collections.<CommandToken>emptyList());
+                Collections.emptyList());
         if (useExternalPort) {
             for (ExternalInput port : source.getOperatorGraph().getInputs().values()) {
                 context.addExternalInput(port.getName(), port.getInfo());

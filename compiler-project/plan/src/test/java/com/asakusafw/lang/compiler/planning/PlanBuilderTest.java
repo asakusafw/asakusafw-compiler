@@ -22,7 +22,6 @@ import java.util.Collections;
 
 import org.junit.Test;
 
-import com.asakusafw.lang.compiler.model.graph.Operator;
 import com.asakusafw.lang.compiler.model.testing.MockOperators;
 
 /**
@@ -285,7 +284,7 @@ public class PlanBuilderTest extends PlanningTestRoot {
             .marker("end", PlanMarker.END).connect("a", "end");
 
         PlanBuilder.from(mock.all())
-            .add(Collections.<Operator>emptySet(), mock.getAsSet("end"))
+            .add(Collections.emptySet(), mock.getAsSet("end"))
             .build();
     }
 
@@ -300,7 +299,7 @@ public class PlanBuilderTest extends PlanningTestRoot {
             .marker("end", PlanMarker.END).connect("a", "end");
 
         PlanBuilder.from(mock.all())
-            .add(mock.getAsSet("begin"), Collections.<Operator>emptySet())
+            .add(mock.getAsSet("begin"), Collections.emptySet())
             .build();
     }
 

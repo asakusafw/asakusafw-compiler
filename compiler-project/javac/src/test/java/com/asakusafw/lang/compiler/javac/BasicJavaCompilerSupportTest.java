@@ -59,7 +59,7 @@ public class BasicJavaCompilerSupportTest {
 
         BasicJavaCompilerSupport compiler = new BasicJavaCompilerSupport(
                 source,
-                Collections.<File>emptyList(),
+                Collections.emptyList(),
                 target);
         assertThat(compiler.getSourcePath(), is(source));
         assertThat(compiler.getDestinationPath(), is(target));
@@ -117,7 +117,7 @@ public class BasicJavaCompilerSupportTest {
         File target = deployer.getFile("target");
         JavaCompilerSupport compiler = new BasicJavaCompilerSupport(
                 source,
-                Collections.<File>emptyList(),
+                Collections.emptyList(),
                 target);
         compiler.process();
         assertThat(target.exists(), is(false));
@@ -134,7 +134,7 @@ public class BasicJavaCompilerSupportTest {
 
         JavaCompilerSupport compiler = new BasicJavaCompilerSupport(
                 source,
-                Collections.<File>emptyList(),
+                Collections.emptyList(),
                 target);
         put(compiler, "com.example.Hello", "?");
         compiler.process();
@@ -148,8 +148,8 @@ public class BasicJavaCompilerSupportTest {
     public void compile_error_bootclasspath() throws Exception {
         File source = deployer.getFile("source");
         File target = deployer.getFile("target");
-        JavaCompilerSupport compiler = new BasicJavaCompilerSupport(source, Collections.<File>emptyList(), target)
-            .withBootClassPath(Collections.<File>emptyList());
+        JavaCompilerSupport compiler = new BasicJavaCompilerSupport(source, Collections.emptyList(), target)
+            .withBootClassPath(Collections.emptyList());
         put(compiler, "com.example.Hello", new String[] {
                 "package com.example;",
                 "public class Hello {}",
@@ -165,7 +165,7 @@ public class BasicJavaCompilerSupportTest {
     public void compile_error_compliant_version() throws Exception {
         File source = deployer.getFile("source");
         File target = deployer.getFile("target");
-        JavaCompilerSupport compiler = new BasicJavaCompilerSupport(source, Collections.<File>emptyList(), target)
+        JavaCompilerSupport compiler = new BasicJavaCompilerSupport(source, Collections.emptyList(), target)
             .withCompliantVersion("INVALID");
         put(compiler, "com.example.Hello", new String[] {
                 "package com.example;",

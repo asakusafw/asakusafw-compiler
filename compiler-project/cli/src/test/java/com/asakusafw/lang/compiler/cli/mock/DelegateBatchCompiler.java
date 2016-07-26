@@ -26,12 +26,9 @@ public class DelegateBatchCompiler implements BatchCompiler {
     /**
      * delegate.
      */
-    public static final ThreadLocal<BatchCompiler> DELEGATE = new ThreadLocal<BatchCompiler>() {
-        @Override
-        protected BatchCompiler initialValue() {
-            throw new AssertionError();
-        }
-    };
+    public static final ThreadLocal<BatchCompiler> DELEGATE = ThreadLocal.withInitial(() -> {
+        throw new AssertionError();
+    });
 
     @Override
     public void compile(Context context, Batch batch) {

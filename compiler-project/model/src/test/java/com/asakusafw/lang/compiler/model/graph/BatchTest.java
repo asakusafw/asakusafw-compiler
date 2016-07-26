@@ -23,7 +23,6 @@ import java.util.Collections;
 import org.junit.Test;
 
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
-import com.asakusafw.lang.compiler.model.info.BatchInfo;
 
 /**
  * Test for {@link Batch}.
@@ -39,8 +38,8 @@ public class BatchTest {
                 "b0",
                 new ClassDescription("B0"),
                 null,
-                Collections.<BatchInfo.Parameter>emptyList(),
-                Collections.<BatchInfo.Attribute>emptyList());
+                Collections.emptyList(),
+                Collections.emptyList());
 
         assertThat(b0.toString(), b0.getBatchId(), is("b0"));
         assertThat(b0.toString(), b0.getDescriptionClass().getClassName(), is("B0"));

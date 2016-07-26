@@ -29,7 +29,6 @@ import com.asakusafw.lang.compiler.operator.Callback;
 import com.asakusafw.lang.compiler.operator.Constants;
 import com.asakusafw.lang.compiler.operator.OperatorCompilerTestRoot;
 import com.asakusafw.lang.compiler.operator.model.OperatorClass;
-import com.asakusafw.lang.compiler.operator.model.OperatorElement;
 
 /**
  * Test for {@link OperatorImplementationEmitter}.
@@ -90,7 +89,7 @@ public class OperatorImplementationEmitterTest extends OperatorCompilerTestRoot 
                 if (round.getRootElements().contains(element)) {
                     assertThat(name, element, is(notNullValue()));
                     OperatorImplementationEmitter emitter = new OperatorImplementationEmitter(env);
-                    emitter.emit(new OperatorClass(element, Collections.<OperatorElement>emptyList()));
+                    emitter.emit(new OperatorClass(element, Collections.emptyList()));
                 }
             }
         });

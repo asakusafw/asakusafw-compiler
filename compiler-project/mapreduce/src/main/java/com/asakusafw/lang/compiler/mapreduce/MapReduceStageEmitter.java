@@ -32,10 +32,8 @@ import com.asakusafw.runtime.stage.StageInput;
 import com.asakusafw.runtime.stage.StageOutput;
 import com.asakusafw.runtime.stage.StageResource;
 import com.asakusafw.utils.java.model.syntax.ClassLiteral;
-import com.asakusafw.utils.java.model.syntax.Comment;
 import com.asakusafw.utils.java.model.syntax.CompilationUnit;
 import com.asakusafw.utils.java.model.syntax.Expression;
-import com.asakusafw.utils.java.model.syntax.FormalParameterDeclaration;
 import com.asakusafw.utils.java.model.syntax.Literal;
 import com.asakusafw.utils.java.model.syntax.MethodDeclaration;
 import com.asakusafw.utils.java.model.syntax.ModelFactory;
@@ -90,7 +88,7 @@ public final class MapReduceStageEmitter {
                 importer.getPackageDeclaration(),
                 importer.toImportDeclarations(),
                 Collections.singletonList(type),
-                Collections.<Comment>emptyList());
+                Collections.emptyList());
     }
 
     private TypeDeclaration generateType() {
@@ -108,7 +106,7 @@ public final class MapReduceStageEmitter {
                     .toAttributes(),
                 f.newSimpleName(clientClass.getSimpleName()),
                 importer.toType(AbstractStageClient.class),
-                Collections.<Type>emptyList(),
+                Collections.emptyList(),
                 members);
     }
 
@@ -291,7 +289,7 @@ public final class MapReduceStageEmitter {
                     .toAttributes(),
                 type,
                 f.newSimpleName(name),
-                Collections.<FormalParameterDeclaration>emptyList(),
+                Collections.emptyList(),
                 statements);
     }
 }

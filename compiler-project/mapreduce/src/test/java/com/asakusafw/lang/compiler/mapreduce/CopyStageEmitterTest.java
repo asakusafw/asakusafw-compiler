@@ -75,16 +75,16 @@ public class CopyStageEmitterTest {
                                 new Path(root, "input/*.txt").toString(),
                                 classOf(Text.class),
                                 classOf(TextInputFormat.class),
-                                Collections.<String, String>emptyMap()),
+                                Collections.emptyMap()),
                         classOf(TextOutputFormat.class),
-                        Collections.<String, String>emptyMap())),
+                        Collections.emptyMap())),
                 base.toString());
         CopyStageEmitter.emit(client, info, javac);
         int status = MapReduceRunner.execute(
                 new Configuration(),
                 client,
                 "testing",
-                Collections.<String, String>emptyMap(),
+                Collections.emptyMap(),
                 javac.compile());
         assertThat("exit status code", status, is(0));
 
@@ -113,27 +113,27 @@ public class CopyStageEmitterTest {
                                         new Path(root, "input/test0.txt").toString(),
                                         classOf(Text.class),
                                         classOf(TextInputFormat.class),
-                                        Collections.<String, String>emptyMap()),
+                                        Collections.emptyMap()),
                                 classOf(TextOutputFormat.class),
-                                Collections.<String, String>emptyMap()),
+                                Collections.emptyMap()),
                         new CopyStageInfo.Operation(
                                 "out1",
                                 new SourceInfo(
                                         new Path(root, "input/test1.txt").toString(),
                                         classOf(Text.class),
                                         classOf(TextInputFormat.class),
-                                        Collections.<String, String>emptyMap()),
+                                        Collections.emptyMap()),
                                 classOf(TextOutputFormat.class),
-                                Collections.<String, String>emptyMap()),
+                                Collections.emptyMap()),
                         new CopyStageInfo.Operation(
                                 "out2",
                                 new SourceInfo(
                                         new Path(root, "input/test2.txt").toString(),
                                         classOf(Text.class),
                                         classOf(TextInputFormat.class),
-                                        Collections.<String, String>emptyMap()),
+                                        Collections.emptyMap()),
                                 classOf(TextOutputFormat.class),
-                                Collections.<String, String>emptyMap()),
+                                Collections.emptyMap()),
                 }),
                 base.toString());
         CopyStageEmitter.emit(client, info, javac);
@@ -141,7 +141,7 @@ public class CopyStageEmitterTest {
                 new Configuration(),
                 client,
                 "testing",
-                Collections.<String, String>emptyMap(),
+                Collections.emptyMap(),
                 javac.compile());
         assertThat("exit status code", status, is(0));
 

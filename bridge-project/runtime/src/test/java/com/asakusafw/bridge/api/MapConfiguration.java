@@ -34,7 +34,7 @@ public class MapConfiguration implements ResourceConfiguration {
      * Creates a new empty instance.
      */
     public MapConfiguration() {
-        this(Collections.<String, String>emptyMap(), MapConfiguration.class.getClassLoader());
+        this(Collections.emptyMap(), MapConfiguration.class.getClassLoader());
     }
 
     /**

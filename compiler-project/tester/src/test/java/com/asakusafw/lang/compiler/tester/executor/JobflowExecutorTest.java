@@ -32,8 +32,6 @@ import org.junit.rules.TemporaryFolder;
 import com.asakusafw.lang.compiler.api.basic.BasicJobflowReference;
 import com.asakusafw.lang.compiler.api.basic.TaskContainerMap;
 import com.asakusafw.lang.compiler.api.reference.CommandTaskReference;
-import com.asakusafw.lang.compiler.api.reference.CommandToken;
-import com.asakusafw.lang.compiler.api.reference.JobflowReference;
 import com.asakusafw.lang.compiler.api.reference.TaskReference;
 import com.asakusafw.lang.compiler.api.reference.TaskReferenceMap;
 import com.asakusafw.lang.compiler.common.Location;
@@ -225,7 +223,7 @@ public class JobflowExecutorTest {
         BasicJobflowReference reference = new BasicJobflowReference(
                 new JobflowInfo.Basic("FID", new ClassDescription("FID")),
                 tasks,
-                Collections.<JobflowReference>emptyList());
+                Collections.emptyList());
         return new JobflowArtifact(
                 new BatchInfo.Basic("BID", new ClassDescription("BID")),
                 reference,
@@ -237,8 +235,8 @@ public class JobflowExecutorTest {
                 "testing",
                 "testing",
                 Location.of(id),
-                Collections.<CommandToken>emptyList(),
-                Collections.<String>emptySet(),
+                Collections.emptyList(),
+                Collections.emptySet(),
                 Arrays.asList(blockers));
     }
 
@@ -251,6 +249,6 @@ public class JobflowExecutorTest {
     }
 
     private TesterContext context(File home) {
-        return new TesterContext(getClass().getClassLoader(), Collections.<String, String>emptyMap());
+        return new TesterContext(getClass().getClassLoader(), Collections.emptyMap());
     }
 }

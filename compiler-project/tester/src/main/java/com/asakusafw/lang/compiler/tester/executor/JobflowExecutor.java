@@ -101,7 +101,7 @@ public class JobflowExecutor implements ArtifactExecutor<JobflowArtifact> {
 
     @Override
     public void execute(TesterContext context, JobflowArtifact artifact) throws InterruptedException, IOException {
-        execute(context, artifact, Collections.<String, String>emptyMap());
+        execute(context, artifact, Collections.emptyMap());
     }
 
     @Override

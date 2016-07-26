@@ -75,7 +75,7 @@ public class MethodDescriptionTest {
         MethodDescription desc = new MethodDescription(
                 classOf(Integer.class),
                 "intValue",
-                Collections.<ReifiableTypeDescription>emptyList());
+                Collections.emptyList());
 
         Method method = desc.resolve(getClass().getClassLoader());
         assertThat(method.invoke(100), is((Object) 100));
@@ -91,7 +91,7 @@ public class MethodDescriptionTest {
         MethodDescription desc = new MethodDescription(
                 classOf(getClass()),
                 "non_public",
-                Collections.<ReifiableTypeDescription>emptyList());
+                Collections.emptyList());
 
         Method method = desc.resolve(getClass().getClassLoader());
         assertThat(method.invoke(null), is((Object) "non public"));

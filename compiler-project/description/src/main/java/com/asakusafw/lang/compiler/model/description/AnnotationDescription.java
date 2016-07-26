@@ -40,7 +40,7 @@ public class AnnotationDescription implements ValueDescription {
      * @param declaringClass the declaring annotation type
      */
     public AnnotationDescription(ClassDescription declaringClass) {
-        this(declaringClass, Collections.<String, ValueDescription>emptyMap());
+        this(declaringClass, Collections.emptyMap());
     }
 
     /**

@@ -34,10 +34,8 @@ import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.operator.Callback;
 import com.asakusafw.lang.compiler.operator.CompileEnvironment;
 import com.asakusafw.lang.compiler.operator.Constants;
-import com.asakusafw.lang.compiler.operator.DataModelMirrorRepository;
 import com.asakusafw.lang.compiler.operator.MockSource;
 import com.asakusafw.lang.compiler.operator.OperatorCompilerTestRoot;
-import com.asakusafw.lang.compiler.operator.OperatorDriver;
 import com.asakusafw.lang.compiler.operator.model.OperatorClass;
 import com.asakusafw.lang.compiler.operator.model.OperatorDescription;
 import com.asakusafw.lang.compiler.operator.model.OperatorDescription.Document;
@@ -198,8 +196,8 @@ public class FlowPartFactoryEmitterTest extends OperatorCompilerTestRoot {
         protected CompileEnvironment createCompileEnvironment(ProcessingEnvironment processingEnv) {
             return new CompileEnvironment(
                     processingEnv,
-                    Collections.<OperatorDriver>emptyList(),
-                    Collections.<DataModelMirrorRepository>emptyList());
+                    Collections.emptyList(),
+                    Collections.emptyList());
         }
 
         @Override
