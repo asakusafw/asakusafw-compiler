@@ -48,7 +48,9 @@ public final class Compatibility {
      * Invokes {@link JobContext#getConfiguration()}.
      * @param context the target context
      * @return the invocation result
+     * @deprecated Directly use {@code context.getConfiguration()} instead
      */
+    @Deprecated
     public static Configuration getConfiguration(JobContext context) {
         if (JOB_CONTEXT_GET_CONFIGURATION != null) {
             try {

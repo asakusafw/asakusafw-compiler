@@ -25,10 +25,10 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.TaskAttemptID;
+import org.apache.hadoop.mapreduce.task.TaskAttemptContextImpl;
 import org.apache.hadoop.util.ReflectionUtils;
 
 import com.asakusafw.lang.compiler.mapreduce.testing.windows.WindowsConfigurator;
-import com.asakusafw.runtime.compatibility.JobCompatibility;
 import com.asakusafw.runtime.io.util.DataBuffer;
 
 /**
@@ -73,8 +73,7 @@ public class InputFormatTester {
      */
     @SuppressWarnings("unchecked")
     public <T> void collect(Collector<T> collector) throws IOException, InterruptedException {
-        TaskAttemptID id = JobCompatibility.newTaskAttemptId(JobCompatibility.newTaskId(JobCompatibility.newJobId()));
-        TaskAttemptContext context = JobCompatibility.newTaskAttemptContext(conf, id);
+        TaskAttemptContext context = new TaskAttemptContextImpl(conf, new TaskAttemptID());
         List<InputSplit> splits = format.getSplits(context);
         for (InputSplit split : splits) {
             InputSplit restored = restore(split);
