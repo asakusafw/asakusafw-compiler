@@ -294,7 +294,7 @@ public class MapReduceStageEmitterTest {
         private void body(Context context) throws IOException {
             Text buf = new Text();
             LocalFileSystem fs = FileSystem.getLocal(context.getConfiguration());
-            try (StageResourceDriver driver = new StageResourceDriver(context.getConfiguration())) {
+            try (StageResourceDriver driver = new StageResourceDriver(context)) {
                 for (Path path : driver.findCache("resource")) {
                     File file = fs.pathToFile(path);
                     List<String> lines = FileEditor.get(file);

@@ -31,7 +31,6 @@ import org.apache.hadoop.io.WritableUtils;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.util.ReflectionUtils;
 
-import com.asakusafw.bridge.hadoop.Compatibility;
 import com.asakusafw.bridge.hadoop.ConfigurationEditor;
 import com.asakusafw.bridge.stage.StageInfo;
 import com.asakusafw.runtime.directio.DataDefinition;
@@ -52,7 +51,7 @@ public final class Util {
     }
 
     static DirectDataSourceRepository getDataSourceRepository(JobContext context) {
-        return HadoopDataSourceUtil.loadRepository(Compatibility.getConfiguration(context));
+        return HadoopDataSourceUtil.loadRepository(context.getConfiguration());
     }
 
     static DataFilter<?> createFilter(
