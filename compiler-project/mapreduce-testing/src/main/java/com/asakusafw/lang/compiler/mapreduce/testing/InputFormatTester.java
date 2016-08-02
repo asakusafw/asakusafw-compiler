@@ -28,8 +28,8 @@ import org.apache.hadoop.mapreduce.TaskAttemptID;
 import org.apache.hadoop.mapreduce.task.TaskAttemptContextImpl;
 import org.apache.hadoop.util.ReflectionUtils;
 
-import com.asakusafw.lang.compiler.mapreduce.testing.windows.WindowsConfigurator;
 import com.asakusafw.runtime.io.util.DataBuffer;
+import com.asakusafw.runtime.windows.WindowsConfigurator;
 
 /**
  * Testing utilities for {@link InputFormat}.

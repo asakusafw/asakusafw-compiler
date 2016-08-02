@@ -106,6 +106,13 @@
     </dependency>
     <dependency>
       <groupId>com.asakusafw</groupId>
+      <artifactId>asakusa-runtime</artifactId>
+      <version>${asakusafw.version}</version>
+      <classifier>tests</classifier>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.asakusafw</groupId>
       <artifactId>asakusa-runtime-inprocess</artifactId>
       <version>${asakusafw.version}</version>
       <scope>test</scope>

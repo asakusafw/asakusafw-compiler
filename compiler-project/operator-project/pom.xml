@@ -13,11 +13,9 @@
   <packaging>pom</packaging>
 
   <modules>
-    <!-- operators -->
     <module>core</module>
     <module>builtin</module>
     <module>dmdl</module>
     <module>all</module>
-    <module>vocabulary</module>
   </modules>
 </project>
