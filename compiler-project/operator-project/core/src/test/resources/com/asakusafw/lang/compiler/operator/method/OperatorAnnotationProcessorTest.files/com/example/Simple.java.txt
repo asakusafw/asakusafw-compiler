@@ -1,7 +1,0 @@
-package com.example;
-
-public abstract class Simple {
-    
-    @Mock
-    public abstract CharSequence method(String value);
-}

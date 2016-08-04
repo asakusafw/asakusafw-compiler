@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.hadoop.conf.Configuration;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -56,7 +57,6 @@ import com.asakusafw.lang.compiler.internalio.InternalImporterDescription;
 import com.asakusafw.lang.compiler.javac.JavaSourceExtension;
 import com.asakusafw.lang.compiler.javac.testing.JavaCompiler;
 import com.asakusafw.lang.compiler.mapreduce.testing.MapReduceRunner;
-import com.asakusafw.lang.compiler.mapreduce.testing.windows.WindowsConfigurator;
 import com.asakusafw.lang.compiler.model.description.ValueDescription;
 import com.asakusafw.lang.compiler.model.info.ExternalInputInfo;
 import com.asakusafw.lang.compiler.model.info.ExternalOutputInfo;
@@ -64,6 +64,7 @@ import com.asakusafw.runtime.io.ModelInput;
 import com.asakusafw.runtime.io.ModelOutput;
 import com.asakusafw.runtime.stage.temporary.TemporaryFileInput;
 import com.asakusafw.runtime.stage.temporary.TemporaryStorage;
+import com.asakusafw.runtime.windows.WindowsSupport;
 import com.asakusafw.vocabulary.external.ExporterDescription;
 import com.asakusafw.vocabulary.external.ImporterDescription;
 
@@ -72,9 +73,11 @@ import com.asakusafw.vocabulary.external.ImporterDescription;
  */
 public class InternalIoPortProcessorTest {
 
-    static {
-        WindowsConfigurator.install();
-    }
+    /**
+     * Support for Windows platform.
+     */
+    @ClassRule
+    public static final WindowsSupport WINDOWS_SUPPORT = new WindowsSupport();
 
     /**
      * temporary folder for testing.

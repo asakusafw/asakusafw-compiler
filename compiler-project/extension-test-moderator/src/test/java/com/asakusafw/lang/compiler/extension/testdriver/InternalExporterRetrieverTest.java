@@ -24,16 +24,17 @@ import java.net.URI;
 
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import com.asakusafw.lang.compiler.extension.testdriver.mock.MockTextDefinition;
 import com.asakusafw.lang.compiler.internalio.InternalExporterDescription;
-import com.asakusafw.lang.compiler.mapreduce.testing.windows.WindowsConfigurator;
 import com.asakusafw.runtime.io.ModelInput;
 import com.asakusafw.runtime.io.ModelOutput;
 import com.asakusafw.runtime.stage.temporary.TemporaryStorage;
+import com.asakusafw.runtime.windows.WindowsSupport;
 import com.asakusafw.testdriver.core.DataModelReflection;
 import com.asakusafw.testdriver.core.DataModelSource;
 import com.asakusafw.testdriver.core.TestContext;
@@ -44,11 +45,13 @@ import com.asakusafw.testdriver.hadoop.ConfigurationFactory;
  */
 public class InternalExporterRetrieverTest {
 
-    static {
-        WindowsConfigurator.install();
-    }
-
     private static final TestContext EMPTY = new TestContext.Empty();
+
+    /**
+     * Support for Windows platform.
+     */
+    @ClassRule
+    public static final WindowsSupport WINDOWS_SUPPORT = new WindowsSupport();
 
     /**
      * temporary folder for testing.

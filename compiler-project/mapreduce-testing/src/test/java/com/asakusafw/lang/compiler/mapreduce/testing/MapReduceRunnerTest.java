@@ -30,6 +30,7 @@ import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -41,11 +42,18 @@ import com.asakusafw.runtime.stage.AbstractStageClient;
 import com.asakusafw.runtime.stage.StageInput;
 import com.asakusafw.runtime.stage.StageOutput;
 import com.asakusafw.runtime.stage.preparator.PreparatorMapper;
+import com.asakusafw.runtime.windows.WindowsSupport;
 
 /**
  * Test for {@link MapReduceRunner}.
  */
 public class MapReduceRunnerTest {
+
+    /**
+     * Support for Windows platform.
+     */
+    @ClassRule
+    public static final WindowsSupport WINDOWS_SUPPORT = new WindowsSupport();
 
     /**
      * temporary folder.

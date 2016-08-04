@@ -1,8 +1,0 @@
-package com.example;
-
-public abstract class NoAbstract {
-    public int field = 0;
-    public void method() {
-        field = 10;
-    }
-}

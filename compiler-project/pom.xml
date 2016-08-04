@@ -56,8 +56,5 @@
     <module>api-testing</module>
     <module>tester</module>
     <module>test-adapter</module>
-
-    <!-- sub projects -->
-    <module>operator-project</module>
   </modules>
 </project>
