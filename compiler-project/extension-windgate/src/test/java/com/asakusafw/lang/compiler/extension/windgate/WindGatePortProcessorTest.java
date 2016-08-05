@@ -74,7 +74,7 @@ public class WindGatePortProcessorTest {
     @Test
     public void name() {
         WindGatePortProcessor proc = new WindGatePortProcessor();
-        assertThat(proc.getModuleName(), is(WindGatePortProcessor.MODULE_NAME));
+        assertThat(proc.getModuleName(), is(WindGateConstants.MODULE_NAME));
     }
 
     /**
@@ -375,7 +375,7 @@ public class WindGatePortProcessorTest {
     @SuppressWarnings("unchecked")
     private void checkTask(TaskContainer tasks, String profile, String kind) {
         CommandTaskReference task = findTask(tasks, profile);
-        assertThat(task.getModuleName(), is(WindGatePortProcessor.MODULE_NAME));
+        assertThat(task.getModuleName(), is(WindGateConstants.MODULE_NAME));
         assertThat(task.getProfileName(), is(profile));
         assertThat(task.getCommand(), is(WindGatePortProcessor.CMD_PROCESS));
         assertThat(task.getArguments(), contains(
@@ -392,7 +392,7 @@ public class WindGatePortProcessorTest {
     @SuppressWarnings("unchecked")
     private void checkFinalize(TaskContainer tasks, String profile) {
         CommandTaskReference task = findTask(tasks, profile);
-        assertThat(task.getModuleName(), is(WindGatePortProcessor.MODULE_NAME));
+        assertThat(task.getModuleName(), is(WindGateConstants.MODULE_NAME));
         assertThat(task.getProfileName(), is(profile));
         assertThat(task.getCommand(), is(WindGatePortProcessor.CMD_FINALIZE));
         assertThat(task.getArguments(), contains(
