@@ -21,7 +21,7 @@ import com.asakusafw.vocabulary.windgate.Constants;
  * Constants for WindGate.
  * @since 0.4.0
  */
-public class WindGateConstants {
+public final class WindGateConstants {
 
     /**
      * The module name of WindGate.
