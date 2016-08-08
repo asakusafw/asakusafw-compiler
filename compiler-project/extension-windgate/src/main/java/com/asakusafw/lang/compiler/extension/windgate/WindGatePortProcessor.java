@@ -61,13 +61,13 @@ import com.asakusafw.windgate.core.vocabulary.FileProcess;
 
 /**
  * An implementation of {@link ExternalPortProcessor} for WindGate.
+ * @since 0.1.0
+ * @version 0.4.0
  */
 public class WindGatePortProcessor
         extends AbstractExternalPortProcessor<WindGateImporterDescription, WindGateExporterDescription> {
 
     static final Logger LOG = LoggerFactory.getLogger(WindGatePortProcessor.class);
-
-    static final String MODULE_NAME = "windgate"; //$NON-NLS-1$
 
     static final Location CMD_PROCESS = Location.of("windgate/bin/process.sh"); //$NON-NLS-1$
 
@@ -91,7 +91,7 @@ public class WindGatePortProcessor
 
     @Override
     protected String getModuleName() {
-        return MODULE_NAME;
+        return WindGateConstants.MODULE_NAME;
     }
 
     @Override
