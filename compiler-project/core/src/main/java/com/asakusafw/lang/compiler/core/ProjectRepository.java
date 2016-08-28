@@ -31,13 +31,13 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.jar.JarOutputStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.asakusafw.lang.compiler.common.Location;
-import com.asakusafw.lang.compiler.common.Predicate;
 import com.asakusafw.lang.compiler.packaging.FileItem;
 import com.asakusafw.lang.compiler.packaging.FileRepository;
 import com.asakusafw.lang.compiler.packaging.ResourceItem;
@@ -147,7 +147,7 @@ public class ProjectRepository implements Closeable {
                     if (aClass == null || results.contains(aClass)) {
                         continue;
                     }
-                    if (predicate.apply(aClass) == false) {
+                    if (predicate.test(aClass) == false) {
                         continue;
                     }
                     results.add(aClass);

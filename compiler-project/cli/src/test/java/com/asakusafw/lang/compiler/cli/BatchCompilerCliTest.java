@@ -25,6 +25,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -50,7 +51,6 @@ import com.asakusafw.lang.compiler.cli.mock.DummyJobflowProcessor;
 import com.asakusafw.lang.compiler.common.Diagnostic;
 import com.asakusafw.lang.compiler.common.DiagnosticException;
 import com.asakusafw.lang.compiler.common.Location;
-import com.asakusafw.lang.compiler.common.Predicate;
 import com.asakusafw.lang.compiler.common.Predicates;
 import com.asakusafw.lang.compiler.common.testing.FileDeployer;
 import com.asakusafw.lang.compiler.core.BatchCompiler;
@@ -159,9 +159,9 @@ public class BatchCompilerCliTest {
         assertThat(conf.batchIdPrefix, contains("prefix."));
 
         Predicate<? super Class<?>> p = predicate(conf.sourcePredicate);
-        assertThat(p.apply(ByteBuffer.class), is(true));
-        assertThat(p.apply(ByteChannel.class), is(false));
-        assertThat(p.apply(StringBuffer.class), is(false));
+        assertThat(p.test(ByteBuffer.class), is(true));
+        assertThat(p.test(ByteChannel.class), is(false));
+        assertThat(p.test(StringBuffer.class), is(false));
 
         assertThat(conf.properties, hasEntry("a", "b"));
         assertThat(conf.properties, hasEntry("c", "d"));
@@ -179,11 +179,11 @@ public class BatchCompilerCliTest {
                 "--include", "*.String*,*Buffer",
         }));
         Predicate<? super Class<?>> p = predicate(conf.sourcePredicate);
-        assertThat(p.apply(String.class), is(true));
-        assertThat(p.apply(StringBuilder.class), is(true));
-        assertThat(p.apply(ByteBuffer.class), is(true));
-        assertThat(p.apply(Integer.class), is(false));
-        assertThat(p.apply(ByteChannel.class), is(false));
+        assertThat(p.test(String.class), is(true));
+        assertThat(p.test(StringBuilder.class), is(true));
+        assertThat(p.test(ByteBuffer.class), is(true));
+        assertThat(p.test(Integer.class), is(false));
+        assertThat(p.test(ByteChannel.class), is(false));
     }
 
     /**
@@ -198,11 +198,11 @@ public class BatchCompilerCliTest {
                 "--exclude", "*.String*,*Buffer",
         }));
         Predicate<? super Class<?>> p = predicate(conf.sourcePredicate);
-        assertThat(p.apply(String.class), is(false));
-        assertThat(p.apply(StringBuilder.class), is(false));
-        assertThat(p.apply(ByteBuffer.class), is(false));
-        assertThat(p.apply(Integer.class), is(true));
-        assertThat(p.apply(ByteChannel.class), is(true));
+        assertThat(p.test(String.class), is(false));
+        assertThat(p.test(StringBuilder.class), is(false));
+        assertThat(p.test(ByteBuffer.class), is(false));
+        assertThat(p.test(Integer.class), is(true));
+        assertThat(p.test(ByteChannel.class), is(true));
     }
 
     /**

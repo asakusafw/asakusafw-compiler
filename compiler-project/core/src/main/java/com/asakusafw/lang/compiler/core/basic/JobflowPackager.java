@@ -18,6 +18,7 @@ package com.asakusafw.lang.compiler.core.basic;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.Collection;
+import java.util.function.Predicate;
 import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
 
@@ -25,7 +26,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.asakusafw.lang.compiler.common.Location;
-import com.asakusafw.lang.compiler.common.Predicate;
 import com.asakusafw.lang.compiler.common.ResourceContainer;
 import com.asakusafw.lang.compiler.packaging.ResourceAssembler;
 import com.asakusafw.lang.compiler.packaging.ResourceRepository;
@@ -70,17 +70,14 @@ public class JobflowPackager {
      */
     static final String PATTERN_JOBFLOW_LIBRARY = "jobflow-{0}.jar"; //$NON-NLS-1$
 
-    private static final Predicate<Location> EMBEDDED_CONTENT_ACCEPTOR = new Predicate<Location>() {
-        @Override
-        public boolean apply(Location location) {
-            if (location.equals(MANIFEST_FILE)) {
-                return false;
-            }
-            if (FRAMEWORK_INFO.isPrefixOf(location)) {
-                return false;
-            }
-            return true;
+    private static final Predicate<Location> EMBEDDED_CONTENT_ACCEPTOR = location -> {
+        if (location.equals(MANIFEST_FILE)) {
+            return false;
         }
+        if (FRAMEWORK_INFO.isPrefixOf(location)) {
+            return false;
+        }
+        return true;
     };
 
     /**

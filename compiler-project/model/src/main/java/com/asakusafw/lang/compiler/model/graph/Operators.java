@@ -20,8 +20,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-
-import com.asakusafw.lang.compiler.common.Predicate;
+import java.util.function.Predicate;
 
 /**
  * Utilities for {@link Operator}.
@@ -242,7 +241,7 @@ public final class Operators {
                 continue;
             }
             saw.add(operator);
-            if (predicate.apply(operator)) {
+            if (predicate.test(operator)) {
                 results.add(operator);
             } else {
                 collectOpposites(operator.getOutputs(), work);
@@ -270,7 +269,7 @@ public final class Operators {
                 continue;
             }
             saw.add(operator);
-            if (predicate.apply(operator)) {
+            if (predicate.test(operator)) {
                 results.add(operator);
             } else {
                 collectOpposites(operator.getInputs(), work);
@@ -300,7 +299,7 @@ public final class Operators {
                 continue;
             }
             saw.add(operator);
-            if (predicate.apply(operator)) {
+            if (predicate.test(operator)) {
                 if (inclusive) {
                     results.add(operator);
                 }
@@ -333,7 +332,7 @@ public final class Operators {
                 continue;
             }
             saw.add(operator);
-            if (predicate.apply(operator)) {
+            if (predicate.test(operator)) {
                 if (inclusive) {
                     results.add(operator);
                 }

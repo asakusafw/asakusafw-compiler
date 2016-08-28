@@ -18,6 +18,8 @@ package com.asakusafw.lang.compiler.common;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
+import java.util.function.Predicate;
+
 import org.hamcrest.FeatureMatcher;
 import org.hamcrest.Matcher;
 import org.junit.Test;
@@ -36,7 +38,7 @@ public class PredicatesTest {
      */
     @Test
     public void anything() {
-        assertThat(T.apply("a"), is(true));
+        assertThat(T.test("a"), is(true));
     }
 
     /**
@@ -44,7 +46,7 @@ public class PredicatesTest {
      */
     @Test
     public void nothing() {
-        assertThat(F.apply("a"), is(false));
+        assertThat(F.test("a"), is(false));
     }
 
     /**
@@ -79,10 +81,10 @@ public class PredicatesTest {
     }
 
     private Matcher<Predicate<Object>> eq(Predicate<Object> p) {
-        return new FeatureMatcher<Predicate<Object>, Boolean>(is(p.apply(null)), "eq", "eq") {
+        return new FeatureMatcher<Predicate<Object>, Boolean>(is(p.test(null)), "eq", "eq") {
             @Override
             protected Boolean featureValueOf(Predicate<Object> actual) {
-                return actual.apply(null);
+                return actual.test(null);
             }
         };
     }

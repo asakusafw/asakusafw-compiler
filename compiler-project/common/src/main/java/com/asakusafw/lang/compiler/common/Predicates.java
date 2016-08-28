@@ -17,9 +17,12 @@ package com.asakusafw.lang.compiler.common;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * Utilities for {@link Predicate}.
+ * @since 0.1.0
+ * @version 0.4.0
  */
 public final class Predicates {
 
@@ -33,12 +36,7 @@ public final class Predicates {
      * @return {@code TRUE} predicate
      */
     public static <T> Predicate<T> anything() {
-        return new Predicate<T>() {
-            @Override
-            public boolean apply(T argument) {
-                return true;
-            }
-        };
+        return argument -> true;
     }
 
     /**
@@ -47,7 +45,7 @@ public final class Predicates {
      * @return {@code FALSE} predicate
      */
     public static <T> Predicate<T> nothing() {
-        return not(anything());
+        return arguments -> false;
     }
 
     /**
@@ -56,13 +54,8 @@ public final class Predicates {
      * @param p the predicate
      * @return {@code NOT} predicate
      */
-    public static <T> Predicate<T> not(final Predicate<? super T> p) {
-        return new Predicate<T>() {
-            @Override
-            public boolean apply(T argument) {
-                return !p.apply(argument);
-            }
-        };
+    public static <T> Predicate<T> not(Predicate<? super T> p) {
+        return argument -> !p.test(argument);
     }
 
     /**
@@ -75,9 +68,9 @@ public final class Predicates {
     public static <T> Predicate<T> and(Predicate<? super T> a, Predicate<? super T> b) {
         return new Composite<T>("All", a, b) { //$NON-NLS-1$
             @Override
-            public boolean apply(T argument) {
+            public boolean test(T argument) {
                 for (Predicate<? super T> p : elements) {
-                    if (p.apply(argument) == false) {
+                    if (p.test(argument) == false) {
                         return false;
                     }
                 }
@@ -96,9 +89,9 @@ public final class Predicates {
     public static <T> Predicate<T> or(final Predicate<? super T> a, final Predicate<? super T> b) {
         return new Composite<T>("Exists", a, b) { //$NON-NLS-1$
             @Override
-            public boolean apply(T argument) {
+            public boolean test(T argument) {
                 for (Predicate<? super T> p : elements) {
-                    if (p.apply(argument)) {
+                    if (p.test(argument)) {
                         return true;
                     }
                 }

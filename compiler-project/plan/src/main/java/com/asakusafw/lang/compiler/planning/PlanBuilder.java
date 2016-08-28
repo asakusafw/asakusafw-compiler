@@ -200,7 +200,7 @@ public final class PlanBuilder {
         Set<Operator> saw = new LinkedHashSet<>();
         for (MarkerOperator operator : inputs) {
             Set<Operator> reachables = Operators.findNearestReachableSuccessors(
-                    operator.getOutputs(), Planning.PLAN_MARKERS);
+                    operator.getOutputs(), PlanMarkers::exists);
             if (strict) {
                 for (MarkerOperator other : inputs) {
                     if (reachables.contains(other)) {
@@ -231,7 +231,7 @@ public final class PlanBuilder {
         if (strict) {
             for (MarkerOperator operator : outputs) {
                 Set<Operator> reachables = Operators.findNearestReachablePredecessors(
-                        operator.getInputs(), Planning.PLAN_MARKERS);
+                        operator.getInputs(), PlanMarkers::exists);
                 for (MarkerOperator other : outputs) {
                     if (reachables.contains(other)) {
                         throw new IllegalArgumentException(MessageFormat.format(
@@ -279,11 +279,11 @@ public final class PlanBuilder {
         Set<Operator> range = new HashSet<>();
         range.addAll(Operators.collectUntilNearestReachableSuccessors(
                 Operators.getOutputs(in),
-                Planning.PLAN_MARKERS,
+                PlanMarkers::exists,
                 false));
         range.retainAll(Operators.collectUntilNearestReachablePredecessors(
                 Operators.getInputs(out),
-                Planning.PLAN_MARKERS,
+                PlanMarkers::exists,
                 false));
         range.addAll(in);
         range.addAll(out);

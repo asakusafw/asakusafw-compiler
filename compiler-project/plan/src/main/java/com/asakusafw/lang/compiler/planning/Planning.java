@@ -20,8 +20,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 
-import com.asakusafw.lang.compiler.common.Predicate;
 import com.asakusafw.lang.compiler.model.graph.ExternalInput;
 import com.asakusafw.lang.compiler.model.graph.ExternalOutput;
 import com.asakusafw.lang.compiler.model.graph.FlowOperator;
@@ -48,12 +48,7 @@ public final class Planning {
     /**
      * A predicate only accepts plan markers.
      */
-    public static final Predicate<Operator> PLAN_MARKERS = new Predicate<Operator>() {
-        @Override
-        public boolean apply(Operator argument) {
-            return PlanMarkers.get(argument) != null;
-        }
-    };
+    public static final Predicate<Operator> PLAN_MARKERS = PlanMarkers::exists;
 
     private Planning() {
         return;

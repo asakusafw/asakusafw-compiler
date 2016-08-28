@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 import org.apache.commons.cli.BasicParser;
@@ -49,7 +50,6 @@ import com.asakusafw.lang.compiler.api.ExternalPortProcessor;
 import com.asakusafw.lang.compiler.api.JobflowProcessor;
 import com.asakusafw.lang.compiler.common.Diagnostic;
 import com.asakusafw.lang.compiler.common.DiagnosticException;
-import com.asakusafw.lang.compiler.common.Predicate;
 import com.asakusafw.lang.compiler.common.Predicates;
 import com.asakusafw.lang.compiler.core.AnalyzerContext;
 import com.asakusafw.lang.compiler.core.BatchCompiler;
@@ -565,13 +565,8 @@ public final class BatchCompilerCli {
 
     private static Predicate<? super Class<?>> loadPredicate(
             AnalyzerContext root, Configuration configuration, final ClassAnalyzer analyzer) {
-        final ClassAnalyzer.Context context = new ClassAnalyzer.Context(root);
-        Predicate<Class<?>> predicate = new Predicate<Class<?>>() {
-            @Override
-            public boolean apply(Class<?> argument) {
-                return analyzer.isBatchClass(context, argument);
-            }
-        };
+        ClassAnalyzer.Context context = new ClassAnalyzer.Context(root);
+        Predicate<Class<?>> predicate = aClass -> analyzer.isBatchClass(context, aClass);
         for (Predicate<? super Class<?>> p : configuration.sourcePredicate) {
             predicate = Predicates.and(predicate, p);
         }

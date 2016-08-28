@@ -20,12 +20,12 @@ import static org.junit.Assert.*;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 import org.junit.Test;
 
 import com.asakusafw.lang.compiler.common.Location;
-import com.asakusafw.lang.compiler.common.Predicate;
 
 /**
  * Test for {@link ResourceAssembler}.
@@ -219,12 +219,7 @@ public class ResourceAssemblerTest extends ResourceTestRoot {
     }
 
     private Predicate<Location> pattern(String pattern) {
-        final Pattern p = Pattern.compile(pattern);
-        return new Predicate<Location>() {
-            @Override
-            public boolean apply(Location argument) {
-                return p.matcher(argument.toPath()).matches();
-            }
-        };
+        Pattern p = Pattern.compile(pattern);
+        return argument -> p.matcher(argument.toPath()).matches();
     }
 }

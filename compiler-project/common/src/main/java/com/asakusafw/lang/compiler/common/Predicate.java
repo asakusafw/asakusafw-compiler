@@ -18,8 +18,13 @@ package com.asakusafw.lang.compiler.common;
 /**
  * Represents a predicate.
  * @param <T> member type
+ * @deprecated Use {@link java.util.function.Predicate} instead
+ * @since 0.1.0
+ * @version 0.4.0
  */
-public interface Predicate<T> {
+@Deprecated
+@FunctionalInterface
+public interface Predicate<T> extends java.util.function.Predicate<T> {
 
     /**
      * Returns whether the argument satisfies this predicate or not.
@@ -27,4 +32,9 @@ public interface Predicate<T> {
      * @return {@code true} if the argument satisfies this, otherwise {@code false}
      */
     boolean apply(T argument);
+
+    @Override
+    default boolean test(T t) {
+        return apply(t);
+    }
 }
