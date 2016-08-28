@@ -86,7 +86,7 @@ public final class Predicates {
      * @param b the second predicate
      * @return {@code OR} predicate
      */
-    public static <T> Predicate<T> or(final Predicate<? super T> a, final Predicate<? super T> b) {
+    public static <T> Predicate<T> or(Predicate<? super T> a, Predicate<? super T> b) {
         return new Composite<T>("Exists", a, b) { //$NON-NLS-1$
             @Override
             public boolean test(T argument) {

@@ -17,7 +17,6 @@ package com.asakusafw.lang.compiler.extension.hive;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -65,12 +64,7 @@ final class Util {
             saw.add(element);
             normalized.add(element);
         }
-        Collections.sort(normalized, new Comparator<T>() {
-            @Override
-            public int compare(T o1, T o2) {
-                return o1.getSchema().getName().compareTo(o2.getSchema().getName());
-            }
-        });
+        Collections.sort(normalized, (o1, o2) -> o1.getSchema().getName().compareTo(o2.getSchema().getName()));
         return normalized;
     }
 }

@@ -47,7 +47,7 @@ public class JavaCompiler implements JavaSourceExtension, TestRule {
     private BasicJavaCompilerSupport entity;
 
     @Override
-    public Statement apply(final Statement base, final Description description) {
+    public Statement apply(Statement base, Description description) {
         return temporary.apply(new Statement() {
             @Override
             public void evaluate() throws Throwable {

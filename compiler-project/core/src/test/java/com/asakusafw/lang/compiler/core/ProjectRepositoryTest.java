@@ -215,7 +215,7 @@ public class ProjectRepositoryTest {
         }
     }
 
-    private Matcher<ClassLoader> hasClass(final String name) {
+    private Matcher<ClassLoader> hasClass(String name) {
         return new BaseMatcher<ClassLoader>() {
 
             @Override

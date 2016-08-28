@@ -181,7 +181,7 @@ public class GroupsTest {
     }
 
     private static Matcher<Group> subgroupOf(String... expressions) {
-        final Group b = group(expressions);
+        Group b = group(expressions);
         return new BaseMatcher<Group>() {
             @Override
             public void describeTo(Description description) {

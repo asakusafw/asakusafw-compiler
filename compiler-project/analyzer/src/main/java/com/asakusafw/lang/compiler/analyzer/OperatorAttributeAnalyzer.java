@@ -28,18 +28,13 @@ import com.asakusafw.lang.compiler.model.graph.Operator.AbstractBuilder;
  * Analyzes extra operator attributes from the original declarations.
  * @since 0.3.0
  */
+@FunctionalInterface
 public interface OperatorAttributeAnalyzer {
 
     /**
      * A null implementation of {@link OperatorAttributeAnalyzer} that always returns an empty map.
      */
-    OperatorAttributeAnalyzer NULL = new OperatorAttributeAnalyzer() {
-
-        @Override
-        public AttributeMap analyze(OperatorSource source) {
-            return new AttributeMap();
-        }
-    };
+    OperatorAttributeAnalyzer NULL = source -> new AttributeMap();
 
     /**
      * Extracts attributes from the target operator source.

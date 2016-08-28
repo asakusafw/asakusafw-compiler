@@ -58,7 +58,6 @@ import com.asakusafw.lang.compiler.hadoop.InputFormatInfoSupport;
 import com.asakusafw.lang.compiler.javac.JavaSourceExtension;
 import com.asakusafw.lang.compiler.javac.testing.JavaCompiler;
 import com.asakusafw.lang.compiler.mapreduce.testing.InputFormatTester;
-import com.asakusafw.lang.compiler.mapreduce.testing.InputFormatTester.Collector;
 import com.asakusafw.lang.compiler.mapreduce.testing.MapReduceRunner;
 import com.asakusafw.lang.compiler.mapreduce.testing.mock.DirectIoContext;
 import com.asakusafw.lang.compiler.mapreduce.testing.mock.MockData;
@@ -1170,13 +1169,8 @@ public class DirectFileIoPortProcessorTest {
         ConfigurationEditor.merge(conf, info.getExtraConfiguration());
         ConfigurationEditor.putStageInfo(conf, new StageInfo("u", "b", "f", "s", "e", args));
         InputFormatTester tester = new InputFormatTester(conf, info.getFormatClass().resolve(conf.getClassLoader()));
-        final Map<Integer, String> results = new LinkedHashMap<>();
-        tester.collect(new Collector<MockData>() {
-            @Override
-            public void handle(MockData object) {
-                results.put(object.getKey(), object.getValue());
-            }
-        });
+        Map<Integer, String> results = new LinkedHashMap<>();
+        tester.collect((MockData object) -> results.put(object.getKey(), object.getValue()));
         return results;
     }
 

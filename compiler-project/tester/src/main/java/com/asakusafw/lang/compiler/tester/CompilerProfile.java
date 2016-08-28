@@ -281,6 +281,7 @@ public final class CompilerProfile {
     /**
      * A callback object for {@link CompilerProfile}.
      */
+    @FunctionalInterface
     public interface Edit {
 
         /**

@@ -24,6 +24,7 @@ import com.asakusafw.lang.compiler.packaging.FileContainerRepository;
 /**
  * Compiles Asakusa batches.
  */
+@FunctionalInterface
 public interface BatchCompiler {
 
     /**

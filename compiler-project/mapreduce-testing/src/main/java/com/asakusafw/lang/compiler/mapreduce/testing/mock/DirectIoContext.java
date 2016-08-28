@@ -34,7 +34,7 @@ public class DirectIoContext implements TestRule {
     private final TemporaryFolder temporary = new TemporaryFolder();
 
     @Override
-    public Statement apply(final Statement base, final Description description) {
+    public Statement apply(Statement base, Description description) {
         return temporary.apply(base, description);
     }
 

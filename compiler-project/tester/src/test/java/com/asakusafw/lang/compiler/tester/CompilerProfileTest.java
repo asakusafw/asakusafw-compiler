@@ -19,7 +19,6 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -52,7 +51,6 @@ import com.asakusafw.lang.compiler.model.info.ExternalInputInfo;
 import com.asakusafw.lang.compiler.model.info.ExternalOutputInfo;
 import com.asakusafw.lang.compiler.packaging.ByteArrayItem;
 import com.asakusafw.lang.compiler.packaging.ResourceItem;
-import com.asakusafw.lang.compiler.tester.CompilerProfile.Edit;
 import com.asakusafw.lang.compiler.tester.executor.DummyTaskExecutor;
 import com.asakusafw.lang.compiler.tester.executor.JobflowExecutor;
 
@@ -79,14 +77,9 @@ public class CompilerProfileTest {
 
         CompilerProfile profile = newProfile();
         profile.forToolRepository()
-            .use(new JobflowProcessor() {
-                @Override
-                public void process(Context context, Jobflow source) throws IOException {
-                    context.addTask(
-                            "testing", "testing",
-                            Location.of("testing"), Collections.emptyList());
-                }
-            });
+            .use((JobflowProcessor) (context, source) -> context.addTask(
+                    "testing", "testing",
+                    Location.of("testing"), Collections.emptyList()));
 
         File home;
         File batchapps;
@@ -195,12 +188,7 @@ public class CompilerProfileTest {
     @Test
     public void edit() throws Exception {
         CompilerProfile profile = newProfile();
-        profile.apply(new Edit() {
-            @Override
-            public void perform(CompilerProfile p) throws IOException {
-                p.withEnvironmentVariables(Collections.singletonMap("a", "A"));
-            }
-        });
+        profile.apply(p -> p.withEnvironmentVariables(Collections.singletonMap("a", "A")));
         try (CompilerTester compiler = profile.build()) {
             Map<String, String> env = compiler.getTesterContext().getEnvironmentVariables();
             assertThat(env, hasEntry("a", "A"));
@@ -215,11 +203,8 @@ public class CompilerProfileTest {
     public void copy() throws Exception {
         CompilerProfile profile = newProfile();
         profile.forToolRepository()
-            .use(new JobflowProcessor() {
-                @Override
-                public void process(Context context, Jobflow source) throws IOException {
-                    return;
-                }
+            .use((JobflowProcessor) (context, source) -> {
+                return;
             });
 
         File copy = new File(folder.getRoot(), "copy");

@@ -19,7 +19,6 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -28,7 +27,6 @@ import java.util.concurrent.Callable;
 
 import org.junit.Test;
 
-import com.asakusafw.lang.compiler.api.JobflowProcessor;
 import com.asakusafw.lang.compiler.common.DiagnosticException;
 import com.asakusafw.lang.compiler.core.CompilerTestRoot;
 import com.asakusafw.lang.compiler.core.JobflowCompiler;
@@ -36,7 +34,6 @@ import com.asakusafw.lang.compiler.core.basic.BasicJobflowCompiler;
 import com.asakusafw.lang.compiler.core.dummy.SimpleExternalPortProcessor;
 import com.asakusafw.lang.compiler.javac.JavaSourceExtension;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
-import com.asakusafw.lang.compiler.model.graph.Jobflow;
 import com.asakusafw.lang.compiler.packaging.FileContainer;
 
 /**
@@ -50,7 +47,7 @@ public class JavaSourceExtensionParticipantTest extends CompilerTestRoot {
      */
     @Test
     public void simple() throws Exception {
-        final ClassDescription aClass = new ClassDescription("com.example.JavaSourceExtension");
+        ClassDescription aClass = new ClassDescription("com.example.JavaSourceExtension");
         initialize(aClass, new String[] {
                 "package com.example;",
                 String.format(
@@ -78,7 +75,7 @@ public class JavaSourceExtensionParticipantTest extends CompilerTestRoot {
      */
     @Test(expected = DiagnosticException.class)
     public void invalid_version() throws Exception {
-        final ClassDescription aClass = new ClassDescription("com.example.JavaSourceExtension");
+        ClassDescription aClass = new ClassDescription("com.example.JavaSourceExtension");
         initialize(aClass, new String[] {
                 "package com.example;",
                 String.format("public class %s {}", aClass.getSimpleName()),
@@ -98,7 +95,7 @@ public class JavaSourceExtensionParticipantTest extends CompilerTestRoot {
      */
     @Test(expected = DiagnosticException.class)
     public void invalid_bootclasspath() throws Exception {
-        final ClassDescription aClass = new ClassDescription("com.example.JavaSourceExtension");
+        ClassDescription aClass = new ClassDescription("com.example.JavaSourceExtension");
         initialize(aClass, new String[] {
                 "package com.example;",
                 String.format("public class %s {}", aClass.getSimpleName()),
@@ -113,22 +110,18 @@ public class JavaSourceExtensionParticipantTest extends CompilerTestRoot {
                 jobflow("testing"));
     }
 
-    private void initialize(final ClassDescription aClass, final String... lines) {
+    private void initialize(ClassDescription aClass, String... lines) {
         externalPortProcessors.add(new SimpleExternalPortProcessor());
         compilerParticipants.add(new JavaSourceExtensionParticipant());
-        jobflowProcessors.add(new JobflowProcessor() {
-            @Override
-            public void process(Context context, Jobflow source) throws IOException {
-                JavaSourceExtension extension = context.getExtension(JavaSourceExtension.class);
-                assertThat(extension, is(notNullValue()));
-                try (PrintWriter pw = new PrintWriter(extension.addJavaFile(aClass))) {
-                    for (String line : lines) {
-                        pw.println(line);
-                    }
+        jobflowProcessors.add((context, source) -> {
+            JavaSourceExtension extension = context.getExtension(JavaSourceExtension.class);
+            assertThat(extension, is(notNullValue()));
+            try (PrintWriter pw = new PrintWriter(extension.addJavaFile(aClass))) {
+                for (String line : lines) {
+                    pw.println(line);
                 }
             }
         });
-
     }
 
     private URLClassLoader loader(File path) {

@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
@@ -85,12 +86,12 @@ public class ModelInputRecordReaderTest {
         assertThat(collector.results, containsInAnyOrder("Hello1", "Hello2", "Hello3"));
     }
 
-    static class StringCollector implements InputFormatTester.Collector<StringBuilder> {
+    static class StringCollector implements Consumer<StringBuilder> {
 
         final Set<String> results = new HashSet<>();
 
         @Override
-        public void handle(StringBuilder object) {
+        public void accept(StringBuilder object) {
             results.add(object.toString());
         }
     }

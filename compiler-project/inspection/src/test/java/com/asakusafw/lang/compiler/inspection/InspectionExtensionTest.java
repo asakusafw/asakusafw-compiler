@@ -36,7 +36,7 @@ public class InspectionExtensionTest {
      */
     @Test
     public void simple() {
-        final AtomicReference<Object> ref = new AtomicReference<>();
+        AtomicReference<Object> ref = new AtomicReference<>();
         ExtensionContainer container = container(new InspectionExtension() {
             @Override
             public boolean isSupported(Object element) {

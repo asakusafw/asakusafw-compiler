@@ -18,7 +18,6 @@ package com.asakusafw.lang.compiler.tester.executor;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -77,11 +76,6 @@ public class BatchExecutor implements ArtifactExecutor<BatchArtifact> {
     }
 
     @Override
-    public void execute(TesterContext context, BatchArtifact artifact) throws InterruptedException, IOException {
-        execute(context, artifact, Collections.emptyMap());
-    }
-
-    @Override
     public void execute(
             TesterContext context,
             BatchArtifact artifact,
@@ -132,6 +126,7 @@ public class BatchExecutor implements ArtifactExecutor<BatchArtifact> {
     /**
      * Represents an action for {@link BatchExecutor}.
      */
+    @FunctionalInterface
     public interface Action {
 
         /**

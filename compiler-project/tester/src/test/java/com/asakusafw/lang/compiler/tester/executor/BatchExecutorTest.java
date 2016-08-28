@@ -44,8 +44,6 @@ import com.asakusafw.lang.compiler.tester.BatchArtifact;
 import com.asakusafw.lang.compiler.tester.ExternalPortMap;
 import com.asakusafw.lang.compiler.tester.JobflowArtifact;
 import com.asakusafw.lang.compiler.tester.TesterContext;
-import com.asakusafw.lang.compiler.tester.executor.BatchExecutor.Action;
-import com.asakusafw.lang.compiler.tester.executor.BatchExecutor.Context;
 
 /**
  * Test for {@link BatchExecutor}.
@@ -113,30 +111,26 @@ public class BatchExecutorTest {
      */
     @Test
     public void hooks() throws Exception {
-        final DummyTaskExecutor tracker = new DummyTaskExecutor();
-        final AtomicBoolean sawBefore = new AtomicBoolean();
-        final AtomicBoolean sawAfter = new AtomicBoolean();
+        DummyTaskExecutor tracker = new DummyTaskExecutor();
+        AtomicBoolean sawBefore = new AtomicBoolean();
+        AtomicBoolean sawAfter = new AtomicBoolean();
         BatchExecutor executor = new BatchExecutor(new JobflowExecutor(Collections.singletonList(tracker)));
 
         TaskReference t0 = task("t0");
         JobflowReference j0 = jobflow(t0);
         BatchArtifact artifact = batch(j0);
 
-        executor.withBefore(new Action() {
-            @Override
-            public void perform(Context context, BatchArtifact a) {
-                assertThat(tracker.getTasks(), is(empty()));
-                assertThat(sawBefore.get(), is(false));
-                sawBefore.set(true);
-            }
-        }).withAfter(new Action() {
-            @Override
-            public void perform(Context context, BatchArtifact a) {
-                assertThat(tracker.getTasks(), is(not(empty())));
-                assertThat(sawAfter.get(), is(false));
-                sawAfter.set(true);
-            }
-        }).execute(context(), artifact);
+        executor.withBefore((context, a) -> {
+            assertThat(tracker.getTasks(), is(empty()));
+            assertThat(sawBefore.get(), is(false));
+            sawBefore.set(true);
+        })
+        .withAfter((context, a) -> {
+            assertThat(tracker.getTasks(), is(not(empty())));
+            assertThat(sawAfter.get(), is(false));
+            sawAfter.set(true);
+        })
+        .execute(context(), artifact);
 
         assertThat(sawBefore.get(), is(true));
         assertThat(sawAfter.get(), is(true));

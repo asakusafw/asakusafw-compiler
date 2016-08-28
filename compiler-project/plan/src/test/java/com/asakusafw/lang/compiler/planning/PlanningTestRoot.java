@@ -123,7 +123,7 @@ public abstract class PlanningTestRoot {
      * @param constraint the constraint
      * @return the predicate
      */
-    public static Predicate<Operator> only(final OperatorConstraint constraint) {
+    public static Predicate<Operator> only(OperatorConstraint constraint) {
         return operator -> operator.getConstraints().contains(constraint);
     }
 

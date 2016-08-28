@@ -16,6 +16,7 @@
 package com.asakusafw.lang.compiler.tester.executor;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Map;
 
 import com.asakusafw.lang.compiler.tester.TesterContext;
@@ -24,6 +25,7 @@ import com.asakusafw.lang.compiler.tester.TesterContext;
  * Executes a compilation artifact for testing.
  * @param <T> the artifact type
  */
+@FunctionalInterface
 public interface ArtifactExecutor<T> {
 
     /**
@@ -33,7 +35,9 @@ public interface ArtifactExecutor<T> {
      * @throws InterruptedException if interrupted while executing the artifact
      * @throws IOException if failed to execute the target artifact
      */
-    void execute(TesterContext context, T artifact) throws InterruptedException, IOException;
+    default void execute(TesterContext context, T artifact) throws InterruptedException, IOException {
+        execute(context, artifact, Collections.emptyMap());
+    }
 
     /**
      * Executes the artifact with empty batch arguments.

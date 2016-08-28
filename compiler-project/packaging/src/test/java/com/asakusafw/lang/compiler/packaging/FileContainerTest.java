@@ -149,15 +149,12 @@ public class FileContainerTest extends ResourceTestRoot {
     @Test
     public void visit() throws Exception {
         FileContainer container = new FileContainer(open("structured.zip"));
-        final Set<String> locations = new HashSet<>();
-        container.accept(new FileVisitor() {
-            @Override
-            public boolean process(Location location, File file) throws IOException {
-                if (file.isFile()) {
-                    locations.add(location.toPath());
-                }
-                return true;
+        Set<String> locations = new HashSet<>();
+        container.accept((location, file) -> {
+            if (file.isFile()) {
+                locations.add(location.toPath());
             }
+            return true;
         });
         assertThat(locations, containsInAnyOrder("a.txt", "a/b.txt", "a/b/c.txt"));
     }

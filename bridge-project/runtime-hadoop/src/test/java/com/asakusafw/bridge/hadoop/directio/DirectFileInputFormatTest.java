@@ -30,7 +30,6 @@ import org.junit.Test;
 import com.asakusafw.bridge.hadoop.ConfigurationEditor;
 import com.asakusafw.bridge.stage.StageInfo;
 import com.asakusafw.lang.compiler.mapreduce.testing.InputFormatTester;
-import com.asakusafw.lang.compiler.mapreduce.testing.InputFormatTester.Collector;
 import com.asakusafw.lang.compiler.mapreduce.testing.mock.DirectIoContext;
 import com.asakusafw.lang.compiler.mapreduce.testing.mock.MockData;
 import com.asakusafw.lang.compiler.mapreduce.testing.mock.MockDataFormat;
@@ -47,7 +46,7 @@ public class DirectFileInputFormatTest {
      * context for testing.
      */
     @Rule
-    public DirectIoContext context = new DirectIoContext();
+    public final DirectIoContext context = new DirectIoContext();
 
     /**
      * simple case.
@@ -151,13 +150,8 @@ public class DirectFileInputFormatTest {
 
     private Map<Integer, String> collect(Configuration conf) throws IOException, InterruptedException {
         InputFormatTester tester = new InputFormatTester(conf, DirectFileInputFormat.class);
-        final Map<Integer, String> results = new LinkedHashMap<>();
-        tester.collect(new Collector<MockData>() {
-            @Override
-            public void handle(MockData object) {
-                results.put(object.getKey(), object.getValue());
-            }
-        });
+        Map<Integer, String> results = new LinkedHashMap<>();
+        tester.collect((MockData object) -> results.put(object.getKey(), object.getValue()));
         return results;
     }
 

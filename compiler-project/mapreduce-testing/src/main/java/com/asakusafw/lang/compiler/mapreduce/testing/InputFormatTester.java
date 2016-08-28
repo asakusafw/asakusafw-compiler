@@ -17,6 +17,7 @@ package com.asakusafw.lang.compiler.mapreduce.testing;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.function.Consumer;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Writable;
@@ -72,7 +73,7 @@ public class InputFormatTester {
      * @throws InterruptedException if interrupted
      */
     @SuppressWarnings("unchecked")
-    public <T> void collect(Collector<T> collector) throws IOException, InterruptedException {
+    public <T> void collect(Consumer<T> collector) throws IOException, InterruptedException {
         TaskAttemptContext context = new TaskAttemptContextImpl(conf, new TaskAttemptID());
         List<InputSplit> splits = format.getSplits(context);
         for (InputSplit split : splits) {
@@ -80,7 +81,7 @@ public class InputFormatTester {
             try (RecordReader<?, ?> reader = format.createRecordReader(restored, context)) {
                 reader.initialize(restored, context);
                 while (reader.nextKeyValue()) {
-                    collector.handle((T) reader.getCurrentValue());
+                    collector.accept((T) reader.getCurrentValue());
                 }
             }
         }
@@ -98,13 +99,20 @@ public class InputFormatTester {
     /**
      * Collects values from {@code InputFormat}.
      * @param <T> the value type
+     * @deprecated Use {@link Consumer} instead
      */
-    public interface Collector<T> {
+    @Deprecated
+    public interface Collector<T> extends Consumer<T> {
 
         /**
          * Handles an object.
          * @param object the target
          */
         void handle(T object);
+
+        @Override
+        default void accept(T t) {
+            handle(t);
+        }
     }
 }

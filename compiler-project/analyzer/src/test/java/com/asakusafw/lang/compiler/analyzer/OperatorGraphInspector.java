@@ -100,7 +100,7 @@ public class OperatorGraphInspector {
      * @param name the port name
      * @return this
      */
-    public OperatorGraphInspector input(String id, final String name) {
+    public OperatorGraphInspector input(String id, String name) {
         return identify(id, argument -> {
             if (argument.getOperatorKind() != OperatorKind.INPUT) {
                 return false;
@@ -115,7 +115,7 @@ public class OperatorGraphInspector {
      * @param name the port name
      * @return this
      */
-    public OperatorGraphInspector output(String id, final String name) {
+    public OperatorGraphInspector output(String id, String name) {
         return identify(id, argument -> {
             if (argument.getOperatorKind() != OperatorKind.OUTPUT) {
                 return false;
@@ -130,7 +130,7 @@ public class OperatorGraphInspector {
      * @param description the description
      * @return this
      */
-    public OperatorGraphInspector flowpart(String id, final Class<?> description) {
+    public OperatorGraphInspector flowpart(String id, Class<?> description) {
         return identify(id, argument -> {
             if (argument.getOperatorKind() != OperatorKind.FLOW) {
                 return false;
@@ -149,7 +149,7 @@ public class OperatorGraphInspector {
      * @param kind the core operator kind
      * @return this
      */
-    public OperatorGraphInspector operator(String id, final CoreOperatorKind kind) {
+    public OperatorGraphInspector operator(String id, CoreOperatorKind kind) {
         return identify(id, argument -> {
             if (argument.getOperatorKind() != OperatorKind.CORE) {
                 return false;
@@ -164,7 +164,7 @@ public class OperatorGraphInspector {
      * @param operatorId the operator ID specified in {@link MockOperator#id()}
      * @return this
      */
-    public OperatorGraphInspector operator(String id, final String operatorId) {
+    public OperatorGraphInspector operator(String id, String operatorId) {
         return identify(id, argument -> {
             if (argument.getOperatorKind() != OperatorKind.USER) {
                 return false;
@@ -193,7 +193,7 @@ public class OperatorGraphInspector {
      * @param methodName the operator method name
      * @return this
      */
-    public OperatorGraphInspector operator(String id, final Class<?> operatorClass, final String methodName) {
+    public OperatorGraphInspector operator(String id, Class<?> operatorClass, String methodName) {
         return identify(id, argument -> {
             if (argument.getOperatorKind() != OperatorKind.USER) {
                 return false;

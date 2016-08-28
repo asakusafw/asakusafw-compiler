@@ -55,7 +55,6 @@ import com.asakusafw.lang.compiler.common.Predicates;
 import com.asakusafw.lang.compiler.common.testing.FileDeployer;
 import com.asakusafw.lang.compiler.core.BatchCompiler;
 import com.asakusafw.lang.compiler.core.util.CompositeElement;
-import com.asakusafw.lang.compiler.model.graph.Batch;
 import com.asakusafw.lang.compiler.packaging.ResourceRepository;
 import com.asakusafw.lang.compiler.packaging.ResourceUtil;
 
@@ -221,7 +220,7 @@ public class BatchCompilerCliTest {
      */
     @Test
     public void execute_minimal() throws Exception {
-        final File output = deployer.newFolder();
+        File output = deployer.newFolder();
         String[] args = strings(new Object[] {
                 "--explore", files(ResourceUtil.findLibraryByClass(DummyBatch.class)),
                 "--output", output,
@@ -230,15 +229,12 @@ public class BatchCompilerCliTest {
                 "--include", classes(DummyBatch.class),
                 "--externalPortProcessors", classes(DummyExternalPortProcessor.class),
         });
-        final AtomicInteger count = new AtomicInteger();
-        int status = execute(args, new BatchCompiler() {
-            @Override
-            public void compile(Context context, Batch batch) {
-                count.incrementAndGet();
-                assertThat(batch.getBatchId(), is("DummyBatch"));
-                assertThat(batch.getDescriptionClass(), is(classOf(DummyBatch.class)));
-                assertThat(context.getOutput().getBasePath(), is(new File(output, batch.getBatchId())));
-            }
+        AtomicInteger count = new AtomicInteger();
+        int status = execute(args, (context, batch) -> {
+            count.incrementAndGet();
+            assertThat(batch.getBatchId(), is("DummyBatch"));
+            assertThat(batch.getDescriptionClass(), is(classOf(DummyBatch.class)));
+            assertThat(context.getOutput().getBasePath(), is(new File(output, batch.getBatchId())));
         });
         assertThat(status, is(0));
         assertThat(count.get(), is(1));
@@ -250,11 +246,11 @@ public class BatchCompilerCliTest {
      */
     @Test
     public void execute_full() throws Exception {
-        final File output = deployer.newFolder();
-        final File explore = prepareLibrary("explore");
-        final File external = prepareLibrary("external");
-        final File embed = prepareLibrary("embed");
-        final File attach = prepareLibrary("attach");
+        File output = deployer.newFolder();
+        File explore = prepareLibrary("explore");
+        File external = prepareLibrary("external");
+        File embed = prepareLibrary("embed");
+        File attach = prepareLibrary("attach");
         String[] args = strings(new Object[] {
                 "--explore", files(ResourceUtil.findLibraryByClass(DummyBatch.class), explore),
                 "--output", output,
@@ -275,42 +271,39 @@ public class BatchCompilerCliTest {
                 "-P", "a=b",
                 "-property", "c=d",
         });
-        final AtomicInteger count = new AtomicInteger();
-        int status = execute(args, new BatchCompiler() {
-            @Override
-            public void compile(Context context, Batch batch) {
-                count.incrementAndGet();
-                assertThat(batch.getBatchId(), is("prefix.DummyBatch"));
-                assertThat(batch.getDescriptionClass(), is(classOf(DummyBatch.class)));
-                assertThat(context.getOutput().getBasePath(), is(new File(output, batch.getBatchId())));
+        AtomicInteger count = new AtomicInteger();
+        int status = execute(args, (context, batch) -> {
+            count.incrementAndGet();
+            assertThat(batch.getBatchId(), is("prefix.DummyBatch"));
+            assertThat(batch.getDescriptionClass(), is(classOf(DummyBatch.class)));
+            assertThat(context.getOutput().getBasePath(), is(new File(output, batch.getBatchId())));
 
-                assertThat(context.getProject().getClassLoader().getResource("explore"), is(notNullValue()));
-                assertThat(context.getProject().getClassLoader().getResource("embed"), is(notNullValue()));
-                assertThat(context.getProject().getClassLoader().getResource("attach"), is(notNullValue()));
-                assertThat(context.getProject().getClassLoader().getResource("external"), is(notNullValue()));
+            assertThat(context.getProject().getClassLoader().getResource("explore"), is(notNullValue()));
+            assertThat(context.getProject().getClassLoader().getResource("embed"), is(notNullValue()));
+            assertThat(context.getProject().getClassLoader().getResource("attach"), is(notNullValue()));
+            assertThat(context.getProject().getClassLoader().getResource("external"), is(notNullValue()));
 
-                assertThat(context.getProject().getProjectContents(), includes("explore"));
-                assertThat(context.getProject().getProjectContents(), not(includes("embed")));
-                assertThat(context.getProject().getProjectContents(), not(includes("attach")));
-                assertThat(context.getProject().getProjectContents(), not(includes("external")));
+            assertThat(context.getProject().getProjectContents(), includes("explore"));
+            assertThat(context.getProject().getProjectContents(), not(includes("embed")));
+            assertThat(context.getProject().getProjectContents(), not(includes("attach")));
+            assertThat(context.getProject().getProjectContents(), not(includes("external")));
 
-                // --explore -> implicitly embedded
-                assertThat(context.getProject().getEmbeddedContents(), includes("explore"));
-                assertThat(context.getProject().getEmbeddedContents(), includes("embed"));
-                assertThat(context.getProject().getEmbeddedContents(), not(includes("attach")));
-                assertThat(context.getProject().getEmbeddedContents(), not(includes("external")));
+            // --explore -> implicitly embedded
+            assertThat(context.getProject().getEmbeddedContents(), includes("explore"));
+            assertThat(context.getProject().getEmbeddedContents(), includes("embed"));
+            assertThat(context.getProject().getEmbeddedContents(), not(includes("attach")));
+            assertThat(context.getProject().getEmbeddedContents(), not(includes("external")));
 
-                assertThat(context.getProject().getAttachedLibraries(), not(deepIncludes("explore")));
-                assertThat(context.getProject().getAttachedLibraries(), not(deepIncludes("embed")));
-                assertThat(context.getProject().getAttachedLibraries(), deepIncludes("attach"));
-                assertThat(context.getProject().getAttachedLibraries(), not(deepIncludes("external")));
+            assertThat(context.getProject().getAttachedLibraries(), not(deepIncludes("explore")));
+            assertThat(context.getProject().getAttachedLibraries(), not(deepIncludes("embed")));
+            assertThat(context.getProject().getAttachedLibraries(), deepIncludes("attach"));
+            assertThat(context.getProject().getAttachedLibraries(), not(deepIncludes("external")));
 
-                assertThat(context.getTools().getDataModelProcessor(), is(consistsOf(DummyDataModelProcessor.class)));
-                assertThat(context.getTools().getExternalPortProcessor(), is(consistsOf(DummyExternalPortProcessor.class)));
-                assertThat(context.getTools().getBatchProcessor(), is(consistsOf(DummyBatchProcessor.class)));
-                assertThat(context.getTools().getJobflowProcessor(), is(consistsOf(DummyJobflowProcessor.class)));
-                assertThat(context.getTools().getParticipant(), is(consistsOf(DummyCompilerParticipant.class)));
-            }
+            assertThat(context.getTools().getDataModelProcessor(), is(consistsOf(DummyDataModelProcessor.class)));
+            assertThat(context.getTools().getExternalPortProcessor(), is(consistsOf(DummyExternalPortProcessor.class)));
+            assertThat(context.getTools().getBatchProcessor(), is(consistsOf(DummyBatchProcessor.class)));
+            assertThat(context.getTools().getJobflowProcessor(), is(consistsOf(DummyJobflowProcessor.class)));
+            assertThat(context.getTools().getParticipant(), is(consistsOf(DummyCompilerParticipant.class)));
         });
         assertThat(status, is(0));
         assertThat(count.get(), is(1));
@@ -322,7 +315,7 @@ public class BatchCompilerCliTest {
      */
     @Test
     public void execute_scoped_properties() throws Exception {
-        final File output = deployer.newFolder();
+        File output = deployer.newFolder();
         String[] args = strings(new Object[] {
                 "--explore", files(ResourceUtil.findLibraryByClass(DummyBatch.class)),
                 "--output", output,
@@ -337,16 +330,13 @@ public class BatchCompilerCliTest {
                 "-P", "DummyBatch:c=C",
                 "-P", "other:a=INVALID",
         });
-        final AtomicInteger count = new AtomicInteger();
-        int status = execute(args, new BatchCompiler() {
-            @Override
-            public void compile(Context context, Batch batch) {
-                count.incrementAndGet();
-                CompilerOptions options = context.getOptions();
-                assertThat(options.get("a", "?"), is("A"));
-                assertThat(options.get("b", "?"), is("!"));
-                assertThat(options.get("c", "?"), is("C"));
-            }
+        AtomicInteger count = new AtomicInteger();
+        int status = execute(args, (context, batch) -> {
+            count.incrementAndGet();
+            CompilerOptions options = context.getOptions();
+            assertThat(options.get("a", "?"), is("A"));
+            assertThat(options.get("b", "?"), is("!"));
+            assertThat(options.get("c", "?"), is("C"));
         });
         assertThat(status, is(0));
         assertThat(count.get(), is(1));
@@ -358,7 +348,7 @@ public class BatchCompilerCliTest {
      */
     @Test
     public void execute_conflict_batch() throws Exception {
-        final File output = deployer.newFolder();
+        File output = deployer.newFolder();
         String[] args = strings(new Object[] {
                 "--explore", files(ResourceUtil.findLibraryByClass(DummyBatch.class)),
                 "--output", output,
@@ -368,11 +358,8 @@ public class BatchCompilerCliTest {
                 "--externalPortProcessors", classes(DummyExternalPortProcessor.class),
                 "--failOnError",
         });
-        int status = execute(args, new BatchCompiler() {
-            @Override
-            public void compile(Context context, Batch batch) {
-                // do nothing
-            }
+        int status = execute(args, (context, batch) -> {
+            // do nothing
         });
         assertThat(status, is(not(0)));
     }
@@ -388,7 +375,7 @@ public class BatchCompilerCliTest {
     }
 
     static Matcher<List<ResourceRepository>> includes(String id) {
-        final Location location = Location.of(id);
+        Location location = Location.of(id);
         return new BaseMatcher<List<ResourceRepository>>() {
             @Override
             public boolean matches(Object item) {
@@ -414,7 +401,7 @@ public class BatchCompilerCliTest {
         };
     }
 
-    static Matcher<List<ResourceRepository>> deepIncludes(final String id) {
+    static Matcher<List<ResourceRepository>> deepIncludes(String id) {
         return new BaseMatcher<List<ResourceRepository>>() {
             @Override
             public boolean matches(Object item) {
@@ -448,7 +435,7 @@ public class BatchCompilerCliTest {
         };
     }
 
-    static Matcher<Object> consistsOf(final Class<?> type) {
+    static Matcher<Object> consistsOf(Class<?> type) {
         return new BaseMatcher<Object>() {
             @Override
             public boolean matches(Object item) {
@@ -480,7 +467,7 @@ public class BatchCompilerCliTest {
      */
     @Test
     public void compile_error() throws Exception {
-        final File output = deployer.newFolder();
+        File output = deployer.newFolder();
         String[] args = strings(new Object[] {
                 "--explore", files(ResourceUtil.findLibraryByClass(DummyBatch.class)),
                 "--output", output,
@@ -489,11 +476,8 @@ public class BatchCompilerCliTest {
                 "--include", classes(DummyBatch.class),
                 "--externalPortProcessors", classes(DummyExternalPortProcessor.class),
         });
-        int status = execute(args, new BatchCompiler() {
-            @Override
-            public void compile(Context context, Batch batch) {
-                throw new DiagnosticException(Diagnostic.Level.ERROR, "testing");
-            }
+        int status = execute(args, (context, batch) -> {
+            throw new DiagnosticException(Diagnostic.Level.ERROR, "testing");
         });
         assertThat(status, is(not(0)));
     }

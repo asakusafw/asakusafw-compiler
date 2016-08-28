@@ -16,7 +16,6 @@
 package com.asakusafw.lang.inspection.gui;
 
 import java.awt.Window;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -196,7 +195,7 @@ public class Main implements Runnable {
     }
 
     private JTree createOverviewTree(InspectionNode root) {
-        final JTree tree = new JTree(new InspectionTreeNode(root));
+        JTree tree = new JTree(new InspectionTreeNode(root));
         tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
         tree.addMouseListener(new MouseAdapter() {
             @Override
@@ -218,27 +217,12 @@ public class Main implements Runnable {
                 if (path == null) {
                     return;
                 }
-                final InspectionTreeNode node = (InspectionTreeNode) path.getLastPathComponent();
+                InspectionTreeNode node = (InspectionTreeNode) path.getLastPathComponent();
                 JPopupMenu menu = new JPopupMenu();
-                menu.add(item("Open Detail", new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        onOpenDetail(tree, node);
-                    }
-                }));
+                menu.add(item("Open Detail", e -> onOpenDetail(tree, node)));
                 if (pdfExporter != null && node.isLeaf() == false) {
-                    menu.add(item("Export PDF", new ActionListener() {
-                        @Override
-                        public void actionPerformed(ActionEvent e) {
-                            onExportPdf(tree, node, false);
-                        }
-                    }));
-                    menu.add(item("Export PDF (Verbose)", new ActionListener() {
-                        @Override
-                        public void actionPerformed(ActionEvent e) {
-                            onExportPdf(tree, node, true);
-                        }
-                    }));
+                    menu.add(item("Export PDF", e -> onExportPdf(tree, node, false)));
+                    menu.add(item("Export PDF (Verbose)", e -> onExportPdf(tree, node, true)));
                 }
                 menu.show(tree, event.getX(), event.getY());
             }

@@ -23,6 +23,7 @@ import com.asakusafw.lang.compiler.common.Location;
 /**
  * A file visitor in containers.
  */
+@FunctionalInterface
 public interface FileVisitor {
 
     /**

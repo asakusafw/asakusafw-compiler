@@ -22,6 +22,7 @@ import com.asakusafw.lang.compiler.model.info.ExternalInputInfo;
  * An interface who can provides {@link InputFormatInfo}.
  * The supported {@link ExternalPortProcessor} must
  */
+@FunctionalInterface
 public interface InputFormatInfoSupport {
 
     /**

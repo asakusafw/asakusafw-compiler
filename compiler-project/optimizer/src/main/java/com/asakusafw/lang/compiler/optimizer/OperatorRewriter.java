@@ -25,16 +25,14 @@ import com.asakusafw.lang.compiler.model.graph.OperatorGraph;
 /**
  * Rewrites {@link OperatorGraph} objects.
  */
+@FunctionalInterface
 public interface OperatorRewriter {
 
     /**
      * Null implementation of {@link OperatorRewriter}.
      */
-    OperatorRewriter NULL = new OperatorRewriter() {
-        @Override
-        public void perform(Context context, OperatorGraph graph) {
-            return;
-        }
+    OperatorRewriter NULL = (context, graph) -> {
+        return;
     };
 
     /**

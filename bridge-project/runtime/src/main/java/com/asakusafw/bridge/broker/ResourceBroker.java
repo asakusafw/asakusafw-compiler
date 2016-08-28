@@ -201,6 +201,7 @@ public final class ResourceBroker {
     /**
      * Initializes resource sessions.
      */
+    @FunctionalInterface
     public interface Initializer {
 
         /**

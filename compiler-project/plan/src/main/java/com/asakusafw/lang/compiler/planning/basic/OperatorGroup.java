@@ -133,12 +133,7 @@ final class OperatorGroup {
     }
 
     public boolean applyRedundantOutputElimination() {
-        return applyCombination(new Applier() {
-            @Override
-            public boolean apply(Operator base, Operator target) {
-                return applyRedundantOutputElimination(base, target);
-            }
-        });
+        return applyCombination((base, target) -> applyRedundantOutputElimination(base, target));
     }
 
     boolean applyRedundantOutputElimination(Operator base, Operator target) {
@@ -190,12 +185,7 @@ final class OperatorGroup {
                 || attributes.contains(Attribute.GENERATOR)) {
             return false;
         }
-        return applyCombination(new Applier() {
-            @Override
-            public boolean apply(Operator base, Operator target) {
-                return applyUnionPushDown(base, target);
-            }
-        });
+        return applyCombination((base, target) -> applyUnionPushDown(base, target));
     }
 
     boolean applyUnionPushDown(Operator base, Operator target) {
@@ -520,6 +510,7 @@ final class OperatorGroup {
         }
     }
 
+    @FunctionalInterface
     private interface Applier {
 
         boolean apply(Operator base, Operator target);

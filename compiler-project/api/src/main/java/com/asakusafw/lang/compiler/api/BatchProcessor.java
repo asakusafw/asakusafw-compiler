@@ -28,6 +28,7 @@ import com.asakusafw.lang.compiler.common.Location;
 /**
  * Processes an Asakusa batch application.
  */
+@FunctionalInterface
 public interface BatchProcessor {
 
     /**

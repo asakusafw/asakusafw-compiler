@@ -19,7 +19,6 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -120,15 +119,12 @@ public class FileSinkTest extends ResourceTestRoot {
             put(sink, item("a/b.txt", "B"));
             put(sink, item("a/b/c.txt", "C"));
 
-            final Set<String> locations = new HashSet<>();
-            sink.accept(new FileVisitor() {
-                @Override
-                public boolean process(Location location, File file) throws IOException {
-                    if (file.isFile()) {
-                        locations.add(location.toPath());
-                    }
-                    return true;
+            Set<String> locations = new HashSet<>();
+            sink.accept((location, file) -> {
+                if (file.isFile()) {
+                    locations.add(location.toPath());
                 }
+                return true;
             });
             assertThat(locations, containsInAnyOrder("a.txt", "a/b.txt", "a/b/c.txt"));
         }

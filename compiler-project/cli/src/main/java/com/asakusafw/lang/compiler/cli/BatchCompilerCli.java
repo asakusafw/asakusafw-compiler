@@ -564,7 +564,7 @@ public final class BatchCompilerCli {
     }
 
     private static Predicate<? super Class<?>> loadPredicate(
-            AnalyzerContext root, Configuration configuration, final ClassAnalyzer analyzer) {
+            AnalyzerContext root, Configuration configuration, ClassAnalyzer analyzer) {
         ClassAnalyzer.Context context = new ClassAnalyzer.Context(root);
         Predicate<Class<?>> predicate = aClass -> analyzer.isBatchClass(context, aClass);
         for (Predicate<? super Class<?>> p : configuration.sourcePredicate) {

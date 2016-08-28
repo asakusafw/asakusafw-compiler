@@ -66,14 +66,9 @@ public class ResourceBrokerTest {
      */
     @Test
     public void schedule() throws Exception {
-        final AtomicBoolean done = new AtomicBoolean();
+        AtomicBoolean done = new AtomicBoolean();
         try (ResourceSession session = ResourceBroker.start()) {
-            ResourceBroker.schedule(new Closeable() {
-                @Override
-                public void close() throws IOException {
-                    done.set(true);
-                }
-            });
+            ResourceBroker.schedule(() -> done.set(true));
             assertThat(done.get(), is(false));
         }
         assertThat(done.get(), is(true));
@@ -85,14 +80,9 @@ public class ResourceBrokerTest {
      */
     @Test
     public void schedule_auto() throws Exception {
-        final AtomicBoolean done = new AtomicBoolean();
+        AtomicBoolean done = new AtomicBoolean();
         try (ResourceSession session = ResourceBroker.start()) {
-            ResourceBroker.put(Closeable.class, new Closeable() {
-                @Override
-                public void close() throws IOException {
-                    done.set(true);
-                }
-            });
+            ResourceBroker.put(Closeable.class, () -> done.set(true));
             assertThat(done.get(), is(false));
         }
         assertThat(done.get(), is(true));
@@ -104,14 +94,11 @@ public class ResourceBrokerTest {
      */
     @Test
     public void schedule_suppress_exception() throws Exception {
-        final AtomicBoolean done = new AtomicBoolean();
+        AtomicBoolean done = new AtomicBoolean();
         try (ResourceSession session = ResourceBroker.start()) {
-            ResourceBroker.schedule(new Closeable() {
-                @Override
-                public void close() throws IOException {
-                    done.set(true);
-                    throw new IOException();
-                }
+            ResourceBroker.schedule(() -> {
+                done.set(true);
+                throw new IOException();
             });
             assertThat(done.get(), is(false));
         }
@@ -135,12 +122,7 @@ public class ResourceBrokerTest {
      */
     @Test
     public void attach() throws Exception {
-        Initializer initializer = new Initializer() {
-            @Override
-            public void accept(ResourceSession session) throws IOException {
-                session.put(String.class, "Hello, world!");
-            }
-        };
+        Initializer initializer = session -> session.put(String.class, "Hello, world!");
         try (ResourceSession session = ResourceBroker.attach(initializer)) {
             assertThat(session.get(String.class), is("Hello, world!"));
             session.put(Integer.class, 100);
@@ -159,12 +141,7 @@ public class ResourceBrokerTest {
      */
     @Test
     public void attach_detached() throws Exception {
-        Initializer initializer = new Initializer() {
-            @Override
-            public void accept(ResourceSession session) throws IOException {
-                session.put(String.class, "Hello, world!");
-            }
-        };
+        Initializer initializer = session -> session.put(String.class, "Hello, world!");
         try (ResourceSession session = ResourceBroker.attach(initializer)) {
             assertThat(session.get(String.class), is("Hello, world!"));
             session.put(Integer.class, 100);

@@ -25,11 +25,6 @@ import com.asakusafw.vocabulary.external.ImporterDescription;
  */
 public abstract class InternalImporterDescription implements ImporterDescription {
 
-    @Override
-    public DataSize getDataSize() {
-        return DataSize.UNKNOWN;
-    }
-
     /**
      * Returns the import target path prefix.
      * <p>

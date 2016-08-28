@@ -385,14 +385,11 @@ in0 +-- c0 --- out0
             .add(ownersOf(origin, mock.getAsSet("out2")))
             .withRedundantOutputElimination(true)
             .withDuplicateCheckpointElimination(true)
-            .withCustomEquivalence(new OperatorEquivalence() {
-                @Override
-                public Object extract(SubPlan owner, Operator operator) {
-                    if (owner.findOutput(operator) != null) {
-                        return PlanMarkers.get(operator);
-                    }
-                    return PlanAssembler.DEFAULT_EQUIVALENCE.extract(owner, operator);
+            .withCustomEquivalence((owner, operator) -> {
+                if (owner.findOutput(operator) != null) {
+                    return PlanMarkers.get(operator);
                 }
+                return PlanAssembler.DEFAULT_EQUIVALENCE.extract(owner, operator);
             })
             .build();
         assertThat(detail.getPlan().getElements(), hasSize(4));

@@ -82,18 +82,15 @@ public class InternalIoPortProcessor
 
     private static final TaskReference.Phase PHASE_OUTPUT = TaskReference.Phase.EPILOGUE;
 
-    private static final Comparator<String> LOCATION_GROUP_COMPARATOR = new Comparator<String>() {
-        @Override
-        public int compare(String o1, String o2) {
-            int l1 = o1.length();
-            int l2 = o2.length();
-            if (l1 < l2) {
-                return +1;
-            } else if (l1 > l2) {
-                return -1;
-            }
-            return o1.compareTo(o2);
+    private static final Comparator<String> LOCATION_GROUP_COMPARATOR = (o1, o2) -> {
+        int l1 = o1.length();
+        int l2 = o2.length();
+        if (l1 < l2) {
+            return +1;
+        } else if (l1 > l2) {
+            return -1;
         }
+        return o1.compareTo(o2);
     };
 
     @Override

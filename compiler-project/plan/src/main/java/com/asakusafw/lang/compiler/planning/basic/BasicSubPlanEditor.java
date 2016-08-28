@@ -167,7 +167,7 @@ final class BasicSubPlanEditor {
     }
 
     private boolean removeRedundantInputs() {
-        final Set<Operator> candidates = collectOpenPorts(target.getInputs());
+        Set<Operator> candidates = collectOpenPorts(target.getInputs());
         if (candidates.isEmpty()) {
             return false;
         }
@@ -187,7 +187,7 @@ final class BasicSubPlanEditor {
     }
 
     private boolean removeRedundantOutputs() {
-        final Set<Operator> candidates = collectOpenPorts(target.getOutputs());
+        Set<Operator> candidates = collectOpenPorts(target.getOutputs());
         if (candidates.isEmpty()) {
             return false;
         }
@@ -206,7 +206,7 @@ final class BasicSubPlanEditor {
     }
 
     private static Set<Operator> collectOpenPorts(Collection<? extends SubPlan.Port> ports) {
-        final Set<Operator> results = new HashSet<>();
+        Set<Operator> results = new HashSet<>();
         for (SubPlan.Port port : ports) {
             if (port.getOpposites().isEmpty()) {
                 results.add(port.getOperator());

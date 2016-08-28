@@ -30,7 +30,9 @@ public interface CompilerParticipant {
      * @param context the current context
      * @param batch the target batch
      */
-    void beforeBatch(BatchCompiler.Context context, Batch batch);
+    default void beforeBatch(BatchCompiler.Context context, Batch batch) {
+        return;
+    }
 
     /**
      * Run after compiling batch.
@@ -38,7 +40,9 @@ public interface CompilerParticipant {
      * @param batch the target batch
      * @param reference the compilation result
      */
-    void afterBatch(BatchCompiler.Context context, Batch batch, BatchReference reference);
+    default void afterBatch(BatchCompiler.Context context, Batch batch, BatchReference reference) {
+        return;
+    }
 
     /**
      * Run before compiling jobflow.
@@ -46,7 +50,9 @@ public interface CompilerParticipant {
      * @param batch information of the jobflow owner
      * @param jobflow the target jobflow
      */
-    void beforeJobflow(JobflowCompiler.Context context, BatchInfo batch, Jobflow jobflow);
+    default void beforeJobflow(JobflowCompiler.Context context, BatchInfo batch, Jobflow jobflow) {
+        return;
+    }
 
     /**
      * Run after compiling jobflow.
@@ -54,5 +60,7 @@ public interface CompilerParticipant {
      * @param batch information of the jobflow owner
      * @param jobflow the target jobflow
      */
-    void afterJobflow(JobflowCompiler.Context context, BatchInfo batch, Jobflow jobflow);
+    default void afterJobflow(JobflowCompiler.Context context, BatchInfo batch, Jobflow jobflow) {
+        return;
+    }
 }

@@ -252,13 +252,8 @@ public class CompositeOperatorEstimatorTest extends OptimizerTestRoot {
         assertThat(e7, hasMark(null));
     }
 
-    static OperatorEstimator engine(final String mark) {
-        return new OperatorEstimator() {
-            @Override
-            public void perform(Context context, Operator operator) {
-                context.putAttribute(String.class, mark);
-            }
-        };
+    static OperatorEstimator engine(String mark) {
+        return (context, operator) -> context.putAttribute(String.class, mark);
     }
 
     static Matcher<OperatorEstimate> hasMark(String mark) {

@@ -17,7 +17,6 @@ package com.asakusafw.lang.compiler.hadoop;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 
 import com.asakusafw.lang.compiler.api.basic.TaskContainer;
 import com.asakusafw.lang.compiler.api.basic.TaskContainerMap;
@@ -38,11 +37,6 @@ public class BasicHadoopTaskExtension implements HadoopTaskExtension {
      */
     public BasicHadoopTaskExtension(TaskContainerMap tasks) {
         this.tasks = tasks;
-    }
-
-    @Override
-    public TaskReference addTask(Phase phase, ClassDescription mainClass, TaskReference... blockers) {
-        return addTask(phase, mainClass, Collections.emptySet(), blockers);
     }
 
     @Override

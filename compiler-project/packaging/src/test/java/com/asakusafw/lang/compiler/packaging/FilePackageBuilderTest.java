@@ -19,7 +19,6 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.io.File;
-import java.io.IOException;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -100,14 +99,11 @@ public class FilePackageBuilderTest extends ResourceTestRoot {
         builder.add(item("hello.txt", "Hello"));
         builder.add(item("hello.csv", "Hello"));
         builder.add(item("hello.bin", "Hello"));
-        builder.add(new FileVisitor() {
-            @Override
-            public boolean process(Location location, File file) throws IOException {
-                if (file.getName().endsWith(".bin")) {
-                    assertThat(file.delete(), is(true));
-                }
-                return false;
+        builder.add((FileVisitor) (location, file) -> {
+            if (file.getName().endsWith(".bin")) {
+                assertThat(file.delete(), is(true));
             }
+            return false;
         });
 
         File base = folder.getRoot();

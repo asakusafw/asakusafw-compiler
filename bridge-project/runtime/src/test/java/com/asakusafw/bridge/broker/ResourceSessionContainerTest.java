@@ -18,7 +18,6 @@ package com.asakusafw.bridge.broker;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -106,15 +105,12 @@ public class ResourceSessionContainerTest {
         container.create(Scope.THREAD).close();
     }
 
-    private boolean createConcurrent(final ResourceSessionContainer container, final Scope scope) {
+    private boolean createConcurrent(ResourceSessionContainer container, Scope scope) {
         ExecutorService executor = Executors.newFixedThreadPool(1);
         try {
-            Future<Boolean> future = executor.submit(new Callable<Boolean>() {
-                @Override
-                public Boolean call() throws Exception {
-                    try (ResourceSession session = container.create(scope)) {
-                        return session != null;
-                    }
+            Future<Boolean> future = executor.submit(() -> {
+                try (ResourceSession session = container.create(scope)) {
+                    return session != null;
                 }
             });
             return future.get();
