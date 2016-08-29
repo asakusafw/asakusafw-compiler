@@ -129,7 +129,7 @@ public abstract class BuiltInOptimizerTestRoot {
      * @param methodName the target method name
      * @return the matcher
      */
-    public Matcher<OperatorGraph> hasOperator(final String methodName) {
+    public Matcher<OperatorGraph> hasOperator(String methodName) {
         return new BaseMatcher<OperatorGraph>() {
             @Override
             public boolean matches(Object item) {
@@ -158,7 +158,7 @@ public abstract class BuiltInOptimizerTestRoot {
      * @param kind the target operator kind
      * @return the matcher
      */
-    public Matcher<OperatorGraph> hasOperator(final CoreOperatorKind kind) {
+    public Matcher<OperatorGraph> hasOperator(CoreOperatorKind kind) {
         return new BaseMatcher<OperatorGraph>() {
             @Override
             public boolean matches(Object item) {

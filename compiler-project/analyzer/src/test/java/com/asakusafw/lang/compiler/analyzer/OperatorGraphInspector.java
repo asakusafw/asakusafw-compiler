@@ -25,8 +25,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 
-import com.asakusafw.lang.compiler.common.Predicate;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.description.MethodDescription;
 import com.asakusafw.lang.compiler.model.graph.CoreOperator;
@@ -100,15 +100,12 @@ public class OperatorGraphInspector {
      * @param name the port name
      * @return this
      */
-    public OperatorGraphInspector input(String id, final String name) {
-        return identify(id, new Predicate<Operator>() {
-            @Override
-            public boolean apply(Operator argument) {
-                if (argument.getOperatorKind() != OperatorKind.INPUT) {
-                    return false;
-                }
-                return ((ExternalPort) argument).getName().equals(name);
+    public OperatorGraphInspector input(String id, String name) {
+        return identify(id, argument -> {
+            if (argument.getOperatorKind() != OperatorKind.INPUT) {
+                return false;
             }
+            return ((ExternalPort) argument).getName().equals(name);
         });
     }
 
@@ -118,15 +115,12 @@ public class OperatorGraphInspector {
      * @param name the port name
      * @return this
      */
-    public OperatorGraphInspector output(String id, final String name) {
-        return identify(id, new Predicate<Operator>() {
-            @Override
-            public boolean apply(Operator argument) {
-                if (argument.getOperatorKind() != OperatorKind.OUTPUT) {
-                    return false;
-                }
-                return ((ExternalPort) argument).getName().equals(name);
+    public OperatorGraphInspector output(String id, String name) {
+        return identify(id, argument -> {
+            if (argument.getOperatorKind() != OperatorKind.OUTPUT) {
+                return false;
             }
+            return ((ExternalPort) argument).getName().equals(name);
         });
     }
 
@@ -136,19 +130,16 @@ public class OperatorGraphInspector {
      * @param description the description
      * @return this
      */
-    public OperatorGraphInspector flowpart(String id, final Class<?> description) {
-        return identify(id, new Predicate<Operator>() {
-            @Override
-            public boolean apply(Operator argument) {
-                if (argument.getOperatorKind() != OperatorKind.FLOW) {
-                    return false;
-                }
-                ClassDescription desc = ((FlowOperator) argument).getDescriptionClass();
-                if (desc.getBinaryName().equals(description.getName()) == false) {
-                    return false;
-                }
-                return true;
+    public OperatorGraphInspector flowpart(String id, Class<?> description) {
+        return identify(id, argument -> {
+            if (argument.getOperatorKind() != OperatorKind.FLOW) {
+                return false;
             }
+            ClassDescription desc = ((FlowOperator) argument).getDescriptionClass();
+            if (desc.getBinaryName().equals(description.getName()) == false) {
+                return false;
+            }
+            return true;
         });
     }
 
@@ -158,15 +149,12 @@ public class OperatorGraphInspector {
      * @param kind the core operator kind
      * @return this
      */
-    public OperatorGraphInspector operator(String id, final CoreOperatorKind kind) {
-        return identify(id, new Predicate<Operator>() {
-            @Override
-            public boolean apply(Operator argument) {
-                if (argument.getOperatorKind() != OperatorKind.CORE) {
-                    return false;
-                }
-                return ((CoreOperator) argument).getCoreOperatorKind() == kind;
+    public OperatorGraphInspector operator(String id, CoreOperatorKind kind) {
+        return identify(id, argument -> {
+            if (argument.getOperatorKind() != OperatorKind.CORE) {
+                return false;
             }
+            return ((CoreOperator) argument).getCoreOperatorKind() == kind;
         });
     }
 
@@ -176,27 +164,24 @@ public class OperatorGraphInspector {
      * @param operatorId the operator ID specified in {@link MockOperator#id()}
      * @return this
      */
-    public OperatorGraphInspector operator(String id, final String operatorId) {
-        return identify(id, new Predicate<Operator>() {
-            @Override
-            public boolean apply(Operator argument) {
-                if (argument.getOperatorKind() != OperatorKind.USER) {
+    public OperatorGraphInspector operator(String id, String operatorId) {
+        return identify(id, argument -> {
+            if (argument.getOperatorKind() != OperatorKind.USER) {
+                return false;
+            }
+            MethodDescription method = ((UserOperator) argument).getMethod();
+            try {
+                Method resolved = method.resolve(getClass().getClassLoader());
+                MockOperator annotation = resolved.getAnnotation(MockOperator.class);
+                if (annotation == null) {
                     return false;
                 }
-                MethodDescription method = ((UserOperator) argument).getMethod();
-                try {
-                    Method resolved = method.resolve(getClass().getClassLoader());
-                    MockOperator annotation = resolved.getAnnotation(MockOperator.class);
-                    if (annotation == null) {
-                        return false;
-                    }
-                    if (annotation.id().equals(operatorId) == false) {
-                        return false;
-                    }
-                    return true;
-                } catch (NoSuchMethodException e) {
-                    throw new AssertionError(e);
+                if (annotation.id().equals(operatorId) == false) {
+                    return false;
                 }
+                return true;
+            } catch (NoSuchMethodException e) {
+                throw new AssertionError(e);
             }
         });
     }
@@ -208,22 +193,19 @@ public class OperatorGraphInspector {
      * @param methodName the operator method name
      * @return this
      */
-    public OperatorGraphInspector operator(String id, final Class<?> operatorClass, final String methodName) {
-        return identify(id, new Predicate<Operator>() {
-            @Override
-            public boolean apply(Operator argument) {
-                if (argument.getOperatorKind() != OperatorKind.USER) {
-                    return false;
-                }
-                MethodDescription method = ((UserOperator) argument).getMethod();
-                if (method.getDeclaringClass().getBinaryName().equals(operatorClass.getName()) == false) {
-                    return false;
-                }
-                if (method.getName().equals(methodName) == false) {
-                    return false;
-                }
-                return true;
+    public OperatorGraphInspector operator(String id, Class<?> operatorClass, String methodName) {
+        return identify(id, argument -> {
+            if (argument.getOperatorKind() != OperatorKind.USER) {
+                return false;
             }
+            MethodDescription method = ((UserOperator) argument).getMethod();
+            if (method.getDeclaringClass().getBinaryName().equals(operatorClass.getName()) == false) {
+                return false;
+            }
+            if (method.getName().equals(methodName) == false) {
+                return false;
+            }
+            return true;
         });
     }
 
@@ -378,7 +360,7 @@ public class OperatorGraphInspector {
     private Set<Operator> findAll(Predicate<Operator> predicate) {
         Set<Operator> results = new HashSet<>(2);
         for (Operator operator : operators) {
-            if (predicate.apply(operator)) {
+            if (predicate.test(operator)) {
                 results.add(operator);
             }
         }

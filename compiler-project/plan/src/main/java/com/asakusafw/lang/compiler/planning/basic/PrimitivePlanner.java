@@ -191,7 +191,7 @@ public final class PrimitivePlanner {
         Operator gathering = successors.iterator().next();
         Set<Operator> gatherGroupCandidates = Operators.findNearestReachablePredecessors(
                 gathering.getInputs(),
-                Planning.PLAN_MARKERS);
+                PlanMarkers::exists);
         assert gatherGroupCandidates.contains(gather);
         Set<MarkerOperator> results = new HashSet<>();
         for (Operator operator : gatherGroupCandidates) {
@@ -234,7 +234,7 @@ public final class PrimitivePlanner {
     private Set<MarkerOperator> collectPossibleOutputOperatorsFor(Set<MarkerOperator> inputs) {
         Set<MarkerOperator> outputCandidates = toMarkers(Operators.findNearestReachableSuccessors(
                 Operators.getOutputs(inputs),
-                Planning.PLAN_MARKERS));
+                PlanMarkers::exists));
         return outputCandidates;
     }
 
@@ -256,11 +256,11 @@ public final class PrimitivePlanner {
         Set<Operator> bodyOperators = new HashSet<>();
         bodyOperators.addAll(Operators.collectUntilNearestReachableSuccessors(
                 Operators.getOutputs(inputs),
-                Planning.PLAN_MARKERS,
+                PlanMarkers::exists,
                 false));
         bodyOperators.retainAll(Operators.collectUntilNearestReachablePredecessors(
                 Operators.getInputs(outputs),
-                Planning.PLAN_MARKERS,
+                PlanMarkers::exists,
                 false));
 
         // find for broadcast consumers, and returns the corresponded BROADCAST plan markers

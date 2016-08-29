@@ -27,6 +27,7 @@ import com.asakusafw.lang.compiler.packaging.FileContainerRepository;
 /**
  * Compiles Asakusa jobflows.
  */
+@FunctionalInterface
 public interface JobflowCompiler {
 
     /**

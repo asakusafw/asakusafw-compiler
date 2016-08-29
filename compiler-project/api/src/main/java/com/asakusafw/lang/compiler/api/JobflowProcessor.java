@@ -35,6 +35,7 @@ import com.asakusafw.lang.compiler.model.info.ExternalOutputInfo;
 /**
  * Processes operator graphs in jobflow.
  */
+@FunctionalInterface
 public interface JobflowProcessor {
 
     /**

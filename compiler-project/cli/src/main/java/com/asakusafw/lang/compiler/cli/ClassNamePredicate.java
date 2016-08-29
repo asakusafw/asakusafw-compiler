@@ -15,12 +15,11 @@
  */
 package com.asakusafw.lang.compiler.cli;
 
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.asakusafw.lang.compiler.common.Predicate;
 
 /**
  * Predicate of class names.
@@ -70,7 +69,7 @@ public class ClassNamePredicate implements Predicate<Class<?>> {
     }
 
     @Override
-    public boolean apply(Class<?> argument) {
+    public boolean test(Class<?> argument) {
         String name = argument.getName();
         boolean match = pattern.matcher(name).matches();
         if (LOG.isDebugEnabled()) {

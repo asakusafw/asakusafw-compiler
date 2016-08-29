@@ -27,6 +27,7 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
@@ -35,7 +36,7 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import com.asakusafw.lang.compiler.common.Location;
-import com.asakusafw.lang.compiler.common.Predicate;
+import com.asakusafw.lang.compiler.common.Predicates;
 import com.asakusafw.lang.compiler.common.testing.FileDeployer;
 import com.asakusafw.lang.compiler.packaging.FileRepository;
 import com.asakusafw.lang.compiler.packaging.ResourceRepository;
@@ -46,12 +47,7 @@ import com.asakusafw.lang.compiler.packaging.ZipRepository;
  */
 public class ProjectRepositoryTest {
 
-    private static final Predicate<Object> ANY = new Predicate<Object>() {
-        @Override
-        public boolean apply(Object argument) {
-            return true;
-        }
-    };
+    private static final Predicate<Object> ANY = Predicates.anything();
 
     /**
      * temporary file deployer.
@@ -73,12 +69,7 @@ public class ProjectRepositoryTest {
             assertThat(locations(repo.getProjectContents()), hasItem("com/example/Hello$World.class"));
             assertThat(locations(repo.getEmbeddedContents()), is(empty()));
             assertThat(locations(repo.getAttachedLibraries()), is(empty()));
-            Set<Class<?>> classes = repo.getProjectClasses(new Predicate<Class<?>>() {
-                @Override
-                public boolean apply(Class<?> argument) {
-                    return argument.getDeclaringClass() == null;
-                }
-            });
+            Set<Class<?>> classes = repo.getProjectClasses(aClass -> aClass.getDeclaringClass() == null);
             assertThat(names(classes), containsInAnyOrder("com.example.Hello"));
         }
     }
@@ -97,12 +88,7 @@ public class ProjectRepositoryTest {
             assertThat(locations(repo.getProjectContents()), hasItem("com/example/Hello$World.class"));
             assertThat(locations(repo.getEmbeddedContents()), is(empty()));
             assertThat(locations(repo.getAttachedLibraries()), is(empty()));
-            Set<Class<?>> classes = repo.getProjectClasses(new Predicate<Class<?>>() {
-                @Override
-                public boolean apply(Class<?> argument) {
-                    return argument.getDeclaringClass() == null;
-                }
-            });
+            Set<Class<?>> classes = repo.getProjectClasses(aClass -> aClass.getDeclaringClass() == null);
             assertThat(names(classes), containsInAnyOrder("com.example.Hello"));
         }
     }
@@ -229,7 +215,7 @@ public class ProjectRepositoryTest {
         }
     }
 
-    private Matcher<ClassLoader> hasClass(final String name) {
+    private Matcher<ClassLoader> hasClass(String name) {
         return new BaseMatcher<ClassLoader>() {
 
             @Override

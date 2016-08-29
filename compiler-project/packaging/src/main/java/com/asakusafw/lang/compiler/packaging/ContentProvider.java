@@ -21,6 +21,7 @@ import java.io.OutputStream;
 /**
  * Provides binary contents.
  */
+@FunctionalInterface
 public interface ContentProvider {
 
     /**

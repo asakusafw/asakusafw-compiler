@@ -33,7 +33,6 @@ import com.asakusafw.lang.compiler.testdriver.adapter.mock.SimpleBatch;
 import com.asakusafw.lang.compiler.testdriver.adapter.mock.SimpleInputDescription;
 import com.asakusafw.lang.compiler.testdriver.adapter.mock.SimpleJobflow;
 import com.asakusafw.lang.compiler.testdriver.adapter.mock.SimpleOutputDescription;
-import com.asakusafw.lang.compiler.tester.CompilerProfile;
 import com.asakusafw.testdriver.compiler.ArtifactMirror;
 import com.asakusafw.testdriver.compiler.BatchMirror;
 import com.asakusafw.testdriver.compiler.CompilerConfiguration;
@@ -141,13 +140,9 @@ public class CompilerToolkitAdapterTest {
         CompilerConfiguration conf = tk.newConfiguration();
         conf.withClassLoader(getClass().getClassLoader());
         conf.withWorkingDirectory(temporary.newFolder());
-        ((CompilerConfigurationAdapter) conf).withEdit(new CompilerProfile.Edit() {
-            @Override
-            public void perform(CompilerProfile profile) throws IOException {
-                profile.forToolRepository()
-                    .use(new MockJobflowProcessor());
-            }
-        });
+        ((CompilerConfigurationAdapter) conf).withEdit(profile -> profile
+                .forToolRepository()
+                .use(new MockJobflowProcessor()));
         return conf;
     }
 

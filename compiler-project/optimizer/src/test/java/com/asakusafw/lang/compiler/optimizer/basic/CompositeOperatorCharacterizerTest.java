@@ -92,13 +92,8 @@ public class CompositeOperatorCharacterizerTest extends OptimizerTestRoot {
         return Arrays.asList(operators);
     }
 
-    static OperatorCharacterizer<Mock> engine(final String mark) {
-        return new OperatorCharacterizer<Mock>() {
-            @Override
-            public Mock extract(Context context, Operator operator) {
-                return new Mock(mark);
-            }
-        };
+    static OperatorCharacterizer<Mock> engine(String mark) {
+        return (context, operator) -> new Mock(mark);
     }
 
     static Matcher<Mock> hasMark(String mark) {

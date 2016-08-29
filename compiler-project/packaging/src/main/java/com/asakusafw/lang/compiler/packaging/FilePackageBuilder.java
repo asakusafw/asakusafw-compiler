@@ -103,7 +103,7 @@ public class FilePackageBuilder {
             }
             for (Map.Entry<Location, ContentProvider> entry : providers.entrySet()) {
                 Location location = entry.getKey();
-                final ContentProvider provider = entry.getValue();
+                ContentProvider provider = entry.getValue();
                 sink.add(location, provider);
             }
         }

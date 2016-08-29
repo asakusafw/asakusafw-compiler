@@ -47,13 +47,8 @@ public abstract class ResourceTestRoot {
      * @param contents the target contents
      * @return the content provider
      */
-    public static ContentProvider provider(final String contents) {
-        return new ContentProvider() {
-            @Override
-            public void writeTo(OutputStream output) throws IOException {
-                output.write(contents.getBytes(ENCODING));
-            }
-        };
+    public static ContentProvider provider(String contents) {
+        return output -> output.write(contents.getBytes(ENCODING));
     }
 
     /**

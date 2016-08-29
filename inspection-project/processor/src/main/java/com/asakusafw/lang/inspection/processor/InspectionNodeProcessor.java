@@ -25,6 +25,7 @@ import com.asakusafw.lang.inspection.InspectionNode;
 /**
  * Processes an {@link InspectionNode}.
  */
+@FunctionalInterface
 public interface InspectionNodeProcessor {
 
     /**

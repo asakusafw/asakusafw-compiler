@@ -147,7 +147,9 @@ public interface SubPlan extends AttributeContainer {
          * @param opposite the opposite port
          * @return {@code true} if their are connected, otherwise {@code false}
          */
-        boolean isConnected(Output opposite);
+        default boolean isConnected(Output opposite) {
+            return getOpposites().contains(opposite);
+        }
 
         /**
          * Returns the upstream outputs.
@@ -167,7 +169,9 @@ public interface SubPlan extends AttributeContainer {
          * @param opposite the opposite port
          * @return {@code true} if their are connected, otherwise {@code false}
          */
-        boolean isConnected(Input opposite);
+        default boolean isConnected(Input opposite) {
+            return getOpposites().contains(opposite);
+        }
 
         /**
          * Returns the downstream inputs.

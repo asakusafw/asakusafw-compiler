@@ -41,14 +41,11 @@ public class ClassLoaderContext implements AutoCloseable {
         swap(escaped);
     }
 
-    private static ClassLoader swap(final ClassLoader classLoader) {
-        return AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() {
-            @Override
-            public ClassLoader run() {
-                ClassLoader old = Thread.currentThread().getContextClassLoader();
-                Thread.currentThread().setContextClassLoader(classLoader);
-                return old;
-            }
+    private static ClassLoader swap(ClassLoader classLoader) {
+        return AccessController.doPrivileged((PrivilegedAction<ClassLoader>) () -> {
+            ClassLoader old = Thread.currentThread().getContextClassLoader();
+            Thread.currentThread().setContextClassLoader(classLoader);
+            return old;
         });
     }
 }

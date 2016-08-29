@@ -17,7 +17,6 @@ package com.asakusafw.lang.compiler.mapreduce.testing.mock;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -32,16 +31,6 @@ import com.asakusafw.runtime.io.ModelOutput;
  * @param <T> the target data type
  */
 public abstract class WritableDataFormat<T extends Writable> extends BinaryStreamFormat<T> {
-
-    @Override
-    public long getPreferredFragmentSize() throws IOException, InterruptedException {
-        return -1;
-    }
-
-    @Override
-    public long getMinimumFragmentSize() throws IOException, InterruptedException {
-        return -1;
-    }
 
     @Override
     public ModelInput<T> createInput(

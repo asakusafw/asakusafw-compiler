@@ -18,19 +18,16 @@ package com.asakusafw.lang.compiler.core.participant;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
-import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.Test;
 
-import com.asakusafw.lang.compiler.api.JobflowProcessor;
 import com.asakusafw.lang.compiler.core.CompilerTestRoot;
 import com.asakusafw.lang.compiler.core.JobflowCompiler;
 import com.asakusafw.lang.compiler.core.basic.BasicJobflowCompiler;
 import com.asakusafw.lang.compiler.core.dummy.SimpleExternalPortProcessor;
 import com.asakusafw.lang.compiler.hadoop.HadoopFormatExtension;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
-import com.asakusafw.lang.compiler.model.graph.Jobflow;
 import com.asakusafw.lang.compiler.packaging.FileContainer;
 
 /**
@@ -43,20 +40,17 @@ public class HadoopFormatExtensionParticipantTest extends CompilerTestRoot {
      */
     @Test
     public void simple() {
-        final AtomicBoolean executed = new AtomicBoolean();
+        AtomicBoolean executed = new AtomicBoolean();
         externalPortProcessors.add(new SimpleExternalPortProcessor());
         compilerParticipants.add(new HadoopFormatExtensionParticipant());
-        jobflowProcessors.add(new JobflowProcessor() {
-            @Override
-            public void process(Context context, Jobflow source) throws IOException {
-                HadoopFormatExtension extension = context.getExtension(HadoopFormatExtension.class);
-                assertThat(extension, is(notNullValue()));
+        jobflowProcessors.add((context, source) -> {
+            HadoopFormatExtension extension = context.getExtension(HadoopFormatExtension.class);
+            assertThat(extension, is(notNullValue()));
 
-                assertThat(extension.getInputFormat(), is(HadoopFormatExtension.DEFAULT_INPUT_FORMAT));
-                assertThat(extension.getOutputFormat(), is(HadoopFormatExtension.DEFAULT_OUTPUT_FORMAT));
+            assertThat(extension.getInputFormat(), is(HadoopFormatExtension.DEFAULT_INPUT_FORMAT));
+            assertThat(extension.getOutputFormat(), is(HadoopFormatExtension.DEFAULT_OUTPUT_FORMAT));
 
-                executed.set(true);
-            }
+            executed.set(true);
         });
 
         FileContainer output = container();
@@ -78,20 +72,17 @@ public class HadoopFormatExtensionParticipantTest extends CompilerTestRoot {
             .withProperty(HadoopFormatExtensionParticipant.KEY_INPUT_FORMAT, "TestingInput")
             .withProperty(HadoopFormatExtensionParticipant.KEY_OUTPUT_FORMAT, "TestingOutput");
 
-        final AtomicBoolean executed = new AtomicBoolean();
+        AtomicBoolean executed = new AtomicBoolean();
         externalPortProcessors.add(new SimpleExternalPortProcessor());
         compilerParticipants.add(new HadoopFormatExtensionParticipant());
-        jobflowProcessors.add(new JobflowProcessor() {
-            @Override
-            public void process(Context context, Jobflow source) throws IOException {
-                HadoopFormatExtension extension = context.getExtension(HadoopFormatExtension.class);
-                assertThat(extension, is(notNullValue()));
+        jobflowProcessors.add((context, source) -> {
+            HadoopFormatExtension extension = context.getExtension(HadoopFormatExtension.class);
+            assertThat(extension, is(notNullValue()));
 
-                assertThat(extension.getInputFormat(), is(new ClassDescription("TestingInput")));
-                assertThat(extension.getOutputFormat(), is(new ClassDescription("TestingOutput")));
+            assertThat(extension.getInputFormat(), is(new ClassDescription("TestingInput")));
+            assertThat(extension.getOutputFormat(), is(new ClassDescription("TestingOutput")));
 
-                executed.set(true);
-            }
+            executed.set(true);
         });
 
         FileContainer output = container();

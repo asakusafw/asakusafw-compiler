@@ -22,6 +22,7 @@ import com.asakusafw.testdriver.compiler.CompilerConfiguration;
  * Initializes {@link CompilerProfile} for Asakusa DSL TestKit.
  * @since 0.8.0
  */
+@FunctionalInterface
 public interface CompilerProfileInitializer {
 
     /**

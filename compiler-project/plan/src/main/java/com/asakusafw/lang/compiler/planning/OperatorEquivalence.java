@@ -20,17 +20,13 @@ import com.asakusafw.lang.compiler.model.graph.Operator;
 /**
  * Extracts ID of operator equivalences.
  */
+@FunctionalInterface
 public interface OperatorEquivalence {
 
     /**
      * Use original serial number as ID.
      */
-    OperatorEquivalence SAME_ORIGIN = new OperatorEquivalence() {
-        @Override
-        public Object extract(SubPlan owner, Operator operator) {
-            return operator.getOriginalSerialNumber();
-        }
-    };
+    OperatorEquivalence SAME_ORIGIN = (owner, operator) -> operator.getOriginalSerialNumber();
 
     /**
      * Returns the equivalence ID from the target operator.

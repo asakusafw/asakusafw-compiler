@@ -151,15 +151,12 @@ public class FileRepositoryTest {
     @Test
     public void visit_all() throws Exception {
         FileRepository repository = new FileRepository(open("structured.zip"));
-        final Set<String> locations = new HashSet<>();
-        repository.accept(new FileVisitor() {
-            @Override
-            public boolean process(Location location, File file) throws IOException {
-                if (file.isFile()) {
-                    locations.add(location.toPath());
-                }
-                return true;
+        Set<String> locations = new HashSet<>();
+        repository.accept((location, file) -> {
+            if (file.isFile()) {
+                locations.add(location.toPath());
             }
+            return true;
         });
         assertThat(locations, containsInAnyOrder("a.txt", "a/b.txt", "a/b/c.txt"));
     }
@@ -171,15 +168,12 @@ public class FileRepositoryTest {
     @Test
     public void visit_flat() throws Exception {
         FileRepository repository = new FileRepository(open("structured.zip"));
-        final Set<String> locations = new HashSet<>();
-        repository.accept(new FileVisitor() {
-            @Override
-            public boolean process(Location location, File file) throws IOException {
-                if (file.isFile()) {
-                    locations.add(location.toPath());
-                }
-                return false;
+        Set<String> locations = new HashSet<>();
+        repository.accept((location, file) -> {
+            if (file.isFile()) {
+                locations.add(location.toPath());
             }
+            return false;
         });
         assertThat(locations, containsInAnyOrder("a.txt"));
     }

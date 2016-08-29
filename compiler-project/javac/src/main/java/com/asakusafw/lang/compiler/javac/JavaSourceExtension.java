@@ -23,6 +23,7 @@ import com.asakusafw.lang.compiler.model.description.ClassDescription;
 /**
  * An extension for using Java source files.
  */
+@FunctionalInterface
 public interface JavaSourceExtension {
 
     /**

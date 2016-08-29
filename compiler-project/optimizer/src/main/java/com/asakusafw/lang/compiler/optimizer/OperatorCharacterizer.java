@@ -25,6 +25,7 @@ import com.asakusafw.lang.compiler.model.graph.Operator;
  * Extracts {@link OperatorCharacteristics}.
  * @param <T> the characteristics type
  */
+@FunctionalInterface
 public interface OperatorCharacterizer<T extends OperatorCharacteristics> {
 
     /**

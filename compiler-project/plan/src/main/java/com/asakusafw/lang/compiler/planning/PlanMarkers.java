@@ -26,6 +26,8 @@ import com.asakusafw.lang.compiler.model.graph.Operators;
 /**
  * Utilities for {@link PlanMarker}.
  * @see Operators
+ * @since 0.1.0
+ * @version 0.4.0
  */
 public final class PlanMarkers {
 
@@ -43,6 +45,15 @@ public final class PlanMarkers {
         return MarkerOperator.builder(dataType)
                 .attribute(PlanMarker.class, marker)
                 .build();
+    }
+
+    /**
+     * Returns whether or not the operator has {@link PlanMarker}.
+     * @param operator the target operator
+     * @return {@code true} if the operator has a marker, otherwise {@code false}
+     */
+    public static boolean exists(Operator operator) {
+        return get(operator) != null;
     }
 
     /**

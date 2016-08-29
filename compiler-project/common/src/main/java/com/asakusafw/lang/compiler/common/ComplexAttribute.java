@@ -20,6 +20,7 @@ import java.util.Map;
 /**
  * Represents an attribute which contains nested values.
  */
+@FunctionalInterface
 public interface ComplexAttribute {
 
     /**

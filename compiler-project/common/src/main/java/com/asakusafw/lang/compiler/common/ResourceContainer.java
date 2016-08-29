@@ -21,6 +21,7 @@ import java.io.OutputStream;
 /**
  * An abstract super interface of resource containers.
  */
+@FunctionalInterface
 public interface ResourceContainer {
 
     /**

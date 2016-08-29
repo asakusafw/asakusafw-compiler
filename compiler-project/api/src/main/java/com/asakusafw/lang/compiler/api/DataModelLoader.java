@@ -22,6 +22,7 @@ import com.asakusafw.lang.compiler.model.description.TypeDescription;
 /**
  * Provides {@link DataModelReference}.
  */
+@FunctionalInterface
 public interface DataModelLoader {
 
     /**

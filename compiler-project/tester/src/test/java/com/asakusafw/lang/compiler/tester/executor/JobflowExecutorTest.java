@@ -41,8 +41,6 @@ import com.asakusafw.lang.compiler.model.info.JobflowInfo;
 import com.asakusafw.lang.compiler.tester.ExternalPortMap;
 import com.asakusafw.lang.compiler.tester.JobflowArtifact;
 import com.asakusafw.lang.compiler.tester.TesterContext;
-import com.asakusafw.lang.compiler.tester.executor.JobflowExecutor.Action;
-import com.asakusafw.lang.compiler.tester.executor.JobflowExecutor.Context;
 
 /**
  * Test for {@link JobflowExecutor}.
@@ -156,30 +154,26 @@ public class JobflowExecutorTest {
      */
     @Test
     public void hooks() throws Exception {
-        final DummyTaskExecutor tracker = new DummyTaskExecutor();
-        final AtomicBoolean sawBefore = new AtomicBoolean();
-        final AtomicBoolean sawAfter = new AtomicBoolean();
+        DummyTaskExecutor tracker = new DummyTaskExecutor();
+        AtomicBoolean sawBefore = new AtomicBoolean();
+        AtomicBoolean sawAfter = new AtomicBoolean();
         JobflowExecutor executor = new JobflowExecutor(Collections.singletonList(tracker));
 
         TaskContainerMap tasks = new TaskContainerMap();
         TaskReference t0 = task("t0");
         tasks.getMainTaskContainer().add(t0);
 
-        executor.withBefore(new Action() {
-            @Override
-            public void perform(Context context, JobflowArtifact artifact) {
-                assertThat(tracker.getTasks(), is(empty()));
-                assertThat(sawBefore.get(), is(false));
-                sawBefore.set(true);
-            }
-        }).withAfter(new Action() {
-            @Override
-            public void perform(Context context, JobflowArtifact artifact) {
-                assertThat(tracker.getTasks(), is(not(empty())));
-                assertThat(sawAfter.get(), is(false));
-                sawAfter.set(true);
-            }
-        }).execute(context(), jobflow(tasks));
+        executor.withBefore((context, artifact) -> {
+            assertThat(tracker.getTasks(), is(empty()));
+            assertThat(sawBefore.get(), is(false));
+            sawBefore.set(true);
+        })
+        .withAfter((context, artifact) -> {
+            assertThat(tracker.getTasks(), is(not(empty())));
+            assertThat(sawAfter.get(), is(false));
+            sawAfter.set(true);
+        })
+        .execute(context(), jobflow(tasks));
 
         assertThat(sawBefore.get(), is(true));
         assertThat(sawAfter.get(), is(true));

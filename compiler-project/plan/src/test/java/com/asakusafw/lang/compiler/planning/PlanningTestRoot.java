@@ -24,11 +24,11 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import org.hamcrest.FeatureMatcher;
 import org.hamcrest.Matcher;
 
-import com.asakusafw.lang.compiler.common.Predicate;
 import com.asakusafw.lang.compiler.model.graph.MarkerOperator;
 import com.asakusafw.lang.compiler.model.graph.Operator;
 import com.asakusafw.lang.compiler.model.graph.OperatorConstraint;
@@ -123,13 +123,8 @@ public abstract class PlanningTestRoot {
      * @param constraint the constraint
      * @return the predicate
      */
-    public static Predicate<Operator> only(final OperatorConstraint constraint) {
-        return new Predicate<Operator>() {
-            @Override
-            public boolean apply(Operator argument) {
-                return argument.getConstraints().contains(constraint);
-            }
-        };
+    public static Predicate<Operator> only(OperatorConstraint constraint) {
+        return operator -> operator.getConstraints().contains(constraint);
     }
 
     /**

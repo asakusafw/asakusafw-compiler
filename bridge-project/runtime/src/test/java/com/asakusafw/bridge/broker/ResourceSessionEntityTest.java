@@ -19,7 +19,6 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.io.Closeable;
-import java.io.IOException;
 import java.util.NoSuchElementException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -62,13 +61,10 @@ public class ResourceSessionEntityTest {
      */
     @Test
     public void get_supplier() throws Exception {
-        final AtomicBoolean once = new AtomicBoolean();
-        final Callable<String> supplier = new Callable<String>() {
-            @Override
-            public String call() throws Exception {
-                assertThat(once.compareAndSet(false, true), is(true));
-                return "Hello, world!";
-            }
+        AtomicBoolean once = new AtomicBoolean();
+        Callable<String> supplier = () -> {
+            assertThat(once.compareAndSet(false, true), is(true));
+            return "Hello, world!";
         };
         try (ResourceSessionEntity entity = new ResourceSessionEntity()) {
             assertThat(entity.get(String.class, supplier), is("Hello, world!"));
@@ -83,14 +79,9 @@ public class ResourceSessionEntityTest {
      */
     @Test
     public void close_resources() throws Exception {
-        final AtomicBoolean closed = new AtomicBoolean();
+        AtomicBoolean closed = new AtomicBoolean();
         try (ResourceSessionEntity entity = new ResourceSessionEntity()) {
-            entity.put(Object.class, new Closeable() {
-                @Override
-                public void close() throws IOException {
-                    assertThat(closed.compareAndSet(false, true), is(true));
-                }
-            });
+            entity.put(Object.class, (Closeable) () -> assertThat(closed.compareAndSet(false, true), is(true)));
             assertThat(closed.get(), is(false));
         }
         assertThat(closed.get(), is(true));

@@ -18,14 +18,10 @@ package com.asakusafw.lang.compiler.core.participant;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
-import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.Test;
 
-import com.asakusafw.lang.compiler.api.BatchProcessor;
-import com.asakusafw.lang.compiler.api.JobflowProcessor;
-import com.asakusafw.lang.compiler.api.reference.BatchReference;
 import com.asakusafw.lang.compiler.core.BatchCompiler;
 import com.asakusafw.lang.compiler.core.CompilerTestRoot;
 import com.asakusafw.lang.compiler.core.basic.BasicBatchCompiler;
@@ -33,7 +29,6 @@ import com.asakusafw.lang.compiler.core.dummy.SimpleExternalPortProcessor;
 import com.asakusafw.lang.compiler.core.dummy.SimpleJobflowProcessor;
 import com.asakusafw.lang.compiler.inspection.InspectionExtension;
 import com.asakusafw.lang.compiler.model.graph.Batch;
-import com.asakusafw.lang.compiler.model.graph.Jobflow;
 import com.asakusafw.lang.compiler.packaging.FileContainer;
 
 /**
@@ -46,25 +41,19 @@ public class InspectionExtensionParticipantTest extends CompilerTestRoot {
      */
     @Test
     public void simple() {
-        final AtomicBoolean jobflowExecuted = new AtomicBoolean();
-        final AtomicBoolean batchExecuted = new AtomicBoolean();
+        AtomicBoolean jobflowExecuted = new AtomicBoolean();
+        AtomicBoolean batchExecuted = new AtomicBoolean();
         externalPortProcessors.add(new SimpleExternalPortProcessor());
         compilerParticipants.add(new InspectionExtensionParticipant());
-        jobflowProcessors.add(new JobflowProcessor() {
-            @Override
-            public void process(JobflowProcessor.Context context, Jobflow source) throws IOException {
-                InspectionExtension extension = context.getExtension(InspectionExtension.class);
-                assertThat(extension, is(notNullValue()));
-                jobflowExecuted.set(true);
-            }
+        jobflowProcessors.add((context, source) -> {
+            InspectionExtension extension = context.getExtension(InspectionExtension.class);
+            assertThat(extension, is(notNullValue()));
+            jobflowExecuted.set(true);
         });
-        batchProcessors.add(new BatchProcessor() {
-            @Override
-            public void process(BatchProcessor.Context context, BatchReference source) throws IOException {
-                InspectionExtension extension = context.getExtension(InspectionExtension.class);
-                assertThat(extension, is(notNullValue()));
-                batchExecuted.set(true);
-            }
+        batchProcessors.add((context, source) -> {
+            InspectionExtension extension = context.getExtension(InspectionExtension.class);
+            assertThat(extension, is(notNullValue()));
+            batchExecuted.set(true);
         });
 
         FileContainer output = container();

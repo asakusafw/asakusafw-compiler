@@ -34,9 +34,9 @@ public class ClassNamePredicateTest {
     @Test
     public void literal() {
         ClassNamePredicate predicate = ClassNamePredicate.parse("java.lang.String");
-        assertThat(predicate.apply(String.class), is(true));
-        assertThat(predicate.apply(Object.class), is(false));
-        assertThat(predicate.apply(List.class), is(false));
+        assertThat(predicate.test(String.class), is(true));
+        assertThat(predicate.test(Object.class), is(false));
+        assertThat(predicate.test(List.class), is(false));
     }
 
     /**
@@ -45,9 +45,9 @@ public class ClassNamePredicateTest {
     @Test
     public void trailing() {
         ClassNamePredicate predicate = ClassNamePredicate.parse("java.lang.*");
-        assertThat(predicate.apply(String.class), is(true));
-        assertThat(predicate.apply(Object.class), is(true));
-        assertThat(predicate.apply(List.class), is(false));
+        assertThat(predicate.test(String.class), is(true));
+        assertThat(predicate.test(Object.class), is(true));
+        assertThat(predicate.test(List.class), is(false));
     }
 
     /**
@@ -56,9 +56,9 @@ public class ClassNamePredicateTest {
     @Test
     public void first() {
         ClassNamePredicate predicate = ClassNamePredicate.parse("*Buffer");
-        assertThat(predicate.apply(StringBuffer.class), is(true));
-        assertThat(predicate.apply(ByteBuffer.class), is(true));
-        assertThat(predicate.apply(StringBuilder.class), is(false));
+        assertThat(predicate.test(StringBuffer.class), is(true));
+        assertThat(predicate.test(ByteBuffer.class), is(true));
+        assertThat(predicate.test(StringBuilder.class), is(false));
     }
 
     /**
@@ -67,9 +67,9 @@ public class ClassNamePredicateTest {
     @Test
     public void middle() {
         ClassNamePredicate predicate = ClassNamePredicate.parse("java.*Buffer");
-        assertThat(predicate.apply(StringBuffer.class), is(true));
-        assertThat(predicate.apply(ByteBuffer.class), is(true));
-        assertThat(predicate.apply(StringBuilder.class), is(false));
+        assertThat(predicate.test(StringBuffer.class), is(true));
+        assertThat(predicate.test(ByteBuffer.class), is(true));
+        assertThat(predicate.test(StringBuilder.class), is(false));
     }
 
     /**
@@ -78,8 +78,8 @@ public class ClassNamePredicateTest {
     @Test
     public void multiple() {
         ClassNamePredicate predicate = ClassNamePredicate.parse("*.util.*");
-        assertThat(predicate.apply(List.class), is(true));
-        assertThat(predicate.apply(java.util.Date.class), is(true));
-        assertThat(predicate.apply(java.sql.Date.class), is(false));
+        assertThat(predicate.test(List.class), is(true));
+        assertThat(predicate.test(java.util.Date.class), is(true));
+        assertThat(predicate.test(java.sql.Date.class), is(false));
     }
 }

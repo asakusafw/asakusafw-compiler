@@ -19,7 +19,6 @@ import static com.asakusafw.lang.compiler.model.description.Descriptions.*;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -30,8 +29,6 @@ import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.junit.Test;
 
-import com.asakusafw.lang.compiler.api.ExternalPortProcessor;
-import com.asakusafw.lang.compiler.api.JobflowProcessor;
 import com.asakusafw.lang.compiler.core.CompilerTestRoot;
 import com.asakusafw.lang.compiler.core.JobflowCompiler;
 import com.asakusafw.lang.compiler.core.basic.BasicJobflowCompiler;
@@ -40,7 +37,6 @@ import com.asakusafw.lang.compiler.core.dummy.SimpleExternalPortProcessor;
 import com.asakusafw.lang.compiler.hadoop.InputFormatInfo;
 import com.asakusafw.lang.compiler.hadoop.InputFormatInfoExtension;
 import com.asakusafw.lang.compiler.hadoop.InputFormatInfoSupport;
-import com.asakusafw.lang.compiler.model.graph.Jobflow;
 import com.asakusafw.lang.compiler.model.info.ExternalInputInfo;
 import com.asakusafw.lang.compiler.packaging.FileContainer;
 
@@ -54,30 +50,24 @@ public class InputFormatInfoExtensionParticipantTest extends CompilerTestRoot {
      */
     @Test
     public void simple() {
-        final AtomicBoolean saw = new AtomicBoolean();
+        AtomicBoolean saw = new AtomicBoolean();
 
-        List<?> adapters = Arrays.asList(new InputFormatInfoSupport() {
-            @Override
-            public InputFormatInfo resolveInput(ExternalPortProcessor.Context context, String name, ExternalInputInfo info) {
-                Map<String, String> conf = new LinkedHashMap<>();
-                conf.put("testing", "ok");
-                return new InputFormatInfo(
-                        classOf(String.class),
-                        classOf(NullWritable.class),
-                        classOf(Text.class), conf);
-            }
+        List<?> adapters = Arrays.asList((InputFormatInfoSupport) (context, name, info) -> {
+            Map<String, String> conf = new LinkedHashMap<>();
+            conf.put("testing", "ok");
+            return new InputFormatInfo(
+                    classOf(String.class),
+                    classOf(NullWritable.class),
+                    classOf(Text.class), conf);
         });
         externalPortProcessors.add(new SimpleExternalPortProcessor(adapters));
         compilerParticipants.add(new InputFormatInfoExtensionParticipant());
-        jobflowProcessors.add(new JobflowProcessor() {
-            @Override
-            public void process(Context context, Jobflow source) throws IOException {
-                ExternalInputInfo info = SimpleExternalPortProcessor.createInput(classOf(DummyImporterDescription.class));
-                InputFormatInfo resolved = InputFormatInfoExtension.resolve(context, "testing", info);
-                assertThat(resolved, is(notNullValue()));
-                assertThat(resolved.getExtraConfiguration(), hasEntry("testing", "ok"));
-                saw.set(true);
-            }
+        jobflowProcessors.add((context, source) -> {
+            ExternalInputInfo info = SimpleExternalPortProcessor.createInput(classOf(DummyImporterDescription.class));
+            InputFormatInfo resolved = InputFormatInfoExtension.resolve(context, "testing", info);
+            assertThat(resolved, is(notNullValue()));
+            assertThat(resolved.getExtraConfiguration(), hasEntry("testing", "ok"));
+            saw.set(true);
         });
 
         FileContainer output = container();

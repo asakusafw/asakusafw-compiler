@@ -26,12 +26,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.asakusafw.lang.compiler.common.Location;
-import com.asakusafw.lang.compiler.common.Predicate;
+import com.asakusafw.lang.compiler.common.Predicates;
 
 /**
  * Assembles resources.
@@ -40,12 +41,7 @@ public class ResourceAssembler {
 
     static final Logger LOG = LoggerFactory.getLogger(ResourceAssembler.class);
 
-    static final Predicate<Object> ANY = new Predicate<Object>() {
-        @Override
-        public boolean apply(Object argument) {
-            return true;
-        }
-    };
+    static final Predicate<Object> ANY = Predicates.anything();
 
     private final Map<Location, ResourceItem> items = new LinkedHashMap<>();
 
@@ -141,18 +137,8 @@ public class ResourceAssembler {
                         return ANY;
                     }
                 }
-                final List<Predicate<? super Location>> elements = new ArrayList<>(predicates);
-                return new Predicate<Location>() {
-                    @Override
-                    public boolean apply(Location argument) {
-                        for (int i = 0, n = elements.size(); i < n; i++) {
-                            if (elements.get(i).apply(argument)) {
-                                return true;
-                            }
-                        }
-                        return false;
-                    }
-                };
+                List<Predicate<? super Location>> elements = new ArrayList<>(predicates);
+                return location -> elements.stream().anyMatch(p -> p.test(location));
             }
         }
 
@@ -206,7 +192,7 @@ public class ResourceAssembler {
         public boolean next() throws IOException {
             while (cursor.next()) {
                 Location location = cursor.getLocation();
-                if (predicate.apply(location)) {
+                if (predicate.test(location)) {
                     LOG.trace("include: {} ({})", location, repository); //$NON-NLS-1$
                     return true;
                 } else {

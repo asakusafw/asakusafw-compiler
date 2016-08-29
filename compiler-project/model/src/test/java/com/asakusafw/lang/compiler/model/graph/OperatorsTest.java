@@ -21,10 +21,10 @@ import static org.junit.Assert.*;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import org.junit.Test;
 
-import com.asakusafw.lang.compiler.common.Predicate;
 import com.asakusafw.lang.compiler.model.graph.Operator.OperatorKind;
 
 /**
@@ -32,12 +32,7 @@ import com.asakusafw.lang.compiler.model.graph.Operator.OperatorKind;
  */
 public class OperatorsTest {
 
-    private static final Predicate<Operator> MARKERS = new Predicate<Operator>() {
-        @Override
-        public boolean apply(Operator argument) {
-            return argument.getOperatorKind() == OperatorKind.MARKER;
-        }
-    };
+    private static final Predicate<Operator> MARKERS = operator -> operator.getOperatorKind() == OperatorKind.MARKER;
 
     /**
      * inputs.

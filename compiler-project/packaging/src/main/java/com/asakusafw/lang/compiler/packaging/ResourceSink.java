@@ -32,7 +32,11 @@ public interface ResourceSink extends Closeable {
      * @param contents the resource contents (will be consumed immediately)
      * @throws IOException if failed to accept the resource by I/O error
      */
-    void add(Location location, InputStream contents) throws IOException;
+    default void add(Location location, InputStream contents) throws IOException {
+        add(location, output -> {
+            ResourceUtil.copy(contents, output);
+        });
+    }
 
     /**
      * Accepts an resource.

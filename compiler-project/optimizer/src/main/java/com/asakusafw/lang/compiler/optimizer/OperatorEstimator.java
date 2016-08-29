@@ -26,16 +26,14 @@ import com.asakusafw.lang.compiler.model.graph.OperatorOutput;
 /**
  * Estimates statistics of each {@link Operator}.
  */
+@FunctionalInterface
 public interface OperatorEstimator {
 
     /**
      * Null implementation of {@link OperatorEstimator}.
      */
-    OperatorEstimator NULL = new OperatorEstimator() {
-        @Override
-        public void perform(Context context, Operator operator) {
-            return;
-        }
+    OperatorEstimator NULL = (context, operator) -> {
+        return;
     };
 
     /**

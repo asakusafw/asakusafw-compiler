@@ -68,7 +68,7 @@ public class BatchProcessorAdapter implements BatchProcessor.Context {
         if (library.isFile() == false) {
             return null;
         }
-        final ZipFile zip = new ZipFile(library);
+        ZipFile zip = new ZipFile(library);
         boolean success = false;
         try {
             ZipEntry entry = zip.getEntry(location.toPath());

@@ -284,15 +284,6 @@ public final class BasicSubPlan extends BasicAttributeContainer implements SubPl
             opposites.remove(opposite);
         }
 
-        /**
-         * Returns whether this is connected to the specified opposite or not.
-         * @param opposite the opposite port
-         * @return {@code true} if their are connected, otherwise {@code false}
-         */
-        protected boolean isConnected(Port opposite) {
-            return opposites.contains(opposite);
-        }
-
         @Override
         public Set<TOpposite> getOpposites() {
             return new LinkedHashSet<>(opposites);
@@ -315,11 +306,6 @@ public final class BasicSubPlan extends BasicAttributeContainer implements SubPl
         @Override
         BasicInput getSelf() {
             return this;
-        }
-
-        @Override
-        public boolean isConnected(Output opposite) {
-            return isConnected((Port) opposite);
         }
 
         @Override
@@ -347,11 +333,6 @@ public final class BasicSubPlan extends BasicAttributeContainer implements SubPl
         @Override
         BasicOutput getSelf() {
             return this;
-        }
-
-        @Override
-        public boolean isConnected(Input opposite) {
-            return isConnected((Port) opposite);
         }
 
         @Override
