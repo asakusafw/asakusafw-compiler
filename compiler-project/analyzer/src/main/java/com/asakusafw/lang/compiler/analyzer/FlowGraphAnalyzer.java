@@ -450,7 +450,7 @@ public final class FlowGraphAnalyzer {
                     } else if (type == Export.class) {
                         String name = ((Export) a).name();
                         ConstructorParameter origin = new ConstructorParameter(constructor, i);
-                        inputs.put(name, new OperatorSource(OperatorKind.OUTPUT, origin));
+                        outputs.put(name, new OperatorSource(OperatorKind.OUTPUT, origin));
                     }
                 }
             }
