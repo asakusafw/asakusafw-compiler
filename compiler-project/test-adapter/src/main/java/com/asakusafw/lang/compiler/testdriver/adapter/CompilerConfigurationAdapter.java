@@ -15,12 +15,16 @@
  */
 package com.asakusafw.lang.compiler.testdriver.adapter;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ServiceLoader;
+import java.util.Set;
 
 import com.asakusafw.lang.compiler.analyzer.builtin.LoggingOperatorRemover;
+import com.asakusafw.lang.compiler.core.basic.JobflowPackager;
 import com.asakusafw.lang.compiler.extension.trace.TraceOperatorWeaver;
 import com.asakusafw.lang.compiler.packaging.ResourceUtil;
 import com.asakusafw.lang.compiler.tester.CompilerProfile;
@@ -60,6 +64,13 @@ class CompilerConfigurationAdapter extends BasicCompilerConfiguration {
 
         profile.forProjectRepository()
             .embed(ResourceUtil.findLibraryByClass(target));
+
+        try (URLClassLoader loader = profile.forProjectRepository().buildClassLoader()) {
+            Set<File> marked = ResourceUtil.findLibrariesByResource(loader, JobflowPackager.FRAGMENT_MARKER);
+            for (File file : marked) {
+                profile.forProjectRepository().embed(file);
+            }
+        }
 
         profile.forToolRepository()
             .useDefaults();
