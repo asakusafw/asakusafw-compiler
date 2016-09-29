@@ -27,9 +27,10 @@ import org.junit.Test;
 import com.asakusafw.bridge.broker.ResourceBroker;
 import com.asakusafw.bridge.broker.ResourceBrokerContext;
 import com.asakusafw.bridge.stage.StageInfo;
+import com.asakusafw.runtime.core.BatchContext;
 
 /**
- * Test for {@link BatchContext}.
+ * Test for {@link com.asakusafw.bridge.api.BatchContext}.
  */
 public class BatchContextTest {
 
@@ -45,6 +46,7 @@ public class BatchContextTest {
     @Test
     public void simple() {
         ResourceBroker.put(StageInfo.class, info("a", "Hello, world!"));
+        brokerContext.activateApis();
         assertThat(BatchContext.get("a"), is("Hello, world!"));
         assertThat(BatchContext.get("b"), is(nullValue()));
     }
@@ -55,6 +57,7 @@ public class BatchContextTest {
     @Test
     public void reserved() {
         ResourceBroker.put(StageInfo.class, info("a", "Hello, world!"));
+        brokerContext.activateApis();
         assertThat(BatchContext.get("user"), is("u"));
         assertThat(BatchContext.get("batch_id"), is("b"));
         assertThat(BatchContext.get("flow_id"), is("f"));
@@ -66,6 +69,16 @@ public class BatchContextTest {
      */
     @Test(expected = IllegalStateException.class)
     public void not_prepared() {
+        brokerContext.activateApis();
+        BatchContext.get("a");
+    }
+
+    /**
+     * not activated.
+     */
+    @Test(expected = IllegalStateException.class)
+    public void not_activated() {
+        ResourceBroker.put(StageInfo.class, info("a", "Hello, world!"));
         BatchContext.get("a");
     }
 

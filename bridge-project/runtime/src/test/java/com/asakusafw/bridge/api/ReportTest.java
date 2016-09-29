@@ -15,7 +15,7 @@
  */
 package com.asakusafw.bridge.api;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
@@ -26,13 +26,14 @@ import org.junit.rules.ExternalResource;
 
 import com.asakusafw.bridge.broker.ResourceBroker;
 import com.asakusafw.bridge.broker.ResourceBrokerContext;
+import com.asakusafw.runtime.core.Report;
 import com.asakusafw.runtime.core.Report.Delegate;
 import com.asakusafw.runtime.core.Report.FailedException;
 import com.asakusafw.runtime.core.Report.Level;
 import com.asakusafw.runtime.core.ResourceConfiguration;
 
 /**
- * Test for {@link Report}.
+ * Test for {@link com.asakusafw.bridge.api.Report}.
  */
 public class ReportTest {
 
@@ -69,6 +70,7 @@ public class ReportTest {
         ResourceConfiguration conf = new MapConfiguration();
         conf.set(ReportAdapter.CLASS_DELEGATE, aClass.getName());
         ResourceBroker.put(ResourceConfiguration.class, conf);
+        brokerContext.activateApis();
     }
 
     /**

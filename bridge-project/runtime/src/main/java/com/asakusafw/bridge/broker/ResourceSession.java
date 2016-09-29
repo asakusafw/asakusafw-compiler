@@ -21,6 +21,8 @@ import java.util.concurrent.Callable;
 
 /**
  * Represents a session of resource broker.
+ * @since 0.1.0
+ * @version 0.4.0
  */
 public interface ResourceSession extends Closeable {
 
@@ -59,4 +61,13 @@ public interface ResourceSession extends Closeable {
      * @throws IllegalStateException if the target resource already exists in this session
      */
     <T> void put(Class<T> type, T resource);
+
+    /**
+     * Adds a object to be closed.
+     * {@link AutoCloseable#close() closer.close()} will be invoked when the current session was closed.
+     * Note that, exceptions occurred in {@code close()} method will be suppressed.
+     * @param closer the closable object
+     * @since 0.4.0
+     */
+    void schedule(AutoCloseable closer);
 }

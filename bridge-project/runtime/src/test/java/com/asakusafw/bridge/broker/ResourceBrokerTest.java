@@ -22,6 +22,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.junit.Rule;
 import org.junit.Test;
 
 import com.asakusafw.bridge.broker.ResourceBroker.Initializer;
@@ -34,6 +35,7 @@ public class ResourceBrokerTest {
     /**
      * setup/cleanup the test case.
      */
+    @Rule
     public final ResourceBrokerContext brokerContext = new ResourceBrokerContext();
 
     /**
