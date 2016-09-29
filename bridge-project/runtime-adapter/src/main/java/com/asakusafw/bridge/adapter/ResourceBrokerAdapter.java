@@ -22,7 +22,7 @@ import com.asakusafw.bridge.broker.ResourceBroker.Scope;
 import com.asakusafw.bridge.broker.ResourceSession;
 import com.asakusafw.bridge.stage.StageInfo;
 import com.asakusafw.runtime.core.ResourceConfiguration;
-import com.asakusafw.runtime.core.RuntimeResource;
+import com.asakusafw.runtime.core.legacy.RuntimeResource;
 import com.asakusafw.runtime.stage.StageConstants;
 
 /**

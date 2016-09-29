@@ -1,0 +1,2 @@
+com.asakusafw.bridge.api.activate.BatchContextApiActivator
+com.asakusafw.bridge.api.activate.ReportApiActivator

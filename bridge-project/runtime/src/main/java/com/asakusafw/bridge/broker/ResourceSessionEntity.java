@@ -123,7 +123,8 @@ final class ResourceSessionEntity implements ResourceSession {
         }
     }
 
-    void schedule(AutoCloseable closer) {
+    @Override
+    public void schedule(AutoCloseable closer) {
         synchronized (closables) {
             closables.addFirst(closer);
         }
@@ -213,6 +214,11 @@ final class ResourceSessionEntity implements ResourceSession {
         @Override
         public <T> void put(Class<T> type, T resource) {
             ResourceSessionEntity.this.put(type, resource);
+        }
+
+        @Override
+        public void schedule(AutoCloseable closer) {
+            ResourceSessionEntity.this.schedule(closer);
         }
 
         @Override

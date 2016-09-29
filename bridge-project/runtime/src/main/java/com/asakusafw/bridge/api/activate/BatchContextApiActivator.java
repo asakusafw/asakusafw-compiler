@@ -13,27 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.asakusafw.bridge.directio.api;
+package com.asakusafw.bridge.api.activate;
 
-import org.junit.rules.ExternalResource;
-
-import com.asakusafw.bridge.api.activate.ApiActivator;
-import com.asakusafw.bridge.broker.ResourceBroker;
+import com.asakusafw.bridge.api.BatchContext;
+import com.asakusafw.runtime.core.api.ApiStub.Reference;
+import com.asakusafw.runtime.core.api.BatchContextApi;
 
 /**
- * Initializes {@link ResourceBroker} in testing.
+ * Activates {@link BatchContext}.
+ * @since 0.4.0
  */
-public class ResourceBrokerContext extends ExternalResource {
+public class BatchContextApiActivator implements ApiActivator {
+
+    private static final BatchContextApi API = new BatchContextApi() {
+        @Override
+        public String get(String name) {
+            return BatchContext.get(name);
+        }
+    };
 
     @Override
-    protected void before() throws Throwable {
-        ResourceBroker.closeAll();
-        ResourceBroker.start();
-        ApiActivator.load(getClass().getClassLoader()).forEach(a -> ResourceBroker.schedule(a.activate()));
-    }
-
-    @Override
-    protected void after() {
-        ResourceBroker.closeAll();
+    public Reference<BatchContextApi> activate() {
+        return com.asakusafw.runtime.core.BatchContext.getStub().activate(API);
     }
 }

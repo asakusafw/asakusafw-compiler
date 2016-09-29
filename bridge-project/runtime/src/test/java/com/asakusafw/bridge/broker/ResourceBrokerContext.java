@@ -17,6 +17,8 @@ package com.asakusafw.bridge.broker;
 
 import org.junit.rules.ExternalResource;
 
+import com.asakusafw.bridge.api.activate.ApiActivator;
+
 /**
  * Initializes {@link ResourceBroker} in testing.
  */
@@ -37,6 +39,13 @@ public class ResourceBrokerContext extends ExternalResource {
      */
     public ResourceBrokerContext(boolean start) {
         this.start = start;
+    }
+
+    /**
+     * Activates framework APIs.
+     */
+    public void activateApis() {
+        ApiActivator.load(getClass().getClassLoader()).forEach(a -> ResourceBroker.schedule(a.activate()));
     }
 
     @Override

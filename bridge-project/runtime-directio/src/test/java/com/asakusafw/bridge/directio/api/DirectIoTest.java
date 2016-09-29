@@ -37,11 +37,12 @@ import com.asakusafw.lang.compiler.mapreduce.testing.mock.DirectIoContext;
 import com.asakusafw.runtime.core.HadoopConfiguration;
 import com.asakusafw.runtime.core.ResourceConfiguration;
 import com.asakusafw.runtime.directio.BinaryStreamFormat;
+import com.asakusafw.runtime.directio.api.DirectIo;
 import com.asakusafw.runtime.io.ModelInput;
 import com.asakusafw.runtime.io.ModelOutput;
 
 /**
- * Test for {@link DirectIo}.
+ * Test for {@link com.asakusafw.bridge.directio.api.DirectIo}.
  */
 public class DirectIoTest {
 
@@ -55,7 +56,7 @@ public class DirectIoTest {
      * using {@link ResourceBroker} in testing.
      */
     @Rule
-    public final ResourceBrokerContext context = new ResourceBrokerContext(true);
+    public final ResourceBrokerContext context = new ResourceBrokerContext();
 
     /**
      * simple case.
@@ -77,7 +78,6 @@ public class DirectIoTest {
     @Test
     public void missing() throws Exception {
         ResourceBroker.put(Configuration.class, env.newConfiguration());
-
         Set<String> results = consume();
         assertThat(results, is(empty()));
     }
@@ -125,11 +125,11 @@ public class DirectIoTest {
         DirectIo.open(MockFormat.class, "testing", "*.txt").close();
     }
 
-    private Set<String> set(String... values) {
+    private static Set<String> set(String... values) {
         return new HashSet<>(Arrays.asList(values));
     }
 
-    private File put(File file, String... lines) throws IOException {
+    private static File put(File file, String... lines) throws IOException {
         file.getAbsoluteFile().getParentFile().mkdirs();
         try (PrintWriter writer = new PrintWriter(file, "UTF-8")) {
             for (String line : lines) {
@@ -139,7 +139,7 @@ public class DirectIoTest {
         return file;
     }
 
-    private Set<String> consume(ModelInput<StringBuilder> input) throws IOException {
+    private static Set<String> consume(ModelInput<StringBuilder> input) throws IOException {
         Set<String> results = new HashSet<>();
         StringBuilder buf = new StringBuilder();
         while (input.readTo(buf)) {
