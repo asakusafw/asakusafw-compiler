@@ -15,7 +15,6 @@
     <dependency>
       <groupId>com.asakusafw</groupId>
       <artifactId>asakusa-iterative-common</artifactId>
-      <version>${asakusafw.version}</version>
     </dependency>
     <dependency>
       <groupId>com.asakusafw.bridge</groupId>
@@ -25,8 +24,6 @@
     <dependency>
       <groupId>com.asakusafw</groupId>
       <artifactId>asakusa-runtime</artifactId>
-      <version>${asakusafw.version}</version>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -35,12 +32,10 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>jcl-over-slf4j</artifactId>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.hamcrest</groupId>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE logback>
+<configuration>
+  <appender name="STDOUT"
+    class="ch.qos.logback.core.ConsoleAppender">
+   <target>System.out</target>
+    <encoder>
+      <pattern>%d{HH:mm:ss} %-5level %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <!-- Asakusa Framework core runtime classes -->
+  <logger name="com.asakusafw.runtime" level="INFO"/>
+
+  <!-- Asakusa DAG Toolset classes -->
+  <logger name="com.asakusafw.dag" level="INFO"/>
+
+  <!-- Asakusa Vanilla runtime classes -->
+  <logger name="com.asakusafw.vanilla" level="INFO"/>
+
+  <!-- Asakusa Vanilla Compiler generated classes -->
+  <logger name="com.asakusafw.vanilla.generated" level="INFO"/>
+
+  <!-- referred libraries -->
+  <logger name="org.apache.hadoop" level="WARN"/>
+
+  <root>
+    <level value="INFO" />
+    <appender-ref ref="STDOUT" />
+  </root>
+</configuration>

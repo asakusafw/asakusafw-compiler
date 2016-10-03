@@ -1,0 +1,172 @@
+/*
+ * Copyright 2011-2016 Asakusa Framework Team.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+ext.parentPom = { f ->
+    if (!f.exists()) {
+        return null
+    }
+    def xml = new XmlSlurper().parse(f)
+    return [
+        projectVersion : xml.version.text(),
+        coreVersion : xml['properties']['asakusafw.version'].text(),
+        sdkVersion : xml['properties']['asakusafw-sdk.version'].text(),
+        hadoopVersion : xml['properties']['hadoop.version'].text(),
+    ]
+}(project.file('../../pom.xml')) // I'm on './vanilla/gradle/build.gradle'.
+ 
+group = 'com.asakusafw.vanilla'
+version = parentPom.projectVersion
+
+defaultTasks 'clean', 'build', 'install', 'assembleTemplates'
+
+apply plugin: 'groovy'
+apply plugin: 'maven'
+apply plugin: 'idea'
+apply plugin: 'eclipse'
+
+configurations {
+    deployerJars
+}
+
+repositories {
+    if (project.hasProperty('mavenLocal')) {
+        logger.lifecycle 'enabling maven local repository'
+        mavenLocal()
+    }
+    mavenCentral()
+    maven { url 'http://asakusafw.s3.amazonaws.com/maven/releases' }
+    maven { url 'http://asakusafw.s3.amazonaws.com/maven/snapshots' }
+}
+
+dependencies {
+    compile gradleApi()
+    compile group: 'com.asakusafw', name: 'asakusa-gradle-plugins', version: parentPom.sdkVersion
+    testCompile gradleTestKit()
+    testCompile group: 'com.asakusafw', name: 'asakusa-gradle-plugins', version: parentPom.sdkVersion, classifier: 'tests'
+    testCompile 'junit:junit:4.11'
+    deployerJars 'org.springframework.build:aws-maven:5.0.0.RELEASE'
+}
+
+project.sourceCompatibility = JavaVersion.toVersion('1.7')
+project.targetCompatibility = JavaVersion.toVersion('1.7')
+
+tasks.withType(AbstractCompile) { task ->
+    task.options.encoding = 'UTF-8'
+    if (System.getProperty('compiler.bootclasspath') != null) {
+        task.options.compilerArgs += ['-bootclasspath', System.getProperty('compiler.bootclasspath')]
+    }
+}
+
+eclipse.jdt {
+    javaRuntimeName = "JavaSE-${sourceCompatibility}"
+}
+
+groovydoc {
+    docTitle "Asakusa Vanilla Gradle Plugins ${version}"
+    windowTitle "Asakusa Vanilla Gradle Plugins ${version}"
+    footer "Copyright 2011-${new Date().format('yyyy')} Asakusa Framework Team."
+}
+
+processResources {
+    File outputFile = new File(destinationDir, 'META-INF/asakusa-vanilla-gradle/artifact.properties')
+    inputs.properties parentPom
+    outputs.file outputFile
+    doLast {
+        logger.info "injecting artifact versions: ${parentPom}"
+        if (!outputFile.parentFile.exists()) {
+            project.mkdir outputFile.parentFile
+        }
+
+        Properties p = new Properties()
+        p.put('feature-version', parentPom.projectVersion)
+        p.put("core-version", parentPom.coreVersion)
+        p.put("sdk-version", parentPom.sdkVersion)
+        p.put('hadoop-version', parentPom.hadoopVersion)
+        outputFile.withOutputStream { s ->
+            p.store(s, null)
+        }
+    }
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            configuration = project.configurations.deployerJars
+            repository id: 'com.asakusafw.releases', url: 's3://asakusafw/maven/releases'
+            snapshotRepository id: 'com.asakusafw.snapshots', url: 's3://asakusafw/maven/snapshots'
+        }
+    }
+}
+
+task assembleTemplates {
+    description 'assembles application project templates'
+}
+
+file('src/templates').eachDirMatch({ it.startsWith 'asakusa-' }) { File source ->
+    String projectName = source.name
+    File output = new File(buildDir, "templates/${projectName}")
+    String generateTaskName = "generate_${projectName}"
+    String processTaskName = "process_${projectName}"
+    String assembleTaskName = "assemble_${projectName}"
+    tasks.create(name: generateTaskName, type: Copy) {
+        doFirst {
+            delete output
+        }
+        from source
+        filesMatching('build.gradle') {
+            expand gradlePluginVersion: version, 
+                mavenRepoType: version.endsWith('SNAPSHOT') ? 'snapshots' : 'releases'
+        }
+        into output
+    }
+    tasks.create(name: processTaskName, type: GradleBuild, dependsOn: generateTaskName) {
+        dir output
+        file('src/templates/init.d').eachFileMatch({ it.endsWith('.gradle') }) {
+            startParameter.addInitScript it
+        }
+        doLast {
+            mkdir new File(output, 'src/main/java')
+            mkdir new File(output, 'src/main/resources')
+            mkdir new File(output, 'src/main/dmdl')
+            mkdir new File(output, 'src/main/libs')
+            mkdir new File(output, 'src/test/java')
+        }
+        tasks = ['asakusaUpgrade']
+    }
+    tasks.create(name: assembleTaskName, type: Tar, dependsOn: processTaskName) {
+        from (output) {
+            exclude "build"
+            exclude ".gradle"
+            into projectName
+        }
+        destinationDir buildDir
+        compression Compression.GZIP
+        archiveName "${projectName}-${version}.tar.gz"
+    }
+    assembleTemplates.dependsOn assembleTaskName
+}
+
+task sourcesJar(type: Jar) {
+    classifier 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives tasks.sourcesJar
+}
+
+tasks.withType(Wrapper) {
+    jarFile file('.buildtools/gradlew.jar')
+}

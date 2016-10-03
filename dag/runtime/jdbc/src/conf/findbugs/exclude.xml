@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+  <Match classregex="com.asakusafw.dag.runtime.jdbc.basic..+">
+    <Or>
+      <Bug pattern="ODR_OPEN_DATABASE_RESOURCE" />
+      <Bug pattern="OBL_UNSATISFIED_OBLIGATION" />
+    </Or>
+  </Match>
+</FindBugsFilter>

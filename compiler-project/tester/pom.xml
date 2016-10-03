@@ -13,6 +13,11 @@
 
   <dependencies>
     <dependency>
+      <groupId>com.asakusafw.lang.utils</groupId>
+      <artifactId>asakusa-lang-common</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>asakusa-compiler-core</artifactId>
       <version>${project.version}</version>
@@ -20,20 +25,14 @@
     <dependency>
       <groupId>com.asakusafw</groupId>
       <artifactId>simple-graph</artifactId>
-      <version>${asakusafw.version}</version>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>com.asakusafw</groupId>
       <artifactId>asakusa-dsl-vocabulary</artifactId>
-      <version>${asakusafw.version}</version>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>com.asakusafw</groupId>
       <artifactId>asakusa-runtime</artifactId>
-      <version>${asakusafw.version}</version>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -42,12 +41,10 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>jcl-over-slf4j</artifactId>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
