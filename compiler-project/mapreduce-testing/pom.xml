@@ -25,19 +25,18 @@
     <dependency>
       <groupId>com.asakusafw</groupId>
       <artifactId>asakusa-runtime</artifactId>
-      <version>${asakusafw.version}</version>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>com.asakusafw</groupId>
       <artifactId>asakusa-runtime-inprocess</artifactId>
-      <version>${asakusafw.version}</version>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.hadoop</groupId>
-      <artifactId>hadoop-client</artifactId>
-      <scope>provided</scope>
+      <artifactId>hadoop-common</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-mapreduce-client-core</artifactId>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -46,17 +45,14 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>jcl-over-slf4j</artifactId>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
@@ -67,7 +63,6 @@
     <dependency>
       <groupId>com.asakusafw</groupId>
       <artifactId>asakusa-runtime</artifactId>
-      <version>${asakusafw.version}</version>
       <classifier>tests</classifier>
       <scope>test</scope>
     </dependency>

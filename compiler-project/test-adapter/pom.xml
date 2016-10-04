@@ -30,26 +30,18 @@
     <dependency>
       <groupId>com.asakusafw</groupId>
       <artifactId>asakusa-test-compiler</artifactId>
-      <version>${asakusafw.version}</version>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>com.asakusafw</groupId>
       <artifactId>asakusa-dsl-vocabulary</artifactId>
-      <version>${asakusafw.version}</version>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>com.asakusafw</groupId>
       <artifactId>asakusa-runtime</artifactId>
-      <version>${asakusafw.version}</version>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>com.asakusafw</groupId>
       <artifactId>asakusa-test-trace-model</artifactId>
-      <version>${asakusafw.version}</version>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -58,12 +50,10 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>jcl-over-slf4j</artifactId>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
@@ -80,18 +70,21 @@
     <dependency>
       <groupId>com.asakusafw</groupId>
       <artifactId>simple-graph</artifactId>
-      <version>${asakusafw.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>com.asakusafw</groupId>
       <artifactId>java-dom</artifactId>
-      <version>${asakusafw.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.hadoop</groupId>
-      <artifactId>hadoop-client</artifactId>
+      <artifactId>hadoop-common</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-mapreduce-client-core</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>

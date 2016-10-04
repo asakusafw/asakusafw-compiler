@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+  <Match classregex="com.asakusafw.dag.compiler.jdbc..+Generator\$Spec">
+    <Bug pattern="EQ_UNUSUAL" />
+  </Match>
+</FindBugsFilter>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+  <Match class="com.asakusafw.dag.compiler.codegen.AsmUtil">
+    <Bug pattern="UC_USELESS_OBJECT" />
+  </Match>
+</FindBugsFilter>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+  <Match class="com.asakusafw.dag.runtime.table.HeapKeyBuffer">
+    <Bug pattern="EQ_CHECK_FOR_OPERAND_NOT_COMPATIBLE_WITH_THIS" />
+  </Match>
+  <Match class="com.asakusafw.dag.runtime.table.HeapKeyBuffer$FrozenView">
+    <Bug pattern="EQ_CHECK_FOR_OPERAND_NOT_COMPATIBLE_WITH_THIS" />
+  </Match>
+</FindBugsFilter>

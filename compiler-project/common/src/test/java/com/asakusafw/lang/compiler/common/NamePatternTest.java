@@ -18,8 +18,8 @@ package com.asakusafw.lang.compiler.common;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
+import java.util.Arrays;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
@@ -106,12 +106,12 @@ public class NamePatternTest {
             public boolean matches(Object item) {
                 @SuppressWarnings("unchecked")
                 Predicate<? super CharSequence> predicate = (Predicate<? super CharSequence>) item;
-                return Stream.of(samples)
+                return Arrays.stream(samples)
                         .anyMatch(predicate);
             }
             @Override
             public void describeTo(Description description) {
-                // TODO Auto-generated method stub
+                description.appendText("accepts any of ").appendValueList("{", ", ", "}", samples);
             }
         };
     }
