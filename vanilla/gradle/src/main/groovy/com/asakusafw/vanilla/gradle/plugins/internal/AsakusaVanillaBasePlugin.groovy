@@ -47,6 +47,8 @@ class AsakusaVanillaBasePlugin implements Plugin<Project> {
     @Override
     void apply(Project project) {
         this.project = project
+        project.apply plugin: AsakusafwBasePlugin
+
         this.extension = project.extensions.create('asakusaVanillaBase', AsakusaVanillaBaseExtension)
         configureExtension()
         configureTasks()
@@ -121,13 +123,5 @@ class AsakusaVanillaBasePlugin implements Plugin<Project> {
         project.tasks.getByName(AsakusafwBasePlugin.TASK_VERSIONS) << {
             logger.lifecycle "Asakusa Vanilla: ${extension.featureVersion}"
         }
-    }
-
-    /**
-     * Returns the extension.
-     * @return the extension
-     */
-    AsakusaVanillaBaseExtension getExtension() {
-        return extension
     }
 }

@@ -84,6 +84,15 @@ class AsakusaVanillaSdkPluginTest {
     }
 
     /**
+     * test for version.
+     */
+    @Test
+    void extension_version() {
+        project.asakusaVanillaBase.featureVersion = '__VERSION__'
+        assert project.asakusafw.vanilla.version == '__VERSION__'
+    }
+
+    /**
      * test for {@code tasks.vanillaCompileBatchapps}.
      */
     @Test
