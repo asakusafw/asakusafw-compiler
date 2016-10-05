@@ -79,8 +79,7 @@ class AsakusaVanillaSdkBasePlugin implements Plugin<Project> {
         }
         PluginUtils.afterEvaluate(project) {
             AsakusaVanillaBaseExtension base = AsakusaVanillaBasePlugin.get(project)
-            AsakusafwPluginConvention sdk = AsakusaSdkPlugin.get(project)
-            AsakusafwSdkExtension features = sdk.sdk
+            AsakusafwSdkExtension features = AsakusaSdkPlugin.get(project).sdk
             project.dependencies {
                 if (features.core) {
                     asakusaVanillaCommon "com.asakusafw.vanilla.compiler:asakusa-vanilla-compiler-core:${base.featureVersion}"
@@ -88,19 +87,19 @@ class AsakusaVanillaSdkBasePlugin implements Plugin<Project> {
                     asakusaVanillaCommon "com.asakusafw.lang.compiler:asakusa-compiler-extension-redirector:${base.featureVersion}"
                     asakusaVanillaCommon "com.asakusafw.lang.compiler:asakusa-compiler-extension-yaess:${base.featureVersion}"
                     asakusaVanillaCommon "com.asakusafw.lang.compiler:asakusa-compiler-cli:${base.featureVersion}"
-                    asakusaVanillaCommon "com.asakusafw:simple-graph:${sdk.asakusafwVersion}"
-                    asakusaVanillaCommon "com.asakusafw:java-dom:${sdk.asakusafwVersion}"
-                    asakusaVanillaCompiler "com.asakusafw:asakusa-dsl-vocabulary:${sdk.asakusafwVersion}"
-                    asakusaVanillaCompiler "com.asakusafw:asakusa-runtime:${sdk.asakusafwVersion}"
-                    asakusaVanillaCompiler "com.asakusafw:asakusa-yaess-core:${sdk.asakusafwVersion}"
+                    asakusaVanillaCommon "com.asakusafw:simple-graph:${base.coreVersion}"
+                    asakusaVanillaCommon "com.asakusafw:java-dom:${base.coreVersion}"
+                    asakusaVanillaCompiler "com.asakusafw:asakusa-dsl-vocabulary:${base.coreVersion}"
+                    asakusaVanillaCompiler "com.asakusafw:asakusa-runtime:${base.coreVersion}"
+                    asakusaVanillaCompiler "com.asakusafw:asakusa-yaess-core:${base.coreVersion}"
 
                     if (features.directio) {
                         asakusaVanillaCommon "com.asakusafw.dag.compiler:asakusa-dag-compiler-extension-directio:${base.featureVersion}"
-                        asakusaVanillaCompiler "com.asakusafw:asakusa-directio-vocabulary:${sdk.asakusafwVersion}"
+                        asakusaVanillaCompiler "com.asakusafw:asakusa-directio-vocabulary:${base.coreVersion}"
                     }
                     if (features.windgate) {
                         asakusaVanillaCommon "com.asakusafw.dag.compiler:asakusa-dag-compiler-extension-windgate:${base.featureVersion}"
-                        asakusaVanillaCompiler "com.asakusafw:asakusa-windgate-vocabulary:${sdk.asakusafwVersion}"
+                        asakusaVanillaCompiler "com.asakusafw:asakusa-windgate-vocabulary:${base.coreVersion}"
                     }
                     if (features.hive) {
                         asakusaVanillaCommon "com.asakusafw.lang.compiler:asakusa-compiler-extension-hive:${base.featureVersion}"
@@ -110,7 +109,7 @@ class AsakusaVanillaSdkBasePlugin implements Plugin<Project> {
                     asakusaVanillaTestkit "com.asakusafw.vanilla.runtime:asakusa-vanilla-assembly:${base.featureVersion}"
                     asakusaVanillaTestkit "com.asakusafw.vanilla.testkit:asakusa-vanilla-test-adapter:${base.featureVersion}"
                     asakusaVanillaTestkit "com.asakusafw.vanilla.testkit:asakusa-vanilla-test-inprocess:${base.featureVersion}"
-                    asakusaVanillaTestkit "com.asakusafw:asakusa-test-inprocess:${sdk.asakusafwVersion}"
+                    asakusaVanillaTestkit "com.asakusafw:asakusa-test-inprocess:${base.coreVersion}"
                 }
             }
         }
