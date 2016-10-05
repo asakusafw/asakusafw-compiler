@@ -23,6 +23,7 @@ import org.gradle.api.Task
 import com.asakusafw.gradle.plugins.AsakusafwOrganizerPlugin
 import com.asakusafw.gradle.plugins.AsakusafwOrganizerPluginConvention
 import com.asakusafw.gradle.plugins.AsakusafwOrganizerProfile
+import com.asakusafw.gradle.plugins.internal.PluginUtils
 import com.asakusafw.vanilla.gradle.plugins.AsakusafwOrganizerVanillaExtension
 
 /**
@@ -57,12 +58,14 @@ class AsakusaVanillaOrganizerPlugin implements Plugin<Project> {
     }
 
     private void configureConvention() {
+        AsakusaVanillaBaseExtension base = AsakusaVanillaBasePlugin.get(project)
         AsakusafwOrganizerPluginConvention convention = project.asakusafwOrganizer
-        convention.extensions.create('vanilla', AsakusafwOrganizerVanillaExtension)
-        convention.vanilla.conventionMapping.with {
+        AsakusafwOrganizerVanillaExtension extension = convention.extensions.create('vanilla', AsakusafwOrganizerVanillaExtension)
+        extension.conventionMapping.with {
             enabled = { true }
             useSystemHadoop = { false }
         }
+        PluginUtils.injectVersionProperty(extension, { base.featureVersion })
     }
 
     private void configureProfiles() {
@@ -73,12 +76,14 @@ class AsakusaVanillaOrganizerPlugin implements Plugin<Project> {
     }
 
     private void configureProfile(AsakusafwOrganizerProfile profile) {
+        AsakusaVanillaBaseExtension base = AsakusaVanillaBasePlugin.get(project)
         AsakusafwOrganizerVanillaExtension extension = profile.extensions.create('vanilla', AsakusafwOrganizerVanillaExtension)
         AsakusafwOrganizerVanillaExtension parent = project.asakusafwOrganizer.vanilla
         extension.conventionMapping.with {
             enabled = { parent.enabled }
             useSystemHadoop = { parent.useSystemHadoop }
         }
+        PluginUtils.injectVersionProperty(extension, { base.featureVersion })
         AsakusaVanillaOrganizer organizer = new AsakusaVanillaOrganizer(project, profile, extension)
         organizer.configureProfile()
         organizers << organizer
