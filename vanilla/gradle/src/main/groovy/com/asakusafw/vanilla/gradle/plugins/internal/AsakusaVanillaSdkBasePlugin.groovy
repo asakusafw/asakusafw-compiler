@@ -18,22 +18,18 @@ package com.asakusafw.vanilla.gradle.plugins.internal
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
-import com.asakusafw.gradle.plugins.AsakusafwCompilerExtension
-import com.asakusafw.gradle.plugins.AsakusafwPluginConvention
 import com.asakusafw.gradle.plugins.AsakusafwSdkExtension
 import com.asakusafw.gradle.plugins.internal.AsakusaSdkPlugin
 import com.asakusafw.gradle.plugins.internal.PluginUtils
 
 /**
  * A base plug-in of {@link AsakusaVanillaSdkPlugin}.
- * This only organizes conventions and dependencies.
+ * This only organizes dependencies and testkits.
  * @since 0.4.0
  */
 class AsakusaVanillaSdkBasePlugin implements Plugin<Project> {
 
     private Project project
-
-    private AsakusafwCompilerExtension extension
 
     @Override
     void apply(Project project) {
@@ -41,23 +37,14 @@ class AsakusaVanillaSdkBasePlugin implements Plugin<Project> {
 
         project.apply plugin: AsakusaSdkPlugin
         project.apply plugin: AsakusaVanillaBasePlugin
-        this.extension = AsakusaSdkPlugin.get(project).extensions.create('vanilla', AsakusafwCompilerExtension)
 
-        configureExtension()
+        configureTestkit()
         configureConfigurations()
     }
 
-    private void configureExtension() {
-        AsakusaVanillaBaseExtension base = AsakusaVanillaBasePlugin.get(project)
-        AsakusafwPluginConvention sdk = AsakusaSdkPlugin.get(project)
-        extension.conventionMapping.with {
-            outputDirectory = { project.relativePath(new File(project.buildDir, 'vanilla-batchapps')) }
-            batchIdPrefix = { (String) 'vanilla.' }
-            failOnError = { true }
-        }
-        extension.compilerProperties.put('javac.version', { sdk.javac.sourceCompatibility.toString() })
-        PluginUtils.injectVersionProperty(extension, { base.featureVersion })
-        sdk.sdk.availableTestkits << new AsakusaVanillaTestkit()
+    private void configureTestkit() {
+        AsakusafwSdkExtension sdk = AsakusaSdkPlugin.get(project).sdk
+        sdk.availableTestkits << new AsakusaVanillaTestkit()
     }
 
     private void configureConfigurations() {
@@ -113,20 +100,5 @@ class AsakusaVanillaSdkBasePlugin implements Plugin<Project> {
                 }
             }
         }
-    }
-
-    /**
-     * Returns the extension object of this plug-in.
-     * The plug-in will be applied automatically.
-     * @param project the target project
-     * @return the related extension
-     */
-    static AsakusafwCompilerExtension get(Project project) {
-        project.apply plugin: AsakusaVanillaSdkBasePlugin
-        AsakusaVanillaSdkBasePlugin plugin = project.plugins.getPlugin(AsakusaVanillaSdkBasePlugin)
-        if (plugin == null) {
-            throw new IllegalStateException('AsakusaVanillaSdkBasePlugin has not been applied')
-        }
-        return plugin.extension
     }
 }
