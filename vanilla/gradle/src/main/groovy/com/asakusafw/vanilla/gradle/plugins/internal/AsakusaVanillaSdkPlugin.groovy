@@ -29,6 +29,7 @@ import com.asakusafw.gradle.tasks.internal.ResolutionUtils
 /**
  * A Gradle sub plug-in for Asakusa Vanilla SDK.
  * @since 0.4.0
+ * @see AsakusaVanillaSdkBasePlugin
  */
 class AsakusaVanillaSdkPlugin implements Plugin<Project> {
 
@@ -45,70 +46,10 @@ class AsakusaVanillaSdkPlugin implements Plugin<Project> {
     void apply(Project project) {
         this.project = project
 
-        project.apply plugin: 'asakusafw-sdk'
-        project.apply plugin: AsakusaVanillaBasePlugin
-        extension = AsakusaSdkPlugin.get(project).extensions.create('vanilla', AsakusafwCompilerExtension)
+        project.apply plugin: AsakusaVanillaSdkBasePlugin
+        this.extension = AsakusaVanillaSdkBasePlugin.get(project)
 
-        configureExtension()
-        configureConfigurations()
         defineTasks()
-    }
-
-    private void configureExtension() {
-        AsakusafwPluginConvention sdk = AsakusaSdkPlugin.get(project)
-        extension.conventionMapping.with {
-            outputDirectory = { project.relativePath(new File(project.buildDir, 'vanilla-batchapps')) }
-            batchIdPrefix = { (String) 'vanilla.' }
-            failOnError = { true }
-        }
-        extension.compilerProperties.put('javac.version', { sdk.javac.sourceCompatibility.toString() })
-    }
-
-    private void configureConfigurations() {
-        project.configurations {
-            asakusaVanillaCommon {
-                description 'Common libraries of Asakusa DSL Compiler for Vanilla'
-                exclude group: 'asm', module: 'asm'
-            }
-            asakusaVanillaCompiler {
-                description 'Full classpath of Asakusa DSL Compiler for Vanilla'
-                extendsFrom project.configurations.compile
-                extendsFrom project.configurations.asakusaVanillaCommon
-            }
-            asakusaVanillaTestkit {
-                description 'Asakusa DSL testkit classpath for Vanilla'
-                extendsFrom project.configurations.asakusaVanillaCommon
-                exclude group: 'com.asakusafw', module: 'asakusa-test-mapreduce'
-            }
-        }
-        PluginUtils.afterEvaluate(project) {
-            AsakusaVanillaBaseExtension base = AsakusaVanillaBasePlugin.get(project)
-            AsakusafwPluginConvention sdk = AsakusaSdkPlugin.get(project)
-            project.dependencies {
-                asakusaVanillaCommon "com.asakusafw.vanilla.compiler:asakusa-vanilla-compiler-core:${base.featureVersion}"
-                asakusaVanillaCommon "com.asakusafw.lang.compiler:asakusa-compiler-extension-redirector:${base.featureVersion}"
-                asakusaVanillaCommon "com.asakusafw.lang.compiler:asakusa-compiler-extension-yaess:${base.featureVersion}"
-                asakusaVanillaCommon "com.asakusafw:simple-graph:${sdk.asakusafwVersion}"
-                asakusaVanillaCommon "com.asakusafw:java-dom:${sdk.asakusafwVersion}"
-                asakusaVanillaCommon "com.asakusafw.lang.compiler:asakusa-compiler-cli:${base.featureVersion}"
-                asakusaVanillaCompiler "com.asakusafw:asakusa-dsl-vocabulary:${sdk.asakusafwVersion}"
-                asakusaVanillaCompiler "com.asakusafw:asakusa-runtime:${sdk.asakusafwVersion}"
-                asakusaVanillaCompiler "com.asakusafw:asakusa-yaess-core:${sdk.asakusafwVersion}"
-
-                asakusaVanillaCommon "com.asakusafw.dag.compiler:asakusa-dag-compiler-extension-directio:${base.featureVersion}"
-                asakusaVanillaCompiler "com.asakusafw:asakusa-directio-vocabulary:${sdk.asakusafwVersion}"
-
-                asakusaVanillaCommon "com.asakusafw.dag.compiler:asakusa-dag-compiler-extension-windgate:${base.featureVersion}"
-                asakusaVanillaCompiler "com.asakusafw:asakusa-windgate-vocabulary:${sdk.asakusafwVersion}"
-
-                asakusaVanillaCommon "com.asakusafw.lang.compiler:asakusa-compiler-extension-hive:${base.featureVersion}"
-
-                asakusaVanillaTestkit "com.asakusafw.vanilla.runtime:asakusa-vanilla-assembly:${base.featureVersion}"
-                asakusaVanillaTestkit "com.asakusafw.vanilla.testkit:asakusa-vanilla-test-adapter:${base.featureVersion}"
-                asakusaVanillaTestkit "com.asakusafw.vanilla.testkit:asakusa-vanilla-test-inprocess:${base.featureVersion}"
-                asakusaVanillaTestkit "com.asakusafw:asakusa-test-inprocess:${sdk.asakusafwVersion}"
-            }
-        }
     }
 
     private void defineTasks() {
