@@ -47,9 +47,22 @@ class AsakusaVanillaSdkPlugin implements Plugin<Project> {
         this.project = project
 
         project.apply plugin: AsakusaVanillaSdkBasePlugin
-        this.extension = AsakusaVanillaSdkBasePlugin.get(project)
+        this.extension = AsakusaSdkPlugin.get(project).extensions.create('vanilla', AsakusafwCompilerExtension)
 
+        configureExtension()
         defineTasks()
+    }
+
+    private void configureExtension() {
+        AsakusaVanillaBaseExtension base = AsakusaVanillaBasePlugin.get(project)
+        AsakusafwPluginConvention sdk = AsakusaSdkPlugin.get(project)
+        extension.conventionMapping.with {
+            outputDirectory = { project.relativePath(new File(project.buildDir, 'vanilla-batchapps')) }
+            batchIdPrefix = { (String) 'vanilla.' }
+            failOnError = { true }
+        }
+        extension.compilerProperties.put('javac.version', { sdk.javac.sourceCompatibility.toString() })
+        PluginUtils.injectVersionProperty(extension, { base.featureVersion })
     }
 
     private void defineTasks() {

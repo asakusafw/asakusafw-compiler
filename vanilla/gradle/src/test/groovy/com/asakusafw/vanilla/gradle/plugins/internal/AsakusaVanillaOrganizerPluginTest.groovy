@@ -76,6 +76,18 @@ class AsakusaVanillaOrganizerPluginTest {
     }
 
     /**
+     * Test for {@code project.asakusafwOrganizer.vanilla.version}.
+     */
+    @Test
+    void extension_version() {
+        project.asakusaVanillaBase.featureVersion = '__VERSION__'
+        assert project.asakusafwOrganizer.vanilla.version == '__VERSION__'
+        assert project.asakusafwOrganizer.profiles.dev.vanilla.version == '__VERSION__'
+        assert project.asakusafwOrganizer.profiles.prod.vanilla.version == '__VERSION__'
+        assert project.asakusafwOrganizer.profiles.other.vanilla.version == '__VERSION__'
+    }
+
+    /**
      * test for extension.
      */
     @Test
