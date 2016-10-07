@@ -13,6 +13,11 @@
 
   <dependencies>
     <dependency>
+      <groupId>com.asakusafw.vanilla.compiler</groupId>
+      <artifactId>asakusa-vanilla-compiler-common</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>com.asakusafw.lang.compiler</groupId>
       <artifactId>asakusa-compiler-test-adapter</artifactId>
       <version>${project.version}</version>

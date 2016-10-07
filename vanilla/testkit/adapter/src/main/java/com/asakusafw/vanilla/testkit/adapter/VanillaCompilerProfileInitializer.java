@@ -15,15 +15,25 @@
  */
 package com.asakusafw.vanilla.testkit.adapter;
 
+import java.util.Arrays;
+import java.util.Collection;
+
+import com.asakusafw.lang.compiler.common.Location;
 import com.asakusafw.lang.compiler.testdriver.adapter.CompilerProfileInitializer;
 import com.asakusafw.lang.compiler.tester.CompilerProfile;
 import com.asakusafw.testdriver.compiler.CompilerConfiguration;
+import com.asakusafw.vanilla.compiler.common.VanillaTask;
 
 /**
  * {@link CompilerProfileInitializer} for Asakusa Vanilla.
  * @since 0.4.0
  */
 public class VanillaCompilerProfileInitializer implements CompilerProfileInitializer {
+
+    @Override
+    public Collection<Location> getLauncherPaths() {
+        return Arrays.asList(VanillaTask.PATH_COMMAND);
+    }
 
     @Override
     public void initialize(CompilerProfile profile, CompilerConfiguration configuration) {
