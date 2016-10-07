@@ -23,15 +23,15 @@ import com.asakusafw.testdriver.compiler.CompilerConfiguration;
 
 /**
  * Initializes {@link CompilerProfile} for Asakusa DSL TestKit.
- * @since 0.8.0
- * @since 0.8.2
+ * @since 0.3.0
+ * @since 0.3.2
  */
 public interface CompilerProfileInitializer {
 
     /**
      * Returns the set of Asakusa launcher paths.
      * @return the launcher paths
-     * @since 0.8.2
+     * @since 0.3.2
      */
     Collection<Location> getLauncherPaths();
 
