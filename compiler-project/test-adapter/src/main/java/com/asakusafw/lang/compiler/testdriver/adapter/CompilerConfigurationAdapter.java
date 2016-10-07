@@ -19,11 +19,13 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.ServiceLoader;
 import java.util.Set;
 
 import com.asakusafw.lang.compiler.analyzer.builtin.LoggingOperatorRemover;
+import com.asakusafw.lang.compiler.common.Location;
 import com.asakusafw.lang.compiler.core.basic.JobflowPackager;
 import com.asakusafw.lang.compiler.extension.trace.TraceOperatorWeaver;
 import com.asakusafw.lang.compiler.packaging.ResourceUtil;
@@ -39,6 +41,8 @@ class CompilerConfigurationAdapter extends BasicCompilerConfiguration {
 
     private final List<CompilerProfile.Edit> edits = new ArrayList<>();
 
+    private final Set<Location> asakusaLauncherPaths = new HashSet<>();
+
     public void withDefaults() {
         withClassLoader(getClass().getClassLoader());
         withOptimizeLevel(OptimizeLevel.NORMAL);
@@ -49,6 +53,10 @@ class CompilerConfigurationAdapter extends BasicCompilerConfiguration {
     public CompilerConfigurationAdapter withEdit(CompilerProfile.Edit edit) {
         edits.add(edit);
         return this;
+    }
+
+    public boolean isAsakusaLauncher(Location path) {
+        return asakusaLauncherPaths.contains(path);
     }
 
     public CompilerTester start(Class<?> target) throws IOException {
@@ -91,12 +99,13 @@ class CompilerConfigurationAdapter extends BasicCompilerConfiguration {
 
         for (CompilerProfileInitializer initializer : ServiceLoader.load(CompilerProfileInitializer.class, cl)) {
             initializer.initialize(profile, this);
+            asakusaLauncherPaths.addAll(initializer.getLauncherPaths());
         }
 
         return profile.build();
     }
 
-    private void install(CompilerProfile profile, TraceSettingList trace) {
+    private static void install(CompilerProfile profile, TraceSettingList trace) {
         List<TraceSetting> elements = trace.getElements();
         if (elements.isEmpty()) {
             return;
