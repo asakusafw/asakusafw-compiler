@@ -31,6 +31,7 @@ import com.asakusafw.lang.compiler.api.reference.CommandTaskReference;
 import com.asakusafw.lang.compiler.api.reference.JobflowReference;
 import com.asakusafw.lang.compiler.api.reference.TaskReference;
 import com.asakusafw.lang.compiler.common.DiagnosticException;
+import com.asakusafw.lang.compiler.common.Location;
 import com.asakusafw.lang.compiler.core.ClassAnalyzer;
 import com.asakusafw.lang.compiler.core.basic.BasicClassAnalyzer;
 import com.asakusafw.lang.compiler.hadoop.HadoopTaskReference;
@@ -54,6 +55,7 @@ import com.asakusafw.testdriver.compiler.TaskMirror;
 import com.asakusafw.testdriver.compiler.basic.BasicArtifactMirror;
 import com.asakusafw.testdriver.compiler.basic.BasicBatchMirror;
 import com.asakusafw.testdriver.compiler.basic.BasicCommandTaskMirror;
+import com.asakusafw.testdriver.compiler.basic.BasicCommandTaskMirror.ConfigurationResolver;
 import com.asakusafw.testdriver.compiler.basic.BasicHadoopTaskMirror;
 import com.asakusafw.testdriver.compiler.basic.BasicJobflowMirror;
 import com.asakusafw.testdriver.compiler.basic.BasicPortMirror;
@@ -79,6 +81,21 @@ class CompilerSessionAdapter implements CompilerSession {
         }
         PHASE_MAPPING = map;
     }
+
+    private static final ConfigurationResolver LAUNCHER_RESOLVER = new ConfigurationResolver() {
+        @Override
+        public List<CommandToken> apply(Map<String, String> configurations) {
+            List<CommandToken> results = new ArrayList<>();
+            for (Map.Entry<String, String> entry : configurations.entrySet()) {
+                String key = entry.getKey();
+                String value = entry.getValue();
+                results.add(CommandToken.of("--hadoop-conf")); //$NON-NLS-1$
+                results.add(CommandToken.of(String.format("%s=%s", //$NON-NLS-1$
+                        key, value)));
+            }
+            return results;
+        }
+    };
 
     private final CompilerConfigurationAdapter configuration;
 
@@ -248,8 +265,10 @@ class CompilerSessionAdapter implements CompilerSession {
     private BasicTaskMirror processTask(TaskReference task) {
         if (task instanceof CommandTaskReference) {
             CommandTaskReference t = (CommandTaskReference) task;
+            Location cmd = t.getCommand();
             List<CommandToken> args = resolveArguments(t.getArguments());
-            return new BasicCommandTaskMirror(t.getModuleName(), t.getProfileName(), t.getCommand().toPath(), args);
+            BasicCommandTaskMirror.ConfigurationResolver resolver = findConfigurationResolver(cmd);
+            return new BasicCommandTaskMirror(t.getModuleName(), t.getProfileName(), cmd.toPath(), args, resolver);
         } else if (task instanceof HadoopTaskReference) {
             HadoopTaskReference t = (HadoopTaskReference) task;
             return new BasicHadoopTaskMirror(t.getModuleName(), t.getMainClass().getBinaryName());
@@ -260,7 +279,7 @@ class CompilerSessionAdapter implements CompilerSession {
         }
     }
 
-    private List<CommandToken> resolveArguments(
+    private static List<CommandToken> resolveArguments(
             List<com.asakusafw.lang.compiler.api.reference.CommandToken> arguments) {
         List<CommandToken> results = new ArrayList<>();
         for (com.asakusafw.lang.compiler.api.reference.CommandToken token : arguments) {
@@ -269,7 +288,7 @@ class CompilerSessionAdapter implements CompilerSession {
         return results;
     }
 
-    private CommandToken resolveCommandToken(com.asakusafw.lang.compiler.api.reference.CommandToken token) {
+    private static CommandToken resolveCommandToken(com.asakusafw.lang.compiler.api.reference.CommandToken token) {
         switch (token.getTokenKind()) {
         case TEXT:
             return CommandToken.of(token.getImage());
@@ -283,6 +302,14 @@ class CompilerSessionAdapter implements CompilerSession {
             return CommandToken.EXECUTION_ID;
         default:
             throw new AssertionError(token.getTokenKind());
+        }
+    }
+
+    private BasicCommandTaskMirror.ConfigurationResolver findConfigurationResolver(Location path) {
+        if (configuration.isAsakusaLauncher(path)) {
+            return LAUNCHER_RESOLVER;
+        } else {
+            return BasicCommandTaskMirror.NULL_RESOLVER;
         }
     }
 

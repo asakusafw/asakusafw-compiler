@@ -59,7 +59,7 @@ public class CompilerToolkitAdapter implements CompilerToolkit {
         return new CompilerSessionAdapter(conf);
     }
 
-    private void initializeWorkingDirectory(CompilerConfiguration conf) throws IOException {
+    private static void initializeWorkingDirectory(CompilerConfiguration conf) throws IOException {
         File workingDirectory = conf.getWorkingDirectory();
         if (workingDirectory == null) {
             throw new IllegalStateException();

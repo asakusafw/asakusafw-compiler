@@ -15,14 +15,28 @@
  */
 package com.asakusafw.lang.compiler.testdriver.adapter;
 
+import java.util.Collection;
+import java.util.Collections;
+
+import com.asakusafw.lang.compiler.common.Location;
 import com.asakusafw.lang.compiler.tester.CompilerProfile;
 import com.asakusafw.testdriver.compiler.CompilerConfiguration;
 
 /**
  * Initializes {@link CompilerProfile} for Asakusa DSL TestKit.
  * @since 0.8.0
+ * @since 0.9.0
  */
 public interface CompilerProfileInitializer {
+
+    /**
+     * Returns the set of Asakusa launcher paths.
+     * @return the launcher paths
+     * @since 0.9.0
+     */
+    default Collection<Location> getLauncherPaths() {
+        return Collections.emptySet();
+    }
 
     /**
      * Initializes the compiler profile.
