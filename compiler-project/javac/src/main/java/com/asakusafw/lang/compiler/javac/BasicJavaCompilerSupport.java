@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 import javax.tools.DiagnosticListener;
 import javax.tools.JavaCompiler;
@@ -126,7 +127,7 @@ public class BasicJavaCompilerSupport extends AbstractJavaCompilerSupport {
             return false;
         }
         if (file.isDirectory()) {
-            for (File child : file.listFiles()) {
+            for (File child : list(file)) {
                 if (isCompileRequired(child)) {
                     return true;
                 }
@@ -206,7 +207,7 @@ public class BasicJavaCompilerSupport extends AbstractJavaCompilerSupport {
             return;
         }
         if (file.isDirectory()) {
-            for (File child : file.listFiles()) {
+            for (File child : list(file)) {
                 collectSourceFiles(sink, child);
             }
         } else if (file.isFile()) {
@@ -214,5 +215,11 @@ public class BasicJavaCompilerSupport extends AbstractJavaCompilerSupport {
                 sink.add(file);
             }
         }
+    }
+
+    private static List<File> list(File file) {
+        return Optional.ofNullable(file.listFiles())
+                .map(Arrays::asList)
+                .orElse(Collections.emptyList());
     }
 }

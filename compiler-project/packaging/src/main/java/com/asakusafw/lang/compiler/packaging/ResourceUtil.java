@@ -26,8 +26,11 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.MessageFormat;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 
@@ -38,6 +41,8 @@ import com.asakusafw.lang.compiler.common.Location;
 
 /**
  * Utilities for packaging.
+ * @since 0.1.0
+ * @version 0.4.0
  */
 public final class ResourceUtil {
 
@@ -267,7 +272,7 @@ public final class ResourceUtil {
         }
         boolean deleted = true;
         if (file.isDirectory()) {
-            for (File child : file.listFiles()) {
+            for (File child : list(file)) {
                 deleted &= delete(child);
             }
         }
@@ -277,6 +282,18 @@ public final class ResourceUtil {
                     file));
         }
         return deleted;
+    }
+
+    /**
+     * Returns a list of entries in the given directory.
+     * @param base the target directory
+     * @return the entries, or an empty list if the given path does not represents a directory
+     * @since 0.4.0
+     */
+    static List<File> list(File base) {
+        return Optional.ofNullable(base.listFiles())
+                .map(Arrays::asList)
+                .orElse(Collections.emptyList());
     }
 
     /**
@@ -344,7 +361,7 @@ public final class ResourceUtil {
 
     private static void visitElements(FileVisitor visitor, Location current, File directory) throws IOException {
         assert directory.isDirectory();
-        for (File file : directory.listFiles()) {
+        for (File file : list(directory)) {
             Location location = new Location(current, file.getName());
             boolean enter = visitor.process(location, file);
             if (enter && file.isDirectory()) {

@@ -58,22 +58,6 @@ public final class OperatorRewriters {
         if (rewriter == OperatorRewriter.NULL) {
             return;
         }
-        OperatorRewriter.Context adapter = newContext(context, estimator);
-        apply(adapter, rewriter, graph);
-    }
-
-    /**
-     * Applies the {@link OperatorRewriter}.
-     * @param context the current context
-     * @param rewriter the target rewriter
-     * @param graph the target operator graph
-     * @throws DiagnosticException if failed to rewrite the target operator graph
-     * @see CompositeOperatorRewriter
-     */
-    private static void apply(
-            OperatorRewriter.Context context,
-            OperatorRewriter rewriter,
-            OperatorGraph graph) {
-        rewriter.perform(context, graph);
+        rewriter.perform(newContext(context, estimator), graph);
     }
 }

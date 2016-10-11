@@ -18,6 +18,8 @@ package com.asakusafw.dag.runtime.jdbc.basic;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
+import java.util.concurrent.TimeUnit;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
@@ -35,7 +37,7 @@ public class BasicConnectionPoolTest extends JdbcDagTestRoot {
      * timeout.
      */
     @Rule
-    public final TestRule timeout = new Timeout(5000);
+    public final TestRule timeout = new Timeout(5, TimeUnit.SECONDS);
 
     /**
      * simple case.

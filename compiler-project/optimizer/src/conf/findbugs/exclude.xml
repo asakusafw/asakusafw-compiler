@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+  <Match class="com.asakusafw.lang.compiler.optimizer.OperatorRewriters">
+    <!-- FIXME: is false-positive case? -->
+    <Bug pattern="UC_USELESS_VOID_METHOD" />
+  </Match>
+</FindBugsFilter>
