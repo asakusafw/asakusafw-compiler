@@ -20,8 +20,11 @@ import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.apache.hadoop.io.Text;
@@ -75,7 +78,7 @@ public class WritableModelInput<T extends Writable> implements ModelInput<T> {
             return Collections.emptySet();
         }
         Set<File> results = new LinkedHashSet<>();
-        for (File file : directory.listFiles()) {
+        for (File file : list(directory)) {
             String name = file.getName();
             if (name.startsWith(".") || name.equals("_SUCCESS")) { //$NON-NLS-1$ //$NON-NLS-2$
                 continue;
@@ -89,6 +92,12 @@ public class WritableModelInput<T extends Writable> implements ModelInput<T> {
             results.add(file);
         }
         return results;
+    }
+
+    private static List<File> list(File dir) {
+        return Optional.ofNullable(dir.listFiles())
+                .map(Arrays::asList)
+                .orElse(Collections.emptyList());
     }
 
     /**

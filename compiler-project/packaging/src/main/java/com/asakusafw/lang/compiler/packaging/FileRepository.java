@@ -78,7 +78,7 @@ public class FileRepository implements ResourceRepository {
             results.add(new FileItem(location, file));
         } else if (file.isDirectory()) {
             // the current location may be null
-            for (File child : file.listFiles()) {
+            for (File child : ResourceUtil.list(file)) {
                 Location enter = new Location(location, child.getName());
                 collect(results, enter, child);
             }

@@ -30,7 +30,10 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Scanner;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -203,7 +206,7 @@ public final class FileEditor {
             return;
         }
         mkdir(destination);
-        for (File file : source.listFiles()) {
+        for (File file : list(source)) {
             File target = new File(destination, file.getName());
             if (file.isDirectory()) {
                 copyDirectory(file, target);
@@ -310,10 +313,16 @@ public final class FileEditor {
                 file.setExecutable(true, true);
             }
         } else if (file.isDirectory()) {
-            for (File f : file.listFiles()) {
+            for (File f : list(file)) {
                 setExecutable(f, extension);
             }
         }
+    }
+
+    private static List<File> list(File dir) {
+        return Optional.ofNullable(dir.listFiles())
+                .map(Arrays::asList)
+                .orElse(Collections.emptyList());
     }
 
     private static void copyStream(InputStream input, OutputStream output) throws IOException {

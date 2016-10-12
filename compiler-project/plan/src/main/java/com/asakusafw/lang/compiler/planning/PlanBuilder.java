@@ -331,7 +331,6 @@ public final class PlanBuilder {
                 if (source == null) {
                     continue;
                 }
-                sourceToOutputs.get(source);
                 Set<BasicSubPlan.BasicOutput> outputs = sourceToOutputs.get(source);
                 if (outputs != null) {
                     for (BasicSubPlan.BasicOutput output : outputs) {

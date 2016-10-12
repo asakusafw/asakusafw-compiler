@@ -19,6 +19,7 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.util.Collections;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -37,7 +38,7 @@ public class SimpleConnectionPoolTest extends JdbcDagTestRoot {
      * timeout.
      */
     @Rule
-    public final TestRule timeout = new Timeout(5000);
+    public final TestRule timeout = new Timeout(5, TimeUnit.SECONDS);
 
     /**
      * simple case.

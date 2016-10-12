@@ -17,11 +17,13 @@ package com.asakusafw.lang.compiler.tester.executor;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.Set;
 
@@ -212,11 +214,17 @@ public final class TaskExecutors {
             return Collections.emptySet();
         }
         Set<File> results = new LinkedHashSet<>();
-        for (File file : directory.listFiles()) {
+        for (File file : list(directory)) {
             if (file.getName().endsWith(EXTENSION_LIBRARY)) {
                 results.add(file);
             }
         }
         return results;
+    }
+
+    private static List<File> list(File directory) {
+        return Optional.ofNullable(directory.listFiles())
+                .map(Arrays::asList)
+                .orElse(Collections.emptyList());
     }
 }
