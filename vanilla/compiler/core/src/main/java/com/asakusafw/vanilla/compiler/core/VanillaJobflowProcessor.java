@@ -77,7 +77,7 @@ public class VanillaJobflowProcessor implements JobflowProcessor {
             LOG.debug("generating vertices: {}", source.getFlowId());
             GraphInfo graph = generateGraph(context, source, plan);
             LOG.debug("generating application entry: {}", source.getFlowId());
-            addApplication(context, source, graph);
+            addApplication(context, graph);
             LOG.debug("generating cleanup : {}", source.getFlowId());
             addCleanup(context, source);
         } finally {
@@ -87,18 +87,18 @@ public class VanillaJobflowProcessor implements JobflowProcessor {
         }
     }
 
-    private Plan plan(Context context, Jobflow source) {
+    private static Plan plan(Context context, Jobflow source) {
         PlanDetail detail = DagPlanning.plan(context, source);
         return detail.getPlan();
     }
 
-    private GraphInfo generateGraph(JobflowProcessor.Context context, JobflowInfo info, Plan plan) {
+    private static GraphInfo generateGraph(JobflowProcessor.Context context, JobflowInfo info, Plan plan) {
         ClassGeneratorContext cgContext = new ClassGeneratorContextAdapter(context, VanillaPackage.CLASS_PREFIX);
         VanillaDescriptorFactory descriptors = new VanillaDescriptorFactory(cgContext);
         return DataFlowGenerator.generate(context, cgContext, descriptors, info, plan);
     }
 
-    private void addApplication(JobflowProcessor.Context context, JobflowInfo info, GraphInfo graph) {
+    private static void addApplication(JobflowProcessor.Context context, GraphInfo graph) {
         add(context, VanillaPackage.PATH_GRAPH_INFO, output -> GraphInfo.save(output, graph));
         ClassDescription application = add(context, new ApplicationGenerator().generate(
                 VanillaPackage.PATH_GRAPH_INFO,
@@ -118,7 +118,7 @@ public class VanillaJobflowProcessor implements JobflowProcessor {
         HadoopCommandRequired.put(task, false);
     }
 
-    private void addCleanup(JobflowProcessor.Context context, JobflowInfo info) {
+    private static void addCleanup(JobflowProcessor.Context context, JobflowInfo info) {
         add(context, new CleanupStageClientGenerator().generate(
                 context.getBatchId(),
                 info.getFlowId(),
@@ -126,7 +126,8 @@ public class VanillaJobflowProcessor implements JobflowProcessor {
                 CleanupStageClientGenerator.DEFAULT_CLASS));
     }
 
-    private void add(JobflowProcessor.Context context, Location location, Action<OutputStream, IOException> action) {
+    private static void add(
+            JobflowProcessor.Context context, Location location, Action<OutputStream, IOException> action) {
         try (OutputStream output = context.addResourceFile(location)) {
             action.perform(output);
         } catch (IOException e) {
@@ -136,7 +137,7 @@ public class VanillaJobflowProcessor implements JobflowProcessor {
         }
     }
 
-    private ClassDescription add(JobflowProcessor.Context context, ClassData data) {
+    private static ClassDescription add(JobflowProcessor.Context context, ClassData data) {
         if (data.hasContents()) {
             try (OutputStream output = context.addClassFile(data.getDescription())) {
                 data.dump(output);
