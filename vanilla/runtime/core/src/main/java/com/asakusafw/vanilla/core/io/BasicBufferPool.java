@@ -46,7 +46,7 @@ public class BasicBufferPool implements BufferPool, Reportable {
 
     static final String KEY_SMALLER_FIRST = KEY_PREFIX + "swap.smaller";
 
-    static final boolean SMALLER_FIRST = SystemProperty.get(KEY_PREFIX, false);
+    static final boolean SMALLER_FIRST = SystemProperty.get(KEY_SMALLER_FIRST, false);
 
     static final Logger LOG = LoggerFactory.getLogger(BasicBufferPool.class);
 

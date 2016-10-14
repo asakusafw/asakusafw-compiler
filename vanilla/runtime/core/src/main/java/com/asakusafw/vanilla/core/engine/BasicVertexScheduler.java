@@ -168,7 +168,7 @@ public class BasicVertexScheduler implements VertexScheduler {
             }
         }
 
-        private Map<VertexMirror, Schedule> build(Collection<? extends VertexMirror> vertices) {
+        private static Map<VertexMirror, Schedule> build(Collection<? extends VertexMirror> vertices) {
             Graph<VertexMirror> dag = Graphs.newInstance();
             for (VertexMirror vertex : vertices) {
                 dag.addNode(vertex);
