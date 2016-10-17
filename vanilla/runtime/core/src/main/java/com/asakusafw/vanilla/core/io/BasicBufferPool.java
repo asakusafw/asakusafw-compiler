@@ -111,7 +111,7 @@ public class BasicBufferPool implements BufferPool, Reportable {
         Entry entry = new Entry(registered, statistics, b, ticket, priority);
         registered.add(entry);
         if (LOG.isDebugEnabled()) {
-            statistics.registerd(ticket.getSize());
+            statistics.registered(ticket.getSize());
         }
         return entry;
     }
@@ -342,22 +342,13 @@ public class BasicBufferPool implements BufferPool, Reportable {
                     return;
                 }
             } while (peak.compareAndSet(current, size) == false);
-            peakUpdated(size, current);
-        }
-
-        private void peakUpdated(long newPeak, long oldPeak) {
-            if (LOG.isTraceEnabled() && newPeak * 2 >= oldPeak) {
-                LOG.trace(MessageFormat.format(
-                        "peak updated: {0}/{1}bytes",
-                        newPeak, limit));
-            }
         }
 
         void reserved(long size) {
             reserved.record(size);
         }
 
-        void registerd(long size) {
+        void registered(long size) {
             registered.record(size);
         }
 
