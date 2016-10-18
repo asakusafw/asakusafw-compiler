@@ -29,7 +29,7 @@ ext.parentPom = { f ->
 group = 'com.asakusafw.vanilla'
 version = parentPom.projectVersion
 
-defaultTasks 'clean', 'build', 'install', 'assembleTemplates'
+defaultTasks 'clean', 'build', 'install'
 
 apply plugin: 'groovy'
 apply plugin: 'maven'
@@ -108,54 +108,6 @@ uploadArchives {
             snapshotRepository id: 'com.asakusafw.snapshots', url: 's3://asakusafw/maven/snapshots'
         }
     }
-}
-
-task assembleTemplates {
-    description 'assembles application project templates'
-}
-
-file('src/templates').eachDirMatch({ it.startsWith 'asakusa-' }) { File source ->
-    String projectName = source.name
-    File output = new File(buildDir, "templates/${projectName}")
-    String generateTaskName = "generate_${projectName}"
-    String processTaskName = "process_${projectName}"
-    String assembleTaskName = "assemble_${projectName}"
-    tasks.create(name: generateTaskName, type: Copy) {
-        doFirst {
-            delete output
-        }
-        from source
-        filesMatching('build.gradle') {
-            expand gradlePluginVersion: version, 
-                mavenRepoType: version.endsWith('SNAPSHOT') ? 'snapshots' : 'releases'
-        }
-        into output
-    }
-    tasks.create(name: processTaskName, type: GradleBuild, dependsOn: generateTaskName) {
-        dir output
-        file('src/templates/init.d').eachFileMatch({ it.endsWith('.gradle') }) {
-            startParameter.addInitScript it
-        }
-        doLast {
-            mkdir new File(output, 'src/main/java')
-            mkdir new File(output, 'src/main/resources')
-            mkdir new File(output, 'src/main/dmdl')
-            mkdir new File(output, 'src/main/libs')
-            mkdir new File(output, 'src/test/java')
-        }
-        tasks = ['asakusaUpgrade']
-    }
-    tasks.create(name: assembleTaskName, type: Tar, dependsOn: processTaskName) {
-        from (output) {
-            exclude "build"
-            exclude ".gradle"
-            into projectName
-        }
-        destinationDir buildDir
-        compression Compression.GZIP
-        archiveName "${projectName}-${version}.tar.gz"
-    }
-    assembleTemplates.dependsOn assembleTaskName
 }
 
 task sourcesJar(type: Jar) {
