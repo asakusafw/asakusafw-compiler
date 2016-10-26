@@ -72,6 +72,29 @@ public class ConvertOperatorGeneratorTest extends OperatorNodeGeneratorTestRoot 
     }
 
     /**
+     * the original object was broken.
+     */
+    @Test
+    public void broken_original() {
+        UserOperator operator = load("simple").build();
+        NodeInfo info = generate(operator);
+        MockResult<MockDataModel> orig = new MockResult<MockDataModel>() {
+            @Override
+            protected MockDataModel bless(MockDataModel result) {
+                result.setValue(result.getValue() + "BROKEN");
+                return new MockDataModel(result);
+            }
+        };
+        MockResult<MockValueModel> results = new MockResult<>();
+        loading(info, c -> {
+            Result<Object> r = c.newInstance(orig, results);
+            r.add(new MockDataModel("Hello"));
+        });
+        assertThat(Lang.project(orig.getResults(), e -> e.getValue()), contains("HelloBROKEN"));
+        assertThat(Lang.project(results.getResults(), e -> e.getValue()), contains("Hello!"));
+    }
+
+    /**
      * cache - identical.
      */
     @Test

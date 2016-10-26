@@ -80,11 +80,6 @@ public class ConvertOperatorGenerator extends UserOperatorNodeGenerator {
             LocalVarRef data = cast(method, 1, input.getDataType());
 
             self.load(method);
-            getField(method, map.get(copy));
-            data.load(method);
-            invokeResultAdd(method);
-
-            self.load(method);
             getField(method, map.get(output));
 
             List<ValueRef> arguments = new ArrayList<>();
@@ -93,6 +88,12 @@ public class ConvertOperatorGenerator extends UserOperatorNodeGenerator {
             arguments.addAll(Lang.project(operator.getArguments(), e -> map.get(e)));
             invoke(method, context, operator, arguments);
 
+            invokeResultAdd(method);
+
+            // must invoke about "original" after "converted" was processed
+            self.load(method);
+            getField(method, map.get(copy));
+            data.load(method);
             invokeResultAdd(method);
         });
         return new ClassData(target, writer::toByteArray);
