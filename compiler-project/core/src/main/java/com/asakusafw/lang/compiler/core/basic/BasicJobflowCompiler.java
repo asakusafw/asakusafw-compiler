@@ -44,24 +44,30 @@ public class BasicJobflowCompiler implements JobflowCompiler {
     public void compile(Context context, BatchInfo batch, Jobflow jobflow) {
         LOG.debug("start jobflow compiler: {}={}", jobflow.getFlowId(), jobflow.getDescriptionClass()); //$NON-NLS-1$
         before(context, batch, jobflow);
-        runOperatorGraphProcessor(context, batch, jobflow);
+        runJobflowProcessor(context, batch, jobflow);
         runExternalPortProcessor(context, batch, jobflow);
         after(context, batch, jobflow);
     }
 
-    private void runOperatorGraphProcessor(Context context, BatchInfo batch, Jobflow jobflow) {
+    private static void runJobflowProcessor(Context context, BatchInfo batch, Jobflow jobflow) {
         JobflowProcessorAdapter adapter = new JobflowProcessorAdapter(context, batch, jobflow);
         JobflowProcessor processor = context.getTools().getJobflowProcessor();
         try {
             processor.process(adapter, jobflow);
+        } catch (DiagnosticException e) {
+            LOG.error(MessageFormat.format(
+                    "error occurred while compiling jobflow: batch={0}, jobflow={1}",
+                    batch.getDescriptionClass().getClassName(),
+                    jobflow.getDescriptionClass().getClassName()));
+            throw e; // rethrow
         } catch (IOException e) {
             throw new DiagnosticException(Diagnostic.Level.ERROR, MessageFormat.format(
                     "error occurred while processing operator graph (jobflow={0})",
-                    jobflow.getDescriptionClass().getClassName()));
+                    jobflow.getDescriptionClass().getClassName()), e);
         }
     }
 
-    private void runExternalPortProcessor(Context context, BatchInfo batch, Jobflow jobflow) {
+    private static void runExternalPortProcessor(Context context, BatchInfo batch, Jobflow jobflow) {
         ExternalPortContainer externals = context.getExternalPorts();
         if (externals.isEmpty()) {
             return;
@@ -73,16 +79,16 @@ public class BasicJobflowCompiler implements JobflowCompiler {
         } catch (IOException e) {
             throw new DiagnosticException(Diagnostic.Level.ERROR, MessageFormat.format(
                     "error occurred while processing external I/Os (jobflow={0})",
-                    jobflow.getDescriptionClass().getClassName()));
+                    jobflow.getDescriptionClass().getClassName()), e);
         }
     }
 
-    private void before(Context context, BatchInfo batch, Jobflow jobflow) {
+    private static void before(Context context, BatchInfo batch, Jobflow jobflow) {
         CompilerParticipant participant = context.getTools().getParticipant();
         participant.beforeJobflow(context, batch, jobflow);
     }
 
-    private void after(Context context, BatchInfo batch, Jobflow jobflow) {
+    private static void after(Context context, BatchInfo batch, Jobflow jobflow) {
         CompilerParticipant participant = context.getTools().getParticipant();
         participant.afterJobflow(context, batch, jobflow);
     }
