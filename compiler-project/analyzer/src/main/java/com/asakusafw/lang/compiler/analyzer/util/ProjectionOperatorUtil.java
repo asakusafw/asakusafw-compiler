@@ -85,7 +85,8 @@ public final class ProjectionOperatorUtil {
         OperatorInput input;
         OperatorOutput output;
         MappingKind kind;
-        switch (((CoreOperator) operator).getCoreOperatorKind()) {
+        CoreOperatorKind op = ((CoreOperator) operator).getCoreOperatorKind();
+        switch (op) {
         case PROJECT: {
             OperatorUtil.checkOperatorPorts(operator, 1, 1);
             input = operator.getInputs().get(Project.ID_INPUT);
@@ -110,17 +111,21 @@ public final class ProjectionOperatorUtil {
         default:
             throw new AssertionError(operator);
         }
-        return extract(dataModelLoader, operator, input, output, kind);
+        return extract(dataModelLoader, op, input, output, kind);
     }
 
     private static List<PropertyMapping> extract(
             DataModelLoader loader,
-            Operator operator, OperatorInput input, OperatorOutput output,
+            CoreOperatorKind op, OperatorInput input, OperatorOutput output,
             MappingKind kind) {
         DataModelReference source = loader.load(input.getDataType());
         DataModelReference destination = loader.load(output.getDataType());
         List<MappingElement> elements = collectElements(source, destination);
-        validateElements(operator, elements, kind);
+        String label = String.format("%s{%s=>%s}", //$NON-NLS-1$
+                op,
+                source.getDeclaration().getSimpleName(),
+                destination.getDeclaration().getSimpleName());
+        validateElements(label, elements, kind);
 
         List<PropertyMapping> results = new ArrayList<>();
         for (MappingElement element : elements) {
