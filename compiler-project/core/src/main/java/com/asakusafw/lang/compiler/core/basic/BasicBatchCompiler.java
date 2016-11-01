@@ -87,7 +87,7 @@ public class BasicBatchCompiler implements BatchCompiler {
         after(context, batch, reference);
     }
 
-    private List<BatchElement> sort(Set<BatchElement> elements) {
+    private static List<BatchElement> sort(Set<BatchElement> elements) {
         Graph<BatchElement> graph = Graphs.newInstance();
         for (BatchElement element : elements) {
             graph.addNode(element);
@@ -121,7 +121,7 @@ public class BasicBatchCompiler implements BatchCompiler {
         }
     }
 
-    private List<JobflowReference> getBlockerJobflows(JobflowContainer jobflows, BatchElement element) {
+    private static List<JobflowReference> getBlockerJobflows(JobflowContainer jobflows, BatchElement element) {
         List<JobflowReference> results = new ArrayList<>();
         for (BatchElement blocker : element.getBlockerElements()) {
             JobflowReference jobflow = jobflows.find(blocker.getJobflow().getFlowId());
@@ -133,35 +133,40 @@ public class BasicBatchCompiler implements BatchCompiler {
         return results;
     }
 
-    private FileContainer createJobflowOutput(Context context, BatchElement element) {
+    private static FileContainer createJobflowOutput(Context context, BatchElement element) {
         String prefix = String.format("jobflow-%s", element.getJobflow().getFlowId()); //$NON-NLS-1$
         try {
             return context.getTemporaryOutputs().newContainer(prefix);
         } catch (IOException e) {
             throw new DiagnosticException(Diagnostic.Level.ERROR, MessageFormat.format(
                     "failed to create temporary output: {0}",
-                    context.getTemporaryOutputs().getRoot()));
+                    context.getTemporaryOutputs().getRoot()), e);
         }
     }
 
-    private void runBatchProcessor(Context context, Batch batch, BatchReference reference) {
+    private static void runBatchProcessor(Context context, Batch batch, BatchReference reference) {
         BatchProcessorAdapter adapter = new BatchProcessorAdapter(context);
         BatchProcessor processor = context.getTools().getBatchProcessor();
         try {
             processor.process(adapter, reference);
+        } catch (DiagnosticException e) {
+            LOG.error(MessageFormat.format(
+                    "error occurred while compiling batch: batch={0}",
+                    batch.getDescriptionClass().getClassName()));
+            throw e; // rethrow
         } catch (IOException e) {
             throw new DiagnosticException(Diagnostic.Level.ERROR, MessageFormat.format(
                     "error occurred while processing jobflow graph (batch={0})",
-                    batch.getDescriptionClass().getClassName()));
+                    batch.getDescriptionClass().getClassName()), e);
         }
     }
 
-    private void before(Context context, Batch batch) {
+    private static void before(Context context, Batch batch) {
         CompilerParticipant participant = context.getTools().getParticipant();
         participant.beforeBatch(context, batch);
     }
 
-    private void after(Context context, Batch batch, BatchReference reference) {
+    private static void after(Context context, Batch batch, BatchReference reference) {
         CompilerParticipant participant = context.getTools().getParticipant();
         participant.afterBatch(context, batch, reference);
     }
