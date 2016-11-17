@@ -62,7 +62,7 @@ class AsakusaVanillaOrganizerPlugin implements Plugin<Project> {
         AsakusafwOrganizerPluginConvention convention = project.asakusafwOrganizer
         AsakusafwOrganizerVanillaExtension extension = convention.extensions.create('vanilla', AsakusafwOrganizerVanillaExtension)
         extension.conventionMapping.with {
-            enabled = { true }
+            enabled = { false }
             useSystemHadoop = { false }
         }
         PluginUtils.injectVersionProperty(extension, { base.featureVersion })

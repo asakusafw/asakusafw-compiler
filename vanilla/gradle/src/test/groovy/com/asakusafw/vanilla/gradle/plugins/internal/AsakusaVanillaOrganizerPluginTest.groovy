@@ -63,16 +63,16 @@ class AsakusaVanillaOrganizerPluginTest {
         AsakusafwOrganizerVanillaExtension extension = root.vanilla
         assert extension != null
 
-        assert extension.enabled == true
+        assert extension.enabled == false
         assert extension.useSystemHadoop == false
 
-        assert root.profiles.dev.vanilla.enabled == true
-        assert root.profiles.prod.vanilla.enabled == true
+        assert root.profiles.dev.vanilla.enabled == false
+        assert root.profiles.prod.vanilla.enabled == false
 
         root.profiles.testing {
             // ok
         }
-        assert root.profiles.testing.vanilla.enabled == true
+        assert root.profiles.testing.vanilla.enabled == false
     }
 
     /**
@@ -95,21 +95,20 @@ class AsakusaVanillaOrganizerPluginTest {
         AsakusafwOrganizerPluginConvention root = project.asakusafwOrganizer
         AsakusafwOrganizerVanillaExtension extension = root.vanilla
 
-        extension.enabled = false
+        extension.enabled = true
 
-        assert root.profiles.dev.vanilla.enabled == false
-        assert root.profiles.prod.vanilla.enabled == false
-
-        root.profiles.prod.vanilla.enabled = true
-        assert extension.enabled == false
-        assert root.profiles.dev.vanilla.enabled == false
+        assert root.profiles.dev.vanilla.enabled == true
         assert root.profiles.prod.vanilla.enabled == true
 
+        root.profiles.prod.vanilla.enabled = false
+        assert extension.enabled == true
+        assert root.profiles.dev.vanilla.enabled == true
+        assert root.profiles.prod.vanilla.enabled == false
 
         root.profiles.testing {
             // ok
         }
-        assert root.profiles.testing.vanilla.enabled == false
+        assert root.profiles.testing.vanilla.enabled == true
     }
 
     /**
