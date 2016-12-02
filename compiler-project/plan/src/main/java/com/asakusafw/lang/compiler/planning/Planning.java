@@ -161,7 +161,7 @@ public final class Planning {
             }
             OperatorInput orig = port.getOperatorPort();
             ExternalOutput.Builder builder = ExternalOutput.builder(port.getName(), port.getInfo())
-                    .input(orig.getName(), orig.getDataType(), orig.getGroup())
+                    .input(orig)
                     .output(ExternalOutput.PORT_NAME, orig.getDataType()) // virtual
                     .constraint(port.getConstraints())
                     .constraint(OperatorConstraint.AT_LEAST_ONCE);

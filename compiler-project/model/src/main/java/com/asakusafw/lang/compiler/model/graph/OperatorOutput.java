@@ -26,6 +26,8 @@ import com.asakusafw.lang.compiler.model.description.TypeDescription;
 
 /**
  * Represents an operator output port.
+ * @since 0.1.0
+ * @version 0.4.1
  */
 public class OperatorOutput implements OperatorPort {
 
@@ -34,6 +36,8 @@ public class OperatorOutput implements OperatorPort {
     private final String name;
 
     private final TypeDescription dataType;
+
+    private final AttributeMap attributes;
 
     private final Set<OperatorInput> opposites = new HashSet<>();
 
@@ -44,9 +48,22 @@ public class OperatorOutput implements OperatorPort {
      * @param dataType the data type
      */
     public OperatorOutput(Operator owner, String name, TypeDescription dataType) {
+        this(owner, name, dataType, AttributeMap.EMPTY);
+    }
+
+    /**
+     * Creates a new instance.
+     * @param owner the owner of this port
+     * @param name the port name
+     * @param dataType the data type
+     * @param attributes the port attributes
+     * @since 0.4.1
+     */
+    public OperatorOutput(Operator owner, String name, TypeDescription dataType, AttributeMap attributes) {
         this.owner = owner;
         this.name = name;
         this.dataType = dataType;
+        this.attributes = attributes;
     }
 
     @Override
@@ -67,6 +84,16 @@ public class OperatorOutput implements OperatorPort {
     @Override
     public TypeDescription getDataType() {
         return dataType;
+    }
+
+    @Override
+    public Set<Class<?>> getAttributeTypes() {
+        return attributes.getAttributeTypes();
+    }
+
+    @Override
+    public <T> T getAttribute(Class<T> attributeType) {
+        return attributes.getAttribute(attributeType);
     }
 
     /**
@@ -130,6 +157,10 @@ public class OperatorOutput implements OperatorPort {
     @Override
     public Collection<OperatorInput> getOpposites() {
         return Collections.unmodifiableList(new ArrayList<>(opposites));
+    }
+
+    OperatorOutput copy(Operator newOwner) {
+        return new OperatorOutput(newOwner, name, dataType, attributes.copy());
     }
 
     @Override

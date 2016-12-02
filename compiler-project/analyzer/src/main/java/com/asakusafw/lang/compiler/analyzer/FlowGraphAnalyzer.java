@@ -313,7 +313,8 @@ public final class FlowGraphAnalyzer {
             OperatorSource source,
             Operator.AbstractBuilder<?, ?> builder) {
         for (FlowElementPortDescription port : description.getInputPorts()) {
-            builder.input(port.getName(), typeOf(port.getDataType()), convert(port.getShuffleKey()));
+            builder.input(port.getName(), typeOf(port.getDataType()), c -> c
+                    .group(convert(port.getShuffleKey())));
         }
         for (FlowElementPortDescription port : description.getOutputPorts()) {
             builder.output(port.getName(), typeOf(port.getDataType()));
