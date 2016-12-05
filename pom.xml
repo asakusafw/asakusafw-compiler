@@ -4,7 +4,7 @@
   <name>Asakusa Framework Language Project</name>
   <groupId>com.asakusafw.lang</groupId>
   <artifactId>project</artifactId>
-  <version>0.3.2-SNAPSHOT</version>
+  <version>0.3.3-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <url>http://asakusafw.com</url>
@@ -45,7 +45,7 @@
     <plugin.javadoc.version>2.10.1</plugin.javadoc.version>
 
     <!-- artifact versions -->
-    <asakusafw.version>0.8.2-SNAPSHOT</asakusafw.version>
+    <asakusafw.version>0.8.3-SNAPSHOT</asakusafw.version>
     <hadoop.version>2.7.2</hadoop.version>
     <commons-cli.version>1.2</commons-cli.version>
     <asm.version>5.0.3</asm.version>
