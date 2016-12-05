@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 
 import com.asakusafw.dag.api.common.ObjectCursor;
 import com.asakusafw.dag.api.processor.EdgeIoProcessorContext;
@@ -29,15 +28,15 @@ import com.asakusafw.dag.api.processor.GroupReader;
 import com.asakusafw.dag.api.processor.basic.CoGroupReader;
 import com.asakusafw.dag.runtime.adapter.CoGroupOperation;
 import com.asakusafw.dag.runtime.adapter.CoGroupOperation.Cursor;
+import com.asakusafw.dag.runtime.adapter.InputHandler;
+import com.asakusafw.dag.runtime.data.ListBuilder;
 import com.asakusafw.lang.utils.common.Arguments;
 import com.asakusafw.lang.utils.common.Invariants;
-import com.asakusafw.dag.runtime.adapter.InputHandler;
-import com.asakusafw.runtime.flow.ListBuffer;
-import com.asakusafw.runtime.model.DataModel;
 
 /**
  * An {@link InputHandler} for {@link CoGroupOperation}.
  * @since 0.4.0
+ * @version 0.4.1
  */
 final class CoGroupInputHandler implements InputHandler<CoGroupOperation.Input, EdgeIoProcessorContext> {
 
@@ -92,6 +91,7 @@ final class CoGroupInputHandler implements InputHandler<CoGroupOperation.Input, 
     /**
      * A builder for {@link CoGroupInputHandler}.
      * @since 0.4.0
+     * @version 0.4.1
      */
     public static final class Builder {
 
@@ -101,20 +101,17 @@ final class CoGroupInputHandler implements InputHandler<CoGroupOperation.Input, 
          * Adds an input.
          * @param <T> the data type
          * @param name the input name
-         * @param supplier the data model object supplier
-         * @param buffer the group buffer
+         * @param builder the group list builder
          * @return this
+         * @since 0.4.1
          */
-        public <T extends DataModel<T>> Builder addInput(
-                String name,
-                Supplier<? extends T> supplier, ListBuffer<T> buffer) {
+        public <T> Builder addInput(String name, ListBuilder<T> builder) {
             Arguments.requireNonNull(name);
-            Arguments.requireNonNull(supplier);
-            Arguments.requireNonNull(buffer);
+            Arguments.requireNonNull(builder);
             Arguments.require(inputs.containsKey(name) == false, MessageFormat.format(
                     "input \"{0}\" is already registered", //$NON-NLS-1$
                     name));
-            Input<T> input = new Input<>(name, supplier, buffer);
+            Input<T> input = new Input<>(name, builder);
             inputs.put(name, input);
             return this;
         }
@@ -131,21 +128,18 @@ final class CoGroupInputHandler implements InputHandler<CoGroupOperation.Input, 
         }
     }
 
-    private static final class Input<T extends DataModel<T>> {
+    private static final class Input<T> {
 
         final String name;
 
-        final Supplier<? extends T> objects;
-
         private final Wrapper<T> wrapper;
 
-        private final ListBuffer<T> buffer;
+        private final ListBuilder<T> builder;
 
-        Input(String name, Supplier<? extends T> objects, ListBuffer<T> buffer) {
+        Input(String name, ListBuilder<T> builder) {
             this.name = name;
-            this.objects = objects;
             this.wrapper = new Wrapper<>();
-            this.buffer = buffer;
+            this.builder = builder;
         }
 
         GroupReader build(EdgeIoProcessorContext context) throws IOException, InterruptedException {
@@ -157,24 +151,8 @@ final class CoGroupInputHandler implements InputHandler<CoGroupOperation.Input, 
         }
 
         @SuppressWarnings("unchecked")
-        <S> ListBuffer<S> fill(ObjectCursor cursor) throws IOException, InterruptedException {
-            ListBuffer<T> buf = buffer;
-            Supplier<? extends T> sup = objects;
-            buf.shrink();
-            buf.begin();
-            while (cursor.nextObject()) {
-                T object = (T) cursor.getObject();
-                if (buf.isExpandRequired()) {
-                    buf.expand(sup.get());
-                }
-                buf.advance().copyFrom(object);
-            }
-            buf.end();
-            return (ListBuffer<S>) buf;
-        }
-
-        void close() {
-            buffer.shrink();
+        <S> List<S> fill(ObjectCursor cursor) throws IOException, InterruptedException {
+            return (List<S>) builder.build(cursor);
         }
     }
 
@@ -209,14 +187,13 @@ final class CoGroupInputHandler implements InputHandler<CoGroupOperation.Input, 
         }
 
         @Override
-        public <T> ListBuffer<T> getList(int index) throws IOException, InterruptedException {
+        public <T> List<T> getList(int index) throws IOException, InterruptedException {
             return input.fill(reader);
         }
 
         @Override
         public void close() throws IOException, InterruptedException {
             reader.close();
-            input.close();
         }
     }
 
@@ -258,9 +235,6 @@ final class CoGroupInputHandler implements InputHandler<CoGroupOperation.Input, 
         @Override
         public void close() throws IOException, InterruptedException {
             reader.close();
-            for (Input<?> input : inputs) {
-                input.close();
-            }
         }
     }
 

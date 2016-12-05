@@ -126,7 +126,8 @@ public class CoGroupInputAdapterGeneratorTest extends ClassGeneratorTestRoot {
     private List<List<List<String>>> check(Map<String, SortedMap<String, List<MockDataModel>>> map) {
         ClassGeneratorContext gc = context();
         ClassDescription generated = add(c -> new CoGroupInputAdapterGenerator().generate(
-                gc, Lang.project(map.keySet(), s -> new Spec(s, typeOf(MockDataModel.class), false)), c));
+                gc, Lang.project(map.keySet(), s -> new Spec(
+                        s, typeOf(MockDataModel.class), CoGroupInputAdapter.BufferType.HEAP)), c));
 
         MockTaskProcessorContext tc = new MockTaskProcessorContext("t");
         map.forEach((in, v) -> tc.withInput(in, () -> new CollectionGroupReader(v)));
