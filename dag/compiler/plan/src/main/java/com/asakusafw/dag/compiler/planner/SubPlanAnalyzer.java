@@ -267,6 +267,9 @@ public final class SubPlanAnalyzer {
         if (isSpillOut(input)) {
             results.add(InputOption.SPILL_OUT);
         }
+        if (isReadOnce(input)) {
+            results.add(InputOption.READ_ONCE);
+        }
         return results;
     }
 
@@ -279,6 +282,17 @@ public final class SubPlanAnalyzer {
             }
         }
         return false;
+    }
+
+    private boolean isReadOnce(SubPlan.Input input) {
+        for (OperatorInput consumer : input.getOperator().getOutput().getOpposites()) {
+            OperatorClass info = getOperatorClass(consumer.getOwner());
+            OperatorInput resolved = info.getOperator().findInput(consumer.getName());
+            if (info.getAttributes(resolved).contains(InputAttribute.VOALTILE) == false) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private TypeDescription computeInputDataType(SubPlan.Input input, InputType type) {

@@ -17,6 +17,7 @@ package com.asakusafw.dag.runtime.skeleton;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import com.asakusafw.dag.api.common.ObjectCursor;
@@ -28,6 +29,7 @@ import com.asakusafw.lang.utils.common.Arguments;
 /**
  * Utilities for {@link CoGroupOperation}.
  * @since 0.4.0
+ * @version 0.4.1
  */
 public final class CoGroupOperationUtil {
 
@@ -107,5 +109,41 @@ public final class CoGroupOperationUtil {
             return Collections.emptyList();
         }
         return input.getList(index);
+    }
+
+    /**
+     * Returns a co-group element.
+     * @param <T> the element type
+     * @param input the input
+     * @param index the group index (0-origin)
+     * @return the group elements, or an empty list if {@code index} is {@code -1}
+     * @throws IOException if I/O error was occurred while reading the input
+     * @throws InterruptedException if interrupted while reading the input
+     * @since 0.4.1
+     */
+    public static <T> Iterable<T> getIterable(Input input, int index) throws IOException, InterruptedException {
+        if (index < 0) {
+            return Collections.emptyList();
+        }
+        return new OnceIterable<>(input.getCursor(index));
+    }
+
+    private static final class OnceIterable<T> implements Iterable<T> {
+
+        private Iterator<T> iterator;
+
+        OnceIterable(Iterator<T> iterator) {
+            this.iterator = iterator;
+        }
+
+        @Override
+        public Iterator<T> iterator() {
+            Iterator<T> result = iterator;
+            if (result == null) {
+                throw new IllegalStateException();
+            }
+            iterator = null;
+            return result;
+        }
     }
 }

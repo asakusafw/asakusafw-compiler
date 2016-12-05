@@ -16,6 +16,7 @@
 package com.asakusafw.lang.compiler.analyzer.builtin;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.asakusafw.lang.compiler.model.description.AnnotationDescription;
 import com.asakusafw.lang.compiler.model.graph.Group;
@@ -27,6 +28,7 @@ import com.asakusafw.lang.compiler.optimizer.OperatorCharacterizer;
 import com.asakusafw.lang.compiler.optimizer.basic.OperatorClass;
 import com.asakusafw.lang.compiler.optimizer.basic.OperatorClass.InputAttribute;
 import com.asakusafw.lang.compiler.optimizer.basic.OperatorClass.InputType;
+import com.asakusafw.vocabulary.attribute.BufferType;
 import com.asakusafw.vocabulary.flow.processor.InputBuffer;
 
 /**
@@ -54,14 +56,25 @@ public class CoGroupKindOperatorClassifier implements OperatorCharacterizer<Oper
             throw new IllegalArgumentException();
         }
         OperatorClass.Builder builder = OperatorClass.builder(operator, InputType.GROUP);
-        boolean escaped = isEscaped(operator.getAnnotation());
+        BufferType defaultInputBufferType = isEscaped(operator.getAnnotation()) ? BufferType.STORED : BufferType.HEAP;
         for (OperatorInput input : inputs) {
             builder.with(input, InputAttribute.PRIMARY);
             if (isSorted(input)) {
                 builder.with(input, InputAttribute.SORTED);
             }
-            if (escaped) {
+            BufferType bufferType = Optional.ofNullable(input.getAttribute(BufferType.class))
+                    .orElse(defaultInputBufferType);
+            switch (bufferType) {
+            case HEAP:
+                break;
+            case STORED:
                 builder.with(input, InputAttribute.ESCAPED);
+                break;
+            case VOLATILE:
+                builder.with(input, InputAttribute.VOALTILE);
+                break;
+            default:
+                throw new AssertionError(bufferType);
             }
         }
         return builder.build();

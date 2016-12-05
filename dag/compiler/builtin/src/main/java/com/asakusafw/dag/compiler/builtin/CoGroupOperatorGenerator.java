@@ -38,11 +38,13 @@ import com.asakusafw.lang.compiler.model.graph.OperatorProperty;
 import com.asakusafw.lang.compiler.model.graph.UserOperator;
 import com.asakusafw.lang.utils.common.Lang;
 import com.asakusafw.runtime.core.Result;
+import com.asakusafw.vocabulary.attribute.BufferType;
 import com.asakusafw.vocabulary.operator.CoGroup;
 
 /**
  * Generates {@link CoGroup} operator.
  * @since 0.4.0
+ * @version 0.4.1
  */
 public class CoGroupOperatorGenerator extends UserOperatorNodeGenerator {
 
@@ -50,7 +52,6 @@ public class CoGroupOperatorGenerator extends UserOperatorNodeGenerator {
     protected Class<? extends Annotation> getAnnotationClass() {
         return CoGroup.class;
     }
-
 
     @Override
     protected NodeInfo generate(Context context, UserOperator operator, Supplier<? extends ClassDescription> namer) {
@@ -80,12 +81,21 @@ public class CoGroupOperatorGenerator extends UserOperatorNodeGenerator {
             List<ValueRef> arguments = new ArrayList<>();
             arguments.add(impl);
             for (OperatorInput input : operator.getInputs()) {
-                arguments.add(v -> getGroupList(v, context, input));
+                if (isReadOnce(input)) {
+                    arguments.add(v -> getGroupIterable(v, context, input));
+                } else {
+                    arguments.add(v -> getGroupList(v, context, input));
+                }
             }
             arguments.addAll(Lang.project(operator.getOutputs(), e -> map.get(e)));
             arguments.addAll(Lang.project(operator.getArguments(), e -> map.get(e)));
             invoke(method, context, operator, arguments);
         });
         return new ClassData(target, writer::toByteArray);
+    }
+
+    private static boolean isReadOnce(OperatorInput port) {
+        BufferType type = port.getAttribute(BufferType.class);
+        return type == BufferType.VOLATILE;
     }
 }
