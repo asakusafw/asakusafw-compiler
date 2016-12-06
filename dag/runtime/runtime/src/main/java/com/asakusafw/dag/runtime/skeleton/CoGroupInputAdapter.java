@@ -115,7 +115,7 @@ public class CoGroupInputAdapter implements InputAdapter<CoGroupOperation.Input>
             if (fileWindowSize <= 0) {
                 return new ArrayListBuffer<>();
             } else {
-                return new FileMapListBuffer<>();
+                return new FileMapListBuffer<>(fileWindowSize);
             }
         default:
             throw new AssertionError(bufferType);
