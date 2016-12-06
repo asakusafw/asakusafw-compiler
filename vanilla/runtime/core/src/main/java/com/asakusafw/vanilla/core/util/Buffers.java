@@ -34,6 +34,17 @@ public final class Buffers {
     private static final String KEY_PREFIX = SystemProperty.KEY_PREFIX + "buffer."; //$NON-NLS-1$
 
     /**
+     * The system property key of whether or not the heap buffer is instead of direct buffer
+     * ({@value}: {@value #DEFAULT_HEAP}).
+     */
+    public static final String KEY_HEAP = KEY_PREFIX + "heap"; //$NON-NLS-1$
+
+    /**
+     * The default value of {@link #KEY_HEAP}.
+     */
+    public static final boolean DEFAULT_HEAP = false;
+
+    /**
      * The system property key of the buffer expansion factor ({@value}: {@value #DEFAULT_EXPANSION_FACTOR}).
      */
     public static final String KEY_EXPANSION_FACTOR = KEY_PREFIX + "expansion.factor"; //$NON-NLS-1$
@@ -69,6 +80,8 @@ public final class Buffers {
 
     static final int MIN_SIZE = 64 * 1024;
 
+    static final boolean HEAP = SystemProperty.get(KEY_HEAP, DEFAULT_HEAP);
+
     static final double EXPANSION_FACTOR = SystemProperty.get(KEY_EXPANSION_FACTOR, DEFAULT_EXPANSION_FACTOR);
 
     static final double MAX_SHRINK_UTILITY = SystemProperty.get(KEY_MAX_SHRINK_UTILITY, DEFAULT_MAX_SHRINK_UTILITY);
@@ -78,6 +91,7 @@ public final class Buffers {
     static {
         if (LOG.isDebugEnabled()) {
             LOG.debug("buffers:");
+            LOG.debug("  {}: {}", KEY_HEAP, HEAP);
             LOG.debug("  {}: {}", KEY_EXPANSION_FACTOR, EXPANSION_FACTOR);
             LOG.debug("  {}: {}", KEY_MAX_SHRINK_UTILITY, MAX_SHRINK_UTILITY);
             LOG.debug("  {}: {}", KEY_MIN_SHRINK_CAPACITY, MIN_SHRINK_CAPACITY);
@@ -94,7 +108,11 @@ public final class Buffers {
      * @return the allocated buffer
      */
     public static ByteBuffer allocate(int size) {
-        return ByteBuffer.allocateDirect(size).order(ByteOrder.nativeOrder());
+        if (HEAP) {
+            return ByteBuffer.allocate(size).order(ByteOrder.nativeOrder());
+        } else {
+            return ByteBuffer.allocateDirect(size).order(ByteOrder.nativeOrder());
+        }
     }
 
     /**
