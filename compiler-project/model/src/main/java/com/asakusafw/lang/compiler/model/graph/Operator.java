@@ -540,10 +540,34 @@ public abstract class Operator {
     }
 
     /**
+     * An abstract option builder for {@link OperatorPort}.
+     * @since 0.4.1
+     */
+    public interface PortOptionBuilder {
+
+        /**
+         * Adds an attribute to the building input.
+         * @param <T> the attribute type
+         * @param value the attribute value
+         * @return this
+         */
+        <T extends Enum<T>> PortOptionBuilder attribute(T value);
+
+        /**
+         * Adds an attribute to the building input.
+         * @param <T> the attribute type
+         * @param type the attribute type
+         * @param value the attribute value
+         * @return this
+         */
+        <T> PortOptionBuilder attribute(Class<T> type, T value);
+    }
+
+    /**
      * A option builder for {@link OperatorInput}.
      * @since 0.4.1
      */
-    public static class InputOptionBuilder {
+    public static class InputOptionBuilder implements PortOptionBuilder {
 
         Group group;
 
@@ -585,23 +609,12 @@ public abstract class Operator {
             return this;
         }
 
-        /**
-         * Adds an attribute to the building input.
-         * @param <T> the attribute type
-         * @param value the attribute value
-         * @return this
-         */
+        @Override
         public <T extends Enum<T>> InputOptionBuilder attribute(T value) {
             return attribute(value.getDeclaringClass(), value);
         }
 
-        /**
-         * Adds an attribute to the building input.
-         * @param <T> the attribute type
-         * @param type the attribute type
-         * @param value the attribute value
-         * @return this
-         */
+        @Override
         public <T> InputOptionBuilder attribute(Class<T> type, T value) {
             this.attributes.add(type, value);
             return this;
@@ -612,7 +625,7 @@ public abstract class Operator {
      * A option builder for {@link OperatorOutput}.
      * @since 0.4.1
      */
-    public static class OutputOptionBuilder {
+    public static class OutputOptionBuilder implements PortOptionBuilder {
 
         final AttributeMap.Builder attributes = new AttributeMap.Builder();
 
@@ -620,24 +633,13 @@ public abstract class Operator {
             return;
         }
 
-        /**
-         * Adds an attribute to the building output.
-         * @param <T> the attribute type
-         * @param type the attribute type
-         * @param value the attribute value
-         * @return this
-         */
+        @Override
         public <T> OutputOptionBuilder attribute(Class<T> type, T value) {
             this.attributes.add(type, value);
             return this;
         }
 
-        /**
-         * Adds an attribute to the building output.
-         * @param <T> the attribute type
-         * @param value the attribute value
-         * @return this
-         */
+        @Override
         public <T extends Enum<T>> OutputOptionBuilder attribute(T value) {
             return attribute(value.getDeclaringClass(), value);
         }

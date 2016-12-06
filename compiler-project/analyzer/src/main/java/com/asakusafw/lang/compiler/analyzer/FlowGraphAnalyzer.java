@@ -74,6 +74,8 @@ import com.asakusafw.vocabulary.flow.FlowDescription;
 import com.asakusafw.vocabulary.flow.Import;
 import com.asakusafw.vocabulary.flow.graph.FlowBoundary;
 import com.asakusafw.vocabulary.flow.graph.FlowElement;
+import com.asakusafw.vocabulary.flow.graph.FlowElementAttribute;
+import com.asakusafw.vocabulary.flow.graph.FlowElementAttributeProvider;
 import com.asakusafw.vocabulary.flow.graph.FlowElementDescription;
 import com.asakusafw.vocabulary.flow.graph.FlowElementInput;
 import com.asakusafw.vocabulary.flow.graph.FlowElementKind;
@@ -313,11 +315,11 @@ public final class FlowGraphAnalyzer {
             OperatorSource source,
             Operator.AbstractBuilder<?, ?> builder) {
         for (FlowElementPortDescription port : description.getInputPorts()) {
-            builder.input(port.getName(), typeOf(port.getDataType()), c -> c
+            builder.input(port.getName(), typeOf(port.getDataType()), c -> attributes(port, c)
                     .group(convert(port.getShuffleKey())));
         }
         for (FlowElementPortDescription port : description.getOutputPorts()) {
-            builder.output(port.getName(), typeOf(port.getDataType()));
+            builder.output(port.getName(), typeOf(port.getDataType()), c -> attributes(port, c));
         }
         if (description instanceof OperatorDescription) {
             for (OperatorDescription.Parameter param : ((OperatorDescription) description).getParameters()) {
@@ -334,6 +336,20 @@ public final class FlowGraphAnalyzer {
             map.mergeTo(builder);
         }
         return builder.build();
+    }
+
+    private static <T extends Operator.PortOptionBuilder> T attributes(
+            FlowElementAttributeProvider provider, T builder) {
+        for (Class<? extends FlowElementAttribute> type : provider.getAttributeTypes()) {
+            drive(provider, type, builder);
+        }
+        return builder;
+    }
+
+    private static <T extends FlowElementAttribute> void drive(
+            FlowElementAttributeProvider provider, Class<T> type, Operator.PortOptionBuilder builder) {
+        T value = provider.getAttribute(type);
+        builder.attribute(type, value);
     }
 
     private static ValueDescription convert(java.lang.reflect.Type type, Object value) {

@@ -35,17 +35,20 @@ import com.asakusafw.lang.compiler.model.graph.Groups;
 import com.asakusafw.lang.compiler.model.graph.OperatorConstraint;
 import com.asakusafw.lang.compiler.model.graph.UserOperator;
 import com.asakusafw.runtime.core.Result;
+import com.asakusafw.vocabulary.attribute.BufferType;
 import com.asakusafw.vocabulary.external.ExporterDescription;
 import com.asakusafw.vocabulary.external.ImporterDescription;
 import com.asakusafw.vocabulary.flow.FlowDescription;
 import com.asakusafw.vocabulary.flow.graph.FlowBoundary;
 import com.asakusafw.vocabulary.flow.graph.FlowElementDescription;
+import com.asakusafw.vocabulary.flow.graph.FlowElementPortDescription;
 import com.asakusafw.vocabulary.flow.graph.FlowGraph;
 import com.asakusafw.vocabulary.flow.graph.FlowPartDescription;
 import com.asakusafw.vocabulary.flow.graph.InputDescription;
 import com.asakusafw.vocabulary.flow.graph.ObservationCount;
 import com.asakusafw.vocabulary.flow.graph.OperatorDescription;
 import com.asakusafw.vocabulary.flow.graph.OutputDescription;
+import com.asakusafw.vocabulary.flow.graph.PortDirection;
 import com.asakusafw.vocabulary.flow.util.CoreOperators;
 import com.asakusafw.vocabulary.model.Key;
 import com.asakusafw.vocabulary.operator.CoGroup;
@@ -471,6 +474,45 @@ public class FlowGraphAnalyzerTest {
             .output("d0", "p");
 
         assertThat(inspector.get("o0").getAttribute(MockAttribute.class), is(new MockAttribute("OK")));
+    }
+
+    /**
+     * port w/ attribute.
+     */
+    @Test
+    public void port_attribute() {
+        FlowGraph g = new MockFlowGraph()
+            .add("s0", new InputDescription("p", String.class))
+            .add("o0", new OperatorDescription.Builder(CoGroup.class)
+                    .declare(Alias.class, Alias.class, "groupsort")
+                    .declareParameter(List.class)
+                    .declareParameter(Result.class)
+                    .addPort(new FlowElementPortDescription(
+                            "p", String.class,
+                            PortDirection.INPUT, null, Arrays.asList(BufferType.VOLATILE)))
+                    .addPort(new FlowElementPortDescription(
+                            "p", String.class,
+                            PortDirection.OUTPUT, null, Arrays.asList(BufferType.STORED)))
+                    .toDescription())
+            .add("d0", new OutputDescription("p", String.class))
+            .connect("s0", "o0")
+            .connect("o0", "d0")
+            .toGraph();
+
+        OperatorGraphInspector inspector = new OperatorGraphInspector(converter.analyze(g))
+            .input("s0", "p")
+            .operator("o0", Alias.class, "groupsort")
+            .output("d0", "p");
+
+        inspector
+            .operators(3)
+            .connections(2)
+            .connected("s0", "o0")
+            .connected("o0", "d0");
+
+        UserOperator operator = (UserOperator) inspector.get("o0");
+        assertThat(operator.getInputs().get(0).getAttribute(BufferType.class), is(BufferType.VOLATILE));
+        assertThat(operator.getOutputs().get(0).getAttribute(BufferType.class), is(BufferType.STORED));
     }
 
     /**
