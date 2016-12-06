@@ -69,6 +69,8 @@ import com.asakusafw.dag.compiler.model.plan.VertexSpec;
 import com.asakusafw.dag.compiler.model.plan.VertexSpec.OperationOption;
 import com.asakusafw.dag.compiler.model.plan.VertexSpec.OperationType;
 import com.asakusafw.dag.runtime.adapter.DataTable;
+import com.asakusafw.dag.runtime.skeleton.CoGroupInputAdapter;
+import com.asakusafw.dag.runtime.skeleton.CoGroupInputAdapter.BufferType;
 import com.asakusafw.lang.compiler.api.CompilerOptions;
 import com.asakusafw.lang.compiler.api.JobflowProcessor;
 import com.asakusafw.lang.compiler.api.reference.ExternalInputReference;
@@ -100,6 +102,7 @@ import com.asakusafw.utils.graph.Graphs;
 /**
  * Generates data flow classes.
  * @since 0.4.0
+ * @version 0.4.1
  */
 public final class DataFlowGenerator {
 
@@ -289,14 +292,18 @@ public final class DataFlowGenerator {
 
     private ClassDescription resolveCoGroupInput(VertexSpec vertex, List<InputSpec> inputs) {
         List<CoGroupInputAdapterGenerator.Spec> specs = inputs.stream()
-                .map(s -> new CoGroupInputAdapterGenerator.Spec(
-                        s.getId(),
-                        s.getDataType(),
-                        s.getInputOptions().contains(InputSpec.InputOption.SPILL_OUT)))
+                .map(s -> new CoGroupInputAdapterGenerator.Spec(s.getId(), s.getDataType(), toBufferType(s)))
                 .collect(Collectors.toList());
         return generate(vertex, "adapter.input", c -> {
             return new CoGroupInputAdapterGenerator().generate(generatorContext, specs, c);
         });
+    }
+
+    private static BufferType toBufferType(InputSpec spec) {
+        if (spec.getInputOptions().contains(InputSpec.InputOption.SPILL_OUT)) {
+            return CoGroupInputAdapter.BufferType.FILE;
+        }
+        return CoGroupInputAdapter.BufferType.HEAP;
     }
 
     private ClassDescription resolveExternalInput(VertexSpec vertex, ExternalInput input) {

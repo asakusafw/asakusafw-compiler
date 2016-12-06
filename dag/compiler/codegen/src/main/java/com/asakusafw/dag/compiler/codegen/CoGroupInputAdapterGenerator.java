@@ -51,7 +51,7 @@ public class CoGroupInputAdapterGenerator {
                 v.visitVarInsn(Opcodes.ALOAD, 0);
                 getConst(v, spec.id);
                 getConst(v, typeOf(supplier));
-                getEnumConstant(v, getBufferType(spec));
+                getEnumConstant(v, spec.bufferType);
                 v.visitMethodInsn(
                         Opcodes.INVOKEVIRTUAL,
                         target.getInternalName(), "bind", //$NON-NLS-1$
@@ -67,13 +67,10 @@ public class CoGroupInputAdapterGenerator {
         return new ClassData(target, writer::toByteArray);
     }
 
-    private static CoGroupInputAdapter.BufferType getBufferType(Spec spec) {
-        return spec.fileListBuffer ? CoGroupInputAdapter.BufferType.FILE : CoGroupInputAdapter.BufferType.HEAP;
-    }
-
     /**
      * Represents an input spec for co-group-kind vertices.
      * @since 0.4.0
+     * @version 0.4.1
      */
     public static class Spec {
 
@@ -81,20 +78,21 @@ public class CoGroupInputAdapterGenerator {
 
         final TypeDescription dataType;
 
-        final boolean fileListBuffer;
+        final CoGroupInputAdapter.BufferType bufferType;
 
         /**
          * Creates a new instance.
          * @param id the input ID
          * @param dataType the input data type
-         * @param fileListBuffer {@code true} to use file list buffer
+         * @param bufferType the buffer type
          */
-        public Spec(String id, TypeDescription dataType, boolean fileListBuffer) {
+        public Spec(String id, TypeDescription dataType, CoGroupInputAdapter.BufferType bufferType) {
             Arguments.requireNonNull(id);
             Arguments.requireNonNull(dataType);
+            Arguments.requireNonNull(bufferType);
             this.id = id;
             this.dataType = dataType;
-            this.fileListBuffer = fileListBuffer;
+            this.bufferType = bufferType;
         }
     }
 }

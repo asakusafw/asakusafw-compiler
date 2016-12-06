@@ -28,16 +28,19 @@ import com.asakusafw.dag.api.processor.VertexProcessorContext;
 import com.asakusafw.dag.runtime.adapter.CoGroupOperation;
 import com.asakusafw.dag.runtime.adapter.InputAdapter;
 import com.asakusafw.dag.runtime.adapter.InputHandler;
+import com.asakusafw.dag.runtime.data.DataAdapter;
+import com.asakusafw.dag.runtime.data.HeapListBuilder;
+import com.asakusafw.dag.runtime.data.ListBuilder;
+import com.asakusafw.dag.runtime.data.SpillListBuilder;
+import com.asakusafw.dag.runtime.io.BasicDataAdapter;
 import com.asakusafw.lang.utils.common.Arguments;
 import com.asakusafw.lang.utils.common.Invariants;
-import com.asakusafw.runtime.flow.ArrayListBuffer;
-import com.asakusafw.runtime.flow.FileMapListBuffer;
-import com.asakusafw.runtime.flow.ListBuffer;
 import com.asakusafw.runtime.model.DataModel;
 
 /**
  * {@link InputAdapter} for co-group edge inputs.
  * @since 0.4.0
+ * @version 0.4.1
  */
 public class CoGroupInputAdapter implements InputAdapter<CoGroupOperation.Input> {
 
@@ -55,6 +58,8 @@ public class CoGroupInputAdapter implements InputAdapter<CoGroupOperation.Input>
     public static final int DEFAULT_FILE_WINDOW_SIZE = 256;
 
     private final List<Consumer<CoGroupInputHandler.Builder>> actions = new ArrayList<>();
+
+    private final Closer closer = new Closer();
 
     private final int fileWindowSize;
 
@@ -101,21 +106,25 @@ public class CoGroupInputAdapter implements InputAdapter<CoGroupOperation.Input>
     private <T extends DataModel<T> & Writable> void bind0(
             String name, Class<?> supplierClass, BufferType bufferType) {
         Supplier<? extends T> objects = Invariants.safe(() -> (Supplier<? extends T>) supplierClass.newInstance());
+        DataAdapter<T> adapter = new BasicDataAdapter<>(objects);
         actions.add(b -> {
-            ListBuffer<T> buffer = newBuffer(bufferType);
-            b.addInput(name, objects, buffer);
+            ListBuilder<T> builder = newListBuilder(bufferType, adapter);
+            synchronized (closer) {
+                closer.add(builder);
+            }
+            b.addInput(name, builder);
         });
     }
 
-    private <T extends Writable> ListBuffer<T> newBuffer(BufferType bufferType) {
+    private <T> ListBuilder<T> newListBuilder(BufferType bufferType, DataAdapter<T> adapter) {
         switch (bufferType) {
         case HEAP:
-            return new ArrayListBuffer<>();
+            return new HeapListBuilder<>(adapter);
         case FILE:
             if (fileWindowSize <= 0) {
-                return new ArrayListBuffer<>();
+                return new HeapListBuilder<>(adapter);
             } else {
-                return new FileMapListBuffer<>(fileWindowSize);
+                return new SpillListBuilder<>(adapter, fileWindowSize);
             }
         default:
             throw new AssertionError(bufferType);
@@ -128,6 +137,13 @@ public class CoGroupInputAdapter implements InputAdapter<CoGroupOperation.Input>
         CoGroupInputHandler.Builder builder = CoGroupInputHandler.builder();
         actions.forEach(a -> a.accept(builder));
         return builder.build();
+    }
+
+    @Override
+    public void close() throws IOException, InterruptedException {
+        synchronized (closer) {
+            closer.close();
+        }
     }
 
     /**
