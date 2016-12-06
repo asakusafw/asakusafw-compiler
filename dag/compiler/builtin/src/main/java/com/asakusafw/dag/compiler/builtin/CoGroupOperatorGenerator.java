@@ -31,6 +31,7 @@ import com.asakusafw.dag.compiler.codegen.AsmUtil.ValueRef;
 import com.asakusafw.dag.compiler.model.ClassData;
 import com.asakusafw.dag.compiler.model.graph.VertexElement;
 import com.asakusafw.dag.runtime.adapter.CoGroupOperation;
+import com.asakusafw.lang.compiler.analyzer.util.GroupOperatorUtil;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.description.Descriptions;
 import com.asakusafw.lang.compiler.model.graph.OperatorInput;
@@ -95,7 +96,7 @@ public class CoGroupOperatorGenerator extends UserOperatorNodeGenerator {
     }
 
     private static boolean isReadOnce(OperatorInput port) {
-        BufferType type = port.getAttribute(BufferType.class);
+        BufferType type = GroupOperatorUtil.getBufferType(port);
         return type == BufferType.VOLATILE;
     }
 }

@@ -547,11 +547,10 @@ public abstract class Operator {
 
         /**
          * Adds an attribute to the building input.
-         * @param <T> the attribute type
          * @param value the attribute value
          * @return this
          */
-        <T extends Enum<T>> PortOptionBuilder attribute(T value);
+        PortOptionBuilder attribute(Enum<?> value);
 
         /**
          * Adds an attribute to the building input.
@@ -610,8 +609,9 @@ public abstract class Operator {
         }
 
         @Override
-        public <T extends Enum<T>> InputOptionBuilder attribute(T value) {
-            return attribute(value.getDeclaringClass(), value);
+        public InputOptionBuilder attribute(Enum<?> value) {
+            this.attributes.add(value);
+            return this;
         }
 
         @Override
@@ -634,14 +634,15 @@ public abstract class Operator {
         }
 
         @Override
-        public <T> OutputOptionBuilder attribute(Class<T> type, T value) {
-            this.attributes.add(type, value);
+        public OutputOptionBuilder attribute(Enum<?> value) {
+            this.attributes.add(value);
             return this;
         }
 
         @Override
-        public <T extends Enum<T>> OutputOptionBuilder attribute(T value) {
-            return attribute(value.getDeclaringClass(), value);
+        public <T> OutputOptionBuilder attribute(Class<T> type, T value) {
+            this.attributes.add(type, value);
+            return this;
         }
     }
 }

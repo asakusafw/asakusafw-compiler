@@ -118,6 +118,20 @@ public final class AttributeMap {
 
         /**
          * Adds an attribute.
+         * @param value the attribute value
+         * @return this
+         */
+        public Builder add(Enum<?> value) {
+            Objects.requireNonNull(value);
+            if (entries == null) {
+                entries = new LinkedHashMap<>();
+            }
+            entries.put(value.getDeclaringClass(), value);
+            return this;
+        }
+
+        /**
+         * Adds an attribute.
          * @param <T> the attribute type
          * @param type the attribute type
          * @param object the attribute value

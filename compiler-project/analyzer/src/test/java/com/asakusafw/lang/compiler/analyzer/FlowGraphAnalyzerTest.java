@@ -492,7 +492,7 @@ public class FlowGraphAnalyzerTest {
                             PortDirection.INPUT, null, Arrays.asList(BufferType.VOLATILE)))
                     .addPort(new FlowElementPortDescription(
                             "p", String.class,
-                            PortDirection.OUTPUT, null, Arrays.asList(BufferType.STORED)))
+                            PortDirection.OUTPUT, null, Arrays.asList(BufferType.SPILL)))
                     .toDescription())
             .add("d0", new OutputDescription("p", String.class))
             .connect("s0", "o0")
@@ -512,7 +512,7 @@ public class FlowGraphAnalyzerTest {
 
         UserOperator operator = (UserOperator) inspector.get("o0");
         assertThat(operator.getInputs().get(0).getAttribute(BufferType.class), is(BufferType.VOLATILE));
-        assertThat(operator.getOutputs().get(0).getAttribute(BufferType.class), is(BufferType.STORED));
+        assertThat(operator.getOutputs().get(0).getAttribute(BufferType.class), is(BufferType.SPILL));
     }
 
     /**
