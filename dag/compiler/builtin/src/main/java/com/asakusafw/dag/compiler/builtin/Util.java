@@ -168,6 +168,18 @@ final class Util {
                 false);
     }
 
+    static void getGroupIterable(MethodVisitor method, Context context, OperatorInput input) {
+        method.visitVarInsn(Opcodes.ALOAD, 1);
+        getInt(method, context.getGroupIndex(input));
+        method.visitMethodInsn(
+                Opcodes.INVOKESTATIC,
+                AsmUtil.typeOf(CoGroupOperationUtil.class).getInternalName(),
+                "getIterable",
+                Type.getMethodDescriptor(AsmUtil.typeOf(Iterable.class),
+                        AsmUtil.typeOf(CoGroupOperation.Input.class), Type.INT_TYPE),
+                false);
+    }
+
     static void invoke(MethodVisitor method, Context context, UserOperator operator, List<ValueRef> arguments) {
         for (ValueRef var : arguments) {
             var.load(method);

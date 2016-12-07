@@ -26,6 +26,8 @@ import com.asakusafw.lang.compiler.model.description.TypeDescription;
 
 /**
  * Represents an operator input port.
+ * @since 0.1.0
+ * @version 0.4.1
  */
 public class OperatorInput implements OperatorPort {
 
@@ -37,17 +39,9 @@ public class OperatorInput implements OperatorPort {
 
     private final Group group;
 
-    private final Set<OperatorOutput> opposites = new HashSet<>();
+    private final AttributeMap attributes;
 
-    /**
-     * Creates a new instance.
-     * @param owner the owner of this port
-     * @param name the port name
-     * @param dataType the data type
-     */
-    public OperatorInput(Operator owner, String name, TypeDescription dataType) {
-        this(owner, name, dataType, null);
-    }
+    private final Set<OperatorOutput> opposites = new HashSet<>();
 
     /**
      * Creates a new instance.
@@ -57,10 +51,24 @@ public class OperatorInput implements OperatorPort {
      * @param group the grouping instruction (nullable)
      */
     public OperatorInput(Operator owner, String name, TypeDescription dataType, Group group) {
+        this(owner, name, dataType, group, AttributeMap.EMPTY);
+    }
+
+    /**
+     * Creates a new instance.
+     * @param owner the owner of this port
+     * @param name the port name
+     * @param dataType the data type
+     * @param group the grouping instruction (nullable)
+     * @param attributes the port attributes
+     * @since 0.4.1
+     */
+    public OperatorInput(Operator owner, String name, TypeDescription dataType, Group group, AttributeMap attributes) {
         this.owner = owner;
         this.name = name;
         this.dataType = dataType;
         this.group = group;
+        this.attributes = attributes;
     }
 
     @Override
@@ -85,10 +93,20 @@ public class OperatorInput implements OperatorPort {
 
     /**
      * Returns the dataset grouping instruction.
-     * @return the dataset grouping instruction, or {@code null} if grouing is not required
+     * @return the dataset grouping instruction, or {@code null} if grouping is not required
      */
     public Group getGroup() {
         return group;
+    }
+
+    @Override
+    public Set<Class<?>> getAttributeTypes() {
+        return attributes.getAttributeTypes();
+    }
+
+    @Override
+    public <T> T getAttribute(Class<T> attributeType) {
+        return attributes.getAttribute(attributeType);
     }
 
     /**
@@ -153,6 +171,10 @@ public class OperatorInput implements OperatorPort {
     @Override
     public Collection<OperatorOutput> getOpposites() {
         return Collections.unmodifiableList(new ArrayList<>(opposites));
+    }
+
+    OperatorInput copy(Operator newOwner) {
+        return new OperatorInput(newOwner, name, dataType, group, attributes.copy());
     }
 
     @Override

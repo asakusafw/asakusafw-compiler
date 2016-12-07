@@ -37,8 +37,11 @@ import com.asakusafw.lang.compiler.optimizer.basic.OperatorClass;
 import com.asakusafw.lang.compiler.optimizer.basic.OperatorClass.InputAttribute;
 import com.asakusafw.lang.compiler.optimizer.basic.OperatorClass.InputType;
 import com.asakusafw.runtime.core.Result;
+import com.asakusafw.vocabulary.attribute.BufferType;
 import com.asakusafw.vocabulary.flow.processor.InputBuffer;
 import com.asakusafw.vocabulary.flow.processor.PartialAggregation;
+import com.asakusafw.vocabulary.model.Once;
+import com.asakusafw.vocabulary.model.Spill;
 import com.asakusafw.vocabulary.operator.CoGroup;
 import com.asakusafw.vocabulary.operator.Extract;
 import com.asakusafw.vocabulary.operator.Fold;
@@ -121,6 +124,42 @@ public class BuiltInOperatorClassifierTest extends BuiltInOptimizerTestRoot {
         assertThat(result.getAttributes(i1), hasItem(InputAttribute.ESCAPED));
         assertThat(result.getAttributes(i1), not(hasItem(InputAttribute.AGGREATE)));
         assertThat(result.getAttributes(i1), not(hasItem(InputAttribute.PARTIAL_REDUCTION)));
+    }
+
+    /**
+     * test for co-group kind w/ buffer types.
+     */
+    @Test
+    public void cogroup_buffer() {
+        Operator operator = OperatorExtractor.extract(CoGroup.class, Ops.class, "cogroup_buffer")
+                .input("a", typeOf(String.class), c -> c
+                        .group(Groups.parse(list(), list()))
+                        .attribute(BufferType.HEAP))
+                .input("a", typeOf(String.class), c -> c
+                        .group(Groups.parse(list(), list()))
+                        .attribute(BufferType.SPILL))
+                .input("a", typeOf(String.class), c -> c
+                        .group(Groups.parse(list(), list()))
+                        .attribute(BufferType.VOLATILE))
+                .output("p", typeOf(String.class))
+                .build();
+        OperatorClass result = apply(context(), operator, DataSize.UNKNOWN, DataSize.UNKNOWN, DataSize.UNKNOWN);
+        assertThat(result.getOperator(), is(operator));
+        assertThat(result.getPrimaryInputType(), is(InputType.GROUP));
+        assertThat(result.getPrimaryInputs(), hasSize(3));
+        assertThat(result.getSecondaryInputs(), hasSize(0));
+
+        OperatorInput i0 = operator.getInputs().get(0);
+        assertThat(result.getAttributes(i0), not(hasItem(InputAttribute.ESCAPED)));
+        assertThat(result.getAttributes(i0), not(hasItem(InputAttribute.VOALTILE)));
+
+        OperatorInput i1 = operator.getInputs().get(1);
+        assertThat(result.getAttributes(i1), hasItem(InputAttribute.ESCAPED));
+        assertThat(result.getAttributes(i1), not(hasItem(InputAttribute.VOALTILE)));
+
+        OperatorInput i2 = operator.getInputs().get(2);
+        assertThat(result.getAttributes(i2), not(hasItem(InputAttribute.ESCAPED)));
+        assertThat(result.getAttributes(i2), hasItem(InputAttribute.VOALTILE));
     }
 
     /**
@@ -293,7 +332,7 @@ public class BuiltInOperatorClassifierTest extends BuiltInOptimizerTestRoot {
         return apply(context, new BuiltInOperatorClassifier(), operator);
     }
 
-    private List<String> list(String... args) {
+    private static List<String> list(String... args) {
         return Arrays.asList(args);
     }
 
@@ -308,6 +347,13 @@ public class BuiltInOperatorClassifierTest extends BuiltInOptimizerTestRoot {
 
         @CoGroup(inputBuffer = InputBuffer.ESCAPE)
         public abstract void cogroup_escape(List<String> a, List<String> b, Result<String> r);
+
+        @CoGroup
+        public abstract void cogroup_buffer(
+                List<String> a,
+                @Spill List<String> b,
+                @Once Iterable<String> c,
+                Result<String> r);
 
         @MasterJoinUpdate
         public abstract void join(String m, String t);

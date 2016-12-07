@@ -34,6 +34,7 @@ import com.asakusafw.lang.compiler.model.testing.OperatorExtractor;
 import com.asakusafw.lang.utils.common.Lang;
 import com.asakusafw.runtime.core.Result;
 import com.asakusafw.runtime.testing.MockResult;
+import com.asakusafw.vocabulary.attribute.BufferType;
 import com.asakusafw.vocabulary.operator.CoGroup;
 
 /**
@@ -115,6 +116,50 @@ public class CoGroupOperatorGeneratorTest extends OperatorNodeGeneratorTestRoot 
     }
 
     /**
+     * w/ iterable.
+     */
+    @Test
+    public void iterable() {
+        UserOperator operator = load("iterable")
+                .input("i0", Descriptions.typeOf(MockDataModel.class))
+                .output("r0", Descriptions.typeOf(MockValueModel.class))
+                .build();
+        NodeInfo info = generate(operator);
+        MockSink<MockValueModel> results = new MockSink<>();
+        loading(info, c -> {
+            Result<Object> r = c.newInstance(results);
+            r.add(cogroup(new Object[][] {
+                {
+                    new MockDataModel("Hello"),
+                }
+            }));
+        });
+        assertThat(results.get(e -> e.getValue()), contains("Hello~"));
+    }
+
+    /**
+     * w/ iterable + volatile.
+     */
+    @Test
+    public void read_once() {
+        UserOperator operator = load("iterable")
+                .input("i0", Descriptions.typeOf(MockDataModel.class), c -> c.attribute(BufferType.VOLATILE))
+                .output("r0", Descriptions.typeOf(MockValueModel.class))
+                .build();
+        NodeInfo info = generate(operator);
+        MockSink<MockValueModel> results = new MockSink<>();
+        loading(info, c -> {
+            Result<Object> r = c.newInstance(results);
+            r.add(cogroup(new Object[][] {
+                {
+                    new MockDataModel("Hello"),
+                }
+            }));
+        });
+        assertThat(results.get(e -> e.getValue()), contains("Hello~"));
+    }
+
+    /**
      * cache - simple case.
      */
     @Test
@@ -166,7 +211,7 @@ public class CoGroupOperatorGeneratorTest extends OperatorNodeGeneratorTestRoot 
         assertThat(b, useCacheOf(a));
     }
 
-    private Builder load(String name) {
+    private static Builder load(String name) {
         return OperatorExtractor.extract(CoGroup.class, Op.class, name);
     }
 
@@ -176,6 +221,13 @@ public class CoGroupOperatorGeneratorTest extends OperatorNodeGeneratorTestRoot 
         @CoGroup
         public void simple(List<MockDataModel> i0, Result<MockValueModel> r0) {
             parameterized(i0, r0, "!");
+        }
+
+        @CoGroup
+        public void iterable(Iterable<MockDataModel> i0, Result<MockValueModel> r0) {
+            for (MockDataModel m : i0) {
+                r0.add(new MockValueModel(m.getValue() + "~"));
+            }
         }
 
         @CoGroup

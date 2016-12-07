@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Consumer;
 
 import com.asakusafw.lang.compiler.model.description.TypeDescription;
 import com.asakusafw.lang.compiler.model.description.ValueDescription;
@@ -101,34 +102,20 @@ public abstract class Operator {
         ((Operator) copy).originalSerialNumber = originalSerialNumber;
         for (OperatorProperty property : properties) {
             switch (property.getPropertyKind()) {
-            case INPUT: {
-                OperatorInput p = (OperatorInput) property;
-                copy.properties.add(new OperatorInput(copy, p.getName(), p.getDataType(), p.getGroup()));
+            case INPUT:
+                copy.properties.add(((OperatorInput) property).copy(copy));
                 break;
-            }
-            case OUTPUT: {
-                OperatorOutput p = (OperatorOutput) property;
-                copy.properties.add(new OperatorOutput(copy, p.getName(), p.getDataType()));
+            case OUTPUT:
+                copy.properties.add(((OperatorOutput) property).copy(copy));
                 break;
-            }
-            case ARGUMENT: {
-                OperatorArgument p = (OperatorArgument) property;
-                copy.properties.add(new OperatorArgument(p.getName(), p.getValue()));
+            case ARGUMENT:
+                copy.properties.add(property);
                 break;
-            }
             default:
                 throw new AssertionError(property);
             }
         }
-        for (Map.Entry<Class<?>, Object> entry : attributes.entrySet()) {
-            Class<?> key = entry.getKey();
-            Object value = entry.getValue();
-            if (value instanceof OperatorAttribute) {
-                value = ((OperatorAttribute) value).copy();
-                assert key.isInstance(value);
-            }
-            copy.attributes.put(key, value);
-        }
+        AttributeMap.copyTo(attributes, copy.attributes);
         copy.constraints.addAll(constraints);
         return copy;
     }
@@ -369,7 +356,7 @@ public abstract class Operator {
      * @param <TOperator> the operator type
      * @param <TSelf> the actual builder type
      * @since 0.1.0
-     * @version 0.3.0
+     * @version 0.4.1
      */
     public abstract static class AbstractBuilder<TOperator extends Operator, TSelf>
             extends BuilderBase<TOperator, TSelf> {
@@ -383,6 +370,79 @@ public abstract class Operator {
         }
 
         /**
+         * Adds a clone of the given input port to the building operator.
+         * @param port the original input
+         * @return this
+         * @since 0.4.1
+         */
+        public TSelf input(OperatorInput port) {
+            TOperator owner = getOwner();
+            owner.properties.add(port.copy(owner));
+            return getSelf();
+        }
+
+        /**
+         * Adds a clone of the given output port to the building operator.
+         * @param port the original output
+         * @return this
+         * @since 0.4.1
+         */
+        public TSelf output(OperatorOutput port) {
+            TOperator owner = getOwner();
+            owner.properties.add(port.copy(owner));
+            return getSelf();
+        }
+
+        /**
+         * Adds a clone of the given argument to the building operator.
+         * @param argument the original argument
+         * @return this
+         * @since 0.4.1
+         */
+        public TSelf argument(OperatorArgument argument) {
+            TOperator owner = getOwner();
+            owner.properties.add(argument);
+            return getSelf();
+        }
+
+        /**
+         * Adds an input port to the building operator.
+         * @param name the port name
+         * @param dataType the data type on the port
+         * @param configurator configurator of the building inputs
+         * @return this
+         * @since 0.4.1
+         */
+        public TSelf input(String name, TypeDescription dataType, Consumer<InputOptionBuilder> configurator) {
+            InputOptionBuilder sub = new InputOptionBuilder();
+            configurator.accept(sub);
+            TOperator owner = getOwner();
+            OperatorInput port = new OperatorInput(owner, name, dataType, sub.group, sub.attributes.build());
+            owner.properties.add(port);
+            for (OperatorOutput upstream : sub.upstreams) {
+                port.connect(upstream);
+            }
+            return getSelf();
+        }
+
+        /**
+         * Adds an input port to the building operator.
+         * @param name the port name
+         * @param dataType the data type on the port
+         * @param configurator configurator of the building inputs
+         * @return this
+         * @since 0.4.1
+         */
+        public TSelf output(String name, TypeDescription dataType, Consumer<OutputOptionBuilder> configurator) {
+            OutputOptionBuilder sub = new OutputOptionBuilder();
+            configurator.accept(sub);
+            TOperator owner = getOwner();
+            OperatorOutput port = new OperatorOutput(owner, name, dataType, sub.attributes.build());
+            owner.properties.add(port);
+            return getSelf();
+        }
+
+        /**
          * Adds an input port to the building operator.
          * @param name the port name
          * @param dataType the data type on the port
@@ -390,7 +450,7 @@ public abstract class Operator {
          * @return this
          */
         public TSelf input(String name, TypeDescription dataType, OperatorOutput... upstreams) {
-            return input(name, dataType, (Group) null, upstreams);
+            return input(name, dataType, c -> c.upstreams(upstreams));
         }
 
         /**
@@ -403,13 +463,7 @@ public abstract class Operator {
          * @see Groups
          */
         public TSelf input(String name, TypeDescription dataType, Group group, OperatorOutput... upstreams) {
-            TOperator owner = getOwner();
-            OperatorInput port = new OperatorInput(owner, name, dataType, group);
-            owner.properties.add(port);
-            for (OperatorOutput upstream : upstreams) {
-                port.connect(upstream);
-            }
-            return getSelf();
+            return input(name, dataType, c -> c.group(group).upstreams(upstreams));
         }
 
         /**
@@ -420,7 +474,8 @@ public abstract class Operator {
          * @return this
          */
         public TSelf input(String name, OperatorOutput upstream, OperatorOutput... upstreams) {
-            return input(name, (Group) null, upstream, upstreams);
+            TypeDescription dataType = upstream.getDataType();
+            return input(name, dataType, c -> c.upstream(upstream).upstreams(upstreams));
         }
 
         /**
@@ -433,10 +488,8 @@ public abstract class Operator {
          * @see Groups
          */
         public TSelf input(String name, Group group, OperatorOutput upstream, OperatorOutput... upstreams) {
-            OperatorOutput[] joint = new OperatorOutput[upstreams.length + 1];
-            joint[0] = upstream;
-            System.arraycopy(upstreams, 0, joint, 1, upstreams.length);
-            return input(name, upstream.getDataType(), group, joint);
+            TypeDescription dataType = upstream.getDataType();
+            return input(name, dataType, c -> c.group(group).upstream(upstream).upstreams(upstreams));
         }
 
         /**
@@ -446,9 +499,9 @@ public abstract class Operator {
          * @return this
          */
         public TSelf output(String name, TypeDescription dataType) {
-            TOperator owner = getOwner();
-            owner.properties.add(new OperatorOutput(owner, name, dataType));
-            return getSelf();
+            return output(name, dataType, c -> {
+                return;
+            });
         }
 
         /**
@@ -483,6 +536,113 @@ public abstract class Operator {
             TOperator owner = getOwner();
             Collections.addAll(owner.constraints, constraints);
             return getSelf();
+        }
+    }
+
+    /**
+     * An abstract option builder for {@link OperatorPort}.
+     * @since 0.4.1
+     */
+    public interface PortOptionBuilder {
+
+        /**
+         * Adds an attribute to the building input.
+         * @param value the attribute value
+         * @return this
+         */
+        PortOptionBuilder attribute(Enum<?> value);
+
+        /**
+         * Adds an attribute to the building input.
+         * @param <T> the attribute type
+         * @param type the attribute type
+         * @param value the attribute value
+         * @return this
+         */
+        <T> PortOptionBuilder attribute(Class<T> type, T value);
+    }
+
+    /**
+     * A option builder for {@link OperatorInput}.
+     * @since 0.4.1
+     */
+    public static class InputOptionBuilder implements PortOptionBuilder {
+
+        Group group;
+
+        final List<OperatorOutput> upstreams = new ArrayList<>();
+
+        final AttributeMap.Builder attributes = new AttributeMap.Builder();
+
+        InputOptionBuilder() {
+            return;
+        }
+
+        /**
+         * Sets the grouping information.
+         * @param grouping grouping information
+         * @return this
+         */
+        public InputOptionBuilder group(Group grouping) {
+            this.group = grouping;
+            return this;
+        }
+
+        /**
+         * Adds an upstream of the building input.
+         * @param upstream the upstream port
+         * @return this
+         */
+        public InputOptionBuilder upstream(OperatorOutput upstream) {
+            this.upstreams.add(upstream);
+            return this;
+        }
+
+        /**
+         * Adds upstreams of the building input.
+         * @param upstreamArray the upstream port
+         * @return this
+         */
+        public InputOptionBuilder upstreams(OperatorOutput... upstreamArray) {
+            Collections.addAll(this.upstreams, upstreamArray);
+            return this;
+        }
+
+        @Override
+        public InputOptionBuilder attribute(Enum<?> value) {
+            this.attributes.add(value);
+            return this;
+        }
+
+        @Override
+        public <T> InputOptionBuilder attribute(Class<T> type, T value) {
+            this.attributes.add(type, value);
+            return this;
+        }
+    }
+
+    /**
+     * A option builder for {@link OperatorOutput}.
+     * @since 0.4.1
+     */
+    public static class OutputOptionBuilder implements PortOptionBuilder {
+
+        final AttributeMap.Builder attributes = new AttributeMap.Builder();
+
+        OutputOptionBuilder() {
+            return;
+        }
+
+        @Override
+        public OutputOptionBuilder attribute(Enum<?> value) {
+            this.attributes.add(value);
+            return this;
+        }
+
+        @Override
+        public <T> OutputOptionBuilder attribute(Class<T> type, T value) {
+            this.attributes.add(type, value);
+            return this;
         }
     }
 }

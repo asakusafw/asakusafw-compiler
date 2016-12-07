@@ -191,6 +191,8 @@ public class OperatorClass implements OperatorCharacteristics {
 
     /**
      * Represents an attribute for {@link OperatorInput}.
+     * @since 0.1.0
+     * @version 0.4.1
      */
     public enum InputAttribute {
 
@@ -208,6 +210,12 @@ public class OperatorClass implements OperatorCharacteristics {
          * Each input group may be escaped from heap memory.
          */
         ESCAPED,
+
+        /**
+         * Each input group must be read up to once.
+         * @since 0.4.1
+         */
+        VOALTILE,
 
         /**
          * Each input group will be aggregated.

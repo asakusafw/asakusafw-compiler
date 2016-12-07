@@ -16,6 +16,7 @@
 package com.asakusafw.dag.runtime.adapter;
 
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
 
 import com.asakusafw.dag.api.common.ObjectCursor;
@@ -57,10 +58,29 @@ public interface CoGroupOperation extends Operation<CoGroupOperation.Input> {
      * Provides the element in each group.
      * @param <T> the element type
      * @since 0.4.0
+     * @version 0.4.1
      */
-    public interface Cursor<T> extends ObjectCursor {
+    public interface Cursor<T> extends ObjectCursor, Iterator<T> {
 
         @Override
         T getObject() throws IOException, InterruptedException;
+
+        @Override
+        default boolean hasNext() {
+            try {
+                return nextObject();
+            } catch (IOException | InterruptedException e) {
+                throw new IllegalStateException(e);
+            }
+        }
+
+        @Override
+        default T next() {
+            try {
+                return getObject();
+            } catch (IOException | InterruptedException e) {
+                throw new IllegalStateException(e);
+            }
+        }
     }
 }

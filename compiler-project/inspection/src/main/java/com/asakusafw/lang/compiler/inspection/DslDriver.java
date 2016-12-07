@@ -36,6 +36,7 @@ import com.asakusafw.lang.compiler.model.graph.OperatorConstraint;
 import com.asakusafw.lang.compiler.model.graph.OperatorGraph;
 import com.asakusafw.lang.compiler.model.graph.OperatorInput;
 import com.asakusafw.lang.compiler.model.graph.OperatorOutput;
+import com.asakusafw.lang.compiler.model.graph.OperatorPort;
 import com.asakusafw.lang.compiler.model.graph.Operators;
 import com.asakusafw.lang.compiler.model.graph.UserOperator;
 import com.asakusafw.lang.compiler.model.info.ExternalInputInfo;
@@ -162,11 +163,13 @@ public class DslDriver {
             if (port.getGroup() != null) {
                 p.withProperty("group", port.getGroup().toString()); //$NON-NLS-1$
             }
+            inspectAttributes(p, port);
         }
         for (OperatorOutput port : object.getOutputs()) {
             InspectionNode.Port p = new InspectionNode.Port(id(port));
             node.withOutput(p);
             p.withProperty(PROPERTY_TYPE, port.getDataType().toString());
+            inspectAttributes(p, port);
         }
         for (OperatorArgument arg : object.getArguments()) {
             node.withProperty(String.format("arguments.%s", arg.getName()), arg.getValue().toString()); //$NON-NLS-1$
@@ -263,6 +266,13 @@ public class DslDriver {
             result.withProperty(getAttributeKey(type), getAttributeValue(attribute));
         }
         return result;
+    }
+
+    private void inspectAttributes(InspectionNode.Port port, OperatorPort object) {
+        for (Class<?> type : object.getAttributeTypes()) {
+            Object attribute = object.getAttribute(type);
+            port.withProperty(getAttributeKey(type), getAttributeValue(attribute));
+        }
     }
 
     private static class OperatorNamer {

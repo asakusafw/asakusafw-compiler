@@ -101,7 +101,7 @@ public class LoggingOperatorUtilTest {
                 .build());
     }
 
-    private UserOperator extract(
+    private static UserOperator extract(
             Class<? extends Annotation> annotationType,
             Class<?> operatorClass,
             String methodName) {

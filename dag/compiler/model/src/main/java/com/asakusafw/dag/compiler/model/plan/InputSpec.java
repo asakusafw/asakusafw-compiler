@@ -173,6 +173,7 @@ public class InputSpec implements ElementSpec<SubPlan.Input> {
     /**
      * Represents an operation type.
      * @since 0.4.0
+     * @version 0.4.1
      */
     public enum InputOption {
 
@@ -185,5 +186,11 @@ public class InputSpec implements ElementSpec<SubPlan.Input> {
          * Uses file list buffer.
          */
         SPILL_OUT,
+
+        /**
+         * Only can read once.
+         * @since 0.4.1
+         */
+        READ_ONCE,
     }
 }
