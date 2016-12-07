@@ -16,13 +16,13 @@
 package com.asakusafw.dag.runtime.data;
 
 import java.io.Closeable;
-import java.io.EOFException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.text.MessageFormat;
 import java.util.AbstractList;
 import java.util.Arrays;
 import java.util.List;
@@ -43,6 +43,8 @@ public class SpillListBuilder<T> implements ListBuilder<T> {
 
     private static final int DEFAULT_CACHE_SIZE = 256;
 
+    private static final int DEFAULT_BUFFER_SOFT_LIMIT = 4 * 1024 * 1024;
+
     static final Logger LOG = LoggerFactory.getLogger(SpillListBuilder.class);
 
     private Entity<T> entity;
@@ -52,7 +54,7 @@ public class SpillListBuilder<T> implements ListBuilder<T> {
      * @param adapter the data adapter
      */
     public SpillListBuilder(DataAdapter<T> adapter) {
-        this(adapter, DEFAULT_CACHE_SIZE);
+        this(adapter, DEFAULT_CACHE_SIZE, DEFAULT_BUFFER_SOFT_LIMIT);
     }
 
     /**
@@ -61,7 +63,17 @@ public class SpillListBuilder<T> implements ListBuilder<T> {
      * @param cacheSize the number of objects should be cached on Java heap
      */
     public SpillListBuilder(DataAdapter<T> adapter, int cacheSize) {
-        this.entity = new Entity<>(adapter, cacheSize);
+        this.entity = new Entity<>(adapter, cacheSize, DEFAULT_BUFFER_SOFT_LIMIT);
+    }
+
+    /**
+     * Creates a new instance.
+     * @param adapter the data adapter
+     * @param cacheSize the number of objects should be cached on Java heap
+     * @param bufferSoftLimit the buffer size soft limit in bytes
+     */
+    public SpillListBuilder(DataAdapter<T> adapter, int cacheSize, int bufferSoftLimit) {
+        this.entity = new Entity<>(adapter, cacheSize, bufferSoftLimit);
     }
 
     @Override
@@ -89,8 +101,8 @@ public class SpillListBuilder<T> implements ListBuilder<T> {
 
         int sizeInList;
 
-        Entity(DataAdapter<T> adapter, int pageSize) {
-            this.store = new Store<>();
+        Entity(DataAdapter<T> adapter, int pageSize, int bufferSoftLimit) {
+            this.store = new Store<>(bufferSoftLimit);
             this.adapter = adapter;
             this.elements = (T[]) new Object[pageSize];
             this.currentPageIndex = 0;
@@ -98,6 +110,7 @@ public class SpillListBuilder<T> implements ListBuilder<T> {
         }
 
         void reset(ObjectCursor cursor) throws IOException, InterruptedException {
+            store.reset();
             DataAdapter<T> da = adapter;
             T[] es = this.elements;
             int offset = 0;
@@ -154,18 +167,32 @@ public class SpillListBuilder<T> implements ListBuilder<T> {
 
     private static class Store<T> implements Closeable {
 
-        private static final long[] EMPTY_OFFSETS = new long[0];
+        private static final int[] EMPTY_INTS = new int[0];
 
-        Path path;
+        private static final long[] EMPTY_LONGS = new long[0];
 
-        FileChannel channel;
+        private final int bufferSoftLimit;
 
-        private long[] offsets = EMPTY_OFFSETS;
+        private Path path;
+
+        private FileChannel channel;
+
+        private long[] offsets = EMPTY_LONGS;
+
+        private long[] fragmentEndOffsets = EMPTY_LONGS;
+
+        private int[] fragmentElementCounts = EMPTY_INTS;
+
+        private int fragmentTableLimit;
 
         private final ResizableNioDataBuffer buffer = new ResizableNioDataBuffer();
 
-        Store() {
-            return;
+        Store(int bufferSoftLimit) {
+            this.bufferSoftLimit = bufferSoftLimit;
+        }
+
+        void reset() {
+            this.fragmentTableLimit = 0;
         }
 
         void putPage(DataAdapter<T> adapter, int index, T[] elements, int count) throws IOException {
@@ -175,51 +202,124 @@ public class SpillListBuilder<T> implements ListBuilder<T> {
                     LOG.debug("generating list spill: {}", path);
                 }
                 channel = FileChannel.open(path,
-                        StandardOpenOption.READ, StandardOpenOption.WRITE,
+                        StandardOpenOption.CREATE, StandardOpenOption.READ, StandardOpenOption.WRITE,
                         StandardOpenOption.DELETE_ON_CLOSE);
                 offsets = new long[256];
             }
-            if (index + 1 >= offsets.length) {
+            if (index >= offsets.length) {
                 offsets = Arrays.copyOf(offsets, offsets.length * 2);
             }
+            int fragmentBegin = 0;
+            long offset = index == 0 ? 0L : offsets[index - 1];
             buffer.contents.clear();
             for (int i = 0; i < count; i++) {
+                if (buffer.contents.position() > bufferSoftLimit) {
+                    // write fragment if buffer was exceeded
+                    int fragmentEnd = i;
+                    assert fragmentEnd > fragmentBegin;
+                    offset = putFragment(offset, fragmentEnd - fragmentBegin, buffer.contents);
+                    buffer.contents.clear();
+                    fragmentBegin = fragmentEnd;
+                }
                 adapter.write(elements[i], buffer);
             }
-            ByteBuffer buf = buffer.contents;
-            buf.flip();
-            long offset = offsets[index];
-            long end = offset + buf.limit();
+            assert buffer.contents.hasRemaining();
+            long end = putContents(offset, buffer.contents);
+            offsets[index] = end;
+        }
+
+        private long putFragment(long begin, int elementCount, ByteBuffer contents) throws IOException {
+            assert elementCount > 0;
+            if (fragmentTableLimit >= fragmentEndOffsets.length) {
+                int size = Math.max(fragmentEndOffsets.length * 2, 256);
+                fragmentEndOffsets = Arrays.copyOf(fragmentEndOffsets, size);
+                fragmentElementCounts = Arrays.copyOf(fragmentElementCounts, size);
+            }
+            long end = putContents(begin, contents);
+            fragmentEndOffsets[fragmentTableLimit] = end;
+            fragmentElementCounts[fragmentTableLimit] = elementCount;
+            fragmentTableLimit++;
+            return end;
+        }
+
+        private long putContents(long begin, ByteBuffer contents) throws IOException {
+            contents.flip();
             if (LOG.isTraceEnabled()) {
-                LOG.trace(String.format("writing list spill: %s#%,d@%,d+%,d", path, index, offset, buf.remaining())); //$NON-NLS-1$
+                LOG.trace(String.format("writing page fragment: %s#%,d@%,d+%,d", path, begin, contents.remaining())); //$NON-NLS-1$
             }
-            while (buf.hasRemaining()) {
-                offset += channel.write(buf, offset);
+            long offset = begin;
+            while (contents.hasRemaining()) {
+                offset += channel.write(contents, offset);
             }
-            offsets[index + 1] = end;
+            return offset;
         }
 
         void getPage(DataAdapter<T> adapter, int index, T[] elements, int count) throws IOException {
-            long offset = offsets[index];
-            long end = offsets[index + 1];
-            int length = (int) (end - offset);
-
+            long offset = index == 0 ? 0L : offsets[index - 1];
+            long end = offsets[index];
+            long length = end - offset;
             ByteBuffer buf = buffer.contents;
-            assert length <= buf.capacity();
-            buf.clear().limit(length);
-
-            if (LOG.isTraceEnabled()) {
-                LOG.trace(String.format("reading list spill: %s#%,d@%,d+%,d", path, index, offset, buf.remaining())); //$NON-NLS-1$
+            if (buf.capacity() >= length) {
+                readFragment(adapter, offset, end, elements, 0, count);
+            } else {
+                getPageFragments(adapter, offset, end, elements, count);
             }
+        }
+
+        private void getPageFragments(
+                DataAdapter<T> adapter,
+                long begin, long end,
+                T[] elements, int count) throws IOException {
+            long fileOffset = begin;
+            int arrayOffset = 0;
+            int fIndex = findFragmentsIndex(begin, end);
+            for (int i = fIndex, n = fragmentTableLimit; i < n; i++) {
+                long fragmentEnd = fragmentEndOffsets[i];
+                if (fragmentEnd >= end) {
+                    break;
+                }
+                int arrayEnd = arrayOffset + fragmentElementCounts[i];
+                // reads rest elements
+                readFragment(adapter, fileOffset, fragmentEnd, elements, arrayOffset, arrayEnd);
+                fileOffset = fragmentEnd;
+                arrayOffset = arrayEnd;
+            }
+            assert fileOffset < end;
+            assert arrayOffset < count;
+            // reads rest elements
+            readFragment(adapter, fileOffset, end, elements, arrayOffset, count);
+        }
+
+        private int findFragmentsIndex(long begin, long end) {
+            int fIndex = Arrays.binarySearch(fragmentEndOffsets, 0, fragmentTableLimit, begin);
+            if (fIndex == fragmentTableLimit || fIndex >= 0) {
+                throw new IllegalStateException();
+            }
+            fIndex = -(fIndex + 1);
+            assert begin < fragmentEndOffsets[fIndex] && fragmentEndOffsets[fIndex] < end;
+            return fIndex;
+        }
+
+        private void readFragment(
+                DataAdapter<T> adapter,
+                long fileBegin, long fileEnd,
+                T[] elements, int arrayBegin, int arrayEnd) throws IOException {
+            ByteBuffer buf = buffer.contents;
+            int fileSize = (int) (fileEnd - fileBegin);
+            buf.clear().limit(fileSize);
+            if (LOG.isTraceEnabled()) {
+                LOG.trace(String.format("reading page fragment: %s#%,d@%,d+%,d", path, fileBegin, buf.remaining())); //$NON-NLS-1$
+            }
+            long offset = fileBegin;
             while (buf.hasRemaining()) {
                 int read = channel.read(buf, offset);
                 if (read < 0) {
-                    throw new EOFException();
+                    throw new IllegalStateException();
                 }
                 offset += read;
             }
             buf.flip();
-            for (int i = 0; i < count; i++) {
+            for (int i = arrayBegin; i < arrayEnd; i++) {
                 adapter.read(buffer, elements[i]);
             }
         }
@@ -227,9 +327,16 @@ public class SpillListBuilder<T> implements ListBuilder<T> {
         @Override
         public void close() throws IOException {
             if (channel != null) {
-                offsets = EMPTY_OFFSETS;
+                offsets = EMPTY_LONGS;
+                fragmentEndOffsets = EMPTY_LONGS;
+                fragmentElementCounts = EMPTY_INTS;
                 buffer.contents = NioDataBuffer.EMPTY_BUFFER;
-                channel.close();
+                channel.close(); // DELETE_ON_CLOSE
+                if (Files.exists(path) && Files.deleteIfExists(path) == false && Files.exists(path)) {
+                    LOG.warn(MessageFormat.format(
+                            "failed to delete a temporary file: {0}",
+                            path));
+                }
                 channel = null;
                 path = null;
             }

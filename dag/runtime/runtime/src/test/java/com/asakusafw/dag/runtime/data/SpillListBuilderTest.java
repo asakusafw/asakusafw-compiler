@@ -125,12 +125,11 @@ public class SpillListBuilderTest {
                 IntOption value = list.get(i);
                 assertEquals(i + begin, value.get());
             }
-        }
-        try (SpillListBuilder<IntOption> builder = new SpillListBuilder<>(new IntOptionAdapter())) {
-            int begin = 2_000_000;
-            int end = 3_000_000;
-            int size = end - begin;
-            List<IntOption> list = builder.build(IntOptionAdapter.range(begin, end));
+
+            begin = 2_000_000;
+            end = 3_000_000;
+            size = end - begin;
+            list = builder.build(IntOptionAdapter.range(begin, end));
             assertThat(list.size(), is(size));
             for (int i = 0, n = end - begin; i < n; i++) {
                 IntOption value = list.get(i);
@@ -182,6 +181,100 @@ public class SpillListBuilderTest {
             for (IntOption value : list) {
                 assertThat(value, is(new IntOption(index++)));
             }
+        }
+    }
+
+    /**
+     * w/ fragments.
+     * @throws Exception if failed
+     */
+    @Test
+    public void fragments() throws Exception {
+        try (SpillListBuilder<IntOption> builder = new SpillListBuilder<>(
+                new IntOptionAdapter(), 1024, 4096)) {
+            int begin = 0;
+            int end = 100_000;
+            int size = end - begin;
+            List<IntOption> list = builder.build(IntOptionAdapter.range(begin, end));
+            assertThat(list.size(), is(size));
+            for (int i = 0, n = end - begin; i < n; i++) {
+                IntOption value = list.get(i);
+                assertEquals(i + begin, value.get());
+            }
+        }
+    }
+
+    /**
+     * just fragment size.
+     * @throws Exception if failed
+     */
+    @Test
+    public void fragments_just() throws Exception {
+        try (SpillListBuilder<IntOption> builder = new SpillListBuilder<>(
+                new IntOptionAdapter(), 1024, 5 * 1024 * 2)) {
+            int begin = 0;
+            int end = 100_000;
+            int size = end - begin;
+            List<IntOption> list = builder.build(IntOptionAdapter.range(begin, end));
+            assertThat(list.size(), is(size));
+            for (int i = 0, n = end - begin; i < n; i++) {
+                IntOption value = list.get(i);
+                assertEquals(i + begin, value.get());
+            }
+        }
+    }
+
+    /**
+     * w/ fragments.
+     * @throws Exception if failed
+     */
+    @Test
+    public void fragments_reuse() throws Exception {
+        try (SpillListBuilder<IntOption> builder = new SpillListBuilder<>(
+                new IntOptionAdapter(), 2000, 4096)) {
+            int begin = 0;
+            int end = 100_000;
+            int size = end - begin;
+            List<IntOption> list = builder.build(IntOptionAdapter.range(begin, end));
+            assertThat(list.size(), is(size));
+            for (int i = 0, n = end - begin; i < n; i++) {
+                IntOption value = list.get(i);
+                assertEquals(i + begin, value.get());
+            }
+
+            begin = 100_000;
+            end = 200_000;
+            size = end - begin;
+            list = builder.build(IntOptionAdapter.range(begin, end));
+            assertThat(list.size(), is(size));
+            for (int i = 0, n = end - begin; i < n; i++) {
+                IntOption value = list.get(i);
+                assertEquals(i + begin, value.get());
+            }
+        }
+    }
+
+    /**
+     * w/ fragments.
+     * @throws Exception if failed
+     */
+    @Test
+    public void fragments_huge() throws Exception {
+        try (SpillListBuilder<IntOption> builder = new SpillListBuilder<>(
+                new IntOptionAdapter(), 2000, 4096)) {
+            int begin = 0;
+            int end = 100_000_000;
+            int size = end - begin;
+            long t0 = System.currentTimeMillis();
+            List<IntOption> list = builder.build(IntOptionAdapter.range(begin, end));
+            assertThat(list.size(), is(size));
+            long t1 = System.currentTimeMillis();
+            for (int i = 0, n = end - begin; i < n; i++) {
+                IntOption value = list.get(i);
+                assertEquals(i + begin, value.get());
+            }
+            long t2 = System.currentTimeMillis();
+            System.out.printf("fragments - write: %,dms, read: %,dms%n", t1 - t0, t2 - t1);
         }
     }
 
