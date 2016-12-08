@@ -245,7 +245,7 @@ public class SpillListBuilder<T> implements ListBuilder<T> {
         private long putContents(long begin, ByteBuffer contents) throws IOException {
             contents.flip();
             if (LOG.isTraceEnabled()) {
-                LOG.trace(String.format("writing page fragment: %s#%,d@%,d+%,d", path, begin, contents.remaining())); //$NON-NLS-1$
+                LOG.trace(String.format("writing page fragment: %s@%,d+%,d", path, begin, contents.remaining())); //$NON-NLS-1$
             }
             long offset = begin;
             while (contents.hasRemaining()) {
@@ -308,7 +308,7 @@ public class SpillListBuilder<T> implements ListBuilder<T> {
             int fileSize = (int) (fileEnd - fileBegin);
             buf.clear().limit(fileSize);
             if (LOG.isTraceEnabled()) {
-                LOG.trace(String.format("reading page fragment: %s#%,d@%,d+%,d", path, fileBegin, buf.remaining())); //$NON-NLS-1$
+                LOG.trace(String.format("reading page fragment: %s@%,d+%,d", path, fileBegin, buf.remaining())); //$NON-NLS-1$
             }
             long offset = fileBegin;
             while (buf.hasRemaining()) {
