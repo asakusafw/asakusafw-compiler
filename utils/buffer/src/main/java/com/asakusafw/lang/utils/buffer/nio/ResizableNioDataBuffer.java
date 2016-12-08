@@ -28,7 +28,7 @@ import com.asakusafw.lang.utils.buffer.DataIoUtils;
  */
 public class ResizableNioDataBuffer implements DataBuffer {
 
-    private static final ByteBuffer EMPTY_BUFFER = ByteBuffer.allocateDirect(0).order(ByteOrder.nativeOrder());
+    private static final ByteBuffer EMPTY_BUFFER = allocate(0);
 
     static final double DEFAULT_BUFFER_EXPANSION_FACTOR = 1.5;
 
@@ -56,8 +56,12 @@ public class ResizableNioDataBuffer implements DataBuffer {
      * @param expansionFactor the buffer expansion factor
      */
     public ResizableNioDataBuffer(int initialCapacity, double expansionFactor) {
-        this.contents = EMPTY_BUFFER;
+        this.contents = initialCapacity <= 0 ? EMPTY_BUFFER : allocate(initialCapacity);
         this.expansionFactor = Math.max(expansionFactor, MINIMUM_BUFFER_EXPANSION_FACTOR);
+    }
+
+    private static ByteBuffer allocate(int size) {
+        return ByteBuffer.allocateDirect(size).order(ByteOrder.nativeOrder());
     }
 
     @Override
