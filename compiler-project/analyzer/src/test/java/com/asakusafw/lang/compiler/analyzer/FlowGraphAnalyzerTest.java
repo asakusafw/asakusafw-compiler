@@ -33,9 +33,12 @@ import com.asakusafw.lang.compiler.model.graph.ExternalInput;
 import com.asakusafw.lang.compiler.model.graph.ExternalOutput;
 import com.asakusafw.lang.compiler.model.graph.Groups;
 import com.asakusafw.lang.compiler.model.graph.OperatorConstraint;
+import com.asakusafw.lang.compiler.model.graph.OperatorInput.InputUnit;
 import com.asakusafw.lang.compiler.model.graph.UserOperator;
+import com.asakusafw.runtime.core.DataTable;
 import com.asakusafw.runtime.core.Result;
 import com.asakusafw.vocabulary.attribute.BufferType;
+import com.asakusafw.vocabulary.attribute.DataTableInfo;
 import com.asakusafw.vocabulary.external.ExporterDescription;
 import com.asakusafw.vocabulary.external.ImporterDescription;
 import com.asakusafw.vocabulary.flow.FlowDescription;
@@ -49,6 +52,7 @@ import com.asakusafw.vocabulary.flow.graph.ObservationCount;
 import com.asakusafw.vocabulary.flow.graph.OperatorDescription;
 import com.asakusafw.vocabulary.flow.graph.OutputDescription;
 import com.asakusafw.vocabulary.flow.graph.PortDirection;
+import com.asakusafw.vocabulary.flow.graph.ShuffleKey;
 import com.asakusafw.vocabulary.flow.util.CoreOperators;
 import com.asakusafw.vocabulary.model.Key;
 import com.asakusafw.vocabulary.operator.CoGroup;
@@ -489,10 +493,10 @@ public class FlowGraphAnalyzerTest {
                     .declareParameter(Result.class)
                     .addPort(new FlowElementPortDescription(
                             "p", String.class,
-                            PortDirection.INPUT, null, Arrays.asList(BufferType.VOLATILE)))
+                            PortDirection.INPUT, null, BufferType.VOLATILE))
                     .addPort(new FlowElementPortDescription(
                             "p", String.class,
-                            PortDirection.OUTPUT, null, Arrays.asList(BufferType.SPILL)))
+                            PortDirection.OUTPUT, null, BufferType.SPILL))
                     .toDescription())
             .add("d0", new OutputDescription("p", String.class))
             .connect("s0", "o0")
@@ -513,6 +517,130 @@ public class FlowGraphAnalyzerTest {
         UserOperator operator = (UserOperator) inspector.get("o0");
         assertThat(operator.getInput(0).getAttribute(BufferType.class), is(BufferType.VOLATILE));
         assertThat(operator.getOutput(0).getAttribute(BufferType.class), is(BufferType.SPILL));
+    }
+
+    /**
+     * per record.
+     */
+    @Test
+    public void record() {
+        FlowGraph g = new MockFlowGraph()
+                .add("s0", new InputDescription("p", String.class))
+                .add("o0", new OperatorDescription.Builder(MockOperator.class)
+                        .declare(Mock.class, Mock.class, "simple")
+                        .declareParameter(String.class)
+                        .declareParameter(Result.class)
+                        .addPort(new FlowElementPortDescription(
+                                "in", String.class,
+                                PortDirection.INPUT, null))
+                        .addPort(new FlowElementPortDescription("p", String.class, PortDirection.OUTPUT))
+                        .toDescription())
+                .add("d0", new OutputDescription("p", String.class))
+                .connect("s0", "o0")
+                .connect("o0", "d0")
+                .toGraph();
+
+        OperatorGraphInspector inspector = new OperatorGraphInspector(converter.analyze(g))
+                .input("s0", "p")
+                .operator("o0", Mock.class, "simple")
+                .output("d0", "p");
+
+        inspector
+            .operators(3)
+            .connections(2)
+            .connected("s0", "o0")
+            .connected("o0", "d0");
+
+        UserOperator operator = (UserOperator) inspector.get("o0");
+        assertThat(operator.getInput(0).getInputUnit(), is(InputUnit.RECORD));
+        assertThat(operator.getInput(0).getGroup(), is(nullValue()));
+        assertThat(operator.getInput(0).getAttribute(DataTableInfo.class), is(nullValue()));
+    }
+
+    /**
+     * per group.
+     */
+    @Test
+    public void group() {
+        FlowGraph g = new MockFlowGraph()
+                .add("s0", new InputDescription("p", String.class))
+                .add("o0", new OperatorDescription.Builder(MockOperator.class)
+                        .declare(Mock.class, Mock.class, "shuffle")
+                        .declareParameter(List.class)
+                        .declareParameter(Result.class)
+                        .addPort(new FlowElementPortDescription(
+                                "in", String.class,
+                                PortDirection.INPUT, new ShuffleKey(
+                                        Arrays.asList("key"),
+                                        Arrays.asList(new ShuffleKey.Order("sort", ShuffleKey.Direction.ASC)))))
+                        .addPort(new FlowElementPortDescription("p", String.class, PortDirection.OUTPUT))
+                        .toDescription())
+                .add("d0", new OutputDescription("p", String.class))
+                .connect("s0", "o0")
+                .connect("o0", "d0")
+                .toGraph();
+
+        OperatorGraphInspector inspector = new OperatorGraphInspector(converter.analyze(g))
+                .input("s0", "p")
+                .operator("o0", Mock.class, "shuffle")
+                .output("d0", "p");
+
+        inspector
+        .operators(3)
+        .connections(2)
+        .connected("s0", "o0")
+        .connected("o0", "d0");
+
+        UserOperator operator = (UserOperator) inspector.get("o0");
+        assertThat(operator.getInput(0).getInputUnit(), is(InputUnit.GROUP));
+        assertThat(operator.getInput(0).getGroup(), is(Groups.parse("=key", "+sort")));
+        assertThat(operator.getInput(0).getAttribute(DataTableInfo.class), is(nullValue()));
+    }
+
+    /**
+     * data table.
+     */
+    @Test
+    public void data_table() {
+        FlowGraph g = new MockFlowGraph()
+                .add("s0", new InputDescription("p0", String.class))
+                .add("s1", new InputDescription("p1", String.class))
+                .add("o0", new OperatorDescription.Builder(MockOperator.class)
+                        .declare(Mock.class, Mock.class, "table")
+                        .declareParameter(String.class)
+                        .declareParameter(DataTable.class)
+                        .declareParameter(Result.class)
+                        .addPort(new FlowElementPortDescription(
+                                "in", String.class,
+                                PortDirection.INPUT, null))
+                        .addPort(new FlowElementPortDescription(
+                                "side", String.class,
+                                PortDirection.INPUT, null, DataTableInfo.of("=key", "+sort")))
+                        .addPort(new FlowElementPortDescription("p", String.class, PortDirection.OUTPUT))
+                        .toDescription())
+                .add("d0", new OutputDescription("p", String.class))
+                .connect("s0", "o0.in")
+                .connect("s1", "o0.side")
+                .connect("o0", "d0")
+                .toGraph();
+
+        OperatorGraphInspector inspector = new OperatorGraphInspector(converter.analyze(g))
+                .input("s0", "p0")
+                .input("s1", "p1")
+                .operator("o0", Mock.class, "table")
+                .output("d0", "p");
+
+        inspector
+            .operators(4)
+            .connections(3)
+            .connected("s0", "o0.in")
+            .connected("s1", "o0.side")
+            .connected("o0", "d0");
+
+        UserOperator operator = (UserOperator) inspector.get("o0");
+        assertThat(operator.getInput(1).getInputUnit(), is(InputUnit.WHOLE));
+        assertThat(operator.getInput(1).getGroup(), is(Groups.parse("=key", "+sort")));
+        assertThat(operator.getInput(1).getAttribute(DataTableInfo.class), is(DataTableInfo.of("=key", "+sort")));
     }
 
     /**
@@ -575,6 +703,12 @@ public class FlowGraphAnalyzerTest {
 
         @MockOperator(parameters = { "in", "out", "argument" })
         public abstract void parameterized(String in, Result<String> out, int argument);
+
+        @MockOperator
+        public abstract void table(
+                String in,
+                @Key(group = "key", order = { "+sortA", "-sortB" }) DataTable<String> side,
+                Result<String> out);
 
         @MockOperator
         public abstract void shuffle(

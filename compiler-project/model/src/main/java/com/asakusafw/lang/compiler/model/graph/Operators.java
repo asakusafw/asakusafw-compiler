@@ -469,8 +469,8 @@ public final class Operators {
     }
 
     /**
-     * Replaces a &quot;straight&quot; operator with another &quot;straight&quot; operator.
-     * The strait operator must only have a single input and output port.
+     * Replaces an operator with another equivalent operator.
+     * The equivalent operators must have same input/output ports.
      * The original operator will {@link Operator#disconnectAll() have no successors nor predecessors}.
      * @param oldOperator the operator to be replaced
      * @param newOperator the replacement operator
@@ -478,12 +478,30 @@ public final class Operators {
     public static void replace(Operator oldOperator, Operator newOperator) {
         List<OperatorInput> oldInputs = oldOperator.getInputs();
         List<OperatorOutput> oldOutputs = oldOperator.getOutputs();
-        checkStraight(oldInputs, oldOutputs);
         List<OperatorInput> newInputs = newOperator.getInputs();
         List<OperatorOutput> newOutputs = newOperator.getOutputs();
-        checkStraight(newInputs, newOutputs);
-        connectAll(oldInputs.get(0).getOpposites(), newInputs.get(0));
-        connectAll(newOutputs.get(0), oldOutputs.get(0).getOpposites());
+        if (oldInputs.size() != newInputs.size()) {
+            throw new IllegalArgumentException();
+        }
+        if (oldOutputs.size() != newOutputs.size()) {
+            throw new IllegalArgumentException();
+        }
+        for (int i = 0, n = oldInputs.size(); i < n; i++) {
+            OperatorInput oldPort = oldInputs.get(i);
+            OperatorInput newPort = newInputs.get(i);
+            if (oldPort.getDataType().equals(newPort.getDataType()) == false) {
+                throw new IllegalArgumentException();
+            }
+            connectAll(oldPort.getOpposites(), newPort);
+        }
+        for (int i = 0, n = oldOutputs.size(); i < n; i++) {
+            OperatorOutput oldPort = oldOutputs.get(i);
+            OperatorOutput newPort = newOutputs.get(i);
+            if (oldPort.getDataType().equals(newPort.getDataType()) == false) {
+                throw new IllegalArgumentException();
+            }
+            connectAll(newPort, oldPort.getOpposites());
+        }
         oldOperator.disconnectAll();
     }
 

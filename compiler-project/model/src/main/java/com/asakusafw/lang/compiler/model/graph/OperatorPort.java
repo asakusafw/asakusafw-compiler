@@ -18,6 +18,7 @@ package com.asakusafw.lang.compiler.model.graph;
 import java.util.Collection;
 import java.util.Set;
 
+import com.asakusafw.lang.compiler.common.AttributeProvider;
 import com.asakusafw.lang.compiler.model.description.TypeDescription;
 
 /**
@@ -25,7 +26,7 @@ import com.asakusafw.lang.compiler.model.description.TypeDescription;
  * @since 0.1.0
  * @version 0.4.1
  */
-public interface OperatorPort extends OperatorProperty {
+public interface OperatorPort extends OperatorProperty, AttributeProvider {
 
     /**
      * Returns the declaring operator.
@@ -46,20 +47,10 @@ public interface OperatorPort extends OperatorProperty {
      */
     TypeDescription getDataType();
 
-    /**
-     * Returns the all attribute types which this port has.
-     * @return the all attribute types
-     * @since 0.4.1
-     */
+    @Override
     Set<Class<?>> getAttributeTypes();
 
-    /**
-     * Returns an attribute.
-     * @param <T> the attribute type
-     * @param attributeType the attribute type
-     * @return the attribute value, or {@code null} if the port has no such an attribute
-     * @since 0.4.1
-     */
+    @Override
     <T> T getAttribute(Class<T> attributeType);
 
     /**

@@ -22,6 +22,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.asakusafw.lang.compiler.common.AttributeEntry;
+
 /**
  * Represents a map of attributes.
  * @since 0.4.1
@@ -82,6 +84,10 @@ public final class AttributeMap {
         return new AttributeMap(copy);
     }
 
+    void copyTo(AttributeMap.Builder builder) {
+        copyTo(entries, builder.entries);
+    }
+
     static void copyTo(Map<Class<?>, Object> from, Map<Class<?>, Object> to) {
         for (Map.Entry<Class<?>, Object> entry : from.entrySet()) {
             Class<?> key = entry.getKey();
@@ -115,6 +121,20 @@ public final class AttributeMap {
     public static class Builder {
 
         Map<Class<?>, Object> entries;
+
+        /**
+         * Adds an attribute.
+         * @param entry the attribute entry
+         * @return this
+         */
+        public Builder add(AttributeEntry<?> entry) {
+            Objects.requireNonNull(entry);
+            if (entries == null) {
+                entries = new LinkedHashMap<>();
+            }
+            entries.put(entry.getType(), entry.getValue());
+            return this;
+        }
 
         /**
          * Adds an attribute.

@@ -27,6 +27,8 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
+import com.asakusafw.lang.compiler.common.AttributeEntry;
+import com.asakusafw.lang.compiler.common.AttributeProvider;
 import com.asakusafw.lang.compiler.model.description.TypeDescription;
 import com.asakusafw.lang.compiler.model.description.ValueDescription;
 
@@ -37,7 +39,7 @@ import com.asakusafw.lang.compiler.model.description.ValueDescription;
  * @since 0.1.0
  * @version 0.4.1
  */
-public abstract class Operator {
+public abstract class Operator implements AttributeProvider {
 
     private static final AtomicLong COUNTER = new AtomicLong();
 
@@ -267,10 +269,7 @@ public abstract class Operator {
         return results;
     }
 
-    /**
-     * Returns the all attribute types which this operator has.
-     * @return the all attribute types
-     */
+    @Override
     public Set<Class<?>> getAttributeTypes() {
         return Collections.unmodifiableSet(attributes.keySet());
     }
@@ -281,6 +280,7 @@ public abstract class Operator {
      * @param attributeType the attribute type
      * @return the attribute value, or {@code null} if the operator has no such an attribute
      */
+    @Override
     public <T> T getAttribute(Class<T> attributeType) {
         Object value = attributes.get(attributeType);
         if (value == null) {
@@ -399,6 +399,30 @@ public abstract class Operator {
             owner.attributes.put(attributeType, attributeValue);
             return getSelf();
         }
+        /**
+         * Adds an attribute to the building operator.
+         * @param value the attribute value
+         * @return this
+         * @since 0.4.1
+         */
+        public TSelf attribute(Enum<?> value) {
+            owner.attributes.put(value.getDeclaringClass(), value);
+            return getSelf();
+        }
+
+        /**
+         * Adds an attribute to the building operator.
+         * When clients {@link MarkerOperator#copy() copy operators},
+         * only attributes implementing {@link OperatorAttribute}
+         * are also copied using {@link OperatorAttribute#copy()} method.
+         * @param entry the attribute entry
+         * @return this
+         * @since 0.4.1
+         */
+        public TSelf attribute(AttributeEntry<?> entry) {
+            owner.attributes.put(entry.getType(), entry.getValue());
+            return getSelf();
+        }
     }
 
     /**
@@ -426,9 +450,25 @@ public abstract class Operator {
          * @since 0.4.1
          */
         public TSelf input(OperatorInput port) {
-            TOperator owner = getOwner();
-            owner.properties.add(port.copy(owner));
-            return getSelf();
+            return input(port, c -> {
+                return;
+            });
+        }
+
+        /**
+         * Adds a clone of the given input port to the building operator.
+         * @param port the original input
+         * @param configurator the configurator
+         * @return this
+         * @since 0.4.1
+         */
+        public TSelf input(OperatorInput port, Consumer<InputOptionBuilder> configurator) {
+            return input(port.getName(), port.getDataType(), c -> {
+                c.unit(port.getInputUnit());
+                c.group(port.getGroup());
+                port.getAttributeMap().copyTo(c.attributes);
+                configurator.accept(c);
+            });
         }
 
         /**
@@ -441,6 +481,20 @@ public abstract class Operator {
             TOperator owner = getOwner();
             owner.properties.add(port.copy(owner));
             return getSelf();
+        }
+
+        /**
+         * Adds a clone of the given output port to the building operator.
+         * @param port the original output
+         * @param configurator the configurator
+         * @return this
+         * @since 0.4.1
+         */
+        public TSelf output(OperatorOutput port, Consumer<OutputOptionBuilder> configurator) {
+            return output(port.getName(), port.getDataType(), c -> {
+                port.getAttributeMap().copyTo(c.attributes);
+                configurator.accept(c);
+            });
         }
 
         /**
@@ -467,7 +521,10 @@ public abstract class Operator {
             InputOptionBuilder sub = new InputOptionBuilder();
             configurator.accept(sub);
             TOperator owner = getOwner();
-            OperatorInput port = new OperatorInput(owner, name, dataType, sub.group, sub.attributes.build());
+            OperatorInput port = new OperatorInput(
+                    owner, name, dataType,
+                    sub.inputUnit, sub.group,
+                    sub.attributes.build());
             owner.properties.add(port);
             for (OperatorOutput upstream : sub.upstreams) {
                 port.connect(upstream);
@@ -597,6 +654,13 @@ public abstract class Operator {
 
         /**
          * Adds an attribute to the building input.
+         * @param entry the attribute entry
+         * @return this
+         */
+        PortOptionBuilder attribute(AttributeEntry<?> entry);
+
+        /**
+         * Adds an attribute to the building input.
          * @param value the attribute value
          * @return this
          */
@@ -618,6 +682,8 @@ public abstract class Operator {
      */
     public static class InputOptionBuilder implements PortOptionBuilder {
 
+        OperatorInput.InputUnit inputUnit = OperatorInput.InputUnit.RECORD;
+
         Group group;
 
         final List<OperatorOutput> upstreams = new ArrayList<>();
@@ -629,12 +695,28 @@ public abstract class Operator {
         }
 
         /**
+         * Sets the input unit kind.
+         * @param unit the input unit kind
+         * @return this
+         */
+        public InputOptionBuilder unit(OperatorInput.InputUnit unit) {
+            this.inputUnit = unit;
+            return this;
+        }
+
+        /**
          * Sets the grouping information.
+         * If the {@link #unit(com.asakusafw.lang.compiler.model.graph.OperatorInput.InputUnit) unit()} has not been
+         * set, this operation will change the input unit to
+         * {@link com.asakusafw.lang.compiler.model.graph.OperatorInput.InputUnit#GROUP GROUP}.
          * @param grouping grouping information
          * @return this
          */
         public InputOptionBuilder group(Group grouping) {
             this.group = grouping;
+            if (grouping != null && inputUnit == OperatorInput.InputUnit.RECORD) {
+                inputUnit = OperatorInput.InputUnit.GROUP;
+            }
             return this;
         }
 
@@ -665,6 +747,12 @@ public abstract class Operator {
         }
 
         @Override
+        public InputOptionBuilder attribute(AttributeEntry<?> entry) {
+            this.attributes.add(entry);
+            return this;
+        }
+
+        @Override
         public <T> InputOptionBuilder attribute(Class<T> type, T value) {
             this.attributes.add(type, value);
             return this;
@@ -686,6 +774,12 @@ public abstract class Operator {
         @Override
         public OutputOptionBuilder attribute(Enum<?> value) {
             this.attributes.add(value);
+            return this;
+        }
+
+        @Override
+        public OutputOptionBuilder attribute(AttributeEntry<?> entry) {
+            this.attributes.add(entry);
             return this;
         }
 

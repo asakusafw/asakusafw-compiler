@@ -50,14 +50,20 @@ import com.asakusafw.lang.compiler.model.graph.Jobflow;
 import com.asakusafw.lang.compiler.model.graph.MarkerOperator;
 import com.asakusafw.lang.compiler.model.graph.Operator;
 import com.asakusafw.lang.compiler.model.graph.Operator.OperatorKind;
+import com.asakusafw.lang.compiler.model.graph.OperatorArgument;
 import com.asakusafw.lang.compiler.model.graph.OperatorGraph;
 import com.asakusafw.lang.compiler.model.graph.OperatorInput;
+import com.asakusafw.lang.compiler.model.graph.OperatorInput.InputUnit;
+import com.asakusafw.lang.compiler.model.graph.OperatorOutput;
+import com.asakusafw.lang.compiler.model.graph.OperatorProperty;
 import com.asakusafw.lang.compiler.model.graph.Operators;
+import com.asakusafw.lang.compiler.model.graph.UserOperator;
 import com.asakusafw.lang.compiler.model.info.JobflowInfo;
 import com.asakusafw.lang.compiler.optimizer.OperatorCharacterizers;
 import com.asakusafw.lang.compiler.optimizer.OperatorRewriters;
 import com.asakusafw.lang.compiler.optimizer.adapter.OptimizerContextAdapter;
 import com.asakusafw.lang.compiler.optimizer.basic.OperatorClass;
+import com.asakusafw.lang.compiler.optimizer.basic.OperatorClass.InputAttribute;
 import com.asakusafw.lang.compiler.planning.OperatorEquivalence;
 import com.asakusafw.lang.compiler.planning.Plan;
 import com.asakusafw.lang.compiler.planning.PlanAssembler;
@@ -194,8 +200,80 @@ public final class DagPlanning {
     static void prepareOperatorGraph(PlanningContext context, OperatorGraph graph) {
         Planning.normalize(graph);
         optimize(context, graph);
+        fixOperatorGraph(context, graph);
         insertPlanMarkers(context, graph);
         Planning.simplifyTerminators(graph);
+    }
+
+    private static void fixOperatorGraph(PlanningContext context, OperatorGraph graph) {
+        Map<Operator, OperatorClass> characteristics = OperatorCharacterizers.apply(
+                context.getOptimizerContext(),
+                context.getEstimator(),
+                context.getClassifier(),
+                graph.getOperators(false));
+        for (Operator operator : graph.getOperators(true)) {
+            if (operator.getOperatorKind() != OperatorKind.USER) {
+                continue;
+            }
+            OperatorClass info = characteristics.get(operator);
+            for (OperatorInput port : operator.getInputs()) {
+                boolean whole = port.getInputUnit() == OperatorInput.InputUnit.WHOLE;
+                boolean secondary = info.getSecondaryInputs().contains(port);
+                if (whole != secondary) {
+                    Operator replacement = fixOperator(info);
+                    Operators.replace(operator, replacement);
+                    graph.add(replacement);
+                    graph.remove(operator);
+                    break;
+                }
+            }
+        }
+        graph.rebuild();
+    }
+
+    private static Operator fixOperator(OperatorClass info) {
+        UserOperator operator = (UserOperator) info.getOperator();
+        UserOperator.Builder builder = UserOperator
+                .builder(operator.getAnnotation(), operator.getMethod(), operator.getImplementationClass());
+        for (OperatorProperty property : operator.getProperties()) {
+            switch (property.getPropertyKind()) {
+            case INPUT: {
+                OperatorInput port = (OperatorInput) property;
+                builder.input(port, c -> {
+                    Set<InputAttribute> attrs = info.getAttributes(port);
+                    if (attrs.contains(InputAttribute.PRIMARY)) {
+                        switch (info.getPrimaryInputType()) {
+                        case NOTHING:
+                            c.unit(port.getInputUnit()); // inherit
+                            break;
+                        case RECORD:
+                            c.unit(InputUnit.RECORD);
+                            break;
+                        case GROUP:
+                            c.unit(InputUnit.GROUP);
+                            break;
+                        default:
+                            throw new AssertionError(info);
+                        }
+                    } else {
+                        c.unit(InputUnit.WHOLE);
+                    }
+                });
+                break;
+            }
+            case OUTPUT:
+                builder.output((OperatorOutput) property);
+                break;
+            case ARGUMENT:
+                builder.argument((OperatorArgument) property);
+                break;
+            default:
+                throw new AssertionError(property);
+            }
+        }
+        operator.getAttributeEntries().forEach(builder::attribute);
+        builder.constraint(operator.getConstraints());
+        return builder.build();
     }
 
     private static void optimize(PlanningContext context, OperatorGraph graph) {
@@ -258,6 +336,7 @@ public final class DagPlanning {
         }
         for (OperatorInput port : info.getPrimaryInputs()) {
             if (isEmpty(port) == false) {
+                assert  port.getInputUnit() == InputUnit.GROUP;
                 boolean aggregate = info.getAttributes(port).contains(OperatorClass.InputAttribute.AGGREATE);
                 EdgeInfo edge = new EdgeInfo(
                         port.getDataType(),
@@ -274,6 +353,7 @@ public final class DagPlanning {
     private static void insertPlanMarkerForPreparingBroadcast(OperatorClass info) {
         for (OperatorInput port : info.getSecondaryInputs()) {
             if (isEmpty(port) == false) {
+                assert  port.getInputUnit() == InputUnit.WHOLE;
                 EdgeInfo edge = new EdgeInfo(port.getDataType(), port.getGroup(), null);
                 Operators.insert(MarkerOperator.builder(port.getDataType())
                         .attribute(PlanMarker.class, PlanMarker.BROADCAST)

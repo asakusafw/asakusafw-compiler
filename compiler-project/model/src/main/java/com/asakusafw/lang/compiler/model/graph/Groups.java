@@ -17,7 +17,7 @@ package com.asakusafw.lang.compiler.model.graph;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -81,13 +81,50 @@ public final class Groups {
     }
 
     /**
-     * Parses string representation of a {@link Group}.
-     * @param grouping the grouping property expressions
-     * @return the related {@link Group} object
-     * @throws IllegalArgumentException if some expressions are unrecognized
+     * Creates a new instance from the given term list.
+     * Each term may start with operator - either {@code =} (grouping), {@code +} (ascendant order), or {@code -}
+     * (descendant order), and follow its property name. If the operator is not specified, the term is mentioned as
+     * a grouping.
+     * @param terms the property terms
+     * @return the created instance
      */
-    public static Group parse(List<String> grouping) {
-        return parse(grouping, Collections.emptyList());
+    public static Group parse(String... terms) {
+        return parse(Arrays.asList(terms));
+    }
+
+    /**
+     * Creates a new instance from the given term list.
+     * Each term may start with operator - either {@code =} (grouping), {@code +} (ascendant order), or {@code -}
+     * (descendant order), and follow its property name. If the operator is not specified, the term is mentioned as
+     * a grouping.
+     * @param terms the property terms
+     * @return the created instance
+     */
+    public static Group parse(List<String> terms) {
+        List<PropertyName> grouping = new ArrayList<>();
+        List<Ordering> ordering = new ArrayList<>();
+        for (String term : terms) {
+            if (term.isEmpty()) {
+                throw new IllegalArgumentException(term);
+            }
+            char operator = term.charAt(0);
+            String name = term.substring(1);
+            switch (operator) {
+            case '=':
+                grouping.add(PropertyName.of(name));
+                break;
+            case '+':
+                ordering.add(new Ordering(PropertyName.of(name), Direction.ASCENDANT));
+                break;
+            case '-':
+                ordering.add(new Ordering(PropertyName.of(name), Direction.DESCENDANT));
+                break;
+            default:
+                grouping.add(PropertyName.of(term));
+                break;
+            }
+        }
+        return new Group(grouping, ordering);
     }
 
     /**

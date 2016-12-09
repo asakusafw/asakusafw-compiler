@@ -37,6 +37,8 @@ public class OperatorInput implements OperatorPort {
 
     private final TypeDescription dataType;
 
+    private final InputUnit inputUnit;
+
     private final Group group;
 
     private final AttributeMap attributes;
@@ -50,8 +52,9 @@ public class OperatorInput implements OperatorPort {
      * @param dataType the data type
      * @param group the grouping instruction (nullable)
      */
+    @Deprecated
     public OperatorInput(Operator owner, String name, TypeDescription dataType, Group group) {
-        this(owner, name, dataType, group, AttributeMap.EMPTY);
+        this(owner, name, dataType, InputUnit.RECORD, group, AttributeMap.EMPTY);
     }
 
     /**
@@ -59,14 +62,18 @@ public class OperatorInput implements OperatorPort {
      * @param owner the owner of this port
      * @param name the port name
      * @param dataType the data type
+     * @param inputUnit the input unit
      * @param group the grouping instruction (nullable)
      * @param attributes the port attributes
      * @since 0.4.1
      */
-    public OperatorInput(Operator owner, String name, TypeDescription dataType, Group group, AttributeMap attributes) {
+    public OperatorInput(
+            Operator owner, String name, TypeDescription dataType,
+            InputUnit inputUnit, Group group, AttributeMap attributes) {
         this.owner = owner;
         this.name = name;
         this.dataType = dataType;
+        this.inputUnit = inputUnit;
         this.group = group;
         this.attributes = attributes;
     }
@@ -92,11 +99,23 @@ public class OperatorInput implements OperatorPort {
     }
 
     /**
+     * Returns the input unit kind.
+     * @return the input unit kind
+     */
+    public InputUnit getInputUnit() {
+        return inputUnit;
+    }
+
+    /**
      * Returns the dataset grouping instruction.
      * @return the dataset grouping instruction, or {@code null} if grouping is not required
      */
     public Group getGroup() {
         return group;
+    }
+
+    AttributeMap getAttributeMap() {
+        return attributes;
     }
 
     @Override
@@ -174,7 +193,7 @@ public class OperatorInput implements OperatorPort {
     }
 
     OperatorInput copy(Operator newOwner) {
-        return new OperatorInput(newOwner, name, dataType, group, attributes.copy());
+        return new OperatorInput(newOwner, name, dataType, inputUnit, group, attributes.copy());
     }
 
     @Override
@@ -182,5 +201,27 @@ public class OperatorInput implements OperatorPort {
         return MessageFormat.format(
                 "Input({0})", //$NON-NLS-1$
                 name);
+    }
+
+    /**
+     * Represents granularity of input.
+     * @since 0.4.1
+     */
+    public enum InputUnit {
+
+        /**
+         * The input handles each record from the upstream.
+         */
+        RECORD,
+
+        /**
+         * The input handles each group from the upstream.
+         */
+        GROUP,
+
+        /**
+         * The input handles whole data from the upstream.
+         */
+        WHOLE,
     }
 }
