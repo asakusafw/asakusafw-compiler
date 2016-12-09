@@ -25,19 +25,17 @@ import org.hamcrest.FeatureMatcher;
 import org.hamcrest.Matcher;
 import org.junit.Test;
 
-import com.asakusafw.dag.compiler.model.plan.InputSpec;
 import com.asakusafw.dag.compiler.model.plan.InputSpec.InputOption;
 import com.asakusafw.dag.compiler.model.plan.InputSpec.InputType;
-import com.asakusafw.dag.compiler.model.plan.OutputSpec;
 import com.asakusafw.dag.compiler.model.plan.OutputSpec.OutputOption;
 import com.asakusafw.dag.compiler.model.plan.OutputSpec.OutputType;
-import com.asakusafw.dag.compiler.model.plan.VertexSpec;
 import com.asakusafw.dag.compiler.model.plan.VertexSpec.OperationOption;
 import com.asakusafw.dag.compiler.model.plan.VertexSpec.OperationType;
 import com.asakusafw.lang.compiler.model.graph.CoreOperator;
 import com.asakusafw.lang.compiler.model.graph.CoreOperator.CoreOperatorKind;
 import com.asakusafw.lang.compiler.model.graph.Group;
 import com.asakusafw.lang.compiler.model.graph.Operator;
+import com.asakusafw.lang.compiler.model.graph.OperatorInput.InputUnit;
 import com.asakusafw.lang.compiler.model.graph.UserOperator;
 import com.asakusafw.lang.compiler.model.info.ExternalInputInfo.DataSize;
 import com.asakusafw.lang.compiler.model.testing.MockOperators;
@@ -79,8 +77,8 @@ in --- *C --- out
         SubPlan s1 = ownerOf(detail, mock.get("out"));
 
         assertThat(info(s0).toString(), s0, primaryOperator(isOperator("in")));
-        assertThat(s0, OperationType(is(OperationType.EXTRACT)));
-        assertThat(s0, not(OperationOption(is(OperationOption.PRE_AGGREGATION))));
+        assertThat(s0, operationType(is(OperationType.EXTRACT)));
+        assertThat(s0, not(operationOption(is(OperationOption.PRE_AGGREGATION))));
         assertThat(input(s0), inputType(is(InputType.NO_DATA)));
         assertThat(input(s0), inputOption(is(InputOption.PRIMARY)));
         assertThat(input(s0), inputGroup(is(nullValue())));
@@ -89,8 +87,8 @@ in --- *C --- out
         assertThat(output(s0), outputAggregation(is(nullValue())));
 
         assertThat(info(s1).toString(), s1, primaryOperator(isOperator("out")));
-        assertThat(s1, OperationType(is(OperationType.OUTPUT)));
-        assertThat(s1, not(OperationOption(is(OperationOption.PRE_AGGREGATION))));
+        assertThat(s1, operationType(is(OperationType.OUTPUT)));
+        assertThat(s1, not(operationOption(is(OperationOption.PRE_AGGREGATION))));
         assertThat(input(s1), inputType(is(InputType.EXTRACT)));
         assertThat(input(s1), inputOption(is(InputOption.PRIMARY)));
         assertThat(input(s1), inputGroup(is(nullValue())));
@@ -128,8 +126,8 @@ in --- *C --- o0 --- *C --- out
         assertThat(output(s0), outputGroup(is(nullValue())));
         assertThat(output(s0), outputAggregation(is(nullValue())));
 
-        assertThat(s1, OperationType(is(OperationType.EXTRACT)));
-        assertThat(s1, not(OperationOption(is(OperationOption.PRE_AGGREGATION))));
+        assertThat(s1, operationType(is(OperationType.EXTRACT)));
+        assertThat(s1, not(operationOption(is(OperationOption.PRE_AGGREGATION))));
         assertThat(input(s1), inputType(is(InputType.EXTRACT)));
         assertThat(input(s1), inputOption(is(InputOption.PRIMARY)));
         assertThat(input(s1), inputGroup(is(nullValue())));
@@ -169,11 +167,11 @@ in --- *G --- o0 --- *C --- out
         assertThat(output(s0), outputAggregation(is(nullValue())));
 
         assertThat(info(s1).toString(), s1, primaryOperator(isOperator("o0")));
-        assertThat(s1, OperationType(is(OperationType.CO_GROUP)));
-        assertThat(s1, not(OperationOption(is(OperationOption.PRE_AGGREGATION))));
+        assertThat(s1, operationType(is(OperationType.CO_GROUP)));
+        assertThat(s1, not(operationOption(is(OperationOption.PRE_AGGREGATION))));
         assertThat(input(s1), inputType(is(InputType.CO_GROUP)));
         assertThat(input(s1), inputOption(is(InputOption.PRIMARY)));
-        assertThat(input(s1), inputOption(is(not(InputOption.SPILL_OUT))));
+        assertThat(input(s1), not(inputOption(is(InputOption.SPILL_OUT))));
         assertThat(input(s1), inputGroup(is(group("=a"))));
         assertThat(output(s1), outputType(is(OutputType.VALUE)));
         assertThat(output(s1), outputGroup(is(nullValue())));
@@ -211,8 +209,8 @@ in --- *G --- o0 --- *C --- out
         assertThat(output(s0), outputAggregation(is(nullValue())));
 
         assertThat(info(s1).toString(), s1, primaryOperator(isOperator("o0")));
-        assertThat(s1, OperationType(is(OperationType.CO_GROUP)));
-        assertThat(s1, not(OperationOption(is(OperationOption.PRE_AGGREGATION))));
+        assertThat(s1, operationType(is(OperationType.CO_GROUP)));
+        assertThat(s1, not(operationOption(is(OperationOption.PRE_AGGREGATION))));
         assertThat(input(s1), inputType(is(InputType.CO_GROUP)));
         assertThat(input(s1), inputOption(is(InputOption.PRIMARY)));
         assertThat(input(s1), inputOption(is(InputOption.SPILL_OUT)));
@@ -253,11 +251,11 @@ in --- *G --- o0 --- *C --- out
         assertThat(output(s0), outputAggregation(isOperator("o0")));
 
         assertThat(info(s1).toString(), s1, primaryOperator(isOperator("o0")));
-        assertThat(s1, OperationType(is(OperationType.CO_GROUP)));
-        assertThat(s1, not(OperationOption(is(OperationOption.PRE_AGGREGATION))));
+        assertThat(s1, operationType(is(OperationType.CO_GROUP)));
+        assertThat(s1, not(operationOption(is(OperationOption.PRE_AGGREGATION))));
         assertThat(input(s1), inputType(is(InputType.CO_GROUP)));
         assertThat(input(s1), inputOption(is(InputOption.PRIMARY)));
-        assertThat(input(s1), inputOption(is(not(InputOption.SPILL_OUT))));
+        assertThat(input(s1), not(inputOption(is(InputOption.SPILL_OUT))));
         assertThat(input(s1), inputGroup(is(group("=a"))));
         assertThat(output(s1), outputType(is(OutputType.VALUE)));
         assertThat(output(s1), outputGroup(is(nullValue())));
@@ -295,11 +293,11 @@ in --- *G --- o0 --- *C --- out
         assertThat(output(s0), outputAggregation(isOperator("o0")));
 
         assertThat(info(s1).toString(), s1, primaryOperator(isOperator("o0")));
-        assertThat(s1, OperationType(is(OperationType.CO_GROUP)));
-        assertThat(s1, OperationOption(is(OperationOption.PRE_AGGREGATION)));
+        assertThat(s1, operationType(is(OperationType.CO_GROUP)));
+        assertThat(s1, operationOption(is(OperationOption.PRE_AGGREGATION)));
         assertThat(input(s1), inputType(is(InputType.CO_GROUP)));
         assertThat(input(s1), inputOption(is(InputOption.PRIMARY)));
-        assertThat(input(s1), inputOption(is(not(InputOption.SPILL_OUT))));
+        assertThat(input(s1), not(inputOption(is(InputOption.SPILL_OUT))));
         assertThat(input(s1), inputGroup(is(group("=a"))));
         assertThat(output(s1), outputType(is(OutputType.VALUE)));
         assertThat(output(s1), outputGroup(is(nullValue())));
@@ -335,8 +333,8 @@ in1 --- *B -/
         SubPlan s1 = ownerOf(detail, mock.get("in1"));
 
         assertThat(info(s0).toString(), s0, primaryOperator(isOperator("in0")));
-        assertThat(s0, OperationType(is(OperationType.EXTRACT)));
-        assertThat(s0, not(OperationOption(is(OperationOption.PRE_AGGREGATION))));
+        assertThat(s0, operationType(is(OperationType.EXTRACT)));
+        assertThat(s0, not(operationOption(is(OperationOption.PRE_AGGREGATION))));
 
         assertThat(output(s1), outputType(is(OutputType.BROADCAST)));
         assertThat(output(s1), outputGroup(is(group("+k"))));
@@ -377,8 +375,8 @@ in0 --- *B -/
         SubPlan s1 = pred(s0).iterator().next();
 
         assertThat(info(s0).toString(), s0, primaryOperator(isOperator("in0")));
-        assertThat(s0, OperationType(is(OperationType.EXTRACT)));
-        assertThat(s0, not(OperationOption(is(OperationOption.PRE_AGGREGATION))));
+        assertThat(s0, operationType(is(OperationType.EXTRACT)));
+        assertThat(s0, not(operationOption(is(OperationOption.PRE_AGGREGATION))));
 
         assertThat(output(s1), outputType(is(OutputType.BROADCAST)));
         assertThat(output(s1), outputGroup(is(group("+k"))));
@@ -444,6 +442,113 @@ in3 --- *B -------------/
     }
 
     /**
+     * co-group w/ data table.
+<pre>{@code
+in0 --+ o0 --- out
+in1 -/
+==>
+        in0 --+- o0 --- *C --- out
+             /
+in1 --- *B -/
+}</pre>
+     */
+    @Test
+    public void extract_with_datatable() {
+        MockOperators m = new MockOperators();
+        PlanDetail detail = DagPlanning.plan(context(), m
+                .input("in0", DataSize.LARGE)
+                .input("in1", DataSize.LARGE)
+                .bless("o0", op(Extract.class, "extract")
+                        .input("in", m.getCommonDataType(), c -> c
+                                .unit(InputUnit.RECORD))
+                        .input("side", m.getCommonDataType(), c -> c
+                                .unit(InputUnit.WHOLE)
+                                .group(group("=k")))
+                        .output("out", m.getCommonDataType()))
+                .connect("in0", "o0.in")
+                .connect("in1", "o0.side")
+                .output("out").connect("o0", "out")
+                .toGraph());
+        MockOperators mock = restore(detail);
+        Plan plan = detail.getPlan();
+        assertThat(plan.getElements(), hasSize(3));
+
+        SubPlan s0 = ownerOf(detail, mock.get("o0"));
+        SubPlan s1 = ownerOf(detail, mock.get("in1"));
+
+        assertThat(info(s0).toString(), s0, primaryOperator(isOperator("in0")));
+        assertThat(s0, operationType(is(OperationType.EXTRACT)));
+        assertThat(s0, operationOption(is(OperationOption.EXTERNAL_INPUT)));
+        assertThat(secondary(s0), inputType(is(InputType.BROADCAST)));
+        assertThat(secondary(s0), not(inputOption(is(InputOption.PRIMARY))));
+        assertThat(secondary(s0), inputGroup(is(group("=k"))));
+
+        assertThat(s1, operationOption(is(OperationOption.EXTERNAL_INPUT)));
+        assertThat(output(s1), outputType(is(OutputType.BROADCAST)));
+        assertThat(output(s1), outputGroup(is(group("=k"))));
+        assertThat(output(s1), outputAggregation(is(nullValue())));
+    }
+
+    /**
+     * co-group w/ data table.
+<pre>{@code
+in0 --+ o0 --- out
+in1 -/
+==>
+in0 --- *G ---+- o0 --- *C --- out
+             /
+in1 --- *B -/
+}</pre>
+     */
+    @Test
+    public void cogroup_with_datatable() {
+        MockOperators m = new MockOperators();
+        PlanDetail detail = DagPlanning.plan(context(), m
+            .input("in0", DataSize.LARGE)
+            .input("in1", DataSize.LARGE)
+            .bless("o0", op(CoGroup.class, "cogroup")
+                    .input("in", m.getCommonDataType(), c -> c
+                            .unit(InputUnit.GROUP)
+                            .group(group("=a")))
+                    .input("side", m.getCommonDataType(), c -> c
+                            .unit(InputUnit.WHOLE)
+                            .group(group("=b")))
+                    .output("out", m.getCommonDataType()))
+                .connect("in0", "o0.in")
+                .connect("in1", "o0.side")
+            .output("out").connect("o0", "out")
+            .toGraph());
+        MockOperators mock = restore(detail);
+        Plan plan = detail.getPlan();
+        assertThat(plan.getElements(), hasSize(4));
+
+        SubPlan s0 = ownerOf(detail, mock.get("in0"));
+        SubPlan s1 = ownerOf(detail, mock.get("in1"));
+        SubPlan s2 = ownerOf(detail, mock.get("o0"));
+
+        assertThat(s0, operationOption(is(OperationOption.EXTERNAL_INPUT)));
+        assertThat(output(s0), outputType(is(OutputType.KEY_VALUE)));
+        assertThat(output(s0), outputGroup(is(group("=a"))));
+        assertThat(output(s0), outputAggregation(is(nullValue())));
+
+        assertThat(s1, operationOption(is(OperationOption.EXTERNAL_INPUT)));
+        assertThat(output(s1), outputType(is(OutputType.BROADCAST)));
+        assertThat(output(s1), outputGroup(is(group("=b"))));
+        assertThat(output(s1), outputAggregation(is(nullValue())));
+
+        assertThat(info(s2).toString(), s2, primaryOperator(isOperator("o0")));
+        assertThat(s2, operationType(is(OperationType.CO_GROUP)));
+        assertThat(s2, not(operationOption(is(OperationOption.PRE_AGGREGATION))));
+        assertThat(primary(s2), inputType(is(InputType.CO_GROUP)));
+        assertThat(primary(s2), inputOption(is(InputOption.PRIMARY)));
+        assertThat(primary(s2), not(inputOption(is(InputOption.SPILL_OUT))));
+        assertThat(primary(s2), inputGroup(is(group("=a"))));
+        assertThat(secondary(s2), inputType(is(InputType.BROADCAST)));
+        assertThat(secondary(s2), not(inputOption(is(InputOption.PRIMARY))));
+        assertThat(secondary(s2), inputGroup(is(group("=b"))));
+    }
+
+    /**
      * through kind.
 <pre>{@code
 in --- c0 --- o0 --- out
@@ -477,7 +582,7 @@ in --- *C --- *G --- o0 --- *C --- out
         assertThat(output(s0), outputGroup(is(nullValue())));
         assertThat(output(s0), outputAggregation(is(nullValue())));
 
-        assertThat(info(s1).toString(), s1, OperationType(is(OperationType.EXTRACT)));
+        assertThat(info(s1).toString(), s1, operationType(is(OperationType.EXTRACT)));
         assertThat(s1, primaryOperator(nullValue()));
     }
 
@@ -762,25 +867,7 @@ in1 -/------/------/
         assertThat(s3.getInputs(), hasSize(2));
     }
 
-    static VertexSpec info(SubPlan container) {
-        VertexSpec info = container.getAttribute(VertexSpec.class);
-        assertThat(String.valueOf(info), info, is(notNullValue()));
-        return info;
-    }
-
-    static InputSpec info(SubPlan.Input container) {
-        InputSpec info = container.getAttribute(InputSpec.class);
-        assertThat(String.valueOf(info), info, is(notNullValue()));
-        return info;
-    }
-
-    static OutputSpec info(SubPlan.Output container) {
-        OutputSpec info = container.getAttribute(OutputSpec.class);
-        assertThat(String.valueOf(info), info, is(notNullValue()));
-        return info;
-    }
-
-    static Matcher<? super SubPlan> OperationType(Matcher<? super OperationType> matcher) {
+    static Matcher<? super SubPlan> operationType(Matcher<? super OperationType> matcher) {
         return new FeatureMatcher<SubPlan, OperationType>(matcher, "driver type", "driver type") {
             @Override
             protected OperationType featureValueOf(SubPlan actual) {
@@ -789,7 +876,7 @@ in1 -/------/------/
         };
     }
 
-    static Matcher<? super SubPlan> OperationOption(Matcher<? super OperationOption> matcher) {
+    static Matcher<? super SubPlan> operationOption(Matcher<? super OperationOption> matcher) {
         return new FeatureMatcher<SubPlan, Set<OperationOption>>(hasItem(matcher), "driver option", "driver option") {
             @Override
             protected Set<OperationOption> featureValueOf(SubPlan actual) {

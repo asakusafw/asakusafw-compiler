@@ -74,16 +74,17 @@ public class MasterJoinOperatorClassifier implements OperatorCharacterizer<Opera
     }
 
     private static OperatorClass extractAsDefault(UserOperator operator) {
-        return OperatorClass.builder(operator, InputType.GROUP)
+        OperatorClass.Builder builder = OperatorClass.builder(operator, InputType.GROUP)
                 .with(operator.getInput(MasterJoin.ID_INPUT_MASTER), InputAttribute.PRIMARY)
-                .with(operator.getInput(MasterJoin.ID_INPUT_TRANSACTION), InputAttribute.PRIMARY)
-                .build();
+                .with(operator.getInput(MasterJoin.ID_INPUT_TRANSACTION), InputAttribute.PRIMARY);
+        return Util.resolve(builder, operator);
     }
 
     private static OperatorClass extractAsBroadcast(UserOperator operator) {
-        return OperatorClass.builder(operator, InputType.RECORD)
-                .with(operator.getInput(MasterJoin.ID_INPUT_TRANSACTION), InputAttribute.PRIMARY)
-                .build();
+        OperatorClass.Builder builder = OperatorClass.builder(operator, InputType.RECORD)
+                .with(operator.getInput(MasterJoin.ID_INPUT_MASTER), InputAttribute.JOIN_TABLE)
+                .with(operator.getInput(MasterJoin.ID_INPUT_TRANSACTION), InputAttribute.PRIMARY);
+        return Util.resolve(builder, operator);
     }
 
     private static long getBroadcastJoinLimit(CompilerOptions options) {

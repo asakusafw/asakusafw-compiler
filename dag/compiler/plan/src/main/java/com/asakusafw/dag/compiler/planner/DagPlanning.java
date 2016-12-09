@@ -63,7 +63,7 @@ import com.asakusafw.lang.compiler.optimizer.OperatorCharacterizers;
 import com.asakusafw.lang.compiler.optimizer.OperatorRewriters;
 import com.asakusafw.lang.compiler.optimizer.adapter.OptimizerContextAdapter;
 import com.asakusafw.lang.compiler.optimizer.basic.OperatorClass;
-import com.asakusafw.lang.compiler.optimizer.basic.OperatorClass.InputAttribute;
+import com.asakusafw.lang.compiler.optimizer.basic.OperatorClass.InputType;
 import com.asakusafw.lang.compiler.planning.OperatorEquivalence;
 import com.asakusafw.lang.compiler.planning.Plan;
 import com.asakusafw.lang.compiler.planning.PlanAssembler;
@@ -90,6 +90,7 @@ import com.asakusafw.utils.graph.Graph;
  * </li>
  * </ul>
  * @since 0.4.0
+ * @version 0.4.1
  */
 public final class DagPlanning {
 
@@ -216,19 +217,36 @@ public final class DagPlanning {
                 continue;
             }
             OperatorClass info = characteristics.get(operator);
-            for (OperatorInput port : operator.getInputs()) {
-                boolean whole = port.getInputUnit() == OperatorInput.InputUnit.WHOLE;
-                boolean secondary = info.getSecondaryInputs().contains(port);
-                if (whole != secondary) {
-                    Operator replacement = fixOperator(info);
-                    Operators.replace(operator, replacement);
-                    graph.add(replacement);
-                    graph.remove(operator);
-                    break;
-                }
+            if (isFixTarget(info)) {
+                Operator replacement = fixOperator(info);
+                Operators.replace(operator, replacement);
+                graph.add(replacement);
+                graph.remove(operator);
             }
         }
         graph.rebuild();
+    }
+
+    private static boolean isFixTarget(OperatorClass info) {
+        for (OperatorInput port : info.getOperator().getInputs()) {
+            InputUnit adjust = computeInputUnit(info, port);
+            if (adjust != port.getInputUnit()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static InputUnit computeInputUnit(OperatorClass info, OperatorInput port) {
+        if (info.getSecondaryInputs().contains(port)) {
+            return InputUnit.WHOLE;
+        } else if (info.getPrimaryInputType() == InputType.RECORD) {
+            return InputUnit.RECORD;
+        } else if (info.getPrimaryInputType() == InputType.GROUP) {
+            return InputUnit.GROUP;
+        } else {
+            return port.getInputUnit(); // don't care
+        }
     }
 
     private static Operator fixOperator(OperatorClass info) {
@@ -239,26 +257,7 @@ public final class DagPlanning {
             switch (property.getPropertyKind()) {
             case INPUT: {
                 OperatorInput port = (OperatorInput) property;
-                builder.input(port, c -> {
-                    Set<InputAttribute> attrs = info.getAttributes(port);
-                    if (attrs.contains(InputAttribute.PRIMARY)) {
-                        switch (info.getPrimaryInputType()) {
-                        case NOTHING:
-                            c.unit(port.getInputUnit()); // inherit
-                            break;
-                        case RECORD:
-                            c.unit(InputUnit.RECORD);
-                            break;
-                        case GROUP:
-                            c.unit(InputUnit.GROUP);
-                            break;
-                        default:
-                            throw new AssertionError(info);
-                        }
-                    } else {
-                        c.unit(InputUnit.WHOLE);
-                    }
-                });
+                builder.input(port, c -> c.unit(computeInputUnit(info, port)));
                 break;
             }
             case OUTPUT:

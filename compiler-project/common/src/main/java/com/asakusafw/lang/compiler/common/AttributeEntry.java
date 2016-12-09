@@ -49,7 +49,7 @@ public class AttributeEntry<T> {
     }
 
     /**
-     * Returns the attribute type
+     * Returns the attribute type.
      * @return the attribute type
      */
     public Class<T> getType() {

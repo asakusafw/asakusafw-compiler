@@ -17,6 +17,7 @@ package com.asakusafw.lang.compiler.analyzer.builtin;
 
 import java.text.MessageFormat;
 import java.util.Arrays;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +28,10 @@ import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.description.ValueDescription;
 import com.asakusafw.lang.compiler.model.graph.CoreOperator;
 import com.asakusafw.lang.compiler.model.graph.Operator;
+import com.asakusafw.lang.compiler.model.graph.OperatorInput;
 import com.asakusafw.lang.compiler.model.graph.UserOperator;
+import com.asakusafw.lang.compiler.optimizer.basic.OperatorClass;
+import com.asakusafw.lang.compiler.optimizer.basic.OperatorClass.InputAttribute;
 
 final class Util {
 
@@ -103,5 +107,20 @@ final class Util {
             }
         }
         return null;
+    }
+
+    public static OperatorClass resolve(OperatorClass.Builder builder, Operator operator) {
+        OperatorClass result = builder.build();
+        validate(result);
+        return result;
+    }
+
+    private static void validate(OperatorClass info) {
+        for (OperatorInput port : info.getInputs()) {
+            Set<InputAttribute> attrs = info.getAttributes(port);
+            if (attrs.contains(InputAttribute.PRIMARY) && attrs.contains(InputAttribute.JOIN_TABLE)) {
+                throw new IllegalStateException();
+            }
+        }
     }
 }

@@ -18,7 +18,6 @@ package com.asakusafw.dag.compiler.planner;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -34,6 +33,10 @@ import org.hamcrest.Matcher;
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
 
+import com.asakusafw.dag.compiler.model.plan.InputSpec;
+import com.asakusafw.dag.compiler.model.plan.InputSpec.InputOption;
+import com.asakusafw.dag.compiler.model.plan.OutputSpec;
+import com.asakusafw.dag.compiler.model.plan.VertexSpec;
 import com.asakusafw.lang.compiler.api.CompilerOptions;
 import com.asakusafw.lang.compiler.api.JobflowProcessor;
 import com.asakusafw.lang.compiler.api.testing.MockJobflowProcessorContext;
@@ -245,6 +248,32 @@ public abstract class PlanningTestRoot {
     }
 
     /**
+     * Returns the singular primary input.
+     * @param sub the target sub-plan
+     * @return the singular input
+     */
+    public static SubPlan.Input primary(SubPlan sub) {
+        List<? extends SubPlan.Input> inputs = sub.getInputs().stream()
+                .filter(p -> info(p).getInputOptions().contains(InputOption.PRIMARY))
+                .collect(Collectors.toList());
+        assertThat(inputs, hasSize(1));
+        return inputs.get(0);
+    }
+
+    /**
+     * Returns the singular secondary input.
+     * @param sub the target sub-plan
+     * @return the singular input
+     */
+    public static SubPlan.Input secondary(SubPlan sub) {
+        List<? extends SubPlan.Input> inputs = sub.getInputs().stream()
+                .filter(p -> info(p).getInputOptions().contains(InputOption.PRIMARY) == false)
+                .collect(Collectors.toList());
+        assertThat(inputs, hasSize(1));
+        return inputs.get(0);
+    }
+
+    /**
      * Returns the singular output.
      * @param sub the target sub-plan
      * @return the singular output
@@ -261,15 +290,39 @@ public abstract class PlanningTestRoot {
      * @return the created object
      */
     public static Group group(String... values) {
-        List<String> g = new ArrayList<>();
-        List<String> o = new ArrayList<>();
-        for (String s : values) {
-            if (s.startsWith("=")) {
-                g.add(s.substring(1));
-            } else {
-                o.add(s);
-            }
-        }
-        return Groups.parse(g, o);
+        return Groups.parse(values);
+    }
+
+    /**
+     * Returns the spec.
+     * @param container the target element
+     * @return the spec
+     */
+    public static VertexSpec info(SubPlan container) {
+        VertexSpec info = container.getAttribute(VertexSpec.class);
+        assertThat(String.valueOf(info), info, is(notNullValue()));
+        return info;
+    }
+
+    /**
+     * Returns the spec.
+     * @param container the target element
+     * @return the spec
+     */
+    public static InputSpec info(SubPlan.Input container) {
+        InputSpec info = container.getAttribute(InputSpec.class);
+        assertThat(String.valueOf(info), info, is(notNullValue()));
+        return info;
+    }
+
+    /**
+     * Returns the spec.
+     * @param container the target element
+     * @return the spec
+     */
+    public static OutputSpec info(SubPlan.Output container) {
+        OutputSpec info = container.getAttribute(OutputSpec.class);
+        assertThat(String.valueOf(info), info, is(notNullValue()));
+        return info;
     }
 }
