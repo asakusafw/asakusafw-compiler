@@ -57,7 +57,7 @@ public class UpdateOperatorGenerator extends UserOperatorNodeGenerator {
         checkPorts(operator, i -> i == 1, i -> i == 1);
         return new OperatorNodeInfo(
                 context.cache(CacheKey.of(operator), () -> generateClass(context, operator, namer.get())),
-                operator.getInputs().get(Update.ID_INPUT).getDataType(),
+                operator.getInput(Update.ID_INPUT).getDataType(),
                 getDependencies(context, operator));
     }
 
@@ -66,8 +66,8 @@ public class UpdateOperatorGenerator extends UserOperatorNodeGenerator {
     }
 
     private static ClassData generateClass(Context context, UserOperator operator, ClassDescription target) {
-        OperatorInput input = operator.getInputs().get(Update.ID_INPUT);
-        OperatorOutput output = operator.getOutputs().get(Update.ID_OUTPUT);
+        OperatorInput input = operator.getInput(Update.ID_INPUT);
+        OperatorOutput output = operator.getOutput(Update.ID_OUTPUT);
 
         ClassWriter writer = newWriter(target, Object.class, Result.class);
         FieldRef impl = defineOperatorField(writer, operator, target);

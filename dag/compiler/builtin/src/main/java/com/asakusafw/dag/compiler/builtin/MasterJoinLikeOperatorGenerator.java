@@ -211,11 +211,11 @@ public abstract class MasterJoinLikeOperatorGenerator extends UserOperatorNodeGe
     }
 
     private static OperatorInput getMasterInput(UserOperator operator) {
-        return operator.getInputs().get(MasterJoin.ID_INPUT_MASTER);
+        return operator.getInput(MasterJoin.ID_INPUT_MASTER);
     }
 
     private static OperatorInput getTransactionInput(UserOperator operator) {
-        return operator.getInputs().get(MasterJoin.ID_INPUT_TRANSACTION);
+        return operator.getInput(MasterJoin.ID_INPUT_TRANSACTION);
     }
 
     /**

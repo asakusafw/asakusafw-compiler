@@ -303,7 +303,7 @@ public final class SubPlanAnalyzer {
             Operator primary = info.getPrimaryOperator();
             Invariants.requireNonNull(primary);
             Invariants.require(primary.getOutputs().size() == 1);
-            return primary.getOutputs().get(0).getDataType();
+            return primary.getOutput(0).getDataType();
         }
         return input.getOperator().getDataType();
     }
@@ -385,7 +385,7 @@ public final class SubPlanAnalyzer {
             Operator aggregator = computeOutputAggregator(output);
             Invariants.requireNonNull(aggregator);
             Invariants.require(aggregator.getOutputs().size() == 1);
-            return aggregator.getOutputs().get(0).getDataType();
+            return aggregator.getOutput(0).getDataType();
         }
         return output.getOperator().getDataType();
     }

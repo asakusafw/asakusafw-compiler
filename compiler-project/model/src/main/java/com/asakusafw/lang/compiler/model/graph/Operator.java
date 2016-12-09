@@ -35,7 +35,7 @@ import com.asakusafw.lang.compiler.model.description.ValueDescription;
  * @see OperatorAttribute
  * @see Operators
  * @since 0.1.0
- * @version 0.3.0
+ * @version 0.4.1
  */
 public abstract class Operator {
 
@@ -164,6 +164,39 @@ public abstract class Operator {
     }
 
     /**
+     * Returns the {@code index}-th operator input.
+     * @param index the target index
+     * @return the operator input
+     * @throws IndexOutOfBoundsException if the given index is out of bounds
+     * @since 0.4.1
+     */
+    public OperatorInput getInput(int index) {
+        return getProperty(OperatorInput.class, index);
+    }
+
+    /**
+     * Returns the {@code index}-th operator output.
+     * @param index the target index
+     * @return the operator output
+     * @throws IndexOutOfBoundsException if the given index is out of bounds
+     * @since 0.4.1
+     */
+    public OperatorOutput getOutput(int index) {
+        return getProperty(OperatorOutput.class, index);
+    }
+
+    /**
+     * Returns the {@code index}-th operator argument.
+     * @param index the target index
+     * @return the operator argument
+     * @throws IndexOutOfBoundsException if the given index is out of bounds
+     * @since 0.4.1
+     */
+    public OperatorArgument getArgument(int index) {
+        return getProperty(OperatorArgument.class, index);
+    }
+
+    /**
      * Returns the operator constraints.
      * @return the operator constraints
      */
@@ -205,6 +238,23 @@ public abstract class Operator {
             }
         }
         return null;
+    }
+
+    private <T> T getProperty(Class<T> type, int index) {
+        if (index < 0) {
+            throw new IndexOutOfBoundsException();
+        }
+        int current = 0;
+        for (OperatorProperty property : getProperties()) {
+            if (type.isInstance(property)) {
+                if (current == index) {
+                    return type.cast(property);
+                } else {
+                    current++;
+                }
+            }
+        }
+        throw new IndexOutOfBoundsException();
     }
 
     private <T> List<T> getProperties(Class<T> type) {

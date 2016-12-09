@@ -116,11 +116,9 @@ public final class JoinedModelUtil {
             ClassLoader classLoader,
             UserOperator operator) throws ClassNotFoundException {
         OperatorUtil.checkOperatorPorts(operator, 2, 2);
-        List<OperatorInput> inputs = operator.getInputs();
-        List<OperatorOutput> outputs = operator.getOutputs();
-        OperatorInput a = inputs.get(MasterJoin.ID_INPUT_MASTER);
-        OperatorInput b = inputs.get(MasterJoin.ID_INPUT_TRANSACTION);
-        OperatorOutput joined = outputs.get(MasterJoin.ID_OUTPUT_JOINED);
+        OperatorInput a = operator.getInput(MasterJoin.ID_INPUT_MASTER);
+        OperatorInput b = operator.getInput(MasterJoin.ID_INPUT_TRANSACTION);
+        OperatorOutput joined = operator.getOutput(MasterJoin.ID_OUTPUT_JOINED);
         return analyzeMasterJoin(classLoader, operator, a, b, joined);
     }
 
@@ -128,11 +126,9 @@ public final class JoinedModelUtil {
             ClassLoader classLoader,
             UserOperator operator) throws ClassNotFoundException {
         OperatorUtil.checkOperatorPorts(operator, 1, 2);
-        List<OperatorInput> inputs = operator.getInputs();
-        List<OperatorOutput> outputs = operator.getOutputs();
-        OperatorInput joined = inputs.get(Split.ID_INPUT);
-        OperatorOutput a = outputs.get(Split.ID_OUTPUT_LEFT);
-        OperatorOutput b = outputs.get(Split.ID_OUTPUT_RIGHT);
+        OperatorInput joined = operator.getInput(Split.ID_INPUT);
+        OperatorOutput a = operator.getOutput(Split.ID_OUTPUT_LEFT);
+        OperatorOutput b = operator.getOutput(Split.ID_OUTPUT_RIGHT);
         return analyzeSplit(classLoader, operator, joined, a, b);
     }
 

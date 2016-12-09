@@ -55,9 +55,9 @@ public class JoinedModelUtilTest {
         List<PropertyMapping> mappings = JoinedModelUtil.getPropertyMappings(cl, operator);
         assertThat(mappings, hasSize(3));
 
-        OperatorInput left = operator.getInputs().get(0);
-        OperatorInput right = operator.getInputs().get(1);
-        OperatorOutput joined = operator.getOutputs().get(0);
+        OperatorInput left = operator.getInput(0);
+        OperatorInput right = operator.getInput(1);
+        OperatorOutput joined = operator.getOutput(0);
         PropertyMapping mk = find("k", mappings);
         PropertyMapping mv0 = find("v0", mappings);
         PropertyMapping mv1 = find("v1", mappings);
@@ -87,9 +87,9 @@ public class JoinedModelUtilTest {
         List<PropertyMapping> mappings = JoinedModelUtil.getPropertyMappings(cl, operator);
         assertThat(mappings, hasSize(4));
 
-        OperatorInput joined = operator.getInputs().get(0);
-        OperatorOutput left = operator.getOutputs().get(0);
-        OperatorOutput right = operator.getOutputs().get(1);
+        OperatorInput joined = operator.getInput(0);
+        OperatorOutput left = operator.getOutput(0);
+        OperatorOutput right = operator.getOutput(1);
 
         PropertyMapping mk0 = find("k0", mappings);
         PropertyMapping mk1 = find("k1", mappings);

@@ -64,7 +64,7 @@ public class AggregationOperatorClassifier implements OperatorCharacterizer<Oper
     }
 
     static OperatorClass extract0(Context context, UserOperator operator) {
-        OperatorInput input = operator.getInputs().get(Fold.ID_INPUT);
+        OperatorInput input = operator.getInput(Fold.ID_INPUT);
         OperatorClass.Builder builder = OperatorClass.builder(operator, InputType.GROUP);
         builder.with(input, InputAttribute.PRIMARY);
         builder.with(input, InputAttribute.AGGREATE);

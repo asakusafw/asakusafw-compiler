@@ -61,7 +61,7 @@ public class LoggingOperatorGenerator extends UserOperatorNodeGenerator {
         checkPorts(operator, i -> i == 1, i -> i == 1);
         return new OperatorNodeInfo(
                 context.cache(CacheKey.of(operator), () -> generateClass(context, operator, namer.get())),
-                operator.getInputs().get(0).getDataType(),
+                operator.getInput(0).getDataType(),
                 getDependencies(context, operator));
     }
 
@@ -72,8 +72,8 @@ public class LoggingOperatorGenerator extends UserOperatorNodeGenerator {
     private ClassData generateClass(Context context, UserOperator operator, ClassDescription target) {
         String report = getReportName(context, operator);
 
-        OperatorInput input = operator.getInputs().get(0);
-        OperatorOutput output = operator.getOutputs().get(0);
+        OperatorInput input = operator.getInput(Logging.ID_INPUT);
+        OperatorOutput output = operator.getOutput(Logging.ID_OUTPUT);
 
         ClassWriter writer = newWriter(target, Object.class, Result.class);
         FieldRef impl = defineOperatorField(writer, operator, target);

@@ -511,8 +511,8 @@ public class FlowGraphAnalyzerTest {
             .connected("o0", "d0");
 
         UserOperator operator = (UserOperator) inspector.get("o0");
-        assertThat(operator.getInputs().get(0).getAttribute(BufferType.class), is(BufferType.VOLATILE));
-        assertThat(operator.getOutputs().get(0).getAttribute(BufferType.class), is(BufferType.SPILL));
+        assertThat(operator.getInput(0).getAttribute(BufferType.class), is(BufferType.VOLATILE));
+        assertThat(operator.getOutput(0).getAttribute(BufferType.class), is(BufferType.SPILL));
     }
 
     /**

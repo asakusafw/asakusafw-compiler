@@ -119,10 +119,10 @@ public class SummarizeOperatorGenerator extends UserOperatorNodeGenerator {
         return new AggregateNodeInfo(
                 adapter,
                 getMapperName(adapter.getDescription()),
-                ObjectCopierGenerator.get(context, operator.getOutputs().get(Summarize.ID_OUTPUT).getDataType()),
+                ObjectCopierGenerator.get(context, operator.getOutput(Summarize.ID_OUTPUT).getDataType()),
                 getCombinerName(adapter.getDescription()),
-                operator.getInputs().get(Summarize.ID_INPUT).getDataType(),
-                operator.getOutputs().get(Summarize.ID_OUTPUT).getDataType(),
+                operator.getInput(Summarize.ID_INPUT).getDataType(),
+                operator.getOutput(Summarize.ID_OUTPUT).getDataType(),
                 getDependencies(context, operator));
     }
 
@@ -154,7 +154,7 @@ public class SummarizeOperatorGenerator extends UserOperatorNodeGenerator {
                 combinerClass.getSimpleName(),
                 Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC);
 
-        OperatorOutput output = operator.getOutputs().get(Summarize.ID_OUTPUT);
+        OperatorOutput output = operator.getOutput(Summarize.ID_OUTPUT);
         List<VertexElement> dependencies = getDependencies(context, operator);
         Invariants.require(dependencies.size() == 1);
         defineDependenciesConstructor(target, writer, dependencies,
@@ -178,8 +178,8 @@ public class SummarizeOperatorGenerator extends UserOperatorNodeGenerator {
     static ClassDescription generateMapperClass(Context context, UserOperator operator, ClassDescription outer) {
         ClassDescription target = getMapperName(outer);
 
-        OperatorInput input = operator.getInputs().get(Summarize.ID_INPUT);
-        OperatorOutput output = operator.getOutputs().get(Summarize.ID_OUTPUT);
+        OperatorInput input = operator.getInput(Summarize.ID_INPUT);
+        OperatorOutput output = operator.getOutput(Summarize.ID_OUTPUT);
 
         ClassWriter writer = newWriter(target, Object.class, Function.class);
         writer.visitOuterClass(outer.getInternalName(), target.getSimpleName(), null);
@@ -318,8 +318,8 @@ public class SummarizeOperatorGenerator extends UserOperatorNodeGenerator {
 
     static ClassDescription generateCombinerClass(Context context, UserOperator operator, ClassDescription outer) {
         ClassDescription target = getCombinerName(outer);
-        OperatorInput input = operator.getInputs().get(Summarize.ID_INPUT);
-        OperatorOutput output = operator.getOutputs().get(Summarize.ID_OUTPUT);
+        OperatorInput input = operator.getInput(Summarize.ID_INPUT);
+        OperatorOutput output = operator.getOutput(Summarize.ID_OUTPUT);
 
         ClassWriter writer = newWriter(target, Object.class, ObjectCombiner.class);
         writer.visitOuterClass(outer.getInternalName(), target.getSimpleName(), null);

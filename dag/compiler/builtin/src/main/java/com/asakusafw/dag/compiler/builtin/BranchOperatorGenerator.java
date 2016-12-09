@@ -64,7 +64,7 @@ public class BranchOperatorGenerator extends UserOperatorNodeGenerator {
         checkPorts(operator, i -> i == 1, i -> i >= 1);
         return new OperatorNodeInfo(
                 context.cache(CacheKey.of(operator), () -> generateClass(context, operator, namer.get())),
-                operator.getInputs().get(0).getDataType(),
+                operator.getInput(0).getDataType(),
                 getDependencies(context, operator));
     }
 
@@ -73,7 +73,7 @@ public class BranchOperatorGenerator extends UserOperatorNodeGenerator {
     }
 
     private static ClassData generateClass(Context context, UserOperator operator, ClassDescription target) {
-        OperatorInput input = operator.getInputs().get(0);
+        OperatorInput input = operator.getInput(0);
         ClassWriter writer = newWriter(target, Object.class, Result.class);
         FieldRef impl = defineOperatorField(writer, operator, target);
         Map<OperatorProperty, FieldRef> map = defineConstructor(context, operator, target, writer, method -> {

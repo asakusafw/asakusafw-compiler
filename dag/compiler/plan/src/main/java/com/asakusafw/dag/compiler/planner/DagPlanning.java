@@ -246,7 +246,7 @@ public final class DagPlanning {
                     || ((CoreOperator) operator).getCoreOperatorKind() != CoreOperatorKind.CHECKPOINT) {
                 continue;
             }
-            PlanMarkers.insert(PlanMarker.CHECKPOINT, operator.getInputs().get(0));
+            PlanMarkers.insert(PlanMarker.CHECKPOINT, operator.getInput(0));
             Operators.remove(operator);
             graph.remove(operator);
         }

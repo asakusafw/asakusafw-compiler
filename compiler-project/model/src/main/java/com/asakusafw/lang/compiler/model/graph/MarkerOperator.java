@@ -66,7 +66,7 @@ public final class MarkerOperator extends Operator {
      */
     public OperatorInput getInput() {
         assert getInputs().size() == 1;
-        return getInputs().get(0);
+        return getInput(0);
     }
 
     /**
@@ -75,7 +75,7 @@ public final class MarkerOperator extends Operator {
      */
     public OperatorOutput getOutput() {
         assert getOutputs().size() == 1;
-        return getOutputs().get(0);
+        return getOutput(0);
     }
 
     /**

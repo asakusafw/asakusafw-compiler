@@ -70,10 +70,10 @@ public class FoldOperatorGenerator extends UserOperatorNodeGenerator {
         return new AggregateNodeInfo(
                 adapter,
                 null,
-                ObjectCopierGenerator.get(context, operator.getInputs().get(Fold.ID_INPUT).getDataType()),
+                ObjectCopierGenerator.get(context, operator.getInput(Fold.ID_INPUT).getDataType()),
                 getCombinerName(adapter.getDescription()),
-                operator.getInputs().get(Fold.ID_INPUT).getDataType(),
-                operator.getOutputs().get(Fold.ID_OUTPUT).getDataType(),
+                operator.getInput(Fold.ID_INPUT).getDataType(),
+                operator.getOutput(Fold.ID_OUTPUT).getDataType(),
                 getDependencies(context, operator));
     }
 
@@ -94,7 +94,7 @@ public class FoldOperatorGenerator extends UserOperatorNodeGenerator {
                 combinerClass.getSimpleName(),
                 Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC);
 
-        OperatorInput input = operator.getInputs().get(Fold.ID_INPUT);
+        OperatorInput input = operator.getInput(Fold.ID_INPUT);
         List<VertexElement> dependencies = getDependencies(context, operator);
         defineDependenciesConstructor(target, writer, dependencies,
                 method -> {
@@ -120,7 +120,7 @@ public class FoldOperatorGenerator extends UserOperatorNodeGenerator {
 
     private ClassDescription generateCombinerClass(Context context, UserOperator operator, ClassDescription outer) {
         ClassDescription target = getCombinerName(outer);
-        OperatorInput input = operator.getInputs().get(0);
+        OperatorInput input = operator.getInput(0);
 
         ClassWriter writer = newWriter(target, Object.class, ObjectCombiner.class);
         writer.visitOuterClass(outer.getInternalName(), target.getInternalName(), null);

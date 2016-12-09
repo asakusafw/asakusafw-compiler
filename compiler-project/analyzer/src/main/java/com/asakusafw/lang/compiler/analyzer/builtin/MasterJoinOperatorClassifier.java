@@ -59,7 +59,7 @@ public class MasterJoinOperatorClassifier implements OperatorCharacterizer<Opera
     }
 
     static OperatorClass extract0(Context context, UserOperator operator, OperatorEstimate estimate) {
-        OperatorInput masterInput = operator.getInputs().get(MasterJoin.ID_INPUT_MASTER);
+        OperatorInput masterInput = operator.getInput(MasterJoin.ID_INPUT_MASTER);
         double size = estimate.getSize(masterInput);
         if (Double.isNaN(size) == false) {
             long limit = getBroadcastJoinLimit(context.getOptions());
@@ -72,14 +72,14 @@ public class MasterJoinOperatorClassifier implements OperatorCharacterizer<Opera
 
     static OperatorClass extractAsDefault(Context context, UserOperator operator) {
         return OperatorClass.builder(operator, InputType.GROUP)
-                .with(operator.getInputs().get(MasterJoin.ID_INPUT_MASTER), InputAttribute.PRIMARY)
-                .with(operator.getInputs().get(MasterJoin.ID_INPUT_TRANSACTION), InputAttribute.PRIMARY)
+                .with(operator.getInput(MasterJoin.ID_INPUT_MASTER), InputAttribute.PRIMARY)
+                .with(operator.getInput(MasterJoin.ID_INPUT_TRANSACTION), InputAttribute.PRIMARY)
                 .build();
     }
 
     static OperatorClass extractAsBroadcast(Context context, UserOperator operator) {
         return OperatorClass.builder(operator, InputType.RECORD)
-                .with(operator.getInputs().get(MasterJoin.ID_INPUT_TRANSACTION), InputAttribute.PRIMARY)
+                .with(operator.getInput(MasterJoin.ID_INPUT_TRANSACTION), InputAttribute.PRIMARY)
                 .build();
     }
 

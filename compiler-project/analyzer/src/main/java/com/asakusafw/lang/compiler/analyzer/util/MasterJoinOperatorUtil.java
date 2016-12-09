@@ -172,7 +172,7 @@ public final class MasterJoinOperatorUtil {
                     "operator must be a kind of MasterJoin: {0}",
                     operator));
         }
-        return operator.getInputs().get(MasterJoin.ID_INPUT_MASTER);
+        return operator.getInput(MasterJoin.ID_INPUT_MASTER);
     }
 
     /**
@@ -188,7 +188,7 @@ public final class MasterJoinOperatorUtil {
                     "operator must be a kind of MasterJoin: {0}",
                     operator));
         }
-        return operator.getInputs().get(MasterJoin.ID_INPUT_TRANSACTION);
+        return operator.getInput(MasterJoin.ID_INPUT_TRANSACTION);
     }
 
     /**
@@ -208,6 +208,6 @@ public final class MasterJoinOperatorUtil {
         if (FIXED_OUTPUT.contains(type) == false) {
             return null;
         }
-        return operator.getOutputs().get(MasterJoin.ID_OUTPUT_MISSED);
+        return operator.getOutput(MasterJoin.ID_OUTPUT_MISSED);
     }
 }

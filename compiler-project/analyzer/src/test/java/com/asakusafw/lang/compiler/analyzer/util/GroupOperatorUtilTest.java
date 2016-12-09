@@ -45,7 +45,7 @@ public class GroupOperatorUtilTest {
     public void simple() {
         UserOperator m0 = extract(GroupSort.class, Ops.class, "m0");
         assertThat(GroupOperatorUtil.isSupported(m0), is(true));
-        assertThat(GroupOperatorUtil.getBufferType(m0.getInputs().get(0)), is(BufferType.HEAP));
+        assertThat(GroupOperatorUtil.getBufferType(m0.getInput(0)), is(BufferType.HEAP));
     }
 
     /**
@@ -79,7 +79,7 @@ public class GroupOperatorUtilTest {
     public void spill() {
         UserOperator m0 = extract(GroupSort.class, Ops.class, "m0", BufferType.SPILL);
         assertThat(GroupOperatorUtil.isSupported(m0), is(true));
-        assertThat(GroupOperatorUtil.getBufferType(m0.getInputs().get(0)), is(BufferType.SPILL));
+        assertThat(GroupOperatorUtil.getBufferType(m0.getInput(0)), is(BufferType.SPILL));
     }
 
     /**
@@ -89,7 +89,7 @@ public class GroupOperatorUtilTest {
     public void once() {
         UserOperator m0 = extract(GroupSort.class, Ops.class, "m0", BufferType.VOLATILE);
         assertThat(GroupOperatorUtil.isSupported(m0), is(true));
-        assertThat(GroupOperatorUtil.getBufferType(m0.getInputs().get(0)), is(BufferType.VOLATILE));
+        assertThat(GroupOperatorUtil.getBufferType(m0.getInput(0)), is(BufferType.VOLATILE));
     }
 
     /**
@@ -99,7 +99,7 @@ public class GroupOperatorUtilTest {
     public void inherit_spill() {
         UserOperator m0 = extract(GroupSort.class, Ops.class, "m2");
         assertThat(GroupOperatorUtil.isSupported(m0), is(true));
-        assertThat(GroupOperatorUtil.getBufferType(m0.getInputs().get(0)), is(BufferType.SPILL));
+        assertThat(GroupOperatorUtil.getBufferType(m0.getInput(0)), is(BufferType.SPILL));
     }
 
     /**
@@ -112,7 +112,7 @@ public class GroupOperatorUtilTest {
                 .input("in", typeOf(String.class))
                 .output("out", typeOf(String.class))
                 .build();
-        GroupOperatorUtil.getBufferType(operator.getInputs().get(0));
+        GroupOperatorUtil.getBufferType(operator.getInput(0));
     }
 
     private static UserOperator extract(
