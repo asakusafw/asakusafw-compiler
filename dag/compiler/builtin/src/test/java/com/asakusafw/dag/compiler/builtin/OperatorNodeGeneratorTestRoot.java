@@ -28,15 +28,18 @@ import com.asakusafw.dag.compiler.codegen.ClassGeneratorTestRoot;
 import com.asakusafw.dag.compiler.codegen.CompositeOperatorNodeGenerator;
 import com.asakusafw.dag.compiler.codegen.OperatorNodeGenerator;
 import com.asakusafw.dag.compiler.codegen.OperatorNodeGenerator.NodeInfo;
+import com.asakusafw.dag.compiler.model.graph.DataTableNode;
 import com.asakusafw.dag.compiler.model.graph.OutputNode;
 import com.asakusafw.dag.compiler.model.graph.ValueElement;
 import com.asakusafw.dag.compiler.model.graph.VertexElement;
 import com.asakusafw.dag.runtime.adapter.CoGroupOperation;
+import com.asakusafw.dag.runtime.adapter.DataTable;
 import com.asakusafw.lang.compiler.model.description.Descriptions;
 import com.asakusafw.lang.compiler.model.description.TypeDescription;
 import com.asakusafw.lang.compiler.model.graph.Operator;
 import com.asakusafw.lang.compiler.model.graph.OperatorArgument;
 import com.asakusafw.lang.compiler.model.graph.OperatorInput;
+import com.asakusafw.lang.compiler.model.graph.OperatorInput.InputUnit;
 import com.asakusafw.lang.compiler.model.graph.OperatorProperty;
 import com.asakusafw.lang.compiler.model.graph.OperatorProperty.PropertyKind;
 import com.asakusafw.lang.utils.common.Action;
@@ -75,7 +78,16 @@ public abstract class OperatorNodeGeneratorTestRoot extends ClassGeneratorTestRo
      * @return the result
      */
     public NodeInfo generate(Operator operator) {
-        return generate(operator, prepare(m -> operator.getOutputs().forEach(o -> m.put(o, result(o.getDataType())))));
+        return generate(operator, prepare(m -> {
+            operator.getInputs().stream()
+                .filter(p -> p.getInputUnit() == InputUnit.WHOLE)
+                .forEach(p -> m.put(p, table(p)));
+            operator.getOutputs().forEach(o -> m.put(o, result(o.getDataType())));
+        }));
+    }
+
+    private VertexElement table(OperatorInput port) {
+        return new DataTableNode(port.getName(), Descriptions.typeOf(DataTable.class), port.getDataType());
     }
 
     /**
@@ -177,25 +189,6 @@ public abstract class OperatorNodeGeneratorTestRoot extends ClassGeneratorTestRo
                 });
             }
             return Invariants.requireNonNull(dependencies.get(property));
-        }
-
-        @Override
-        public boolean isSideData(OperatorInput input) {
-            return dependencies.get(input) != null;
-        }
-
-        @Override
-        public int getGroupIndex(OperatorInput input) {
-            int index = 0;
-            for (OperatorInput in : input.getOwner().getInputs()) {
-                if (dependencies.containsKey(in) == false) {
-                    if (in == input) {
-                        return index;
-                    }
-                    index++;
-                }
-            }
-            return -1;
         }
     }
 }

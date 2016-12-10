@@ -19,6 +19,7 @@ import static com.asakusafw.dag.compiler.codegen.AsmUtil.*;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -42,6 +43,7 @@ import com.asakusafw.dag.compiler.codegen.ClassGeneratorContext;
 import com.asakusafw.dag.compiler.codegen.OperatorNodeGenerator.Context;
 import com.asakusafw.dag.compiler.model.graph.DataNode;
 import com.asakusafw.dag.compiler.model.graph.VertexElement;
+import com.asakusafw.dag.compiler.model.graph.VertexElement.ElementKind;
 import com.asakusafw.dag.runtime.adapter.CoGroupOperation;
 import com.asakusafw.dag.runtime.adapter.KeyBuffer;
 import com.asakusafw.dag.runtime.skeleton.CoGroupOperationUtil;
@@ -54,13 +56,14 @@ import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.description.TypeDescription;
 import com.asakusafw.lang.compiler.model.graph.Group;
 import com.asakusafw.lang.compiler.model.graph.Operator;
+import com.asakusafw.lang.compiler.model.graph.OperatorArgument;
 import com.asakusafw.lang.compiler.model.graph.OperatorInput;
+import com.asakusafw.lang.compiler.model.graph.OperatorInput.InputUnit;
 import com.asakusafw.lang.compiler.model.graph.OperatorOutput;
 import com.asakusafw.lang.compiler.model.graph.OperatorPort;
 import com.asakusafw.lang.compiler.model.graph.OperatorProperty;
 import com.asakusafw.lang.compiler.model.graph.UserOperator;
 import com.asakusafw.lang.utils.common.Invariants;
-import com.asakusafw.lang.utils.common.Lang;
 import com.asakusafw.runtime.value.ValueOption;
 
 final class Util {
@@ -72,6 +75,22 @@ final class Util {
     static void checkPorts(Operator operator, IntPredicate inputs, IntPredicate outputs) {
         Invariants.require(inputs.test(operator.getInputs().size()));
         Invariants.require(outputs.test(operator.getOutputs().size()));
+        int records = 0;
+        int groups = 0;
+        for (OperatorInput input : operator.getInputs()) {
+            switch (input.getInputUnit()) {
+            case RECORD:
+                records++;
+                break;
+            case GROUP:
+                groups++;
+                break;
+            default:
+                break;
+            }
+        }
+        Invariants.require(records == 0 || groups == 0);
+        Invariants.require(records == 1 || groups > 0);
     }
 
     static void checkArgs(Operator operator, IntPredicate args) {
@@ -92,9 +111,15 @@ final class Util {
     }
 
     private static void checkDependency(VertexElement element, OperatorPort port) {
-        Invariants.require(element instanceof DataNode);
-        TypeDescription type = ((DataNode) element).getDataType();
-        Invariants.require(type.equals(port.getDataType()));
+        if (element.getElementKind() == ElementKind.EMPTY_DATA_TABLE) {
+            Invariants.require(port instanceof OperatorInput);
+            Invariants.require(((OperatorInput) port).getInputUnit() == InputUnit.WHOLE);
+            return;
+        } else {
+            Invariants.require(element instanceof DataNode);
+            TypeDescription type = ((DataNode) element).getDataType();
+            Invariants.require(type.equals(port.getDataType()));
+        }
     }
 
     static FieldRef defineOperatorField(ClassVisitor writer, UserOperator operator, ClassDescription target) {
@@ -117,7 +142,7 @@ final class Util {
             method.visitVarInsn(Opcodes.ALOAD, 0);
             method.visitMethodInsn(Opcodes.INVOKESPECIAL,
                     AsmUtil.typeOf(Object.class).getInternalName(),
-                    "<init>",
+                    CONSTRUCTOR_NAME,
                     Type.getMethodDescriptor(Type.VOID_TYPE),
                     false);
         }, body);
@@ -130,7 +155,7 @@ final class Util {
             ClassVisitor writer,
             Consumer<MethodVisitor> superConstructor,
             Consumer<MethodVisitor> body) {
-        List<OperatorProperty> properties = Lang.concat(operator.getOutputs(), operator.getArguments());
+        List<OperatorProperty> properties = getExternalProperties(operator);
         return defineConstructor(context, properties, aClass, writer, superConstructor, body);
     }
 
@@ -152,8 +177,55 @@ final class Util {
         return results;
     }
 
+    static List<OperatorInput> getPrimaryInputs(Operator operator) {
+        List<OperatorInput> results = new ArrayList<>();
+        for (OperatorInput port : operator.getInputs()) {
+            if (port.getInputUnit() != InputUnit.WHOLE) {
+                results.add(port);
+            }
+        }
+        return results;
+    }
+
+    static List<OperatorInput> getSecondaryInputs(Operator operator) {
+        List<OperatorInput> results = new ArrayList<>();
+        for (OperatorInput port : operator.getInputs()) {
+            if (port.getInputUnit() == InputUnit.WHOLE) {
+                results.add(port);
+            }
+        }
+        return results;
+    }
+
+    static List<OperatorProperty> getExternalProperties(Operator operator) {
+        List<OperatorProperty> results = new ArrayList<>();
+        results.addAll(getSecondaryInputs(operator));
+        results.addAll(operator.getOutputs());
+        results.addAll(operator.getArguments());
+        return results;
+    }
+
     static List<VertexElement> getDefaultDependencies(Context context, UserOperator operator) {
-        return context.getDependencies(Lang.concat(operator.getOutputs(), operator.getArguments()));
+        return context.getDependencies(getExternalProperties(operator));
+    }
+
+    static void appendSecondaryInputs(
+            Consumer<ValueRef> destination,
+            UserOperator operator, Function<? super OperatorInput, ? extends ValueRef> mappings) {
+        getSecondaryInputs(operator)
+            .forEach(port -> destination.accept(Invariants.requireNonNull(mappings.apply(port))));
+    }
+
+    static void appendOutputs(
+            Consumer<ValueRef> destination,
+            UserOperator operator, Function<? super OperatorOutput, ? extends ValueRef> mappings) {
+        operator.getOutputs().forEach(port -> destination.accept(Invariants.requireNonNull(mappings.apply(port))));
+    }
+
+    static void appendArguments(
+            Consumer<ValueRef> destination,
+            UserOperator operator, Function<? super OperatorArgument, ? extends ValueRef> mappings) {
+        operator.getArguments().forEach(arg -> destination.accept(Invariants.requireNonNull(mappings.apply(arg))));
     }
 
     static void getGroupList(MethodVisitor method, Context context, OperatorInput input) {

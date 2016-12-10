@@ -21,15 +21,19 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 import com.asakusafw.dag.compiler.codegen.OperatorNodeGenerator.NodeInfo;
+import com.asakusafw.dag.runtime.testing.MockDataModel;
 import com.asakusafw.dag.runtime.testing.MockSink;
 import com.asakusafw.dag.runtime.testing.MockValueModel;
 import com.asakusafw.lang.compiler.model.PropertyName;
 import com.asakusafw.lang.compiler.model.description.Descriptions;
 import com.asakusafw.lang.compiler.model.description.ReifiableTypeDescription;
+import com.asakusafw.lang.compiler.model.graph.OperatorInput.InputUnit;
 import com.asakusafw.lang.compiler.model.graph.UserOperator;
 import com.asakusafw.lang.compiler.model.graph.UserOperator.Builder;
 import com.asakusafw.lang.compiler.model.testing.OperatorExtractor;
+import com.asakusafw.runtime.core.DataTable;
 import com.asakusafw.runtime.core.Result;
+import com.asakusafw.runtime.value.IntOption;
 import com.asakusafw.vocabulary.operator.Branch;
 
 /**
@@ -76,6 +80,32 @@ public class BranchOperatorGeneratorTest extends OperatorNodeGeneratorTestRoot {
         });
         assertThat(a.get(MockValueModel::getValue), hasSize(0));
         assertThat(b.get(MockValueModel::getValue), contains("A", "C"));
+        assertThat(c.get(MockValueModel::getValue), hasSize(0));
+    }
+
+    /**
+     * w/ data tables.
+     */
+    @Test
+    public void datatable() {
+        UserOperator operator = load("table")
+                .input("t0", Descriptions.typeOf(MockDataModel.class), c -> c
+                        .group(group("key"))
+                        .unit(InputUnit.WHOLE))
+                .build();
+        MockTable<MockDataModel> table = new MockTable<>(MockDataModel::getKeyOption)
+                .add(new MockDataModel(0, "B"));
+        NodeInfo info = generate(operator);
+        MockSink<MockValueModel> a = new MockSink<>();
+        MockSink<MockValueModel> b = new MockSink<>();
+        MockSink<MockValueModel> c = new MockSink<>();
+        loading(info, ctor -> {
+            Result<Object> r = ctor.newInstance(table, a, b, c);
+            r.add(new MockValueModel("A"));
+            r.add(new MockValueModel("C"));
+        });
+        assertThat(a.get(MockValueModel::getValue), hasSize(0));
+        assertThat(b.get(MockValueModel::getValue), hasSize(2));
         assertThat(c.get(MockValueModel::getValue), hasSize(0));
     }
 
@@ -144,6 +174,11 @@ public class BranchOperatorGeneratorTest extends OperatorNodeGeneratorTestRoot {
         @Branch
         public Switch parameterized(MockValueModel m, String arg) {
             return Switch.valueOf(arg);
+        }
+
+        @Branch
+        public Switch table(MockValueModel m, DataTable<MockDataModel> t) {
+            return Switch.valueOf(t.find(new IntOption(0)).get(0).getValue());
         }
     }
 

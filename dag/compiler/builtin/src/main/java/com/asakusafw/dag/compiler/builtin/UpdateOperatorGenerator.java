@@ -37,7 +37,6 @@ import com.asakusafw.lang.compiler.model.graph.OperatorInput;
 import com.asakusafw.lang.compiler.model.graph.OperatorOutput;
 import com.asakusafw.lang.compiler.model.graph.OperatorProperty;
 import com.asakusafw.lang.compiler.model.graph.UserOperator;
-import com.asakusafw.lang.utils.common.Lang;
 import com.asakusafw.runtime.core.Result;
 import com.asakusafw.vocabulary.operator.Update;
 
@@ -54,7 +53,7 @@ public class UpdateOperatorGenerator extends UserOperatorNodeGenerator {
 
     @Override
     protected NodeInfo generate(Context context, UserOperator operator, Supplier<? extends ClassDescription> namer) {
-        checkPorts(operator, i -> i == 1, i -> i == 1);
+        checkPorts(operator, i -> i >= 1, i -> i == 1);
         return new OperatorNodeInfo(
                 context.cache(CacheKey.of(operator), () -> generateClass(context, operator, namer.get())),
                 operator.getInput(Update.ID_INPUT).getDataType(),
@@ -79,7 +78,8 @@ public class UpdateOperatorGenerator extends UserOperatorNodeGenerator {
             List<ValueRef> arguments = new ArrayList<>();
             arguments.add(impl);
             arguments.add(new LocalVarRef(Opcodes.ALOAD, 1));
-            arguments.addAll(Lang.project(operator.getArguments(), e -> map.get(e)));
+            appendSecondaryInputs(arguments::add, operator, map::get);
+            appendArguments(arguments::add, operator, map::get);
             invoke(method, context, operator, arguments);
 
             method.visitVarInsn(Opcodes.ALOAD, 0);

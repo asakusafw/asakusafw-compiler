@@ -18,14 +18,12 @@ package com.asakusafw.dag.compiler.builtin;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
 import org.junit.Test;
 
 import com.asakusafw.dag.compiler.codegen.OperatorNodeGenerator.NodeInfo;
-import com.asakusafw.dag.compiler.model.graph.DataTableNode;
 import com.asakusafw.dag.runtime.adapter.DataTable;
 import com.asakusafw.dag.runtime.adapter.KeyBuffer;
 import com.asakusafw.dag.runtime.table.BasicDataTable;
@@ -33,7 +31,7 @@ import com.asakusafw.dag.runtime.testing.MockDataModel;
 import com.asakusafw.dag.runtime.testing.MockKeyValueModel;
 import com.asakusafw.dag.runtime.testing.MockSink;
 import com.asakusafw.lang.compiler.model.description.Descriptions;
-import com.asakusafw.lang.compiler.model.graph.Groups;
+import com.asakusafw.lang.compiler.model.graph.OperatorInput.InputUnit;
 import com.asakusafw.lang.compiler.model.graph.UserOperator;
 import com.asakusafw.lang.compiler.model.graph.UserOperator.Builder;
 import com.asakusafw.lang.compiler.model.testing.OperatorExtractor;
@@ -52,7 +50,7 @@ public class MasterJoinUpdateOperatorGeneratorTest extends OperatorNodeGenerator
      */
     @Test
     public void simple_merge() {
-        UserOperator operator = load("simple").build();
+        UserOperator operator = loadMerge("simple").build();
         NodeInfo info = generate(operator);
         MockSink<MockDataModel> j = new MockSink<>();
         MockSink<MockDataModel> m = new MockSink<>();
@@ -77,7 +75,7 @@ public class MasterJoinUpdateOperatorGeneratorTest extends OperatorNodeGenerator
      */
     @Test
     public void missing_merge() {
-        UserOperator operator = load("simple").build();
+        UserOperator operator = loadMerge("simple").build();
         NodeInfo info = generate(operator);
         MockSink<MockDataModel> j = new MockSink<>();
         MockSink<MockDataModel> m = new MockSink<>();
@@ -101,7 +99,7 @@ public class MasterJoinUpdateOperatorGeneratorTest extends OperatorNodeGenerator
      */
     @Test
     public void parameterized_merge() {
-        UserOperator operator = load("parameterized")
+        UserOperator operator = loadMerge("parameterized")
                 .argument("p", Descriptions.valueOf("-"))
                 .build();
         NodeInfo info = generate(operator);
@@ -128,7 +126,7 @@ public class MasterJoinUpdateOperatorGeneratorTest extends OperatorNodeGenerator
      */
     @Test
     public void selection_merge() {
-        UserOperator operator = load("selecting")
+        UserOperator operator = loadMerge("selecting")
                 .argument("p", Descriptions.valueOf("-"))
                 .build();
         NodeInfo info = generate(operator);
@@ -157,7 +155,7 @@ public class MasterJoinUpdateOperatorGeneratorTest extends OperatorNodeGenerator
      */
     @Test
     public void selection_merge_fixed() {
-        UserOperator operator = load("fixed")
+        UserOperator operator = loadMerge("fixed")
                 .argument("p", Descriptions.valueOf("*"))
                 .build();
         NodeInfo info = generate(operator);
@@ -182,8 +180,8 @@ public class MasterJoinUpdateOperatorGeneratorTest extends OperatorNodeGenerator
      */
     @Test
     public void simple_table() {
-        UserOperator operator = load("simple").build();
-        NodeInfo info = generateWithTable(operator);
+        UserOperator operator = loadTable("simple").build();
+        NodeInfo info = generate(operator);
         MockSink<MockDataModel> j = new MockSink<>();
         MockSink<MockDataModel> m = new MockSink<>();
         loading(info, ctor -> {
@@ -202,8 +200,8 @@ public class MasterJoinUpdateOperatorGeneratorTest extends OperatorNodeGenerator
      */
     @Test
     public void missing_table() {
-        UserOperator operator = load("simple").build();
-        NodeInfo info = generateWithTable(operator);
+        UserOperator operator = loadTable("simple").build();
+        NodeInfo info = generate(operator);
         MockSink<MockDataModel> j = new MockSink<>();
         MockSink<MockDataModel> m = new MockSink<>();
         loading(info, ctor -> {
@@ -221,10 +219,10 @@ public class MasterJoinUpdateOperatorGeneratorTest extends OperatorNodeGenerator
      */
     @Test
     public void parameterized_table() {
-        UserOperator operator = load("parameterized")
+        UserOperator operator = loadTable("parameterized")
                 .argument("p", Descriptions.valueOf("-"))
                 .build();
-        NodeInfo info = generateWithTable(operator);
+        NodeInfo info = generate(operator);
         MockSink<MockDataModel> j = new MockSink<>();
         MockSink<MockDataModel> m = new MockSink<>();
         loading(info, ctor -> {
@@ -243,10 +241,10 @@ public class MasterJoinUpdateOperatorGeneratorTest extends OperatorNodeGenerator
      */
     @Test
     public void selection_table() {
-        UserOperator operator = load("selecting")
+        UserOperator operator = loadTable("selecting")
                 .argument("p", Descriptions.valueOf("-"))
                 .build();
-        NodeInfo info = generateWithTable(operator);
+        NodeInfo info = generate(operator);
         MockSink<MockDataModel> j = new MockSink<>();
         MockSink<MockDataModel> m = new MockSink<>();
         loading(info, ctor -> {
@@ -267,10 +265,10 @@ public class MasterJoinUpdateOperatorGeneratorTest extends OperatorNodeGenerator
      */
     @Test
     public void selection_table_fixed() {
-        UserOperator operator = load("fixed")
+        UserOperator operator = loadTable("fixed")
                 .argument("p", Descriptions.valueOf("*"))
                 .build();
-        NodeInfo info = generateWithTable(operator);
+        NodeInfo info = generate(operator);
         MockSink<MockDataModel> j = new MockSink<>();
         MockSink<MockDataModel> m = new MockSink<>();
         loading(info, ctor -> {
@@ -283,27 +281,34 @@ public class MasterJoinUpdateOperatorGeneratorTest extends OperatorNodeGenerator
     }
 
     /**
-     * orphaned master.
+     * w/ data tables.
      */
     @Test
-    public void orphaned_master() {
-        UserOperator operator = load("simple").build();
-        NodeInfo info = generate(operator, c -> {
-            // missing table, and is not a group input
-            c.put(operator.findInput("master"), null);
-            c.put(operator.findInput("transaction"), null);
-            c.put(operator.findOutput("found"), result(Descriptions.typeOf(MockDataModel.class)));
-            c.put(operator.findOutput("missing"), result(Descriptions.typeOf(MockDataModel.class)));
-        });
+    public void datatable() {
+        UserOperator operator = loadMerge("table")
+                .input("t0", Descriptions.typeOf(MockDataModel.class), c -> c
+                        .group(group("key"))
+                        .unit(InputUnit.WHOLE))
+                .build();
+        NodeInfo info = generate(operator);
+        MockTable<MockDataModel> table = new MockTable<>(MockDataModel::getKeyOption)
+                .add(new MockDataModel(0, "<TBL>"));
         MockSink<MockDataModel> j = new MockSink<>();
         MockSink<MockDataModel> m = new MockSink<>();
         loading(info, ctor -> {
-            Result<Object> r = ctor.newInstance(j, m);
-            r.add(new MockDataModel(0, "T0"));
-            r.add(new MockDataModel(0, "T1"));
+            Result<Object> r = ctor.newInstance(table, j, m);
+            r.add(cogroup(new Object[][] {
+                {
+                    new MockKeyValueModel(0, "M0"),
+                },
+                {
+                    new MockDataModel(0, "T0"),
+                    new MockDataModel(0, "T1"),
+                },
+            }));
         });
-        assertThat(j.get(MockDataModel::getValue), hasSize(0));
-        assertThat(m.get(MockDataModel::getValue), containsInAnyOrder("T0", "T1"));
+        assertThat(j.get(MockDataModel::getValue), containsInAnyOrder("M0T0<TBL>", "M0T1<TBL>"));
+        assertThat(m.get(MockDataModel::getValue), hasSize(0));
     }
 
     /**
@@ -311,7 +316,18 @@ public class MasterJoinUpdateOperatorGeneratorTest extends OperatorNodeGenerator
      */
     @Test
     public void cache() {
-        UserOperator operator = load("simple").build();
+        UserOperator operator = loadMerge("simple").build();
+        NodeInfo a = generate(operator);
+        NodeInfo b = generate(operator);
+        assertThat(b, useCacheOf(a));
+    }
+
+    /**
+     * cache - identical.
+     */
+    @Test
+    public void cache_table() {
+        UserOperator operator = loadTable("simple").build();
         NodeInfo a = generate(operator);
         NodeInfo b = generate(operator);
         assertThat(b, useCacheOf(a));
@@ -322,8 +338,8 @@ public class MasterJoinUpdateOperatorGeneratorTest extends OperatorNodeGenerator
      */
     @Test
     public void cache_diff_method() {
-        UserOperator opA = load("simple").build();
-        UserOperator opB = load("renamed").build();
+        UserOperator opA = loadMerge("simple").build();
+        UserOperator opB = loadMerge("renamed").build();
         NodeInfo a = generate(opA);
         NodeInfo b = generate(opB);
         assertThat(b, not(useCacheOf(a)));
@@ -334,10 +350,10 @@ public class MasterJoinUpdateOperatorGeneratorTest extends OperatorNodeGenerator
      */
     @Test
     public void cache_diff_argument() {
-        UserOperator opA = load("parameterized")
+        UserOperator opA = loadMerge("parameterized")
                 .argument("parameterized", Descriptions.valueOf("a"))
                 .build();
-        UserOperator opB = load("parameterized")
+        UserOperator opB = loadMerge("parameterized")
                 .argument("parameterized", Descriptions.valueOf("b"))
                 .build();
         NodeInfo a = generate(opA);
@@ -350,30 +366,37 @@ public class MasterJoinUpdateOperatorGeneratorTest extends OperatorNodeGenerator
      */
     @Test
     public void cache_diff_strategy() {
-        UserOperator opA = load("simple").build();
+        UserOperator opA = loadMerge("simple").build();
+        UserOperator opB = loadTable("simple").build();
         NodeInfo a = generate(opA);
-        NodeInfo b = generateWithTable(opA);
+        NodeInfo b = generate(opB);
         assertThat(b, not(useCacheOf(a)));
-    }
-
-    private NodeInfo generateWithTable(UserOperator operator) {
-        NodeInfo info = generate(operator, c -> {
-            c.put(operator.findInput("master"), new DataTableNode("master",
-                    Descriptions.typeOf(DataTable.class),
-                    Descriptions.typeOf(MockKeyValueModel.class)));
-            operator.getOutputs().forEach(o -> c.put(o, result(o.getDataType())));
-        });
-        return info;
     }
 
     private KeyBuffer key(DataTable.Builder<?> builder, int key) {
         return builder.newKeyBuffer().append(new IntOption(key));
     }
 
-    private Builder load(String name) {
+    private Builder loadMerge(String name) {
         return OperatorExtractor.extract(MasterJoinUpdate.class, Op.class, name)
-                .input("master", Descriptions.typeOf(MockKeyValueModel.class), Groups.parse(Arrays.asList("key")))
-                .input("transaction", Descriptions.typeOf(MockDataModel.class), Groups.parse(Arrays.asList("key")))
+                .input("master", Descriptions.typeOf(MockKeyValueModel.class), c -> c
+                        .group(group("key"))
+                        .unit(InputUnit.GROUP))
+                .input("transaction", Descriptions.typeOf(MockDataModel.class), c -> c
+                        .group(group("key"))
+                        .unit(InputUnit.GROUP))
+                .output("found", Descriptions.typeOf(MockDataModel.class))
+                .output("missing", Descriptions.typeOf(MockDataModel.class));
+    }
+
+    private Builder loadTable(String name) {
+        return OperatorExtractor.extract(MasterJoinUpdate.class, Op.class, name)
+                .input("master", Descriptions.typeOf(MockKeyValueModel.class), c -> c
+                        .group(group("key"))
+                        .unit(InputUnit.WHOLE))
+                .input("transaction", Descriptions.typeOf(MockDataModel.class), c -> c
+                        .group(group("key"))
+                        .unit(InputUnit.RECORD))
                 .output("found", Descriptions.typeOf(MockDataModel.class))
                 .output("missing", Descriptions.typeOf(MockDataModel.class));
     }
@@ -417,6 +440,12 @@ public class MasterJoinUpdateOperatorGeneratorTest extends OperatorNodeGenerator
         @MasterSelection
         public MockKeyValueModel fixer(List<MockKeyValueModel> k, MockDataModel v, String parameter) {
             return new MockKeyValueModel(parameter);
+        }
+
+        @MasterJoinUpdate
+        public void table(MockKeyValueModel k, MockDataModel v,
+                com.asakusafw.runtime.core.DataTable<MockDataModel> t) {
+            parameterized(k, v, t.find(k.getKeyOption()).get(0).getValue());
         }
     }
 }

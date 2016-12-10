@@ -22,13 +22,13 @@ import java.util.Objects;
 import com.asakusafw.dag.compiler.codegen.ClassGeneratorContext;
 import com.asakusafw.dag.compiler.codegen.OperatorNodeGenerator;
 import com.asakusafw.dag.compiler.model.graph.VertexElement;
-import com.asakusafw.dag.compiler.model.graph.VertexElement.ElementKind;
 import com.asakusafw.dag.compiler.model.plan.InputSpec;
 import com.asakusafw.dag.compiler.model.plan.InputSpec.InputType;
 import com.asakusafw.lang.compiler.model.graph.OperatorInput;
 import com.asakusafw.lang.compiler.model.graph.OperatorOutput;
 import com.asakusafw.lang.compiler.model.graph.OperatorPort;
 import com.asakusafw.lang.compiler.model.graph.OperatorProperty;
+import com.asakusafw.lang.compiler.model.graph.OperatorInput.InputUnit;
 import com.asakusafw.lang.compiler.planning.SubPlan;
 import com.asakusafw.lang.utils.common.Invariants;
 
@@ -70,12 +70,6 @@ public class OperatorNodeGeneratorContextAdapter
     }
 
     @Override
-    public boolean isSideData(OperatorInput input) {
-        VertexElement element = dependencies.get(input);
-        return element != null && element.getElementKind() == ElementKind.DATA_TABLE;
-    }
-
-    @Override
     public int getGroupIndex(OperatorInput input) {
         int index = 0;
         for (OperatorInput port : input.getOwner().getInputs()) {
@@ -90,6 +84,9 @@ public class OperatorNodeGeneratorContextAdapter
     }
 
     private boolean isGroupInput(OperatorInput port) {
+        if (port.getInputUnit() != InputUnit.GROUP) {
+            return false;
+        }
         Collection<OperatorOutput> opposites = port.getOpposites();
         if (opposites.size() != 1) {
             return false;

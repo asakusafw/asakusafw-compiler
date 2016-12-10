@@ -46,6 +46,7 @@ public interface VertexElement {
     /**
      * Represents a kind of {@link VertexElement}.
      * @since 0.4.0
+     * @version 0.4.1
      */
     enum ElementKind {
 
@@ -84,5 +85,11 @@ public interface VertexElement {
          * Represents an aggregation.
          */
         AGGREGATE,
+
+        /**
+         * Represents an empty data table.
+         * @since 0.4.1
+         */
+        EMPTY_DATA_TABLE,
     }
 }

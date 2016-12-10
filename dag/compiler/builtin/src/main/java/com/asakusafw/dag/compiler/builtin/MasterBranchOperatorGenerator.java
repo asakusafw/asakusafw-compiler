@@ -30,7 +30,6 @@ import com.asakusafw.dag.compiler.codegen.AsmUtil.ValueRef;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.graph.OperatorProperty;
 import com.asakusafw.lang.compiler.model.graph.UserOperator;
-import com.asakusafw.lang.utils.common.Lang;
 import com.asakusafw.vocabulary.operator.MasterBranch;
 
 /**
@@ -57,7 +56,8 @@ public class MasterBranchOperatorGenerator extends MasterJoinLikeOperatorGenerat
         arguments.add(impl);
         arguments.add(master);
         arguments.add(transaction);
-        arguments.addAll(Lang.project(operator.getArguments(), e -> dependencies.get(e)));
+        appendExtraDataTables(arguments::add, operator, dependencies::get);
+        appendArguments(arguments::add, operator, dependencies::get);
         invoke(method, context, operator, arguments);
         BranchOperatorGenerator.branch(
                 method, context, operator,

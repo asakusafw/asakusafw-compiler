@@ -34,7 +34,6 @@ import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.graph.OperatorOutput;
 import com.asakusafw.lang.compiler.model.graph.OperatorProperty;
 import com.asakusafw.lang.compiler.model.graph.UserOperator;
-import com.asakusafw.lang.utils.common.Lang;
 import com.asakusafw.vocabulary.operator.MasterCheck;
 import com.asakusafw.vocabulary.operator.MasterJoinUpdate;
 
@@ -71,7 +70,8 @@ public class MasterJoinUpdateOperatorGenerator extends MasterJoinLikeOperatorGen
         arguments.add(impl);
         arguments.add(master);
         arguments.add(transaction);
-        arguments.addAll(Lang.project(operator.getArguments(), e -> dependencies.get(e)));
+        appendExtraDataTables(arguments::add, operator, dependencies::get);
+        appendArguments(arguments::add, operator, dependencies::get);
         invoke(method, context, operator, arguments);
         dependencies.get(found).load(method);
         transaction.load(method);

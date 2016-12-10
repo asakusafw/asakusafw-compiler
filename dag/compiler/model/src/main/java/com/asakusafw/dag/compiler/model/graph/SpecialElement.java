@@ -17,28 +17,29 @@ package com.asakusafw.dag.compiler.model.graph;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
-import com.asakusafw.dag.api.processor.ProcessorContext;
-import com.asakusafw.lang.compiler.model.description.Descriptions;
 import com.asakusafw.lang.compiler.model.description.TypeDescription;
+import com.asakusafw.lang.utils.common.Arguments;
 
 /**
- * Represents a special elements.
- * @since 0.4.0
+ * Represents a special element.
+ * @since 0.4.1
  */
-public enum SpecialElement implements VertexElement {
-
-    /**
-     * The runtime context.
-     */
-    CONTEXT(ElementKind.CONTEXT, Descriptions.typeOf(ProcessorContext.class)),
-    ;
+public class SpecialElement implements VertexElement {
 
     private final ElementKind kind;
 
     private final TypeDescription type;
 
-    SpecialElement(ElementKind kind, TypeDescription type) {
+    /**
+     * Creates a new instance.
+     * @param kind the element kind
+     * @param type the element type
+     */
+    public SpecialElement(ElementKind kind, TypeDescription type) {
+        Arguments.requireNonNull(kind);
+        Arguments.requireNonNull(type);
         this.kind = kind;
         this.type = type;
     }
@@ -56,5 +57,40 @@ public enum SpecialElement implements VertexElement {
     @Override
     public List<? extends VertexElement> getDependencies() {
         return Collections.emptyList();
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + Objects.hashCode(kind);
+        result = prime * result + Objects.hashCode(type);
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        SpecialElement other = (SpecialElement) obj;
+        if (!Objects.equals(kind, other.kind)) {
+            return false;
+        }
+        if (!Objects.equals(type, other.type)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return kind.toString();
     }
 }

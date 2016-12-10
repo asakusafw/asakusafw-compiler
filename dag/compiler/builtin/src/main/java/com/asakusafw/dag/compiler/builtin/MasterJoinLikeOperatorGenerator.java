@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.objectweb.asm.ClassVisitor;
@@ -40,7 +41,6 @@ import com.asakusafw.dag.runtime.adapter.CoGroupOperation;
 import com.asakusafw.dag.runtime.adapter.DataTable;
 import com.asakusafw.dag.runtime.skeleton.MergeJoinResult;
 import com.asakusafw.dag.runtime.skeleton.TableJoinResult;
-import com.asakusafw.dag.runtime.table.BasicDataTable;
 import com.asakusafw.lang.compiler.analyzer.util.MasterJoinOperatorUtil;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.description.Descriptions;
@@ -49,7 +49,6 @@ import com.asakusafw.lang.compiler.model.graph.OperatorProperty;
 import com.asakusafw.lang.compiler.model.graph.UserOperator;
 import com.asakusafw.lang.utils.common.Invariants;
 import com.asakusafw.lang.utils.common.Lang;
-import com.asakusafw.vocabulary.operator.MasterJoin;
 
 /**
  * An abstract implementation of {@link OperatorNodeGenerator} for master join like operators.
@@ -59,99 +58,51 @@ public abstract class MasterJoinLikeOperatorGenerator extends UserOperatorNodeGe
 
     @Override
     protected NodeInfo generate(Context context, UserOperator operator, Supplier<? extends ClassDescription> namer) {
-        checkPorts(operator, i -> i == 2, i -> i >= 1);
-        OperatorInput master = getMasterInput(operator);
-        OperatorInput transaction = getTransactionInput(operator);
-        if (isEmptyTableJoin(context, master, transaction)) {
-            return genEmpty(context, operator, namer);
-        } else if (context.isSideData(master)) {
+        validate(context, operator);
+        OperatorInput master = MasterJoinOperatorUtil.getMasterInput(operator);
+        if (context.isSideData(master)) {
             return genTable(context, operator, namer);
         } else {
             return genMerge(context, operator, namer);
         }
     }
 
-    private static boolean isEmptyTableJoin(Context context, OperatorInput master, OperatorInput transaction) {
-        return context.isSideData(master) == false
-                && context.getGroupIndex(master) < 0
-                && context.getGroupIndex(transaction) < 0;
-    }
 
-    private NodeInfo genEmpty(Context context, UserOperator operator, Supplier<? extends ClassDescription> namer) {
-        OperatorInput transaction = getTransactionInput(operator);
-        List<OperatorProperty> injects = Lang.concat(operator.getOutputs(), operator.getArguments());
-        CacheKey key = CacheKey.builder()
-            .raw(Strategy.EMPTY)
-            .operator(operator)
-            .build();
-        return new OperatorNodeInfo(
-                context.cache(key, () -> genEmptyClass(context, operator, injects, namer.get())),
-                transaction.getDataType(),
-                context.getDependencies(injects));
-    }
-
-    private ClassData genEmptyClass(Context context,
-            UserOperator operator, List<OperatorProperty> injects, ClassDescription target) {
-        ClassWriter writer = newWriter(target, TableJoinResult.class);
-        FieldRef impl = defineOperatorField(writer, operator, target);
-        Consumer<MethodVisitor> initializer = defineExtraFields(writer, context, operator, target);
-        Map<OperatorProperty, FieldRef> dependencies = defineConstructor(
-                context, injects,
-                target, writer,
-                method -> {
-                    method.visitVarInsn(Opcodes.ALOAD, 0);
-                    method.visitMethodInsn(Opcodes.INVOKESTATIC,
-                            typeOf(BasicDataTable.class).getInternalName(),
-                            "empty",
-                            Type.getMethodDescriptor(typeOf(DataTable.class)),
-                            false);
-                    method.visitMethodInsn(Opcodes.INVOKESPECIAL,
-                            typeOf(TableJoinResult.class).getInternalName(),
-                            CONSTRUCTOR_NAME,
-                            Type.getMethodDescriptor(Type.VOID_TYPE, typeOf(DataTable.class)),
-                            false);
-                },
-                method -> {
-                    setOperatorField(method, operator, impl);
-                    initializer.accept(method);
-                });
-        OperatorInput transaction = getTransactionInput(operator);
-        defineBuildKey(context, writer, transaction.getDataType(), transaction.getGroup());
-        defineSelection(context, writer, operator, impl, dependencies);
-        defineProcess(context, writer, operator, impl, dependencies, target);
-        writer.visitEnd();
-        return new ClassData(target, writer::toByteArray);
+    /**
+     * Validates the given operator.
+     * @param context the current context
+     * @param operator the target operator
+     */
+    protected void validate(Context context, UserOperator operator) {
+        checkPorts(operator, i -> i >= 2, i -> i >= 1);
     }
 
     private NodeInfo genTable(Context context, UserOperator operator, Supplier<? extends ClassDescription> namer) {
-        OperatorInput master = getMasterInput(operator);
-        OperatorInput transaction = getTransactionInput(operator);
-        List<OperatorProperty> injects = new ArrayList<>();
-        injects.add(master);
-        injects.addAll(operator.getOutputs());
-        injects.addAll(operator.getArguments());
         CacheKey key = CacheKey.builder()
                 .raw(Strategy.TABLE)
                 .operator(operator)
                 .build();
         return new OperatorNodeInfo(
-                context.cache(key, () -> genTableClass(context, operator, injects, namer.get())),
-                transaction.getDataType(),
-                context.getDependencies(injects));
+                context.cache(key, () -> genTableClass(context, operator, namer.get())),
+                MasterJoinOperatorUtil.getTransactionInput(operator).getDataType(),
+                getDefaultDependencies(context, operator));
     }
 
-    private ClassData genTableClass(
-            Context context,
-            UserOperator operator, List<OperatorProperty> injects, ClassDescription target) {
+    private ClassData genTableClass(Context context, UserOperator operator, ClassDescription target) {
+        OperatorInput master = MasterJoinOperatorUtil.getMasterInput(operator);
+        List<OperatorProperty> externals = getExternalProperties(operator);
+        int masterIndex = externals.indexOf(master);
+        Invariants.require(masterIndex >= 0);
+
         ClassWriter writer = newWriter(target, TableJoinResult.class);
         FieldRef impl = defineOperatorField(writer, operator, target);
         Consumer<MethodVisitor> initializer = defineExtraFields(writer, context, operator, target);
         Map<OperatorProperty, FieldRef> dependencies = defineConstructor(
-                context, injects,
+                context, externals,
                 target, writer,
                 method -> {
                     method.visitVarInsn(Opcodes.ALOAD, 0);
-                    method.visitVarInsn(Opcodes.ALOAD, 1); // the first argument is data table
+                    method.visitVarInsn(Opcodes.ALOAD, masterIndex + 1);
                     method.visitMethodInsn(Opcodes.INVOKESPECIAL,
                             typeOf(TableJoinResult.class).getInternalName(),
                             CONSTRUCTOR_NAME,
@@ -162,7 +113,7 @@ public abstract class MasterJoinLikeOperatorGenerator extends UserOperatorNodeGe
                     setOperatorField(method, operator, impl);
                     initializer.accept(method);
                 });
-        OperatorInput transaction = getTransactionInput(operator);
+        OperatorInput transaction = MasterJoinOperatorUtil.getTransactionInput(operator);
         defineBuildKey(context, writer, transaction.getDataType(), transaction.getGroup());
         defineSelection(context, writer, operator, impl, dependencies);
         defineProcess(context, writer, operator, impl, dependencies, target);
@@ -182,8 +133,8 @@ public abstract class MasterJoinLikeOperatorGenerator extends UserOperatorNodeGe
     }
 
     private ClassData genMergeClass(Context context, UserOperator operator, ClassDescription target) {
-        OperatorInput master = getMasterInput(operator);
-        OperatorInput transaction = getTransactionInput(operator);
+        OperatorInput master = MasterJoinOperatorUtil.getMasterInput(operator);
+        OperatorInput transaction = MasterJoinOperatorUtil.getTransactionInput(operator);
         ClassWriter writer = newWriter(target, MergeJoinResult.class);
         FieldRef impl = defineOperatorField(writer, operator, target);
         Consumer<MethodVisitor> initializer = defineExtraFields(writer, context, operator, target);
@@ -208,14 +159,6 @@ public abstract class MasterJoinLikeOperatorGenerator extends UserOperatorNodeGe
         defineProcess(context, writer, operator, impl, dependencies, target);
         writer.visitEnd();
         return new ClassData(target, writer::toByteArray);
-    }
-
-    private static OperatorInput getMasterInput(UserOperator operator) {
-        return operator.getInput(MasterJoin.ID_INPUT_MASTER);
-    }
-
-    private static OperatorInput getTransactionInput(UserOperator operator) {
-        return operator.getInput(MasterJoin.ID_INPUT_TRANSACTION);
     }
 
     /**
@@ -250,7 +193,7 @@ public abstract class MasterJoinLikeOperatorGenerator extends UserOperatorNodeGe
                 Type.getMethodDescriptor(typeOf(Object.class), typeOf(List.class), typeOf(Object.class)),
                 null,
                 null);
-        cast(method, 2, getTransactionInput(operator).getDataType());
+        cast(method, 2, MasterJoinOperatorUtil.getTransactionInput(operator).getDataType());
 
         List<ValueRef> arguments = new ArrayList<>();
         impl.load(method);
@@ -283,8 +226,8 @@ public abstract class MasterJoinLikeOperatorGenerator extends UserOperatorNodeGe
                 Type.getMethodDescriptor(Type.VOID_TYPE, typeOf(Object.class), typeOf(Object.class)),
                 null,
                 null);
-        cast(method, 1, getMasterInput(operator).getDataType());
-        cast(method, 2, getTransactionInput(operator).getDataType());
+        cast(method, 1, MasterJoinOperatorUtil.getMasterInput(operator).getDataType());
+        cast(method, 2, MasterJoinOperatorUtil.getTransactionInput(operator).getDataType());
         defineProcess(method, context, operator,
                 new LocalVarRef(Opcodes.ALOAD, 1), new LocalVarRef(Opcodes.ALOAD, 2),
                 impl, dependencies, target);
@@ -313,9 +256,25 @@ public abstract class MasterJoinLikeOperatorGenerator extends UserOperatorNodeGe
             Map<OperatorProperty, FieldRef> dependencies,
             ClassDescription target);
 
-    private enum Strategy {
+    /**
+     * Appends data tables except master input.
+     * @param destination the destination
+     * @param operator the target operator
+     * @param mappings the mappings
+     */
+    protected static void appendExtraDataTables(
+            Consumer<ValueRef> destination,
+            UserOperator operator, Function<? super OperatorInput, ? extends ValueRef> mappings) {
+        OperatorInput master = MasterJoinOperatorUtil.getMasterInput(operator);
+        for (OperatorInput port : getSecondaryInputs(operator)) {
+            if (port == master) {
+                continue;
+            }
+            destination.accept(Invariants.requireNonNull(mappings.apply(port)));
+        }
+    }
 
-        EMPTY,
+    private enum Strategy {
 
         MERGE,
 

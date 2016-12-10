@@ -26,9 +26,11 @@ import com.asakusafw.dag.compiler.codegen.OperatorNodeGenerator.NodeInfo;
 import com.asakusafw.dag.runtime.testing.MockDataModel;
 import com.asakusafw.lang.compiler.model.description.Descriptions;
 import com.asakusafw.lang.compiler.model.graph.UserOperator;
+import com.asakusafw.lang.compiler.model.graph.OperatorInput.InputUnit;
 import com.asakusafw.lang.compiler.model.graph.UserOperator.Builder;
 import com.asakusafw.lang.compiler.model.testing.OperatorExtractor;
 import com.asakusafw.lang.utils.common.Lang;
+import com.asakusafw.runtime.core.DataTable;
 import com.asakusafw.runtime.core.Report;
 import com.asakusafw.runtime.core.Result;
 import com.asakusafw.runtime.core.legacy.LegacyReport;
@@ -81,6 +83,27 @@ public class LoggingOperatorGeneratorTest extends OperatorNodeGeneratorTestRoot 
         loading(info, c -> {
             Result<Object> r = c.newInstance(results, "?");
             r.add(new MockDataModel("Hello"));
+        });
+        assertThat(Lang.project(results.getResults(), e -> e.getValue()), contains("Hello"));
+    }
+
+    /**
+     * w/ data tables.
+     */
+    @Test
+    public void datatable() {
+        UserOperator operator = load("table")
+                .input("t0", Descriptions.typeOf(MockDataModel.class), c -> c
+                        .group(group("key"))
+                        .unit(InputUnit.WHOLE))
+                .build();
+        NodeInfo info = generate(operator);
+        MockTable<MockDataModel> table = new MockTable<>(MockDataModel::getKeyOption)
+                .add(new MockDataModel(1, "world"));
+        MockResult<MockDataModel> results = new MockResult<>();
+        loading(info, c -> {
+            Result<Object> r = c.newInstance(table, results);
+            r.add(new MockDataModel(1, "Hello"));
         });
         assertThat(Lang.project(results.getResults(), e -> e.getValue()), contains("Hello"));
     }
@@ -146,6 +169,11 @@ public class LoggingOperatorGeneratorTest extends OperatorNodeGeneratorTestRoot 
         @Logging
         public String parameterized(MockDataModel m, String parameter) {
             return m.getValue() + parameter;
+        }
+
+        @Logging
+        public String table(MockDataModel m, DataTable<MockDataModel> t) {
+            return parameterized(m, t.find(m.getKeyOption()).get(0).getValue());
         }
     }
 }

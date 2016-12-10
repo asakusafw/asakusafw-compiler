@@ -25,9 +25,11 @@ import com.asakusafw.dag.runtime.testing.MockDataModel;
 import com.asakusafw.dag.runtime.testing.MockValueModel;
 import com.asakusafw.lang.compiler.model.description.Descriptions;
 import com.asakusafw.lang.compiler.model.graph.UserOperator;
+import com.asakusafw.lang.compiler.model.graph.OperatorInput.InputUnit;
 import com.asakusafw.lang.compiler.model.graph.UserOperator.Builder;
 import com.asakusafw.lang.compiler.model.testing.OperatorExtractor;
 import com.asakusafw.lang.utils.common.Lang;
+import com.asakusafw.runtime.core.DataTable;
 import com.asakusafw.runtime.core.Result;
 import com.asakusafw.runtime.testing.MockResult;
 import com.asakusafw.vocabulary.operator.Convert;
@@ -69,6 +71,29 @@ public class ConvertOperatorGeneratorTest extends OperatorNodeGeneratorTestRoot 
         });
         assertThat(Lang.project(orig.getResults(), e -> e.getValue()), contains("Hello"));
         assertThat(Lang.project(results.getResults(), e -> e.getValue()), contains("Hello?"));
+    }
+
+    /**
+     * w/ data tables.
+     */
+    @Test
+    public void datatable() {
+        UserOperator operator = load("table")
+                .input("t0", Descriptions.typeOf(MockDataModel.class), c -> c
+                        .group(group("key"))
+                        .unit(InputUnit.WHOLE))
+                .build();
+        NodeInfo info = generate(operator);
+        MockTable<MockDataModel> table = new MockTable<>(MockDataModel::getKeyOption)
+                .add(new MockDataModel(1, "world"));
+        MockResult<MockDataModel> orig = new MockResult<>();
+        MockResult<MockValueModel> results = new MockResult<>();
+        loading(info, c -> {
+            Result<Object> r = c.newInstance(table, orig, results);
+            r.add(new MockDataModel(1, "Hello"));
+        });
+        assertThat(Lang.project(orig.getResults(), e -> e.getValue()), contains("Hello"));
+        assertThat(Lang.project(results.getResults(), e -> e.getValue()), contains("Helloworld"));
     }
 
     /**
@@ -156,6 +181,11 @@ public class ConvertOperatorGeneratorTest extends OperatorNodeGeneratorTestRoot 
         @Convert
         public MockValueModel parameterized(MockDataModel m, String parameter) {
             return new MockValueModel(m.getValue() + parameter);
+        }
+
+        @Convert
+        public MockValueModel table(MockDataModel m, DataTable<MockDataModel> t) {
+            return parameterized(m, t.find(m.getKeyOption()).get(0).getValue());
         }
     }
 }
