@@ -22,8 +22,9 @@ import java.util.List;
  * A data table.
  * @param <T> the data type
  * @since 0.4.0
+ * @version 0.4.1
  */
-public interface DataTable<T> {
+public interface DataTable<T> extends com.asakusafw.runtime.core.DataTable<T> {
 
     /**
      * Creates a new key buffer for this table.

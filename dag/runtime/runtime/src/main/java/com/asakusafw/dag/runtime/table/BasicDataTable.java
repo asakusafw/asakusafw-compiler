@@ -37,9 +37,12 @@ public class BasicDataTable<T> implements DataTable<T> {
 
     private final Supplier<? extends KeyBuffer> buffers;
 
+    private final ThreadLocal<KeyBuffer> bufferCache;
+
     BasicDataTable(Map<KeyBuffer.View, ? extends List<T>> entity, Supplier<? extends KeyBuffer> buffers) {
         this.entity = entity;
         this.buffers = buffers;
+        this.bufferCache = ThreadLocal.withInitial(buffers);
     }
 
     @Override
@@ -63,6 +66,55 @@ public class BasicDataTable<T> implements DataTable<T> {
      */
     public static <T> DataTable<T> empty() {
         return new BasicDataTable<>(Collections.emptyMap(), () -> VoidKeyBuffer.INSTANCE);
+    }
+
+    @Override
+    public List<T> find() {
+        KeyBuffer buffer = bufferCache.get().clear();
+        return getList(buffer);
+    }
+
+    @Override
+    public List<T> find(Object key) {
+        KeyBuffer buffer = bufferCache.get().clear();
+        buffer.append(key);
+        return getList(buffer);
+    }
+
+    @Override
+    public List<T> find(Object a, Object b) {
+        KeyBuffer buffer = bufferCache.get().clear();
+        buffer.append(a);
+        buffer.append(b);
+        return getList(buffer);
+    }
+
+    @Override
+    public List<T> find(Object a, Object b, Object c) {
+        KeyBuffer buffer = bufferCache.get().clear();
+        buffer.append(a);
+        buffer.append(b);
+        buffer.append(c);
+        return getList(buffer);
+    }
+
+    @Override
+    public List<T> find(Object a, Object b, Object c, Object d) {
+        KeyBuffer buffer = bufferCache.get().clear();
+        buffer.append(a);
+        buffer.append(b);
+        buffer.append(c);
+        buffer.append(d);
+        return getList(buffer);
+    }
+
+    @Override
+    public List<T> find(Object... elements) {
+        KeyBuffer buffer = bufferCache.get().clear();
+        for (Object element : elements) {
+            buffer.append(element);
+        }
+        return getList(buffer);
     }
 
     /**
