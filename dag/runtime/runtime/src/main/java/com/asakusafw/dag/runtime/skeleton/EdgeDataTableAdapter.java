@@ -17,6 +17,7 @@ package com.asakusafw.dag.runtime.skeleton;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -72,13 +73,31 @@ public class EdgeDataTableAdapter implements DataTableAdapter {
             String tableId, String inputId,
             Supplier<? extends KeyExtractor<?>> keyExtractor,
             Supplier<? extends ObjectCopier<?>> copier) {
+        return bind(tableId, inputId, keyExtractor, copier, null);
+    }
+
+    /**
+     * Binds the data table.
+     * @param tableId the table ID
+     * @param inputId the source input ID
+     * @param keyExtractor the key builder
+     * @param copier the object copier
+     * @param comparator the comparator (nullable)
+     * @return this
+     * @since 0.4.1
+     */
+    public EdgeDataTableAdapter bind(
+            String tableId, String inputId,
+            Supplier<? extends KeyExtractor<?>> keyExtractor,
+            Supplier<? extends ObjectCopier<?>> copier,
+            Supplier<? extends Comparator<?>> comparator) {
         Arguments.requireNonNull(tableId);
         Arguments.requireNonNull(inputId);
         Arguments.requireNonNull(keyExtractor);
         Arguments.requireNonNull(copier);
         Supplier<? extends DataTable.Builder<Object>> tableBuilders = () -> new BasicDataTable.Builder<>(
                 new HashMap<>(), keyBufferFactory);
-        specs.add(new Spec(tableId, inputId, tableBuilders, keyExtractor, copier));
+        specs.add(new Spec(tableId, inputId, tableBuilders, keyExtractor, copier, comparator));
         return this;
     }
 
@@ -101,6 +120,29 @@ public class EdgeDataTableAdapter implements DataTableAdapter {
         return bind(tableId, inputId, Util.toSupplier(keyExtractor), Util.toSupplier(copier));
     }
 
+    /**
+     * Binds the data table.
+     * @param tableId the table ID
+     * @param inputId the source input ID
+     * @param keyExtractor the key builder
+     * @param copier the object copier
+     * @param comparator the entry comparator (nullable)
+     * @return this
+     * @since 0.4.1
+     */
+    public EdgeDataTableAdapter bind(
+            String tableId, String inputId,
+            Class<? extends KeyExtractor<?>> keyExtractor,
+            Class<? extends ObjectCopier<?>> copier,
+            Class<? extends Comparator<?>> comparator) {
+        Arguments.requireNonNull(tableId);
+        Arguments.requireNonNull(inputId);
+        Arguments.requireNonNull(keyExtractor);
+        Arguments.requireNonNull(tableId);
+        return bind(tableId, inputId,
+                Util.toSupplier(keyExtractor), Util.toSupplier(copier), Util.toSupplier(comparator));
+    }
+
     @Override
     public void initialize() throws IOException, InterruptedException {
         for (Spec spec : specs) {
@@ -116,7 +158,8 @@ public class EdgeDataTableAdapter implements DataTableAdapter {
                     table.add(key, object);
                 }
             }
-            resolved.put(spec.tableId, table.build());
+            Comparator<Object> comparator = spec.comparator == null ? null : spec.comparator.get();
+            resolved.put(spec.tableId, table.build(comparator));
         }
     }
 
@@ -144,16 +187,20 @@ public class EdgeDataTableAdapter implements DataTableAdapter {
 
         final Supplier<? extends ObjectCopier<Object>> copier;
 
+        final Supplier<? extends Comparator<Object>> comparator;
+
         @SuppressWarnings("unchecked")
         Spec(String tableId, String inputId,
                 Supplier<? extends DataTable.Builder<?>> tableBuilder,
                 Supplier<? extends KeyExtractor<?>> keyBuilder,
-                Supplier<? extends ObjectCopier<?>> copier) {
+                Supplier<? extends ObjectCopier<?>> copier,
+                Supplier<? extends Comparator<?>> comparator) {
             this.tableId = tableId;
             this.inputId = inputId;
             this.tableBuilder = (Supplier<? extends Builder<Object>>) tableBuilder;
             this.keyBuilder = (Supplier<? extends KeyExtractor<Object>>) keyBuilder;
             this.copier = (Supplier<? extends ObjectCopier<Object>>) copier;
+            this.comparator = (Supplier<? extends Comparator<Object>>) comparator;
         }
     }
 }

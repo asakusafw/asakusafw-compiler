@@ -41,6 +41,7 @@ import com.asakusafw.lang.utils.common.Invariants;
 /**
  * Generates {@link EdgeDataTableAdapter}.
  * @since 0.4.0
+ * @version 0.4.1
  */
 public class EdgeDataTableAdapterGenerator {
 
@@ -59,18 +60,25 @@ public class EdgeDataTableAdapterGenerator {
             for (Spec spec : specs) {
                 ClassDescription keyBuilder = generateKeyBuilder(context, spec, qualify(target, "k", index));
                 ClassDescription copier = ObjectCopierGenerator.get(context, spec.dataType);
+                ClassDescription comparator;
+                if (spec.group.getOrdering().isEmpty()) {
+                    comparator = null;
+                } else {
+                    comparator = ObjectComparatorGenerator.get(context, spec.dataType, spec.group.getOrdering());
+                }
                 self.load(v);
                 getConst(v, spec.tableId);
                 getConst(v, spec.inputId);
                 getConst(v, keyBuilder);
                 getConst(v, copier);
+                getConst(v, comparator);
                 v.visitMethodInsn(
                         Opcodes.INVOKEVIRTUAL,
                         target.getInternalName(), "bind",
                         Type.getMethodDescriptor(
                                 typeOf(EdgeDataTableAdapter.class),
                                 typeOf(String.class), typeOf(String.class),
-                                typeOf(Class.class), typeOf(Class.class)),
+                                typeOf(Class.class), typeOf(Class.class), typeOf(Class.class)),
                         false);
                 v.visitInsn(Opcodes.POP);
                 index++;

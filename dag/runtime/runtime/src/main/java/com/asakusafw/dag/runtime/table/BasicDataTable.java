@@ -17,6 +17,7 @@ package com.asakusafw.dag.runtime.table;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,6 +68,8 @@ public class BasicDataTable<T> implements DataTable<T> {
     /**
      * A builder for {@link BasicDataTable}.
      * @param <T> the element type
+     * @since 0.4.0
+     * @version 0.4.1
      */
     public static class Builder<T> implements DataTable.Builder<T> {
 
@@ -109,7 +112,12 @@ public class BasicDataTable<T> implements DataTable<T> {
         }
 
         @Override
-        public DataTable<T> build() {
+        public DataTable<T> build(Comparator<? super T> comparator) {
+            if (comparator != null) {
+                for (List<T> entry : entity.values()) {
+                    entry.sort(comparator);
+                }
+            }
             return new BasicDataTable<>(entity, buffers);
         }
     }
