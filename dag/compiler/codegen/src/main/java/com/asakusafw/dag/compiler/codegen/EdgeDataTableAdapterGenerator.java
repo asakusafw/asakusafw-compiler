@@ -58,7 +58,12 @@ public class EdgeDataTableAdapterGenerator {
             LocalVarRef self = new LocalVarRef(Opcodes.ALOAD, 0);
             int index = 0;
             for (Spec spec : specs) {
-                ClassDescription keyBuilder = generateKeyBuilder(context, spec, qualify(target, "k", index));
+                ClassDescription keyBuilder;
+                if (spec.group.getGrouping().isEmpty()) {
+                    keyBuilder = null;
+                } else {
+                    keyBuilder = generateKeyBuilder(context, spec, qualify(target, "k", index));
+                }
                 ClassDescription copier = ObjectCopierGenerator.get(context, spec.dataType);
                 ClassDescription comparator;
                 if (spec.group.getOrdering().isEmpty()) {

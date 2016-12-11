@@ -40,6 +40,7 @@ import com.asakusafw.lang.utils.common.Invariants;
 /**
  * {@link DataTableAdapter} for edge output.
  * @since 0.4.0
+ * @version 0.4.1
  */
 public class EdgeDataTableAdapter implements DataTableAdapter {
 
@@ -65,7 +66,7 @@ public class EdgeDataTableAdapter implements DataTableAdapter {
      * Binds the data table.
      * @param tableId the table ID
      * @param inputId the source input ID
-     * @param keyExtractor the key builder
+     * @param keyExtractor the key builder (nullable)
      * @param copier the object copier
      * @return this
      */
@@ -80,7 +81,7 @@ public class EdgeDataTableAdapter implements DataTableAdapter {
      * Binds the data table.
      * @param tableId the table ID
      * @param inputId the source input ID
-     * @param keyExtractor the key builder
+     * @param keyExtractor the key builder (nullable)
      * @param copier the object copier
      * @param comparator the comparator (nullable)
      * @return this
@@ -93,7 +94,6 @@ public class EdgeDataTableAdapter implements DataTableAdapter {
             Supplier<? extends Comparator<?>> comparator) {
         Arguments.requireNonNull(tableId);
         Arguments.requireNonNull(inputId);
-        Arguments.requireNonNull(keyExtractor);
         Arguments.requireNonNull(copier);
         Supplier<? extends DataTable.Builder<Object>> tableBuilders = () -> new BasicDataTable.Builder<>(
                 new HashMap<>(), keyBufferFactory);
@@ -105,7 +105,7 @@ public class EdgeDataTableAdapter implements DataTableAdapter {
      * Binds the data table.
      * @param tableId the table ID
      * @param inputId the source input ID
-     * @param keyExtractor the key builder
+     * @param keyExtractor the key builder (nullable)
      * @param copier the object copier
      * @return this
      */
@@ -115,7 +115,6 @@ public class EdgeDataTableAdapter implements DataTableAdapter {
             Class<? extends ObjectCopier<?>> copier) {
         Arguments.requireNonNull(tableId);
         Arguments.requireNonNull(inputId);
-        Arguments.requireNonNull(keyExtractor);
         Arguments.requireNonNull(tableId);
         return bind(tableId, inputId, Util.toSupplier(keyExtractor), Util.toSupplier(copier));
     }
@@ -124,7 +123,7 @@ public class EdgeDataTableAdapter implements DataTableAdapter {
      * Binds the data table.
      * @param tableId the table ID
      * @param inputId the source input ID
-     * @param keyExtractor the key builder
+     * @param keyExtractor the key builder (nullable)
      * @param copier the object copier
      * @param comparator the entry comparator (nullable)
      * @return this
@@ -137,7 +136,6 @@ public class EdgeDataTableAdapter implements DataTableAdapter {
             Class<? extends Comparator<?>> comparator) {
         Arguments.requireNonNull(tableId);
         Arguments.requireNonNull(inputId);
-        Arguments.requireNonNull(keyExtractor);
         Arguments.requireNonNull(tableId);
         return bind(tableId, inputId,
                 Util.toSupplier(keyExtractor), Util.toSupplier(copier), Util.toSupplier(comparator));
@@ -146,15 +144,18 @@ public class EdgeDataTableAdapter implements DataTableAdapter {
     @Override
     public void initialize() throws IOException, InterruptedException {
         for (Spec spec : specs) {
+            ObjectCopier<Object> copier = spec.copier.get();
+            KeyExtractor<Object> extractor = spec.keyBuilder == null ? null : spec.keyBuilder.get();
             DataTable.Builder<Object> table = spec.tableBuilder.get();
             KeyBuffer key = table.newKeyBuffer();
-            ObjectCopier<Object> copier = spec.copier.get();
-            KeyExtractor<Object> extractor = spec.keyBuilder.get();
+            key.clear();
             try (ObjectReader reader = (ObjectReader) context.getInput(spec.inputId)) {
                 while (reader.nextObject()) {
                     Object object = copier.newCopy(reader.getObject());
-                    key.clear();
-                    extractor.buildKey(key, object);
+                    if (extractor != null) {
+                        key.clear();
+                        extractor.buildKey(key, object);
+                    }
                     table.add(key, object);
                 }
             }

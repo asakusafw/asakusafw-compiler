@@ -25,10 +25,15 @@ import com.asakusafw.lang.utils.buffer.DataIoUtils;
 /**
  * A resizable {@link DataBuffer} implementation using Java NIO.
  * @since 0.4.0
+ * @version 0.4.1
  */
 public class ResizableNioDataBuffer implements DataBuffer {
 
-    private static final ByteBuffer EMPTY_BUFFER = allocate(0);
+    /**
+     * An empty buffer (off-heap).
+     * @since 0.4.1
+     */
+    public static final ByteBuffer EMPTY_BUFFER = allocate(0);
 
     static final double DEFAULT_BUFFER_EXPANSION_FACTOR = 1.5;
 

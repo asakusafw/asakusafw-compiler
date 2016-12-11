@@ -51,6 +51,28 @@ public class HeapKeyBufferTest {
     }
 
     /**
+     * w/ frozen keys.
+     */
+    @Test
+    public void frozen() {
+        KeyBuffer a = newBuffer();
+        KeyBuffer b = newBuffer();
+        assertThat(a.getFrozen(), is(a.getFrozen()));
+        assertThat(a.getFrozen(), is(b.getFrozen()));
+        assertThat(a.getFrozen().hashCode(), is(b.getFrozen().hashCode()));
+
+        append(a, 1);
+        assertThat(a.getFrozen(), is(not(b.getFrozen())));
+
+        append(b, 1);
+        assertThat(a.getFrozen().hashCode(), is(b.getFrozen().hashCode()));
+
+        append(a, 2);
+        append(b, 3);
+        assertThat(a.getFrozen(), is(not(b.getFrozen())));
+    }
+
+    /**
      * clear.
      */
     @Test

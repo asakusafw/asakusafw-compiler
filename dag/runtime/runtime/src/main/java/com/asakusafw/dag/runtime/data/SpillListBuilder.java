@@ -31,7 +31,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.asakusafw.dag.api.common.ObjectCursor;
-import com.asakusafw.lang.utils.buffer.nio.NioDataBuffer;
 import com.asakusafw.lang.utils.buffer.nio.ResizableNioDataBuffer;
 
 /**
@@ -330,7 +329,7 @@ public class SpillListBuilder<T> implements ListBuilder<T> {
                 offsets = EMPTY_LONGS;
                 fragmentEndOffsets = EMPTY_LONGS;
                 fragmentElementCounts = EMPTY_INTS;
-                buffer.contents = NioDataBuffer.EMPTY_BUFFER;
+                buffer.contents = ResizableNioDataBuffer.EMPTY_BUFFER;
                 channel.close(); // DELETE_ON_CLOSE
                 if (Files.exists(path) && Files.deleteIfExists(path) == false && Files.exists(path)) {
                     LOG.warn(MessageFormat.format(

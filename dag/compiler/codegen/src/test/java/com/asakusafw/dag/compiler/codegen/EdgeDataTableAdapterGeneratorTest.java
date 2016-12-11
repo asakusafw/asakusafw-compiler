@@ -72,6 +72,23 @@ public class EdgeDataTableAdapterGeneratorTest extends ClassGeneratorTestRoot {
     }
 
     /**
+     * w/ empty group.
+     */
+    @Test
+    public void empty_group() {
+        define("t", "i", MockDataModel.class);
+        data("i", new Object[] {
+                new MockDataModel(0, "Hello0"),
+                new MockDataModel(1, "Hello1"),
+                new MockDataModel(2, "Hello2"),
+        });
+        check(a -> {
+            DataTable<MockDataModel> t = a.getDataTable(MockDataModel.class, "t");
+            assertThat(get(t, MockDataModel::getValue), containsInAnyOrder("Hello0", "Hello1", "Hello2"));
+        });
+    }
+
+    /**
      * w/ sorted.
      */
     @Test

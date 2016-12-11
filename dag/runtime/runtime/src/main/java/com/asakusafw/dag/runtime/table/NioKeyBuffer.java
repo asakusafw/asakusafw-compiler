@@ -41,8 +41,10 @@ public class NioKeyBuffer implements KeyBuffer {
     @Override
     public View getFrozen() {
         ByteBuffer contents = buffer.contents;
+        if (contents.position() == 0) {
+            return FrozenView.EMPTY;
+        }
         ByteBuffer copy = ByteBuffer.allocateDirect(contents.position()).order(contents.order());
-
         contents.flip();
         copy.put(contents);
         contents.position(contents.limit()).limit(contents.capacity());
@@ -141,6 +143,8 @@ public class NioKeyBuffer implements KeyBuffer {
     }
 
     private static final class FrozenView extends ViewBase {
+
+        static final FrozenView EMPTY = new FrozenView(ResizableNioDataBuffer.EMPTY_BUFFER);
 
         private final ByteBuffer buffer;
 
