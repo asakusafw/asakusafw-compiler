@@ -32,8 +32,8 @@ import com.asakusafw.lang.compiler.model.graph.OperatorInput.InputUnit;
 import com.asakusafw.lang.compiler.model.graph.UserOperator;
 import com.asakusafw.lang.compiler.model.graph.UserOperator.Builder;
 import com.asakusafw.lang.compiler.model.testing.OperatorExtractor;
-import com.asakusafw.runtime.core.DataTable;
 import com.asakusafw.runtime.core.Result;
+import com.asakusafw.runtime.core.TableView;
 import com.asakusafw.vocabulary.operator.MasterBranch;
 import com.asakusafw.vocabulary.operator.MasterSelection;
 
@@ -276,7 +276,7 @@ public class MasterBranchOperatorGeneratorTest extends OperatorNodeGeneratorTest
         }
 
         @MasterBranch
-        public Switch table(MockKeyModel k, MockDataModel v, DataTable<MockDataModel> t) {
+        public Switch table(MockKeyModel k, MockDataModel v, TableView<MockDataModel> t) {
             List<MockDataModel> list = t.find(v.getKeyOption());
             return list.isEmpty() ? Switch.X : Switch.valueOf(list.get(0).getValue());
         }

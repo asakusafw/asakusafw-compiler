@@ -21,7 +21,6 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 import com.asakusafw.dag.compiler.codegen.OperatorNodeGenerator.NodeInfo;
-import com.asakusafw.dag.runtime.adapter.DataTable;
 import com.asakusafw.dag.runtime.testing.MockDataModel;
 import com.asakusafw.dag.runtime.testing.MockKeyValueModel;
 import com.asakusafw.dag.runtime.testing.MockValueModel;
@@ -32,6 +31,7 @@ import com.asakusafw.lang.compiler.model.graph.UserOperator.Builder;
 import com.asakusafw.lang.compiler.model.testing.OperatorExtractor;
 import com.asakusafw.lang.utils.common.Lang;
 import com.asakusafw.runtime.core.Result;
+import com.asakusafw.runtime.core.TableView;
 import com.asakusafw.runtime.testing.MockResult;
 import com.asakusafw.vocabulary.operator.Extract;
 
@@ -198,7 +198,7 @@ public class ExtractOperatorGeneratorTest extends OperatorNodeGeneratorTestRoot 
         }
 
         @Extract
-        public void table(MockDataModel m, DataTable<MockDataModel> t, Result<MockValueModel> r0) {
+        public void table(MockDataModel m, TableView<MockDataModel> t, Result<MockValueModel> r0) {
             parameterized(m, r0, t.find(m.getKeyOption()).get(0).getValue());
         }
     }

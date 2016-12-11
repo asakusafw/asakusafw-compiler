@@ -30,12 +30,12 @@ import com.asakusafw.dag.runtime.testing.MockDataModel;
 import com.asakusafw.dag.runtime.testing.MockSink;
 import com.asakusafw.lang.compiler.model.description.Descriptions;
 import com.asakusafw.lang.compiler.model.graph.Groups;
-import com.asakusafw.lang.compiler.model.graph.UserOperator;
 import com.asakusafw.lang.compiler.model.graph.OperatorInput.InputUnit;
+import com.asakusafw.lang.compiler.model.graph.UserOperator;
 import com.asakusafw.lang.compiler.model.graph.UserOperator.Builder;
 import com.asakusafw.lang.compiler.model.testing.OperatorExtractor;
-import com.asakusafw.runtime.core.DataTable;
 import com.asakusafw.runtime.core.Result;
+import com.asakusafw.runtime.core.TableView;
 import com.asakusafw.vocabulary.operator.Fold;
 
 /**
@@ -224,7 +224,7 @@ public class FoldOperatorGeneratorTest extends OperatorNodeGeneratorTestRoot {
         }
 
         @Fold
-        public void table(MockDataModel a, MockDataModel b, DataTable<MockDataModel> t) {
+        public void table(MockDataModel a, MockDataModel b, TableView<MockDataModel> t) {
             parameterized(a, b, t.find(a.getKeyOption()).get(0).getValue());
         }
     }

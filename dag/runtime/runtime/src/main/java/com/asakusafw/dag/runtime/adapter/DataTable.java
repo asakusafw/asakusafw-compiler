@@ -18,13 +18,15 @@ package com.asakusafw.dag.runtime.adapter;
 import java.util.Comparator;
 import java.util.List;
 
+import com.asakusafw.runtime.core.TableView;
+
 /**
  * A data table.
  * @param <T> the data type
  * @since 0.4.0
  * @version 0.4.1
  */
-public interface DataTable<T> extends com.asakusafw.runtime.core.DataTable<T> {
+public interface DataTable<T> extends TableView<T> {
 
     /**
      * Creates a new key buffer for this table.

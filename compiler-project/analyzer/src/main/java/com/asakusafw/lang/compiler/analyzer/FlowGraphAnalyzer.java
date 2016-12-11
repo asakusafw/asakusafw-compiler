@@ -59,17 +59,17 @@ import com.asakusafw.lang.compiler.model.graph.Group;
 import com.asakusafw.lang.compiler.model.graph.Groups;
 import com.asakusafw.lang.compiler.model.graph.Operator;
 import com.asakusafw.lang.compiler.model.graph.Operator.OperatorKind;
-import com.asakusafw.lang.compiler.model.graph.OperatorInput.InputUnit;
 import com.asakusafw.lang.compiler.model.graph.OperatorConstraint;
 import com.asakusafw.lang.compiler.model.graph.OperatorGraph;
 import com.asakusafw.lang.compiler.model.graph.OperatorInput;
+import com.asakusafw.lang.compiler.model.graph.OperatorInput.InputUnit;
 import com.asakusafw.lang.compiler.model.graph.OperatorOutput;
 import com.asakusafw.lang.compiler.model.graph.UserOperator;
 import com.asakusafw.lang.compiler.model.info.ExternalInputInfo;
 import com.asakusafw.lang.compiler.model.info.ExternalOutputInfo;
 import com.asakusafw.utils.graph.Graph;
 import com.asakusafw.utils.graph.Graphs;
-import com.asakusafw.vocabulary.attribute.DataTableInfo;
+import com.asakusafw.vocabulary.attribute.ViewInfo;
 import com.asakusafw.vocabulary.external.ExporterDescription;
 import com.asakusafw.vocabulary.external.ImporterDescription;
 import com.asakusafw.vocabulary.flow.Export;
@@ -320,13 +320,13 @@ public final class FlowGraphAnalyzer {
         for (FlowElementPortDescription port : description.getInputPorts()) {
             builder.input(port.getName(), typeOf(port.getDataType()), c -> {
                 attributes(port, c);
-                DataTableInfo table = port.getAttribute(DataTableInfo.class);
-                if (table == null) {
+                ViewInfo view = port.getAttribute(ViewInfo.class);
+                if (view == null) {
                     c.group(convert(port.getShuffleKey()));
                 } else {
-                    // data tables
+                    // views
                     c.unit(InputUnit.WHOLE);
-                    c.group(Groups.parse(table.getTerms()));
+                    c.group(Groups.parse(view.getTerms()));
                 }
             });
         }

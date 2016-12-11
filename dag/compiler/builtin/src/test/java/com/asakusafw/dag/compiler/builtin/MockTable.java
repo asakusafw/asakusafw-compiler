@@ -19,9 +19,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import com.asakusafw.dag.runtime.adapter.DataTable;
 import com.asakusafw.dag.runtime.adapter.KeyBuffer;
@@ -30,7 +32,6 @@ import com.asakusafw.lang.utils.common.Arguments;
 /**
  * Mock {@link DataTable}.
  * @param <T> the element type
- * @since WIP
  */
 public class MockTable<T> implements DataTable<T> {
 
@@ -81,6 +82,15 @@ public class MockTable<T> implements DataTable<T> {
             changed = false;
         }
         return map.getOrDefault(elements[0], Collections.emptyList());
+    }
+
+    @Override
+    public Iterator<T> iterator() {
+        return map.values().stream()
+                .flatMap(it -> it.stream())
+                .collect(Collectors.collectingAndThen(
+                        Collectors.toList(),
+                        it -> it.iterator()));
     }
 
     @Override

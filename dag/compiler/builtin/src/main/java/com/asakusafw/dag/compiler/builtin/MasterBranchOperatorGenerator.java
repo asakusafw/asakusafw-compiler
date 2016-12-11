@@ -56,7 +56,7 @@ public class MasterBranchOperatorGenerator extends MasterJoinLikeOperatorGenerat
         arguments.add(impl);
         arguments.add(master);
         arguments.add(transaction);
-        appendExtraDataTables(arguments::add, operator, dependencies::get);
+        appendExtraViews(arguments::add, operator, dependencies::get);
         appendArguments(arguments::add, operator, dependencies::get);
         invoke(method, context, operator, arguments);
         BranchOperatorGenerator.branch(

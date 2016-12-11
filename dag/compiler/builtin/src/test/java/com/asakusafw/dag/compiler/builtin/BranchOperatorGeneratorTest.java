@@ -31,8 +31,8 @@ import com.asakusafw.lang.compiler.model.graph.OperatorInput.InputUnit;
 import com.asakusafw.lang.compiler.model.graph.UserOperator;
 import com.asakusafw.lang.compiler.model.graph.UserOperator.Builder;
 import com.asakusafw.lang.compiler.model.testing.OperatorExtractor;
-import com.asakusafw.runtime.core.DataTable;
 import com.asakusafw.runtime.core.Result;
+import com.asakusafw.runtime.core.TableView;
 import com.asakusafw.runtime.value.IntOption;
 import com.asakusafw.vocabulary.operator.Branch;
 
@@ -177,7 +177,7 @@ public class BranchOperatorGeneratorTest extends OperatorNodeGeneratorTestRoot {
         }
 
         @Branch
-        public Switch table(MockValueModel m, DataTable<MockDataModel> t) {
+        public Switch table(MockValueModel m, TableView<MockDataModel> t) {
             return Switch.valueOf(t.find(new IntOption(0)).get(0).getValue());
         }
     }

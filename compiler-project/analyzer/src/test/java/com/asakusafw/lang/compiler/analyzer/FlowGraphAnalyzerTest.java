@@ -35,10 +35,10 @@ import com.asakusafw.lang.compiler.model.graph.Groups;
 import com.asakusafw.lang.compiler.model.graph.OperatorConstraint;
 import com.asakusafw.lang.compiler.model.graph.OperatorInput.InputUnit;
 import com.asakusafw.lang.compiler.model.graph.UserOperator;
-import com.asakusafw.runtime.core.DataTable;
 import com.asakusafw.runtime.core.Result;
+import com.asakusafw.runtime.core.TableView;
 import com.asakusafw.vocabulary.attribute.BufferType;
-import com.asakusafw.vocabulary.attribute.DataTableInfo;
+import com.asakusafw.vocabulary.attribute.ViewInfo;
 import com.asakusafw.vocabulary.external.ExporterDescription;
 import com.asakusafw.vocabulary.external.ImporterDescription;
 import com.asakusafw.vocabulary.flow.FlowDescription;
@@ -554,7 +554,7 @@ public class FlowGraphAnalyzerTest {
         UserOperator operator = (UserOperator) inspector.get("o0");
         assertThat(operator.getInput(0).getInputUnit(), is(InputUnit.RECORD));
         assertThat(operator.getInput(0).getGroup(), is(nullValue()));
-        assertThat(operator.getInput(0).getAttribute(DataTableInfo.class), is(nullValue()));
+        assertThat(operator.getInput(0).getAttribute(ViewInfo.class), is(nullValue()));
     }
 
     /**
@@ -594,7 +594,7 @@ public class FlowGraphAnalyzerTest {
         UserOperator operator = (UserOperator) inspector.get("o0");
         assertThat(operator.getInput(0).getInputUnit(), is(InputUnit.GROUP));
         assertThat(operator.getInput(0).getGroup(), is(Groups.parse("=key", "+sort")));
-        assertThat(operator.getInput(0).getAttribute(DataTableInfo.class), is(nullValue()));
+        assertThat(operator.getInput(0).getAttribute(ViewInfo.class), is(nullValue()));
     }
 
     /**
@@ -608,14 +608,14 @@ public class FlowGraphAnalyzerTest {
                 .add("o0", new OperatorDescription.Builder(MockOperator.class)
                         .declare(Mock.class, Mock.class, "table")
                         .declareParameter(String.class)
-                        .declareParameter(DataTable.class)
+                        .declareParameter(TableView.class)
                         .declareParameter(Result.class)
                         .addPort(new FlowElementPortDescription(
                                 "in", String.class,
                                 PortDirection.INPUT, null))
                         .addPort(new FlowElementPortDescription(
                                 "side", String.class,
-                                PortDirection.INPUT, null, DataTableInfo.of("=key", "+sort")))
+                                PortDirection.INPUT, null, ViewInfo.tableOf("=key", "+sort")))
                         .addPort(new FlowElementPortDescription("p", String.class, PortDirection.OUTPUT))
                         .toDescription())
                 .add("d0", new OutputDescription("p", String.class))
@@ -640,7 +640,7 @@ public class FlowGraphAnalyzerTest {
         UserOperator operator = (UserOperator) inspector.get("o0");
         assertThat(operator.getInput(1).getInputUnit(), is(InputUnit.WHOLE));
         assertThat(operator.getInput(1).getGroup(), is(Groups.parse("=key", "+sort")));
-        assertThat(operator.getInput(1).getAttribute(DataTableInfo.class), is(DataTableInfo.of("=key", "+sort")));
+        assertThat(operator.getInput(1).getAttribute(ViewInfo.class), is(ViewInfo.tableOf("=key", "+sort")));
     }
 
     /**
@@ -707,7 +707,7 @@ public class FlowGraphAnalyzerTest {
         @MockOperator
         public abstract void table(
                 String in,
-                @Key(group = "key", order = { "+sortA", "-sortB" }) DataTable<String> side,
+                @Key(group = "key", order = { "+sortA", "-sortB" }) TableView<String> side,
                 Result<String> out);
 
         @MockOperator

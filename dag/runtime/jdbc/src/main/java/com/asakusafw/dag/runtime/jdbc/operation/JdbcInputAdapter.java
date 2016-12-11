@@ -38,9 +38,9 @@ import com.asakusafw.dag.runtime.adapter.InputHandler.InputSession;
 import com.asakusafw.dag.runtime.jdbc.ConnectionPool;
 import com.asakusafw.dag.runtime.jdbc.JdbcInputDriver;
 import com.asakusafw.dag.runtime.jdbc.JdbcInputDriver.Partition;
+import com.asakusafw.dag.runtime.jdbc.JdbcProfile;
 import com.asakusafw.lang.utils.common.Arguments;
 import com.asakusafw.lang.utils.common.Invariants;
-import com.asakusafw.dag.runtime.jdbc.JdbcProfile;
 
 /**
  * {@link InputAdapter} for JDBC inputs.

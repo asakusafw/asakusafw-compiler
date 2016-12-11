@@ -42,8 +42,8 @@ import com.asakusafw.dag.runtime.jdbc.util.JdbcUtil;
 import com.asakusafw.lang.utils.common.Action;
 import com.asakusafw.lang.utils.common.FunctionWithException;
 import com.asakusafw.lang.utils.common.InterruptibleIo;
-import com.asakusafw.lang.utils.common.Invariants;
 import com.asakusafw.lang.utils.common.InterruptibleIo.Closer;
+import com.asakusafw.lang.utils.common.Invariants;
 import com.asakusafw.runtime.util.VariableTable;
 
 /**

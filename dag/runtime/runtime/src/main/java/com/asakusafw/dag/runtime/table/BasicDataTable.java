@@ -19,8 +19,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.function.Supplier;
 
 import com.asakusafw.dag.runtime.adapter.DataTable;
@@ -66,6 +68,39 @@ public class BasicDataTable<T> implements DataTable<T> {
      */
     public static <T> DataTable<T> empty() {
         return new BasicDataTable<>(Collections.emptyMap(), () -> VoidKeyBuffer.INSTANCE);
+    }
+
+    @Override
+    public Iterator<T> iterator() {
+        Iterator<? extends List<T>> partitions = entity.values().iterator();
+        return new Iterator<T>() {
+            private Iterator<T> nextPartition;
+            @Override
+            public boolean hasNext() {
+                while (true) {
+                    if (nextPartition == null) {
+                        if (partitions.hasNext()) {
+                            nextPartition = partitions.next().iterator();
+                        } else {
+                            return false;
+                        }
+                    }
+                    if (nextPartition.hasNext()) {
+                        return true;
+                    } else {
+                        nextPartition = null;
+                    }
+                }
+            }
+
+            @Override
+            public T next() {
+                if (nextPartition == null) {
+                    throw new NoSuchElementException();
+                }
+                return nextPartition.next();
+            }
+        };
     }
 
     @Override

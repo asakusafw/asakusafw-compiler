@@ -24,13 +24,13 @@ import com.asakusafw.dag.compiler.codegen.OperatorNodeGenerator.NodeInfo;
 import com.asakusafw.dag.runtime.testing.MockDataModel;
 import com.asakusafw.dag.runtime.testing.MockValueModel;
 import com.asakusafw.lang.compiler.model.description.Descriptions;
-import com.asakusafw.lang.compiler.model.graph.UserOperator;
 import com.asakusafw.lang.compiler.model.graph.OperatorInput.InputUnit;
+import com.asakusafw.lang.compiler.model.graph.UserOperator;
 import com.asakusafw.lang.compiler.model.graph.UserOperator.Builder;
 import com.asakusafw.lang.compiler.model.testing.OperatorExtractor;
 import com.asakusafw.lang.utils.common.Lang;
-import com.asakusafw.runtime.core.DataTable;
 import com.asakusafw.runtime.core.Result;
+import com.asakusafw.runtime.core.TableView;
 import com.asakusafw.runtime.testing.MockResult;
 import com.asakusafw.vocabulary.operator.Convert;
 
@@ -184,7 +184,7 @@ public class ConvertOperatorGeneratorTest extends OperatorNodeGeneratorTestRoot 
         }
 
         @Convert
-        public MockValueModel table(MockDataModel m, DataTable<MockDataModel> t) {
+        public MockValueModel table(MockDataModel m, TableView<MockDataModel> t) {
             return parameterized(m, t.find(m.getKeyOption()).get(0).getValue());
         }
     }

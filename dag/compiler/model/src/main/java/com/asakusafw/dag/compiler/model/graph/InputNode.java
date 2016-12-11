@@ -20,8 +20,8 @@ import java.util.List;
 
 import com.asakusafw.lang.compiler.model.description.BasicTypeDescription;
 import com.asakusafw.lang.compiler.model.description.BasicTypeDescription.BasicTypeKind;
-import com.asakusafw.lang.utils.common.Arguments;
 import com.asakusafw.lang.compiler.model.description.TypeDescription;
+import com.asakusafw.lang.utils.common.Arguments;
 
 /**
  * Represents an input node.

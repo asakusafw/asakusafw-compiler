@@ -33,8 +33,8 @@ import com.asakusafw.lang.compiler.model.graph.UserOperator;
 import com.asakusafw.lang.compiler.model.graph.UserOperator.Builder;
 import com.asakusafw.lang.compiler.model.testing.OperatorExtractor;
 import com.asakusafw.lang.utils.common.Lang;
-import com.asakusafw.runtime.core.DataTable;
 import com.asakusafw.runtime.core.Result;
+import com.asakusafw.runtime.core.TableView;
 import com.asakusafw.runtime.testing.MockResult;
 import com.asakusafw.vocabulary.operator.GroupSort;
 
@@ -222,7 +222,7 @@ public class GroupSortOperatorGeneratorTest extends OperatorNodeGeneratorTestRoo
         }
 
         @GroupSort
-        public void table(List<MockDataModel> i0, DataTable<MockDataModel> t0, Result<MockValueModel> r0) {
+        public void table(List<MockDataModel> i0, TableView<MockDataModel> t0, Result<MockValueModel> r0) {
             for (MockDataModel m : i0) {
                 MockDataModel t = t0.find(m.getKeyOption()).get(0);
                 r0.add(new MockValueModel(t.getValue()));

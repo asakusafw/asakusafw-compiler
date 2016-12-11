@@ -30,10 +30,10 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
+import com.asakusafw.dag.compiler.codegen.AsmUtil;
 import com.asakusafw.dag.compiler.codegen.AsmUtil.FieldRef;
 import com.asakusafw.dag.compiler.codegen.AsmUtil.LocalVarRef;
 import com.asakusafw.dag.compiler.codegen.AsmUtil.ValueRef;
-import com.asakusafw.dag.compiler.codegen.AsmUtil;
 import com.asakusafw.dag.compiler.codegen.ObjectCopierGenerator;
 import com.asakusafw.dag.compiler.model.ClassData;
 import com.asakusafw.dag.compiler.model.graph.ValueElement;

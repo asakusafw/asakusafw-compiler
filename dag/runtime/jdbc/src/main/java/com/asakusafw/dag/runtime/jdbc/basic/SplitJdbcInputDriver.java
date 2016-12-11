@@ -44,9 +44,9 @@ import com.asakusafw.dag.runtime.jdbc.JdbcProfile;
 import com.asakusafw.dag.runtime.jdbc.ResultSetAdapter;
 import com.asakusafw.dag.runtime.jdbc.util.JdbcUtil;
 import com.asakusafw.lang.utils.common.Arguments;
+import com.asakusafw.lang.utils.common.InterruptibleIo.Closer;
 import com.asakusafw.lang.utils.common.Invariants;
 import com.asakusafw.lang.utils.common.Optionals;
-import com.asakusafw.lang.utils.common.InterruptibleIo.Closer;
 
 /**
  * Splittable {@link JdbcInputDriver}.

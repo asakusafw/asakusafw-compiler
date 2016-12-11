@@ -262,7 +262,7 @@ public abstract class MasterJoinLikeOperatorGenerator extends UserOperatorNodeGe
      * @param operator the target operator
      * @param mappings the mappings
      */
-    protected static void appendExtraDataTables(
+    protected static void appendExtraViews(
             Consumer<ValueRef> destination,
             UserOperator operator, Function<? super OperatorInput, ? extends ValueRef> mappings) {
         OperatorInput master = MasterJoinOperatorUtil.getMasterInput(operator);

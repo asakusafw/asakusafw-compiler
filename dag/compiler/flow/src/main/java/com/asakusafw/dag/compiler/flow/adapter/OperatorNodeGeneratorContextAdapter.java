@@ -25,10 +25,10 @@ import com.asakusafw.dag.compiler.model.graph.VertexElement;
 import com.asakusafw.dag.compiler.model.plan.InputSpec;
 import com.asakusafw.dag.compiler.model.plan.InputSpec.InputType;
 import com.asakusafw.lang.compiler.model.graph.OperatorInput;
+import com.asakusafw.lang.compiler.model.graph.OperatorInput.InputUnit;
 import com.asakusafw.lang.compiler.model.graph.OperatorOutput;
 import com.asakusafw.lang.compiler.model.graph.OperatorPort;
 import com.asakusafw.lang.compiler.model.graph.OperatorProperty;
-import com.asakusafw.lang.compiler.model.graph.OperatorInput.InputUnit;
 import com.asakusafw.lang.compiler.planning.SubPlan;
 import com.asakusafw.lang.utils.common.Invariants;
 
