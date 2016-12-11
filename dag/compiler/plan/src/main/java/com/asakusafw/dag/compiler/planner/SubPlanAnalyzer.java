@@ -354,7 +354,7 @@ public final class SubPlanAnalyzer {
             }
         case BROADCAST:
             return new OutputSpec(output, id, type, sourceType, dataType, Collections.emptySet(),
-                    computeOutputGroup(output), null);
+                    null, null);
         default:
             throw new AssertionError(type);
         }

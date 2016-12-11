@@ -606,9 +606,9 @@ public final class DagPlanning {
             assert marker != null;
             switch (marker) {
             case CHECKPOINT:
+            case BROADCAST:
                 return operator.getDataType();
             case GATHER:
-            case BROADCAST:
                 assert operator.getAttribute(EdgeInfo.class) != null;
                 return operator.getAttribute(EdgeInfo.class);
             default:

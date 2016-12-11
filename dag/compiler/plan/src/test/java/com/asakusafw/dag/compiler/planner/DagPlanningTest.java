@@ -337,7 +337,7 @@ in1 --- *B -/
         assertThat(s0, not(operationOption(is(OperationOption.PRE_AGGREGATION))));
 
         assertThat(output(s1), outputType(is(OutputType.BROADCAST)));
-        assertThat(output(s1), outputGroup(is(group("+k"))));
+        assertThat(output(s1), outputGroup(nullValue()));
         assertThat(output(s1), outputAggregation(is(nullValue())));
 
         assertThat(output(s1).getOpposites(), hasSize(1));
@@ -379,7 +379,7 @@ in0 --- *B -/
         assertThat(s0, not(operationOption(is(OperationOption.PRE_AGGREGATION))));
 
         assertThat(output(s1), outputType(is(OutputType.BROADCAST)));
-        assertThat(output(s1), outputGroup(is(group("+k"))));
+        assertThat(output(s1), outputGroup(is(nullValue())));
         assertThat(output(s1), outputAggregation(is(nullValue())));
 
         assertThat(output(s1).getOpposites(), hasSize(1));
@@ -485,7 +485,7 @@ in1 --- *B -/
 
         assertThat(s1, operationOption(is(OperationOption.EXTERNAL_INPUT)));
         assertThat(output(s1), outputType(is(OutputType.BROADCAST)));
-        assertThat(output(s1), outputGroup(is(group("=k"))));
+        assertThat(output(s1), outputGroup(is(nullValue())));
         assertThat(output(s1), outputAggregation(is(nullValue())));
     }
 
@@ -533,7 +533,7 @@ in1 --- *B -/
 
         assertThat(s1, operationOption(is(OperationOption.EXTERNAL_INPUT)));
         assertThat(output(s1), outputType(is(OutputType.BROADCAST)));
-        assertThat(output(s1), outputGroup(is(group("=b"))));
+        assertThat(output(s1), outputGroup(is(nullValue())));
         assertThat(output(s1), outputAggregation(is(nullValue())));
 
         assertThat(info(s2).toString(), s2, primaryOperator(isOperator("o0")));
