@@ -444,7 +444,7 @@ public class MasterJoinUpdateOperatorGeneratorTest extends OperatorNodeGenerator
 
         @MasterJoinUpdate
         public void table(MockKeyValueModel k, MockDataModel v,
-                com.asakusafw.runtime.core.TableView<MockDataModel> t) {
+                com.asakusafw.runtime.core.GroupView<MockDataModel> t) {
             parameterized(k, v, t.find(k.getKeyOption()).get(0).getValue());
         }
     }

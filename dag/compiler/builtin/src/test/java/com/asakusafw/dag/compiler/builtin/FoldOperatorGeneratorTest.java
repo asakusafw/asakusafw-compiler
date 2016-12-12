@@ -35,7 +35,7 @@ import com.asakusafw.lang.compiler.model.graph.UserOperator;
 import com.asakusafw.lang.compiler.model.graph.UserOperator.Builder;
 import com.asakusafw.lang.compiler.model.testing.OperatorExtractor;
 import com.asakusafw.runtime.core.Result;
-import com.asakusafw.runtime.core.TableView;
+import com.asakusafw.runtime.core.GroupView;
 import com.asakusafw.vocabulary.operator.Fold;
 
 /**
@@ -224,7 +224,7 @@ public class FoldOperatorGeneratorTest extends OperatorNodeGeneratorTestRoot {
         }
 
         @Fold
-        public void table(MockDataModel a, MockDataModel b, TableView<MockDataModel> t) {
+        public void table(MockDataModel a, MockDataModel b, GroupView<MockDataModel> t) {
             parameterized(a, b, t.find(a.getKeyOption()).get(0).getValue());
         }
     }

@@ -18,7 +18,7 @@ package com.asakusafw.dag.runtime.adapter;
 import java.util.Comparator;
 import java.util.List;
 
-import com.asakusafw.runtime.core.TableView;
+import com.asakusafw.runtime.core.GroupView;
 
 /**
  * A data table.
@@ -26,7 +26,7 @@ import com.asakusafw.runtime.core.TableView;
  * @since 0.4.0
  * @version 0.4.1
  */
-public interface DataTable<T> extends TableView<T> {
+public interface DataTable<T> extends GroupView<T> {
 
     /**
      * Creates a new key buffer for this table.

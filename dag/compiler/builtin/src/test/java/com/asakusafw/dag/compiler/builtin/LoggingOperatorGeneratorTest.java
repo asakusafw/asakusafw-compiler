@@ -32,7 +32,7 @@ import com.asakusafw.lang.compiler.model.testing.OperatorExtractor;
 import com.asakusafw.lang.utils.common.Lang;
 import com.asakusafw.runtime.core.Report;
 import com.asakusafw.runtime.core.Result;
-import com.asakusafw.runtime.core.TableView;
+import com.asakusafw.runtime.core.GroupView;
 import com.asakusafw.runtime.core.legacy.LegacyReport;
 import com.asakusafw.runtime.testing.MockResult;
 import com.asakusafw.vocabulary.operator.Logging;
@@ -172,7 +172,7 @@ public class LoggingOperatorGeneratorTest extends OperatorNodeGeneratorTestRoot 
         }
 
         @Logging
-        public String table(MockDataModel m, TableView<MockDataModel> t) {
+        public String table(MockDataModel m, GroupView<MockDataModel> t) {
             return parameterized(m, t.find(m.getKeyOption()).get(0).getValue());
         }
     }

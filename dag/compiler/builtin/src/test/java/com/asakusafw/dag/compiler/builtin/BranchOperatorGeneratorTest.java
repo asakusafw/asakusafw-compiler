@@ -32,7 +32,7 @@ import com.asakusafw.lang.compiler.model.graph.UserOperator;
 import com.asakusafw.lang.compiler.model.graph.UserOperator.Builder;
 import com.asakusafw.lang.compiler.model.testing.OperatorExtractor;
 import com.asakusafw.runtime.core.Result;
-import com.asakusafw.runtime.core.TableView;
+import com.asakusafw.runtime.core.GroupView;
 import com.asakusafw.runtime.value.IntOption;
 import com.asakusafw.vocabulary.operator.Branch;
 
@@ -177,7 +177,7 @@ public class BranchOperatorGeneratorTest extends OperatorNodeGeneratorTestRoot {
         }
 
         @Branch
-        public Switch table(MockValueModel m, TableView<MockDataModel> t) {
+        public Switch table(MockValueModel m, GroupView<MockDataModel> t) {
             return Switch.valueOf(t.find(new IntOption(0)).get(0).getValue());
         }
     }

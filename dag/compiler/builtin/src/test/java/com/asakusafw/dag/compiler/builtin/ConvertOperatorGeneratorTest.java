@@ -30,7 +30,7 @@ import com.asakusafw.lang.compiler.model.graph.UserOperator.Builder;
 import com.asakusafw.lang.compiler.model.testing.OperatorExtractor;
 import com.asakusafw.lang.utils.common.Lang;
 import com.asakusafw.runtime.core.Result;
-import com.asakusafw.runtime.core.TableView;
+import com.asakusafw.runtime.core.GroupView;
 import com.asakusafw.runtime.testing.MockResult;
 import com.asakusafw.vocabulary.operator.Convert;
 
@@ -184,7 +184,7 @@ public class ConvertOperatorGeneratorTest extends OperatorNodeGeneratorTestRoot 
         }
 
         @Convert
-        public MockValueModel table(MockDataModel m, TableView<MockDataModel> t) {
+        public MockValueModel table(MockDataModel m, GroupView<MockDataModel> t) {
             return parameterized(m, t.find(m.getKeyOption()).get(0).getValue());
         }
     }
