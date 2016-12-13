@@ -97,6 +97,11 @@ class AsakusaVanillaSdkBasePlugin implements Plugin<Project> {
                     asakusaVanillaTestkit "com.asakusafw.vanilla.testkit:asakusa-vanilla-test-adapter:${base.featureVersion}"
                     asakusaVanillaTestkit "com.asakusafw.vanilla.testkit:asakusa-vanilla-test-inprocess:${base.featureVersion}"
                     asakusaVanillaTestkit "com.asakusafw:asakusa-test-inprocess:${base.coreVersion}"
+                    asakusaVanillaTestkit "com.asakusafw:asakusa-test-windows:${base.coreVersion}"
+
+                    if (features.windgate) {
+                        asakusaVanillaTestkit "com.asakusafw:asakusa-windgate-test-inprocess:${base.coreVersion}"
+                    }
                 }
             }
         }
