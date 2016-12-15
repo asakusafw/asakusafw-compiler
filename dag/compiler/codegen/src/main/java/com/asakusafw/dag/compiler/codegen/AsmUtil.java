@@ -51,6 +51,7 @@ import com.asakusafw.runtime.value.ValueOption;
 /**
  * Utilities for ASM.
  * @since 0.4.0
+ * @version 0.4.1
  */
 public final class AsmUtil {
 
@@ -341,8 +342,19 @@ public final class AsmUtil {
      * @param values the array elements
      */
     public static void getArray(MethodVisitor method, String[] values) {
+        getArray(method, typeOf(String.class), values);
+    }
+
+    /**
+     * Adds a string array on to the top of the stack.
+     * @param method the current method visitor
+     * @param elementType the element type
+     * @param values the array elements
+     * @since 0.4.1
+     */
+    public static void getArray(MethodVisitor method, Type elementType, Object[] values) {
         getInt(method, values.length);
-        method.visitTypeInsn(Opcodes.ANEWARRAY, typeOf(String.class).getInternalName());
+        method.visitTypeInsn(Opcodes.ANEWARRAY, elementType.getInternalName());
         for (int index = 0; index < values.length; index++) {
             method.visitInsn(Opcodes.DUP);
             getInt(method, index);

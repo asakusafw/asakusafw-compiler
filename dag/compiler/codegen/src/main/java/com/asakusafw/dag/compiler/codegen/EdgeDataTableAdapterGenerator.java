@@ -65,31 +65,48 @@ public class EdgeDataTableAdapterGenerator {
                     keyBuilder = generateKeyBuilder(context, spec, qualify(target, "k", index));
                 }
                 ClassDescription copier = ObjectCopierGenerator.get(context, spec.dataType);
-                ClassDescription comparator;
-                if (spec.group.getOrdering().isEmpty()) {
-                    comparator = null;
-                } else {
-                    comparator = ObjectComparatorGenerator.get(context, spec.dataType, spec.group.getOrdering());
-                }
+                ClassDescription comparator = toComparatorClass(context, spec);
+                TypeDescription[] keyElementTypes = toKeyElementTypes(context, spec);
                 self.load(v);
                 getConst(v, spec.tableId);
                 getConst(v, spec.inputId);
                 getConst(v, keyBuilder);
                 getConst(v, copier);
                 getConst(v, comparator);
+                getArray(v, typeOf(Class.class), keyElementTypes);
                 v.visitMethodInsn(
                         Opcodes.INVOKEVIRTUAL,
                         target.getInternalName(), "bind",
                         Type.getMethodDescriptor(
                                 typeOf(EdgeDataTableAdapter.class),
                                 typeOf(String.class), typeOf(String.class),
-                                typeOf(Class.class), typeOf(Class.class), typeOf(Class.class)),
+                                typeOf(Class.class), typeOf(Class.class), typeOf(Class.class),
+                                typeOf(Class[].class)),
                         false);
                 v.visitInsn(Opcodes.POP);
                 index++;
             }
         });
         return new ClassData(target, writer::toByteArray);
+    }
+
+    static ClassDescription toComparatorClass(ClassGeneratorContext context, Spec spec) {
+        ClassDescription comparator;
+        if (spec.group.getOrdering().isEmpty()) {
+            comparator = null;
+        } else {
+            comparator = ObjectComparatorGenerator.get(context, spec.dataType, spec.group.getOrdering());
+        }
+        return comparator;
+    }
+
+    static TypeDescription[] toKeyElementTypes(ClassGeneratorContext context, Spec spec) {
+        DataModelReference dataModel = context.getDataModelLoader().load(spec.dataType);
+        return spec.group.getGrouping().stream()
+                .sequential()
+                .map(n -> Invariants.requireNonNull(dataModel.findProperty(n)))
+                .map(PropertyReference::getType)
+                .toArray(TypeDescription[]::new);
     }
 
     ClassDescription generateKeyBuilder(ClassGeneratorContext context, Spec spec, ClassDescription target) {

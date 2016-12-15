@@ -16,9 +16,13 @@
 package com.asakusafw.dag.runtime.skeleton;
 
 import java.text.MessageFormat;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import com.asakusafw.dag.api.processor.ProcessorContext;
 import com.asakusafw.dag.runtime.adapter.KeyBuffer;
@@ -62,6 +66,26 @@ final class Util {
                         throw new IllegalArgumentException(MessageFormat.format(
                                 "{0} must be a valid integer: {1}={2}",
                                 title, key, value), e);
+                    }
+                })
+                .orElse(defaultValue);
+    }
+
+    static <T extends Enum<T>> T getProperty(
+            ProcessorContext context,
+            String title, String key, T defaultValue) {
+        return context.getProperty(key)
+                .map(value -> {
+                    try {
+                        return Enum.valueOf(defaultValue.getDeclaringClass(), value.toUpperCase(Locale.ENGLISH));
+                    } catch (NoSuchElementException e) {
+                        throw new IllegalArgumentException(MessageFormat.format(
+                                "{0} must be one of '{'{1}'}': {2}={3}",
+                                title,
+                                Arrays.stream(defaultValue.getDeclaringClass().getEnumConstants())
+                                    .map(Enum::name)
+                                    .collect(Collectors.joining()),
+                                key, value), e);
                     }
                 })
                 .orElse(defaultValue);

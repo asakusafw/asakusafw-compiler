@@ -33,10 +33,13 @@ import com.asakusafw.dag.api.processor.testing.MockVertexProcessorContext;
 import com.asakusafw.dag.runtime.adapter.DataTable;
 import com.asakusafw.dag.runtime.adapter.DataTableAdapter;
 import com.asakusafw.dag.runtime.adapter.KeyBuffer;
+import com.asakusafw.dag.runtime.table.BasicDataTable.ValidationLevel;
 import com.asakusafw.dag.runtime.testing.MockDataModel;
 import com.asakusafw.lang.utils.common.Action;
+import com.asakusafw.lang.utils.common.AssertUtil;
 import com.asakusafw.lang.utils.common.Lang;
 import com.asakusafw.runtime.value.IntOption;
+import com.asakusafw.runtime.value.StringOption;
 
 /**
  * Test for {@link EdgeDataTableAdapter}.
@@ -92,6 +95,126 @@ public class EdgeDataTableAdapterTest {
         });
     }
 
+    /**
+     * validate the number of key elements.
+     */
+    @Test
+    public void validate_count() {
+        specs.add(a -> a.bind("t0", "i0",
+                MockDataModel.KeyBuilder.class, MockDataModel.Copier.class,
+                null));
+        specs.add(a -> a.bind("t1", "i1",
+                MockDataModel.KeyBuilder.class, MockDataModel.Copier.class,
+                null, IntOption.class));
+        specs.add(a -> a.bind("t2", "i2",
+                MockDataModel.KeyBuilder.class, MockDataModel.Copier.class,
+                null, IntOption.class, IntOption.class));
+        specs.add(a -> a.bind("t3", "i3",
+                MockDataModel.KeyBuilder.class, MockDataModel.Copier.class,
+                null, IntOption.class, IntOption.class, IntOption.class));
+        specs.add(a -> a.bind("t4", "i4",
+                MockDataModel.KeyBuilder.class, MockDataModel.Copier.class,
+                null, IntOption.class, IntOption.class, IntOption.class, IntOption.class));
+        specs.add(a -> a.bind("t5", "i5",
+                MockDataModel.KeyBuilder.class, MockDataModel.Copier.class,
+                null, IntOption.class, IntOption.class, IntOption.class, IntOption.class, IntOption.class));
+        data("i0", new Object[0]);
+        data("i1", new Object[] {
+                new MockDataModel(0, "Hello0"),
+        });
+        data("i2", new Object[0]);
+        data("i3", new Object[0]);
+        data("i4", new Object[0]);
+        data("i5", new Object[0]);
+        check(a -> {
+            DataTable<MockDataModel> t1 = a.getDataTable(MockDataModel.class, "t1");
+            assertThat(t1.find(new IntOption(0)), hasSize(1));
+            assertThat(t1.find(new StringOption("0")), hasSize(0)); // ignored
+            AssertUtil.catching(() -> t1.find());
+            AssertUtil.catching(() -> t1.find(new IntOption(), new IntOption()));
+            AssertUtil.catching(() -> t1.find(new IntOption(), new IntOption(), new IntOption()));
+            AssertUtil.catching(() -> t1.find(new IntOption(), new IntOption(), new IntOption()));
+            AssertUtil.catching(() -> t1.find(new IntOption(), new IntOption(), new IntOption(), new IntOption()));
+
+            DataTable<MockDataModel> t0 = a.getDataTable(MockDataModel.class, "t0");
+            AssertUtil.catching(() -> t0.find(new IntOption()));
+
+            DataTable<MockDataModel> t2 = a.getDataTable(MockDataModel.class, "t2");
+            t2.find(new IntOption(), new IntOption()); // ok
+            AssertUtil.catching(() -> t2.find(new IntOption()));
+            AssertUtil.catching(() -> t2.find(new IntOption(), new IntOption(), new IntOption()));
+
+            DataTable<MockDataModel> t3 = a.getDataTable(MockDataModel.class, "t3");
+            t3.find(new IntOption(), new IntOption(), new IntOption()); // ok
+            AssertUtil.catching(() -> t3.find(new IntOption(), new IntOption()));
+            AssertUtil.catching(() -> t3.find(new IntOption(), new IntOption(), new IntOption(), new IntOption()));
+
+            DataTable<MockDataModel> t4 = a.getDataTable(MockDataModel.class, "t4");
+            t4.find(new IntOption(), new IntOption(), new IntOption(), new IntOption()); // ok
+            AssertUtil.catching(() -> t4.find(new IntOption(), new IntOption(), new IntOption()));
+            AssertUtil.catching(() -> t4.find(new IntOption(), new IntOption(), new IntOption(),
+                    new IntOption(), new IntOption()));
+
+            DataTable<MockDataModel> t5 = a.getDataTable(MockDataModel.class, "t5");
+            t5.find(new IntOption(), new IntOption(), new IntOption(), new IntOption(), new IntOption()); // ok
+            AssertUtil.catching(() -> t5.find(new IntOption(), new IntOption(), new IntOption(), new IntOption()));
+            AssertUtil.catching(() -> t5.find(new IntOption(), new IntOption(), new IntOption(),new IntOption(),
+                    new IntOption(), new IntOption()));
+        });
+    }
+
+    /**
+     * validate the key element types.
+     */
+    @Test
+    public void validate_type() {
+        specs.add(a -> a.bind("t1", "i1",
+                MockDataModel.KeyBuilder.class, MockDataModel.Copier.class,
+                null, IntOption.class));
+        specs.add(a -> a.bind("t2", "i2",
+                MockDataModel.KeyBuilder.class, MockDataModel.Copier.class,
+                null, IntOption.class, IntOption.class));
+        specs.add(a -> a.bind("t3", "i3",
+                MockDataModel.KeyBuilder.class, MockDataModel.Copier.class,
+                null, IntOption.class, IntOption.class, IntOption.class));
+        specs.add(a -> a.bind("t4", "i4",
+                MockDataModel.KeyBuilder.class, MockDataModel.Copier.class,
+                null, IntOption.class, IntOption.class, IntOption.class, IntOption.class));
+        specs.add(a -> a.bind("t5", "i5",
+                MockDataModel.KeyBuilder.class, MockDataModel.Copier.class,
+                null, IntOption.class, IntOption.class, IntOption.class, IntOption.class, IntOption.class));
+        data("i1", new Object[0]);
+        data("i2", new Object[0]);
+        data("i3", new Object[0]);
+        data("i4", new Object[0]);
+        data("i5", new Object[0]);
+        MockVertexProcessorContext context = new MockVertexProcessorContext()
+                .withProperty(EdgeDataTableAdapter.KEY_VIEW_VALIDATE, ValidationLevel.TYPE.name());
+        check(context, a -> {
+            DataTable<MockDataModel> t1 = a.getDataTable(MockDataModel.class, "t1");
+            t1.find(new IntOption(0)); // ok
+            AssertUtil.catching(() -> t1.find(new StringOption("0")));
+
+            DataTable<MockDataModel> t2 = a.getDataTable(MockDataModel.class, "t2");
+            t2.find(new IntOption(0), new IntOption(0)); // ok
+            AssertUtil.catching(() -> t2.find(new IntOption(0), new StringOption("0")));
+
+            DataTable<MockDataModel> t3 = a.getDataTable(MockDataModel.class, "t3");
+            t3.find(new IntOption(0), new IntOption(0), new IntOption(0)); // ok
+            AssertUtil.catching(() -> t3.find(new IntOption(0), new IntOption(0), new StringOption("0")));
+
+            DataTable<MockDataModel> t4 = a.getDataTable(MockDataModel.class, "t4");
+            t4.find(new IntOption(0), new IntOption(0), new IntOption(0), new IntOption(0)); // ok
+            AssertUtil.catching(() -> t4.find(new IntOption(0), new IntOption(0), new IntOption(0),
+                    new StringOption("0")));
+
+            DataTable<MockDataModel> t5 = a.getDataTable(MockDataModel.class, "t5");
+            t5.find(new IntOption(0), new IntOption(0), new IntOption(0), new IntOption(0), new IntOption(0)); // ok
+            AssertUtil.catching(() -> t5.find(new IntOption(0), new IntOption(0), new IntOption(0), new IntOption(0),
+                    new StringOption("0")));
+        });
+    }
+
     private void define(String tId, String iId, Class<?> type, String... group) {
         specs.add(a -> a.bind(tId, iId, MockDataModel.KeyBuilder.class, MockDataModel.Copier.class));
     }
@@ -101,7 +224,10 @@ public class EdgeDataTableAdapterTest {
     }
 
     private void check(Action<DataTableAdapter, Exception> callback) {
-        MockVertexProcessorContext context = new MockVertexProcessorContext();
+        check(new MockVertexProcessorContext(), callback);
+    }
+
+    private void check(MockVertexProcessorContext context, Action<DataTableAdapter, Exception> callback) {
         inputs.forEach((k, v) -> {
             context.withInput(k, () -> new CollectionObjectReader(v));
         });
