@@ -72,6 +72,46 @@ public class EdgeDataTableAdapterTest {
     }
 
     /**
+     * w/o key extractors.
+     */
+    @Test
+    public void flat() {
+        specs.add(a -> a.bind("t", "i",
+                null, MockDataModel.Copier.class,
+                MockDataModel.ValueComparator.class));
+        data("i", new Object[] {
+                new MockDataModel(0, "0"),
+                new MockDataModel(1, "1"),
+                new MockDataModel(2, "2"),
+        });
+        check(a -> {
+            DataTable<MockDataModel> t = a.getDataTable(MockDataModel.class, "t");
+            assertThat(get(t, MockDataModel::getValue), containsInAnyOrder("0", "1", "2"));
+        });
+    }
+
+    /**
+     * w/ sorted.
+     */
+    @Test
+    public void sorted() {
+        specs.add(a -> a.bind("t", "i",
+                MockDataModel.KeyBuilder.class, MockDataModel.Copier.class,
+                MockDataModel.ValueComparator.class));
+        data("i", new Object[] {
+                new MockDataModel(0, "0"),
+                new MockDataModel(0, "2"),
+                new MockDataModel(0, "4"),
+                new MockDataModel(0, "3"),
+                new MockDataModel(0, "1"),
+        });
+        check(a -> {
+            DataTable<MockDataModel> t = a.getDataTable(MockDataModel.class, "t");
+            assertThat(get(t, MockDataModel::getValue, 0), contains("0", "1", "2", "3", "4"));
+        });
+    }
+
+    /**
      * multiple tables.
      */
     @Test
@@ -100,32 +140,12 @@ public class EdgeDataTableAdapterTest {
      */
     @Test
     public void validate_count() {
-        specs.add(a -> a.bind("t0", "i0",
-                MockDataModel.KeyBuilder.class, MockDataModel.Copier.class,
-                null));
         specs.add(a -> a.bind("t1", "i1",
                 MockDataModel.KeyBuilder.class, MockDataModel.Copier.class,
                 null, IntOption.class));
-        specs.add(a -> a.bind("t2", "i2",
-                MockDataModel.KeyBuilder.class, MockDataModel.Copier.class,
-                null, IntOption.class, IntOption.class));
-        specs.add(a -> a.bind("t3", "i3",
-                MockDataModel.KeyBuilder.class, MockDataModel.Copier.class,
-                null, IntOption.class, IntOption.class, IntOption.class));
-        specs.add(a -> a.bind("t4", "i4",
-                MockDataModel.KeyBuilder.class, MockDataModel.Copier.class,
-                null, IntOption.class, IntOption.class, IntOption.class, IntOption.class));
-        specs.add(a -> a.bind("t5", "i5",
-                MockDataModel.KeyBuilder.class, MockDataModel.Copier.class,
-                null, IntOption.class, IntOption.class, IntOption.class, IntOption.class, IntOption.class));
-        data("i0", new Object[0]);
         data("i1", new Object[] {
                 new MockDataModel(0, "Hello0"),
         });
-        data("i2", new Object[0]);
-        data("i3", new Object[0]);
-        data("i4", new Object[0]);
-        data("i5", new Object[0]);
         check(a -> {
             DataTable<MockDataModel> t1 = a.getDataTable(MockDataModel.class, "t1");
             assertThat(t1.find(new IntOption(0)), hasSize(1));
@@ -135,31 +155,6 @@ public class EdgeDataTableAdapterTest {
             AssertUtil.catching(() -> t1.find(new IntOption(), new IntOption(), new IntOption()));
             AssertUtil.catching(() -> t1.find(new IntOption(), new IntOption(), new IntOption()));
             AssertUtil.catching(() -> t1.find(new IntOption(), new IntOption(), new IntOption(), new IntOption()));
-
-            DataTable<MockDataModel> t0 = a.getDataTable(MockDataModel.class, "t0");
-            AssertUtil.catching(() -> t0.find(new IntOption()));
-
-            DataTable<MockDataModel> t2 = a.getDataTable(MockDataModel.class, "t2");
-            t2.find(new IntOption(), new IntOption()); // ok
-            AssertUtil.catching(() -> t2.find(new IntOption()));
-            AssertUtil.catching(() -> t2.find(new IntOption(), new IntOption(), new IntOption()));
-
-            DataTable<MockDataModel> t3 = a.getDataTable(MockDataModel.class, "t3");
-            t3.find(new IntOption(), new IntOption(), new IntOption()); // ok
-            AssertUtil.catching(() -> t3.find(new IntOption(), new IntOption()));
-            AssertUtil.catching(() -> t3.find(new IntOption(), new IntOption(), new IntOption(), new IntOption()));
-
-            DataTable<MockDataModel> t4 = a.getDataTable(MockDataModel.class, "t4");
-            t4.find(new IntOption(), new IntOption(), new IntOption(), new IntOption()); // ok
-            AssertUtil.catching(() -> t4.find(new IntOption(), new IntOption(), new IntOption()));
-            AssertUtil.catching(() -> t4.find(new IntOption(), new IntOption(), new IntOption(),
-                    new IntOption(), new IntOption()));
-
-            DataTable<MockDataModel> t5 = a.getDataTable(MockDataModel.class, "t5");
-            t5.find(new IntOption(), new IntOption(), new IntOption(), new IntOption(), new IntOption()); // ok
-            AssertUtil.catching(() -> t5.find(new IntOption(), new IntOption(), new IntOption(), new IntOption()));
-            AssertUtil.catching(() -> t5.find(new IntOption(), new IntOption(), new IntOption(),new IntOption(),
-                    new IntOption(), new IntOption()));
         });
     }
 
@@ -168,50 +163,16 @@ public class EdgeDataTableAdapterTest {
      */
     @Test
     public void validate_type() {
-        specs.add(a -> a.bind("t1", "i1",
-                MockDataModel.KeyBuilder.class, MockDataModel.Copier.class,
-                null, IntOption.class));
         specs.add(a -> a.bind("t2", "i2",
                 MockDataModel.KeyBuilder.class, MockDataModel.Copier.class,
                 null, IntOption.class, IntOption.class));
-        specs.add(a -> a.bind("t3", "i3",
-                MockDataModel.KeyBuilder.class, MockDataModel.Copier.class,
-                null, IntOption.class, IntOption.class, IntOption.class));
-        specs.add(a -> a.bind("t4", "i4",
-                MockDataModel.KeyBuilder.class, MockDataModel.Copier.class,
-                null, IntOption.class, IntOption.class, IntOption.class, IntOption.class));
-        specs.add(a -> a.bind("t5", "i5",
-                MockDataModel.KeyBuilder.class, MockDataModel.Copier.class,
-                null, IntOption.class, IntOption.class, IntOption.class, IntOption.class, IntOption.class));
-        data("i1", new Object[0]);
         data("i2", new Object[0]);
-        data("i3", new Object[0]);
-        data("i4", new Object[0]);
-        data("i5", new Object[0]);
         MockVertexProcessorContext context = new MockVertexProcessorContext()
                 .withProperty(EdgeDataTableAdapter.KEY_VIEW_VALIDATE, ValidationLevel.TYPE.name());
         check(context, a -> {
-            DataTable<MockDataModel> t1 = a.getDataTable(MockDataModel.class, "t1");
-            t1.find(new IntOption(0)); // ok
-            AssertUtil.catching(() -> t1.find(new StringOption("0")));
-
             DataTable<MockDataModel> t2 = a.getDataTable(MockDataModel.class, "t2");
             t2.find(new IntOption(0), new IntOption(0)); // ok
             AssertUtil.catching(() -> t2.find(new IntOption(0), new StringOption("0")));
-
-            DataTable<MockDataModel> t3 = a.getDataTable(MockDataModel.class, "t3");
-            t3.find(new IntOption(0), new IntOption(0), new IntOption(0)); // ok
-            AssertUtil.catching(() -> t3.find(new IntOption(0), new IntOption(0), new StringOption("0")));
-
-            DataTable<MockDataModel> t4 = a.getDataTable(MockDataModel.class, "t4");
-            t4.find(new IntOption(0), new IntOption(0), new IntOption(0), new IntOption(0)); // ok
-            AssertUtil.catching(() -> t4.find(new IntOption(0), new IntOption(0), new IntOption(0),
-                    new StringOption("0")));
-
-            DataTable<MockDataModel> t5 = a.getDataTable(MockDataModel.class, "t5");
-            t5.find(new IntOption(0), new IntOption(0), new IntOption(0), new IntOption(0), new IntOption(0)); // ok
-            AssertUtil.catching(() -> t5.find(new IntOption(0), new IntOption(0), new IntOption(0), new IntOption(0),
-                    new StringOption("0")));
         });
     }
 
