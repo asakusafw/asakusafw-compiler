@@ -44,9 +44,9 @@ import com.asakusafw.dag.runtime.jdbc.ConnectionPool;
 import com.asakusafw.dag.runtime.jdbc.JdbcProfile;
 import com.asakusafw.dag.runtime.jdbc.basic.BasicConnectionPool;
 import com.asakusafw.lang.utils.common.InterruptibleIo;
+import com.asakusafw.lang.utils.common.InterruptibleIo.Closer;
 import com.asakusafw.lang.utils.common.Optionals;
 import com.asakusafw.lang.utils.common.Tuple;
-import com.asakusafw.lang.utils.common.InterruptibleIo.Closer;
 
 /**
  * Installs {@link JdbcEnvironment} into the core processor environment.

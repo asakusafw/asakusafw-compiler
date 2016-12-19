@@ -118,7 +118,7 @@ public abstract class BuiltInOptimizerTestRoot {
             Operator current = line[i];
             assert last.getOutputs().size() == 1;
             assert current.getInputs().size() == 1;
-            last.getOutputs().get(0).connect(current.getInputs().get(0));
+            last.getOutput(0).connect(current.getInput(0));
             last = current;
         }
         return new OperatorGraph(Arrays.asList(line));

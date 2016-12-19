@@ -54,7 +54,7 @@ public class HeapKeyBuffer implements KeyBuffer, KeyBuffer.View {
 
     @Override
     public KeyBuffer.View getFrozen() {
-        return new FrozenView(buffer);
+        return FrozenView.build(buffer);
     }
 
     @Override
@@ -95,10 +95,22 @@ public class HeapKeyBuffer implements KeyBuffer, KeyBuffer.View {
 
     private static final class FrozenView implements KeyBuffer.View {
 
+        private static final FrozenView EMPTY = new FrozenView(new byte[0]);
+
         final byte[] buffer;
 
-        FrozenView(DataBuffer entity) {
-            this.buffer = Arrays.copyOfRange(entity.getData(), entity.getReadPosition(), entity.getReadLimit());
+        private FrozenView(byte[] buffer) {
+            this.buffer = buffer;
+        }
+
+        static FrozenView build(DataBuffer entity) {
+            int from = entity.getReadPosition();
+            int to = entity.getReadLimit();
+            if (from == to) {
+                return EMPTY;
+            } else {
+                return new FrozenView(Arrays.copyOfRange(entity.getData(), from, to));
+            }
         }
 
         @Override

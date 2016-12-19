@@ -21,7 +21,6 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -37,11 +36,13 @@ import com.asakusafw.lang.compiler.model.graph.CoreOperator.CoreOperatorKind;
 import com.asakusafw.lang.compiler.model.graph.Group;
 import com.asakusafw.lang.compiler.model.graph.Groups;
 import com.asakusafw.lang.compiler.model.graph.OperatorConstraint;
+import com.asakusafw.lang.compiler.model.graph.OperatorInput.InputUnit;
 import com.asakusafw.lang.compiler.packaging.ResourceUtil;
 import com.asakusafw.lang.compiler.tester.CompilerProfile;
 import com.asakusafw.lang.compiler.tester.executor.JobflowExecutor;
 import com.asakusafw.lang.compiler.tester.externalio.TestInput;
 import com.asakusafw.lang.compiler.tester.externalio.TestOutput;
+import com.asakusafw.runtime.core.GroupView;
 import com.asakusafw.runtime.core.Result;
 import com.asakusafw.runtime.windows.WindowsSupport;
 import com.asakusafw.vanilla.compiler.tester.InProcessVanillaTaskExecutor;
@@ -665,29 +666,51 @@ public class VanillaJobflowProcessorTest extends VanillaCompilerTesterRoot {
                 .connect("op.missed", "out1"));
     }
 
+    /**
+     * w/ view.
+     * @throws Exception if failed
+     */
+    @Test
+    public void view() throws Exception {
+        testio.input("t", MockDataModel.class, o -> {
+            o.write(new MockDataModel(0, "Hello, world!"));
+        });
+        testio.input("v", MockDataModel.class, o -> {
+            o.write(new MockDataModel(0, BigDecimal.valueOf(2), "x"));
+            o.write(new MockDataModel(0, BigDecimal.valueOf(1), "o"));
+            o.write(new MockDataModel(0, BigDecimal.valueOf(3), "x"));
+            o.write(new MockDataModel(1, BigDecimal.valueOf(0), "x"));
+        });
+        testio.output("t", MockDataModel.class, o -> {
+            assertThat(o, contains(new MockDataModel(0, "Hello, world!o")));
+        });
+        /*
+         * [In(t)] -> [Extract] -> [Out]
+         *            |
+         * [In(v)] ---/
+         */
+        run(profile, executor, g -> g
+                .input("in", TestInput.of("t", MockDataModel.class))
+                .input("side", TestInput.of("v", MockDataModel.class))
+                .operator("op", Ops.class, "view", b -> b
+                        .input("in", typeOf(MockDataModel.class))
+                        .input("view", typeOf(MockDataModel.class), c -> c
+                                .group(group("=key", "+sort"))
+                                .unit(InputUnit.WHOLE))
+                        .output("out", typeOf(MockDataModel.class))
+                        .build())
+                .output("out", TestOutput.of("t", MockDataModel.class))
+                .connect("in", "op.in")
+                .connect("side", "op.view")
+                .connect("op", "out"));
+    }
+
     private static BigDecimal d(long value) {
         return new BigDecimal(value);
     }
 
-    private static Group group(String... values) {
-        List<String> group = new ArrayList<>();
-        List<String> order = new ArrayList<>();
-        for (String s : values) {
-            char operator = s.charAt(0);
-            switch (operator) {
-            case '=':
-                group.add(s.substring(1));
-                break;
-            case '+':
-            case '-':
-                order.add(s);
-                break;
-            default:
-                group.add(s);
-                break;
-            }
-        }
-        return Groups.parse(group, order);
+    private static Group group(String... terms) {
+        return Groups.parse(terms);
     }
 
     @SuppressWarnings("javadoc")
@@ -753,6 +776,12 @@ public class VanillaJobflowProcessorTest extends VanillaCompilerTesterRoot {
             kv.setKey(model.getKey());
             kv.setValue(model.getValue());
             return kv;
+        }
+
+        @Update
+        public void view(MockDataModel model,
+                @Key(group = "key", order="sort") GroupView<MockDataModel> table) {
+            model.setValue(model.getValue() + table.find(model.getKeyOption()).get(0).getValue());
         }
     }
 }

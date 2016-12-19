@@ -226,6 +226,12 @@ public class OperatorClass implements OperatorCharacteristics {
          * Each input group accepts partial reduction.
          */
         PARTIAL_REDUCTION,
+
+        /**
+         * The input is resolved as join table.
+         * @since 0.4.1
+         */
+        JOIN_TABLE,
     }
 
     /**

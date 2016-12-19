@@ -452,7 +452,7 @@ public final class MockOperators {
         OperatorOutput port;
         if (pair[1].equals("*")) { //$NON-NLS-1$
             assertThat(operator.getOutputs(), hasSize(1));
-            port = operator.getOutputs().get(0);
+            port = operator.getOutput(0);
         } else {
             port = operator.findOutput(pair[1]);
         }
@@ -466,7 +466,7 @@ public final class MockOperators {
         OperatorInput port;
         if (pair[1].equals("*")) { //$NON-NLS-1$
             assertThat(operator.getInputs(), hasSize(1));
-            port = operator.getInputs().get(0);
+            port = operator.getInput(0);
         } else {
             port = operator.findInput(pair[1]);
         }

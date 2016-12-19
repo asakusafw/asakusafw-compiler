@@ -67,7 +67,7 @@ public class ProjectOperatorGenerator extends CoreOperatorNodeGenerator {
 
         return new OperatorNodeInfo(
                 context.cache(CacheKey.of(operator), () -> genClass(context, operator, namer.get())),
-                operator.getInputs().get(Project.ID_INPUT).getDataType(),
+                operator.getInput(Project.ID_INPUT).getDataType(),
                 getDependencies(context, operator));
     }
 
@@ -77,8 +77,8 @@ public class ProjectOperatorGenerator extends CoreOperatorNodeGenerator {
 
     private static ClassData genClass(Context context, CoreOperator operator, ClassDescription target) {
         DataModelLoader loader = context.getDataModelLoader();
-        DataModelReference inputType = loader.load(operator.getInputs().get(Project.ID_INPUT).getDataType());
-        DataModelReference outputType = loader.load(operator.getOutputs().get(Project.ID_OUTPUT).getDataType());
+        DataModelReference inputType = loader.load(operator.getInput(Project.ID_INPUT).getDataType());
+        DataModelReference outputType = loader.load(operator.getOutput(Project.ID_OUTPUT).getDataType());
         List<PropertyMapping> mappings = ProjectionOperatorUtil.getPropertyMappings(loader, operator);
 
         ClassWriter writer = newWriter(target, Object.class, Result.class);
@@ -99,8 +99,8 @@ public class ProjectOperatorGenerator extends CoreOperatorNodeGenerator {
 
             Map<OperatorInput, ValueRef> inputs = new HashMap<>();
             Map<OperatorOutput, ValueRef> outputs = new HashMap<>();
-            inputs.put(operator.getInputs().get(Project.ID_INPUT), new LocalVarRef(Opcodes.ALOAD, 1));
-            outputs.put(operator.getOutputs().get(Project.ID_OUTPUT), new LocalVarRef(Opcodes.ALOAD, 2));
+            inputs.put(operator.getInput(Project.ID_INPUT), new LocalVarRef(Opcodes.ALOAD, 1));
+            outputs.put(operator.getOutput(Project.ID_OUTPUT), new LocalVarRef(Opcodes.ALOAD, 2));
             mapping(method, loader, mappings, inputs, outputs);
 
             method.visitVarInsn(Opcodes.ALOAD, 0);

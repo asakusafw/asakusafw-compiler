@@ -23,11 +23,13 @@ import org.junit.Test;
 import com.asakusafw.dag.compiler.codegen.OperatorNodeGenerator.NodeInfo;
 import com.asakusafw.dag.runtime.testing.MockDataModel;
 import com.asakusafw.lang.compiler.model.description.Descriptions;
+import com.asakusafw.lang.compiler.model.graph.OperatorInput.InputUnit;
 import com.asakusafw.lang.compiler.model.graph.UserOperator;
 import com.asakusafw.lang.compiler.model.graph.UserOperator.Builder;
 import com.asakusafw.lang.compiler.model.testing.OperatorExtractor;
 import com.asakusafw.lang.utils.common.Lang;
 import com.asakusafw.runtime.core.Result;
+import com.asakusafw.runtime.core.GroupView;
 import com.asakusafw.runtime.testing.MockResult;
 import com.asakusafw.vocabulary.operator.Update;
 
@@ -79,6 +81,27 @@ public class UpdateOperatorGeneratorTest extends OperatorNodeGeneratorTestRoot {
             r.add(new MockDataModel("Hello"));
         });
         assertThat(Lang.project(results.getResults(), e -> e.getValue()), contains("Hello1"));
+    }
+
+    /**
+     * w/ data tables.
+     */
+    @Test
+    public void datatable() {
+        UserOperator operator = load("table")
+                .input("t0", Descriptions.typeOf(MockDataModel.class), c -> c
+                        .group(group("key"))
+                        .unit(InputUnit.WHOLE))
+                .build();
+        NodeInfo info = generate(operator);
+        MockTable<MockDataModel> table = new MockTable<>(MockDataModel::getKeyOption)
+                .add(new MockDataModel(1, "world"));
+        MockResult<MockDataModel> results = new MockResult<>();
+        loading(info, c -> {
+            Result<Object> r = c.newInstance(table, results);
+            r.add(new MockDataModel(1, "Hello"));
+        });
+        assertThat(Lang.project(results.getResults(), e -> e.getValue()), contains("Helloworld"));
     }
 
     /**
@@ -147,6 +170,11 @@ public class UpdateOperatorGeneratorTest extends OperatorNodeGeneratorTestRoot {
         @Update
         public void parameterized_int(MockDataModel m, int parameter) {
             m.setValue(m.getValue() + parameter);
+        }
+
+        @Update
+        public void table(MockDataModel m, GroupView<MockDataModel> t) {
+            parameterized(m, t.find(m.getKeyOption()).get(0).getValue());
         }
     }
 }

@@ -25,13 +25,16 @@ import org.junit.Test;
 import com.asakusafw.dag.compiler.codegen.OperatorNodeGenerator.NodeInfo;
 import com.asakusafw.dag.runtime.testing.MockDataModel;
 import com.asakusafw.dag.runtime.testing.MockKeyValueModel;
+import com.asakusafw.dag.runtime.testing.MockSink;
 import com.asakusafw.dag.runtime.testing.MockValueModel;
 import com.asakusafw.lang.compiler.model.description.Descriptions;
+import com.asakusafw.lang.compiler.model.graph.OperatorInput.InputUnit;
 import com.asakusafw.lang.compiler.model.graph.UserOperator;
 import com.asakusafw.lang.compiler.model.graph.UserOperator.Builder;
 import com.asakusafw.lang.compiler.model.testing.OperatorExtractor;
 import com.asakusafw.lang.utils.common.Lang;
 import com.asakusafw.runtime.core.Result;
+import com.asakusafw.runtime.core.GroupView;
 import com.asakusafw.runtime.testing.MockResult;
 import com.asakusafw.vocabulary.operator.GroupSort;
 
@@ -111,6 +114,32 @@ public class GroupSortOperatorGeneratorTest extends OperatorNodeGeneratorTestRoo
     }
 
     /**
+     * w/ data tables.
+     */
+    @Test
+    public void datatable() {
+        UserOperator operator = load("table")
+                .input("t0", Descriptions.typeOf(MockDataModel.class), c -> c
+                        .group(group("key"))
+                        .unit(InputUnit.WHOLE))
+                .output("r0", Descriptions.typeOf(MockValueModel.class))
+                .build();
+        NodeInfo info = generate(operator);
+        MockTable<MockDataModel> table = new MockTable<>(MockDataModel::getKeyOption)
+                .add(new MockDataModel(1, "world"));
+        MockSink<MockValueModel> results = new MockSink<>();
+        loading(info, c -> {
+            Result<Object> r = c.newInstance(table, results);
+            r.add(cogroup(new Object[][] {
+                {
+                    new MockDataModel(1, "Hello"),
+                }
+            }));
+        });
+        assertThat(results.get(e -> e.getValue()), contains("world"));
+    }
+
+    /**
      * cache - identical.
      */
     @Test
@@ -159,7 +188,7 @@ public class GroupSortOperatorGeneratorTest extends OperatorNodeGeneratorTestRoo
 
     private Builder load(String name) {
         return OperatorExtractor.extract(GroupSort.class, Op.class, name)
-                .input("in", Descriptions.typeOf(MockDataModel.class));
+                .input("in", Descriptions.typeOf(MockDataModel.class), group("key"));
     }
 
     @SuppressWarnings("javadoc")
@@ -189,6 +218,14 @@ public class GroupSortOperatorGeneratorTest extends OperatorNodeGeneratorTestRoo
         public void parameterized(List<MockDataModel> i0, Result<MockValueModel> r0, String parameter) {
             for (MockDataModel m : i0) {
                 r0.add(new MockValueModel(m.getValue() + parameter));
+            }
+        }
+
+        @GroupSort
+        public void table(List<MockDataModel> i0, GroupView<MockDataModel> t0, Result<MockValueModel> r0) {
+            for (MockDataModel m : i0) {
+                MockDataModel t = t0.find(m.getKeyOption()).get(0);
+                r0.add(new MockValueModel(t.getValue()));
             }
         }
     }

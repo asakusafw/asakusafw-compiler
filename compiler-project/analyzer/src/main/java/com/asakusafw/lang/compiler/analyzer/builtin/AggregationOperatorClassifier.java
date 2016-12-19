@@ -15,14 +15,16 @@
  */
 package com.asakusafw.lang.compiler.analyzer.builtin;
 
+import java.util.function.Predicate;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.asakusafw.lang.compiler.api.CompilerOptions;
-import com.asakusafw.lang.compiler.model.description.AnnotationDescription;
 import com.asakusafw.lang.compiler.model.graph.Operator;
 import com.asakusafw.lang.compiler.model.graph.Operator.OperatorKind;
 import com.asakusafw.lang.compiler.model.graph.OperatorInput;
+import com.asakusafw.lang.compiler.model.graph.OperatorInput.InputUnit;
 import com.asakusafw.lang.compiler.model.graph.UserOperator;
 import com.asakusafw.lang.compiler.optimizer.OperatorCharacterizer;
 import com.asakusafw.lang.compiler.optimizer.basic.OperatorClass;
@@ -64,18 +66,25 @@ public class AggregationOperatorClassifier implements OperatorCharacterizer<Oper
     }
 
     static OperatorClass extract0(Context context, UserOperator operator) {
-        OperatorInput input = operator.getInputs().get(Fold.ID_INPUT);
+        OperatorInput input = operator.getInput(Fold.ID_INPUT);
         OperatorClass.Builder builder = OperatorClass.builder(operator, InputType.GROUP);
         builder.with(input, InputAttribute.PRIMARY);
         builder.with(input, InputAttribute.AGGREATE);
-        if (isPartialAggregation(context.getOptions(), operator.getAnnotation())) {
+        if (isPartialAggregation(context.getOptions(), operator)) {
             builder.with(input, InputAttribute.PARTIAL_REDUCTION);
         }
-        return builder.build();
+        return Util.resolve(builder, operator);
     }
 
-    private static boolean isPartialAggregation(CompilerOptions options, AnnotationDescription annotation) {
-        PartialAggregation value = Util.element(annotation, KEY_AGGREGATION_TYPE, PartialAggregation.DEFAULT);
+    private static boolean isPartialAggregation(CompilerOptions options, UserOperator operator) {
+        if (operator.getInputs().stream()
+                .map(OperatorInput::getInputUnit)
+                .anyMatch(Predicate.isEqual(InputUnit.WHOLE))) {
+            // partial aggregation is disabled if data tables are required
+            return false;
+        }
+        PartialAggregation value = Util.element(operator.getAnnotation(),
+                KEY_AGGREGATION_TYPE, PartialAggregation.DEFAULT);
         if (value == PartialAggregation.DEFAULT) {
             value = Util.resolve(options, KEY_AGGREGATION, OPTIONS_AGGREGATION, DEFAULT_AGGREGATEION);
         }

@@ -19,6 +19,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.Comparator;
 
 import org.apache.hadoop.io.Writable;
 
@@ -185,6 +186,13 @@ public final class MockDataModel implements DataModel<MockDataModel>, Writable {
         @Override
         public void buildKey(KeyBuffer key, MockDataModel object) {
             key.append(object.getKeyOption());
+        }
+    }
+
+    public static class ValueComparator implements Comparator<MockDataModel> {
+        @Override
+        public int compare(MockDataModel o1, MockDataModel o2) {
+            return o1.getValueOption().compareTo(o2.getValueOption());
         }
     }
 }

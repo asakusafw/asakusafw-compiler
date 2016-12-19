@@ -54,8 +54,8 @@ public class SummarizedModelUtilTest {
         List<PropertyFolding> foldings = SummarizedModelUtil.getPropertyFoldings(cl, operator);
         assertThat(foldings, hasSize(3));
 
-        OperatorInput input = operator.getInputs().get(0);
-        OperatorOutput output = operator.getOutputs().get(0);
+        OperatorInput input = operator.getInput(0);
+        OperatorOutput output = operator.getOutput(0);
         PropertyFolding fk = find("k", foldings);
         PropertyFolding fv = find("v", foldings);
         PropertyFolding fc = find("c", foldings);

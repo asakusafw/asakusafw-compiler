@@ -28,11 +28,13 @@ import com.asakusafw.dag.runtime.testing.MockKeyValueModel;
 import com.asakusafw.dag.runtime.testing.MockSink;
 import com.asakusafw.dag.runtime.testing.MockValueModel;
 import com.asakusafw.lang.compiler.model.description.Descriptions;
+import com.asakusafw.lang.compiler.model.graph.OperatorInput.InputUnit;
 import com.asakusafw.lang.compiler.model.graph.UserOperator;
 import com.asakusafw.lang.compiler.model.graph.UserOperator.Builder;
 import com.asakusafw.lang.compiler.model.testing.OperatorExtractor;
 import com.asakusafw.lang.utils.common.Lang;
 import com.asakusafw.runtime.core.Result;
+import com.asakusafw.runtime.core.GroupView;
 import com.asakusafw.runtime.testing.MockResult;
 import com.asakusafw.vocabulary.attribute.BufferType;
 import com.asakusafw.vocabulary.operator.CoGroup;
@@ -48,7 +50,7 @@ public class CoGroupOperatorGeneratorTest extends OperatorNodeGeneratorTestRoot 
     @Test
     public void simple() {
         UserOperator operator = load("simple")
-                .input("i0", Descriptions.typeOf(MockDataModel.class))
+                .input("i0", Descriptions.typeOf(MockDataModel.class), group("key"))
                 .output("r0", Descriptions.typeOf(MockValueModel.class))
                 .build();
         NodeInfo info = generate(operator);
@@ -70,7 +72,7 @@ public class CoGroupOperatorGeneratorTest extends OperatorNodeGeneratorTestRoot 
     @Test
     public void multiple() {
         UserOperator operator = load("multiout")
-                .input("i0", Descriptions.typeOf(MockDataModel.class))
+                .input("i0", Descriptions.typeOf(MockDataModel.class), group("key"))
                 .output("r0", Descriptions.typeOf(MockDataModel.class))
                 .output("r1", Descriptions.typeOf(MockKeyValueModel.class))
                 .output("r2", Descriptions.typeOf(MockValueModel.class))
@@ -98,7 +100,7 @@ public class CoGroupOperatorGeneratorTest extends OperatorNodeGeneratorTestRoot 
     @Test
     public void parameterized() {
         UserOperator operator = load("parameterized")
-                .input("i0", Descriptions.typeOf(MockDataModel.class))
+                .input("i0", Descriptions.typeOf(MockDataModel.class), group("key"))
                 .output("r0", Descriptions.typeOf(MockValueModel.class))
                 .argument("p", Descriptions.valueOf("-"))
                 .build();
@@ -121,7 +123,7 @@ public class CoGroupOperatorGeneratorTest extends OperatorNodeGeneratorTestRoot 
     @Test
     public void iterable() {
         UserOperator operator = load("iterable")
-                .input("i0", Descriptions.typeOf(MockDataModel.class))
+                .input("i0", Descriptions.typeOf(MockDataModel.class), group("key"))
                 .output("r0", Descriptions.typeOf(MockValueModel.class))
                 .build();
         NodeInfo info = generate(operator);
@@ -143,7 +145,9 @@ public class CoGroupOperatorGeneratorTest extends OperatorNodeGeneratorTestRoot 
     @Test
     public void read_once() {
         UserOperator operator = load("iterable")
-                .input("i0", Descriptions.typeOf(MockDataModel.class), c -> c.attribute(BufferType.VOLATILE))
+                .input("i0", Descriptions.typeOf(MockDataModel.class), c -> c
+                        .group(group("key"))
+                        .attribute(BufferType.VOLATILE))
                 .output("r0", Descriptions.typeOf(MockValueModel.class))
                 .build();
         NodeInfo info = generate(operator);
@@ -160,12 +164,39 @@ public class CoGroupOperatorGeneratorTest extends OperatorNodeGeneratorTestRoot 
     }
 
     /**
+     * w/ data tables.
+     */
+    @Test
+    public void datatable() {
+        UserOperator operator = load("table")
+                .input("i0", Descriptions.typeOf(MockDataModel.class), group("key"))
+                .input("t0", Descriptions.typeOf(MockDataModel.class), c -> c
+                        .group(group("key"))
+                        .unit(InputUnit.WHOLE))
+                .output("r0", Descriptions.typeOf(MockValueModel.class))
+                .build();
+        NodeInfo info = generate(operator);
+        MockTable<MockDataModel> table = new MockTable<>(MockDataModel::getKeyOption)
+                .add(new MockDataModel(1, "world"));
+        MockSink<MockValueModel> results = new MockSink<>();
+        loading(info, c -> {
+            Result<Object> r = c.newInstance(table, results);
+            r.add(cogroup(new Object[][] {
+                {
+                    new MockDataModel(1, "Hello"),
+                }
+            }));
+        });
+        assertThat(results.get(e -> e.getValue()), contains("world"));
+    }
+
+    /**
      * cache - simple case.
      */
     @Test
     public void cache() {
         UserOperator opA = load("simple")
-                .input("i0", Descriptions.typeOf(MockDataModel.class))
+                .input("i0", Descriptions.typeOf(MockDataModel.class), group("key"))
                 .output("r0", Descriptions.typeOf(MockValueModel.class))
                 .build();
         NodeInfo a = generate(opA);
@@ -179,11 +210,11 @@ public class CoGroupOperatorGeneratorTest extends OperatorNodeGeneratorTestRoot 
     @Test
     public void cache_diff_method() {
         UserOperator opA = load("simple")
-                .input("i0", Descriptions.typeOf(MockDataModel.class))
+                .input("i0", Descriptions.typeOf(MockDataModel.class), group("key"))
                 .output("r0", Descriptions.typeOf(MockValueModel.class))
                 .build();
         UserOperator opB = load("renamed")
-                .input("i0", Descriptions.typeOf(MockDataModel.class))
+                .input("i0", Descriptions.typeOf(MockDataModel.class), group("key"))
                 .output("r0", Descriptions.typeOf(MockValueModel.class))
                 .build();
         NodeInfo a = generate(opA);
@@ -197,12 +228,12 @@ public class CoGroupOperatorGeneratorTest extends OperatorNodeGeneratorTestRoot 
     @Test
     public void cache_diff_argument() {
         UserOperator opA = load("parameterized")
-                .input("i0", Descriptions.typeOf(MockDataModel.class))
+                .input("i0", Descriptions.typeOf(MockDataModel.class), group("key"))
                 .output("r0", Descriptions.typeOf(MockValueModel.class))
                 .argument("p", Descriptions.valueOf("a"))
                 .build();
         UserOperator opB = load("parameterized")
-                .input("i0", Descriptions.typeOf(MockDataModel.class))
+                .input("i0", Descriptions.typeOf(MockDataModel.class), group("key"))
                 .output("r0", Descriptions.typeOf(MockValueModel.class))
                 .argument("p", Descriptions.valueOf("b"))
                 .build();
@@ -249,6 +280,14 @@ public class CoGroupOperatorGeneratorTest extends OperatorNodeGeneratorTestRoot 
         public void parameterized(List<MockDataModel> i0, Result<MockValueModel> r0, String parameter) {
             for (MockDataModel m : i0) {
                 r0.add(new MockValueModel(m.getValue() + parameter));
+            }
+        }
+
+        @CoGroup
+        public void table(List<MockDataModel> i0, GroupView<MockDataModel> t0, Result<MockValueModel> r0) {
+            for (MockDataModel m : i0) {
+                MockDataModel t = t0.find(m.getKeyOption()).get(0);
+                r0.add(new MockValueModel(t.getValue()));
             }
         }
     }

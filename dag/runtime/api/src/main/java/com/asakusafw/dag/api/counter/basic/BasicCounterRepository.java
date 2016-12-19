@@ -26,8 +26,8 @@ import com.asakusafw.dag.api.counter.CounterGroup;
 import com.asakusafw.dag.api.counter.CounterGroup.Category;
 import com.asakusafw.dag.api.counter.CounterGroup.Column;
 import com.asakusafw.dag.api.counter.CounterGroup.Scope;
-import com.asakusafw.lang.utils.common.Arguments;
 import com.asakusafw.dag.api.counter.CounterRepository;
+import com.asakusafw.lang.utils.common.Arguments;
 
 /**
  * A basic implementation of {@link CounterRepository}.

@@ -84,13 +84,13 @@ public class BuiltInOperatorClassifierTest extends BuiltInOptimizerTestRoot {
         assertThat(result.getPrimaryInputs(), hasSize(2));
         assertThat(result.getSecondaryInputs(), hasSize(0));
 
-        OperatorInput i0 = operator.getInputs().get(0);
+        OperatorInput i0 = operator.getInput(0);
         assertThat(result.getAttributes(i0), hasItem(InputAttribute.SORTED));
         assertThat(result.getAttributes(i0), not(hasItem(InputAttribute.ESCAPED)));
         assertThat(result.getAttributes(i0), not(hasItem(InputAttribute.AGGREATE)));
         assertThat(result.getAttributes(i0), not(hasItem(InputAttribute.PARTIAL_REDUCTION)));
 
-        OperatorInput i1 = operator.getInputs().get(1);
+        OperatorInput i1 = operator.getInput(1);
         assertThat(result.getAttributes(i1), not(hasItem(InputAttribute.SORTED)));
         assertThat(result.getAttributes(i1), not(hasItem(InputAttribute.ESCAPED)));
         assertThat(result.getAttributes(i1), not(hasItem(InputAttribute.AGGREATE)));
@@ -113,13 +113,13 @@ public class BuiltInOperatorClassifierTest extends BuiltInOptimizerTestRoot {
         assertThat(result.getPrimaryInputs(), hasSize(2));
         assertThat(result.getSecondaryInputs(), hasSize(0));
 
-        OperatorInput i0 = operator.getInputs().get(0);
+        OperatorInput i0 = operator.getInput(0);
         assertThat(result.getAttributes(i0), hasItem(InputAttribute.SORTED));
         assertThat(result.getAttributes(i0), hasItem(InputAttribute.ESCAPED));
         assertThat(result.getAttributes(i0), not(hasItem(InputAttribute.AGGREATE)));
         assertThat(result.getAttributes(i0), not(hasItem(InputAttribute.PARTIAL_REDUCTION)));
 
-        OperatorInput i1 = operator.getInputs().get(1);
+        OperatorInput i1 = operator.getInput(1);
         assertThat(result.getAttributes(i1), not(hasItem(InputAttribute.SORTED)));
         assertThat(result.getAttributes(i1), hasItem(InputAttribute.ESCAPED));
         assertThat(result.getAttributes(i1), not(hasItem(InputAttribute.AGGREATE)));
@@ -149,15 +149,15 @@ public class BuiltInOperatorClassifierTest extends BuiltInOptimizerTestRoot {
         assertThat(result.getPrimaryInputs(), hasSize(3));
         assertThat(result.getSecondaryInputs(), hasSize(0));
 
-        OperatorInput i0 = operator.getInputs().get(0);
+        OperatorInput i0 = operator.getInput(0);
         assertThat(result.getAttributes(i0), not(hasItem(InputAttribute.ESCAPED)));
         assertThat(result.getAttributes(i0), not(hasItem(InputAttribute.VOALTILE)));
 
-        OperatorInput i1 = operator.getInputs().get(1);
+        OperatorInput i1 = operator.getInput(1);
         assertThat(result.getAttributes(i1), hasItem(InputAttribute.ESCAPED));
         assertThat(result.getAttributes(i1), not(hasItem(InputAttribute.VOALTILE)));
 
-        OperatorInput i2 = operator.getInputs().get(2);
+        OperatorInput i2 = operator.getInput(2);
         assertThat(result.getAttributes(i2), not(hasItem(InputAttribute.ESCAPED)));
         assertThat(result.getAttributes(i2), hasItem(InputAttribute.VOALTILE));
     }
@@ -192,8 +192,8 @@ public class BuiltInOperatorClassifierTest extends BuiltInOptimizerTestRoot {
         OperatorClass result = apply(context(), operator, DataSize.TINY, DataSize.UNKNOWN);
         assertThat(result.getOperator(), is(operator));
         assertThat(result.getPrimaryInputType(), is(InputType.RECORD));
-        assertThat(result.getPrimaryInputs(), contains(operator.getInputs().get(1)));
-        assertThat(result.getSecondaryInputs(), contains(operator.getInputs().get(0)));
+        assertThat(result.getPrimaryInputs(), contains(operator.getInput(1)));
+        assertThat(result.getSecondaryInputs(), contains(operator.getInput(0)));
     }
 
     /**
@@ -229,8 +229,8 @@ public class BuiltInOperatorClassifierTest extends BuiltInOptimizerTestRoot {
         OperatorClass result = apply(context, operator, DataSize.SMALL, DataSize.UNKNOWN);
         assertThat(result.getOperator(), is(operator));
         assertThat(result.getPrimaryInputType(), is(InputType.RECORD));
-        assertThat(result.getPrimaryInputs(), contains(operator.getInputs().get(1)));
-        assertThat(result.getSecondaryInputs(), contains(operator.getInputs().get(0)));
+        assertThat(result.getPrimaryInputs(), contains(operator.getInput(1)));
+        assertThat(result.getSecondaryInputs(), contains(operator.getInput(0)));
     }
 
     /**
@@ -248,7 +248,7 @@ public class BuiltInOperatorClassifierTest extends BuiltInOptimizerTestRoot {
         assertThat(result.getPrimaryInputs(), hasSize(1));
         assertThat(result.getSecondaryInputs(), hasSize(0));
 
-        OperatorInput input = operator.getInputs().get(0);
+        OperatorInput input = operator.getInput(0);
         assertThat(result.getAttributes(input), hasItem(InputAttribute.AGGREATE));
         assertThat(result.getAttributes(input), not(hasItem(InputAttribute.PARTIAL_REDUCTION)));
     }
@@ -269,7 +269,7 @@ public class BuiltInOperatorClassifierTest extends BuiltInOptimizerTestRoot {
         assertThat(result.getPrimaryInputs(), hasSize(1));
         assertThat(result.getSecondaryInputs(), hasSize(0));
 
-        OperatorInput input = operator.getInputs().get(0);
+        OperatorInput input = operator.getInput(0);
         assertThat(result.getAttributes(input), hasItem(InputAttribute.AGGREATE));
         assertThat(result.getAttributes(input), hasItem(InputAttribute.PARTIAL_REDUCTION));
     }
@@ -289,7 +289,7 @@ public class BuiltInOperatorClassifierTest extends BuiltInOptimizerTestRoot {
         assertThat(result.getPrimaryInputs(), hasSize(1));
         assertThat(result.getSecondaryInputs(), hasSize(0));
 
-        OperatorInput input = operator.getInputs().get(0);
+        OperatorInput input = operator.getInput(0);
         assertThat(result.getAttributes(input), hasItem(InputAttribute.AGGREATE));
         assertThat(result.getAttributes(input), not(hasItem(InputAttribute.PARTIAL_REDUCTION)));
     }
@@ -309,7 +309,7 @@ public class BuiltInOperatorClassifierTest extends BuiltInOptimizerTestRoot {
         assertThat(result.getPrimaryInputs(), hasSize(1));
         assertThat(result.getSecondaryInputs(), hasSize(0));
 
-        OperatorInput input = operator.getInputs().get(0);
+        OperatorInput input = operator.getInput(0);
         assertThat(result.getAttributes(input), hasItem(InputAttribute.AGGREATE));
         assertThat(result.getAttributes(input), hasItem(InputAttribute.PARTIAL_REDUCTION));
     }

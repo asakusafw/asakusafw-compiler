@@ -72,6 +72,49 @@ public class EdgeDataTableAdapterGeneratorTest extends ClassGeneratorTestRoot {
     }
 
     /**
+     * w/ empty group.
+     */
+    @Test
+    public void empty_group() {
+        define("t", "i", MockDataModel.class);
+        data("i", new Object[] {
+                new MockDataModel(0, "Hello0"),
+                new MockDataModel(1, "Hello1"),
+                new MockDataModel(2, "Hello2"),
+        });
+        check(a -> {
+            DataTable<MockDataModel> t = a.getDataTable(MockDataModel.class, "t");
+            assertThat(get(t, MockDataModel::getValue), containsInAnyOrder("Hello0", "Hello1", "Hello2"));
+        });
+    }
+
+    /**
+     * w/ sorted.
+     */
+    @Test
+    public void sorted() {
+        define("t", "i", MockDataModel.class, "key", "+value");
+        data("i", new Object[] {
+                new MockDataModel(0, "0"),
+                new MockDataModel(1, "1a"),
+                new MockDataModel(1, "1c"),
+                new MockDataModel(1, "1e"),
+                new MockDataModel(1, "1d"),
+                new MockDataModel(1, "1b"),
+                new MockDataModel(2, "2c"),
+                new MockDataModel(2, "2b"),
+                new MockDataModel(2, "2a"),
+        });
+        check(a -> {
+            DataTable<MockDataModel> t = a.getDataTable(MockDataModel.class, "t");
+            assertThat(get(t, MockDataModel::getValue, 0), contains("0"));
+            assertThat(get(t, MockDataModel::getValue, 1), contains("1a", "1b", "1c", "1d", "1e"));
+            assertThat(get(t, MockDataModel::getValue, 2), contains("2a", "2b", "2c"));
+            assertThat(get(t, MockDataModel::getValue, 3), hasSize(0));
+        });
+    }
+
+    /**
      * multiple tables.
      */
     @Test
@@ -95,8 +138,8 @@ public class EdgeDataTableAdapterGeneratorTest extends ClassGeneratorTestRoot {
         });
     }
 
-    private void define(String tId, String iId, Class<?> type, String... group) {
-        specs.add(new Spec(tId, iId, Descriptions.typeOf(type), Groups.parse(Arrays.asList(group))));
+    private void define(String tId, String iId, Class<?> type, String... terms) {
+        specs.add(new Spec(tId, iId, Descriptions.typeOf(type), Groups.parse(terms)));
     }
 
     private void data(String iId, Object... values) {

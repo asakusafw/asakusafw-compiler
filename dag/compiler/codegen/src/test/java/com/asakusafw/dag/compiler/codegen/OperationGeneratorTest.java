@@ -34,15 +34,16 @@ import com.asakusafw.dag.compiler.model.graph.OperatorNode;
 import com.asakusafw.dag.compiler.model.graph.OutputNode;
 import com.asakusafw.dag.compiler.model.graph.SpecialElement;
 import com.asakusafw.dag.compiler.model.graph.ValueElement;
+import com.asakusafw.dag.compiler.model.graph.VertexElement;
 import com.asakusafw.dag.runtime.adapter.DataTable;
 import com.asakusafw.dag.runtime.adapter.Operation;
 import com.asakusafw.dag.runtime.adapter.OperationAdapter;
 import com.asakusafw.dag.runtime.table.BasicDataTable;
 import com.asakusafw.lang.compiler.model.description.BasicTypeDescription.BasicTypeKind;
+import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.utils.common.Action;
 import com.asakusafw.lang.utils.common.Invariants;
 import com.asakusafw.lang.utils.common.Optionals;
-import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.runtime.core.Result;
 import com.asakusafw.runtime.testing.MockResult;
 
@@ -158,13 +159,30 @@ public class OperationGeneratorTest extends ClassGeneratorTestRoot {
         OutputNode output = new OutputNode("testing", typeOf(Result.class), typeOf(String.class));
         OperatorNode operator = new OperatorNode(
                 classOf(SimpleOp.class), typeOf(Result.class), typeOf(String.class),
-                output, SpecialElement.CONTEXT);
+                output, new SpecialElement(VertexElement.ElementKind.CONTEXT, typeOf(ProcessorContext.class)));
         InputNode root = new InputNode(operator);
         MockContext context = new MockContext();
         testing(root, context, op -> {
             op.process("Hello, world!");
         });
         assertThat(context.get("testing"), contains("Hello, world!CONTEXT"));
+    }
+
+    /**
+     * w/ operator + context.
+     */
+    @Test
+    public void operator_empty_data_table() {
+        OutputNode output = new OutputNode("testing", typeOf(Result.class), typeOf(String.class));
+        OperatorNode operator = new OperatorNode(
+                classOf(SimpleOp.class), typeOf(Result.class), typeOf(String.class),
+                output, new SpecialElement(VertexElement.ElementKind.EMPTY_DATA_TABLE, typeOf(DataTable.class)));
+        InputNode root = new InputNode(operator);
+        MockContext context = new MockContext();
+        testing(root, context, op -> {
+            op.process("Hello, world!");
+        });
+        assertThat(context.get("testing"), contains("Hello, world!TABLE"));
     }
 
     private void testing(InputNode node, OperationAdapter.Context context, Action<Operation<Object>, ?> action) {

@@ -28,6 +28,7 @@ import com.asakusafw.lang.compiler.model.description.TypeDescription;
 import com.asakusafw.lang.compiler.model.graph.CoreOperator;
 import com.asakusafw.lang.compiler.model.graph.Operator;
 import com.asakusafw.lang.compiler.model.graph.OperatorInput;
+import com.asakusafw.lang.compiler.model.graph.OperatorInput.InputUnit;
 import com.asakusafw.lang.compiler.model.graph.OperatorProperty;
 import com.asakusafw.lang.compiler.model.graph.UserOperator;
 import com.asakusafw.lang.utils.common.Arguments;
@@ -105,7 +106,9 @@ public interface OperatorNodeGenerator {
          * @param input the target input
          * @return {@code true} if the input is side-data, otherwise {@code false}
          */
-        boolean isSideData(OperatorInput input);
+        default boolean isSideData(OperatorInput input) {
+            return input.getInputUnit() == InputUnit.WHOLE;
+        }
 
         /**
          * Returns the group index of the target input.
@@ -113,7 +116,21 @@ public interface OperatorNodeGenerator {
          * @return the input ID, or {@code -1} if the input it omitted
          * @throws IllegalArgumentException if the input is not group, or it is a side-data
          */
-        int getGroupIndex(OperatorInput input);
+        default int getGroupIndex(OperatorInput input) {
+            if (input.getInputUnit() != InputUnit.GROUP) {
+                return -1;
+            }
+            int index = 0;
+            for (OperatorInput port : input.getOwner().getInputs()) {
+                if (port.getInputUnit() == InputUnit.GROUP) {
+                    if (port.equals(input)) {
+                        return index;
+                    }
+                    index++;
+                }
+            }
+            return -1;
+        }
     }
 
     /**

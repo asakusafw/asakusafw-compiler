@@ -19,6 +19,7 @@ import java.util.List;
 
 import com.asakusafw.lang.compiler.model.graph.Operator;
 import com.asakusafw.lang.compiler.model.graph.OperatorInput;
+import com.asakusafw.lang.compiler.model.graph.OperatorInput.InputUnit;
 import com.asakusafw.lang.compiler.optimizer.OperatorCharacterizer;
 import com.asakusafw.lang.compiler.optimizer.basic.OperatorClass;
 import com.asakusafw.lang.compiler.optimizer.basic.OperatorClass.InputAttribute;
@@ -35,8 +36,21 @@ public class ExtractKindOperatorClassifier implements OperatorCharacterizer<Oper
         if (inputs.isEmpty()) {
             throw new IllegalArgumentException();
         }
+        int count = 0;
         OperatorClass.Builder builder = OperatorClass.builder(operator, InputType.RECORD);
-        builder.with(inputs.get(0), InputAttribute.PRIMARY);
-        return builder.build();
+        for (OperatorInput input : inputs) {
+            InputUnit unit = input.getInputUnit();
+            if (unit == InputUnit.GROUP) {
+                throw new IllegalStateException();
+            } else if (unit == InputUnit.WHOLE) {
+                continue;
+            }
+            builder.with(input, InputAttribute.PRIMARY);
+            count++;
+        }
+        if (count != 1) {
+            throw new IllegalStateException();
+        }
+        return Util.resolve(builder, operator);
     }
 }

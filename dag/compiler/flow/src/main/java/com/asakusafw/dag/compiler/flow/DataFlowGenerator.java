@@ -58,6 +58,7 @@ import com.asakusafw.dag.compiler.model.graph.InputNode;
 import com.asakusafw.dag.compiler.model.graph.OperationSpec;
 import com.asakusafw.dag.compiler.model.graph.OperatorNode;
 import com.asakusafw.dag.compiler.model.graph.OutputNode;
+import com.asakusafw.dag.compiler.model.graph.SpecialElement;
 import com.asakusafw.dag.compiler.model.graph.ValueElement;
 import com.asakusafw.dag.compiler.model.graph.VertexElement;
 import com.asakusafw.dag.compiler.model.graph.VertexElement.ElementKind;
@@ -85,6 +86,7 @@ import com.asakusafw.lang.compiler.model.graph.Operator;
 import com.asakusafw.lang.compiler.model.graph.Operator.OperatorKind;
 import com.asakusafw.lang.compiler.model.graph.OperatorArgument;
 import com.asakusafw.lang.compiler.model.graph.OperatorInput;
+import com.asakusafw.lang.compiler.model.graph.OperatorInput.InputUnit;
 import com.asakusafw.lang.compiler.model.graph.OperatorOutput;
 import com.asakusafw.lang.compiler.model.graph.OperatorPort;
 import com.asakusafw.lang.compiler.model.graph.OperatorProperty;
@@ -113,6 +115,9 @@ public final class DataFlowGenerator {
     private static final TypeDescription TYPE_DATATABLE = Descriptions.typeOf(DataTable.class);
 
     private static final ClassDescription TYPE_VOID_RESULT = Descriptions.classOf(VoidResult.class);
+
+    private static final VertexElement ELEMENT_EMPTY_DATATABLE =
+            new SpecialElement(VertexElement.ElementKind.EMPTY_DATA_TABLE, TYPE_DATATABLE);
 
     private final Plan plan;
 
@@ -404,7 +409,7 @@ public final class DataFlowGenerator {
         Map<OperatorProperty, VertexElement> dependencies = new LinkedHashMap<>();
         // add broadcast inputs as data tables
         for (OperatorInput port : operator.getInputs()) {
-            if (port.getOpposites().size() != 1) {
+            if (port.getInputUnit() != InputUnit.WHOLE) {
                 continue;
             }
             VertexElement upstream = port.getOpposites().stream()
@@ -414,7 +419,10 @@ public final class DataFlowGenerator {
                 .findFirst()
                 .orElse(null);
             if (upstream != null && upstream.getElementKind() == ElementKind.DATA_TABLE) {
+                Invariants.require(port.getOpposites().size() == 1);
                 dependencies.put(port, upstream);
+            } else {
+                dependencies.put(port, ELEMENT_EMPTY_DATATABLE);
             }
         }
         // add outputs as succeeding result sinks

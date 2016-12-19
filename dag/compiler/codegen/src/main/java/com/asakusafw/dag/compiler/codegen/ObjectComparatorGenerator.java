@@ -17,12 +17,8 @@ package com.asakusafw.dag.compiler.codegen;
 
 import static com.asakusafw.dag.compiler.codegen.AsmUtil.*;
 
-import java.io.DataInput;
-import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 import org.objectweb.asm.ClassWriter;
@@ -31,68 +27,34 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
-import com.asakusafw.dag.api.common.DataComparator;
 import com.asakusafw.dag.compiler.codegen.AsmUtil.LocalVarRef;
 import com.asakusafw.dag.compiler.model.ClassData;
-import com.asakusafw.dag.runtime.io.ValueOptionSerDe;
 import com.asakusafw.lang.compiler.api.reference.DataModelReference;
 import com.asakusafw.lang.compiler.api.reference.PropertyReference;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
-import com.asakusafw.lang.compiler.model.description.Descriptions;
 import com.asakusafw.lang.compiler.model.description.TypeDescription;
 import com.asakusafw.lang.compiler.model.graph.Group;
 import com.asakusafw.lang.utils.common.Arguments;
 import com.asakusafw.lang.utils.common.Invariants;
-import com.asakusafw.runtime.value.BooleanOption;
-import com.asakusafw.runtime.value.ByteOption;
-import com.asakusafw.runtime.value.DateOption;
-import com.asakusafw.runtime.value.DateTimeOption;
-import com.asakusafw.runtime.value.DecimalOption;
-import com.asakusafw.runtime.value.DoubleOption;
-import com.asakusafw.runtime.value.FloatOption;
-import com.asakusafw.runtime.value.IntOption;
-import com.asakusafw.runtime.value.LongOption;
-import com.asakusafw.runtime.value.ShortOption;
-import com.asakusafw.runtime.value.StringOption;
 
 /**
- * Generates {@link DataComparator}.
- * @since 0.4.0
+ * Generates {@link Comparator}.
+ * @since 0.4.1
  */
-public final class DataComparatorGenerator {
+public final class ObjectComparatorGenerator {
 
     private static final String CATEGORY = "compare"; //$NON-NLS-1$
 
-    private static final String SUFFIX = "DataComparator"; //$NON-NLS-1$
+    private static final String SUFFIX = "ObjectComparator"; //$NON-NLS-1$
 
-    private static final Type TYPE_DATA_INPUT = typeOf(DataInput.class);
+    private static final Type TYPE_COMPARABLE = typeOf(Comparable.class);
 
-    private static final String DESC_COMPARE = Type.getMethodDescriptor(
-            typeOf(int.class), TYPE_DATA_INPUT, TYPE_DATA_INPUT);
-
-    private static final Map<TypeDescription, String> METHOD_NAMES;
-    static {
-        Map<TypeDescription, String> map = new HashMap<>();
-        map.put(Descriptions.typeOf(BooleanOption.class), "compareBoolean");
-        map.put(Descriptions.typeOf(ByteOption.class), "compareByte");
-        map.put(Descriptions.typeOf(ShortOption.class), "compareShort");
-        map.put(Descriptions.typeOf(IntOption.class), "compareInt");
-        map.put(Descriptions.typeOf(LongOption.class), "compareLong");
-        map.put(Descriptions.typeOf(FloatOption.class), "compareFloat");
-        map.put(Descriptions.typeOf(DoubleOption.class), "compareDouble");
-        map.put(Descriptions.typeOf(DecimalOption.class), "compareDecimal");
-        map.put(Descriptions.typeOf(DateOption.class), "compareDate");
-        map.put(Descriptions.typeOf(DateTimeOption.class), "compareDateTime");
-        map.put(Descriptions.typeOf(StringOption.class), "compareString");
-        METHOD_NAMES = Collections.unmodifiableMap(map);
-    }
-
-    private DataComparatorGenerator() {
+    private ObjectComparatorGenerator() {
         return;
     }
 
     /**
-     * Generates {@link DataComparator} class.
+     * Generates {@link Comparator} class.
      * @param context the current context
      * @param type the target data model type
      * @param orderings the ordering terms
@@ -104,7 +66,7 @@ public final class DataComparatorGenerator {
     }
 
     /**
-     * Generates {@link DataComparator} class.
+     * Generates {@link Comparator} class.
      * @param context the current context
      * @param type the target data model type
      * @param orderings the ordering terms
@@ -121,7 +83,7 @@ public final class DataComparatorGenerator {
 
     private static ClassData generate0(
             DataModelReference reference, List<Group.Ordering> orderings, ClassDescription target) {
-        ClassWriter writer = newWriter(target, Object.class, DataComparator.class);
+        ClassWriter writer = newWriter(target, Object.class, Comparator.class);
         defineEmptyConstructor(writer, Object.class);
         defineCompare(writer, reference, orderings);
         writer.visitEnd();
@@ -133,34 +95,38 @@ public final class DataComparatorGenerator {
         MethodVisitor v = writer.visitMethod(
                 Opcodes.ACC_PUBLIC,
                 "compare",
-                DESC_COMPARE,
+                Type.getMethodDescriptor(typeOf(int.class), typeOf(Object.class), typeOf(Object.class)),
                 null,
-                new String[] {
-                        typeOf(IOException.class).getInternalName(),
-                });
-        LocalVarRef a = new LocalVarRef(Opcodes.ALOAD, 1);
-        LocalVarRef b = new LocalVarRef(Opcodes.ALOAD, 2);
+                null);
+        LocalVarRef a = cast(v, 1, reference.getDeclaration());
+        LocalVarRef b = cast(v, 2, reference.getDeclaration());
         for (Group.Ordering ordering : orderings) {
-            PropertyReference property = Invariants.requireNonNull(reference.findProperty(ordering.getPropertyName()));
-
-            // int diff = ValueOptionSerDe.compareT({a, b}, {b, a});
+            LocalVarRef left;
+            LocalVarRef right;
             switch (ordering.getDirection()) {
             case ASCENDANT:
-                a.load(v);
-                b.load(v);
+                left = a;
+                right = b;
                 break;
             case DESCENDANT:
-                b.load(v);
-                a.load(v);
+                left = b;
+                right = a;
                 break;
             default:
                 throw new AssertionError(ordering);
             }
-            v.visitMethodInsn(Opcodes.INVOKESTATIC,
-                    typeOf(ValueOptionSerDe.class).getInternalName(),
-                    Invariants.requireNonNull(METHOD_NAMES.get(property.getType())),
-                    DESC_COMPARE,
-                    false);
+
+            // int diff = left.getXOption().compareTo(right.getXOption());
+            PropertyReference property = Invariants.requireNonNull(reference.findProperty(ordering.getPropertyName()));
+            left.load(v);
+            getOption(v, property);
+            right.load(v);
+            getOption(v, property);
+            v.visitMethodInsn(Opcodes.INVOKEINTERFACE,
+                    TYPE_COMPARABLE.getInternalName(),
+                    "compareTo",
+                    Type.getMethodDescriptor(typeOf(int.class), typeOf(Object.class)),
+                    true);
             LocalVarRef cmp = putLocalVar(v, Type.INT, 3);
             Label eq = new Label();
 

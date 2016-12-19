@@ -38,6 +38,7 @@ import com.asakusafw.dag.compiler.model.graph.VertexElement.ElementKind;
 import com.asakusafw.dag.runtime.adapter.DataTable;
 import com.asakusafw.dag.runtime.adapter.Operation;
 import com.asakusafw.dag.runtime.adapter.OperationAdapter;
+import com.asakusafw.dag.runtime.table.BasicDataTable;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.description.EnumConstantDescription;
 import com.asakusafw.lang.compiler.model.description.ImmediateDescription;
@@ -181,6 +182,9 @@ public class OperationGenerator {
             case CONTEXT:
                 getContext(method, target, ids);
                 break;
+            case EMPTY_DATA_TABLE:
+                getEmptyDataTable(method, target, ids);
+                break;
             default:
                 throw new AssertionError(element.getElementKind());
             }
@@ -203,6 +207,15 @@ public class OperationGenerator {
                 target.getInternalName(),
                 FIELD_CONTEXT,
                 typeOf(OperationAdapter.Context.class).getDescriptor());
+    }
+
+    private static void getEmptyDataTable(
+            MethodVisitor method, ClassDescription target, Function<VertexElement, String> ids) {
+        method.visitMethodInsn(Opcodes.INVOKESTATIC,
+                typeOf(BasicDataTable.class).getInternalName(),
+                "empty", //$NON-NLS-1$
+                Type.getMethodDescriptor(typeOf(DataTable.class)),
+                false);
     }
 
     private static void getValue(

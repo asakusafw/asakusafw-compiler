@@ -22,6 +22,7 @@ import com.asakusafw.lang.compiler.model.graph.Group;
 import com.asakusafw.lang.compiler.model.graph.Operator;
 import com.asakusafw.lang.compiler.model.graph.Operator.OperatorKind;
 import com.asakusafw.lang.compiler.model.graph.OperatorInput;
+import com.asakusafw.lang.compiler.model.graph.OperatorInput.InputUnit;
 import com.asakusafw.lang.compiler.model.graph.UserOperator;
 import com.asakusafw.lang.compiler.optimizer.OperatorCharacterizer;
 import com.asakusafw.lang.compiler.optimizer.basic.OperatorClass;
@@ -50,6 +51,12 @@ public class CoGroupKindOperatorClassifier implements OperatorCharacterizer<Oper
         }
         OperatorClass.Builder builder = OperatorClass.builder(operator, InputType.GROUP);
         for (OperatorInput input : inputs) {
+            InputUnit unit = input.getInputUnit();
+            if (unit == InputUnit.RECORD) {
+                throw new IllegalStateException();
+            } else if (unit == InputUnit.WHOLE) {
+                continue;
+            }
             builder.with(input, InputAttribute.PRIMARY);
             if (isSorted(input)) {
                 builder.with(input, InputAttribute.SORTED);
@@ -67,7 +74,7 @@ public class CoGroupKindOperatorClassifier implements OperatorCharacterizer<Oper
                 throw new AssertionError(input);
             }
         }
-        return builder.build();
+        return Util.resolve(builder, operator);
     }
 
     private static boolean isSorted(OperatorInput input) {

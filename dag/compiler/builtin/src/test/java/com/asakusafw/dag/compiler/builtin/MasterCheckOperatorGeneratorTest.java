@@ -18,18 +18,15 @@ package com.asakusafw.dag.compiler.builtin;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Test;
 
 import com.asakusafw.dag.compiler.codegen.OperatorNodeGenerator.NodeInfo;
-import com.asakusafw.dag.compiler.model.graph.DataTableNode;
-import com.asakusafw.dag.runtime.adapter.DataTable;
 import com.asakusafw.dag.runtime.testing.MockDataModel;
 import com.asakusafw.dag.runtime.testing.MockKeyModel;
 import com.asakusafw.lang.compiler.model.description.Descriptions;
-import com.asakusafw.lang.compiler.model.graph.Groups;
+import com.asakusafw.lang.compiler.model.graph.OperatorInput.InputUnit;
 import com.asakusafw.lang.compiler.model.graph.UserOperator;
 import com.asakusafw.lang.compiler.model.graph.UserOperator.Builder;
 import com.asakusafw.lang.compiler.model.testing.OperatorExtractor;
@@ -148,27 +145,34 @@ public class MasterCheckOperatorGeneratorTest extends OperatorNodeGeneratorTestR
     @Test
     public void cache_diff_strategy() {
         UserOperator opA = load("simple").build();
+        UserOperator opB = loadTable("simple").build();
         NodeInfo a = generate(opA);
-        NodeInfo b = generateWithTable(opA);
+        NodeInfo b = generate(opB);
         assertThat(b, not(useCacheOf(a)));
     }
 
     private Builder load(String name) {
         return OperatorExtractor.extract(MasterCheck.class, Op.class, name)
-                .input("master", Descriptions.typeOf(MockKeyModel.class), Groups.parse(Arrays.asList("key")))
-                .input("transaction", Descriptions.typeOf(MockDataModel.class), Groups.parse(Arrays.asList("key")))
+                .input("master", Descriptions.typeOf(MockKeyModel.class), c -> c
+                        .group(group("key"))
+                        .unit(InputUnit.GROUP))
+                .input("transaction", Descriptions.typeOf(MockDataModel.class), c -> c
+                        .group(group("key"))
+                        .unit(InputUnit.GROUP))
                 .output("found", Descriptions.typeOf(MockDataModel.class))
                 .output("missing", Descriptions.typeOf(MockDataModel.class));
     }
 
-    private NodeInfo generateWithTable(UserOperator operator) {
-        NodeInfo info = generate(operator, c -> {
-            c.put(operator.findInput("master"), new DataTableNode("master",
-                    Descriptions.typeOf(DataTable.class),
-                    Descriptions.typeOf(MockKeyModel.class)));
-            operator.getOutputs().forEach(o -> c.put(o, result(o.getDataType())));
-        });
-        return info;
+    private Builder loadTable(String name) {
+        return OperatorExtractor.extract(MasterCheck.class, Op.class, name)
+                .input("master", Descriptions.typeOf(MockKeyModel.class), c -> c
+                        .group(group("key"))
+                        .unit(InputUnit.WHOLE))
+                .input("transaction", Descriptions.typeOf(MockDataModel.class), c -> c
+                        .group(group("key"))
+                        .unit(InputUnit.RECORD))
+                .output("found", Descriptions.typeOf(MockDataModel.class))
+                .output("missing", Descriptions.typeOf(MockDataModel.class));
     }
 
     @SuppressWarnings("javadoc")

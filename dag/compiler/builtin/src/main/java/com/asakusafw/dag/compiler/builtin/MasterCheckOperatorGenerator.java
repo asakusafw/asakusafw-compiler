@@ -15,6 +15,7 @@
  */
 package com.asakusafw.dag.compiler.builtin;
 
+import static com.asakusafw.dag.compiler.builtin.Util.*;
 import static com.asakusafw.dag.compiler.codegen.AsmUtil.*;
 
 import java.lang.annotation.Annotation;
@@ -41,6 +42,11 @@ public class MasterCheckOperatorGenerator extends MasterJoinLikeOperatorGenerato
     @Override
     protected Class<? extends Annotation> getAnnotationClass() {
         return MasterCheck.class;
+    }
+
+    @Override
+    protected void validate(Context context, UserOperator operator) {
+        checkPorts(operator, i -> i == 2, i -> i >= 1);
     }
 
     @Override

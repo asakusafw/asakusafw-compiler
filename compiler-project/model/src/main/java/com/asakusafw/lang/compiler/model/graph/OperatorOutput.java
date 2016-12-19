@@ -96,6 +96,10 @@ public class OperatorOutput implements OperatorPort {
         return attributes.getAttribute(attributeType);
     }
 
+    AttributeMap getAttributeMap() {
+        return attributes;
+    }
+
     /**
      * Returns whether this is connected to the specified port.
      * @param oppsite the target port

@@ -89,22 +89,22 @@ public final class ProjectionOperatorUtil {
         switch (op) {
         case PROJECT: {
             OperatorUtil.checkOperatorPorts(operator, 1, 1);
-            input = operator.getInputs().get(Project.ID_INPUT);
-            output = operator.getOutputs().get(Project.ID_OUTPUT);
+            input = operator.getInput(Project.ID_INPUT);
+            output = operator.getOutput(Project.ID_OUTPUT);
             kind = MappingKind.NARROWING;
             break;
         }
         case EXTEND: {
             OperatorUtil.checkOperatorPorts(operator, 1, 1);
-            input = operator.getInputs().get(Extend.ID_INPUT);
-            output = operator.getOutputs().get(Extend.ID_OUTPUT);
+            input = operator.getInput(Extend.ID_INPUT);
+            output = operator.getOutput(Extend.ID_OUTPUT);
             kind = MappingKind.WIDENING;
             break;
         }
         case RESTRUCTURE: {
             OperatorUtil.checkOperatorPorts(operator, 1, 1);
-            input = operator.getInputs().get(Restructure.ID_INPUT);
-            output = operator.getOutputs().get(Restructure.ID_OUTPUT);
+            input = operator.getInput(Restructure.ID_INPUT);
+            output = operator.getOutput(Restructure.ID_OUTPUT);
             kind = MappingKind.ELASTIC;
             break;
         }

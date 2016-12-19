@@ -15,14 +15,18 @@
  */
 package com.asakusafw.dag.runtime.adapter;
 
+import java.util.Comparator;
 import java.util.List;
+
+import com.asakusafw.runtime.core.GroupView;
 
 /**
  * A data table.
  * @param <T> the data type
  * @since 0.4.0
+ * @version 0.4.1
  */
-public interface DataTable<T> {
+public interface DataTable<T> extends GroupView<T> {
 
     /**
      * Creates a new key buffer for this table.
@@ -41,6 +45,7 @@ public interface DataTable<T> {
      * A builder for building {@link DataTable}.
      * @param <T> the data type
      * @since 0.4.0
+     * @since 0.4.1
      */
     public interface Builder<T> {
 
@@ -60,8 +65,20 @@ public interface DataTable<T> {
 
         /**
          * Builds a {@link DataTable} from the {@link #add(KeyBuffer, Object) added} elements.
+         * Each entry may not be sorted.
          * @return the build table
          */
-        DataTable<T> build();
+        default DataTable<T> build() {
+            return build(null);
+        }
+
+        /**
+         * Builds a {@link DataTable} from the {@link #add(KeyBuffer, Object) added} elements.
+         * Each entry will be sorted by the given comparator if it is specified.
+         * @param comparator the comparator, or {@code null} if sort is not required
+         * @return the build table
+         * @since 0.4.1
+         */
+        DataTable<T> build(Comparator<? super T> comparator);
     }
 }

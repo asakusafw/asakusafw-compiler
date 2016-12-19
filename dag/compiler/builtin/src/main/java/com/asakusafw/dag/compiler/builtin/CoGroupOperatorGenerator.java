@@ -37,7 +37,6 @@ import com.asakusafw.lang.compiler.model.description.Descriptions;
 import com.asakusafw.lang.compiler.model.graph.OperatorInput;
 import com.asakusafw.lang.compiler.model.graph.OperatorProperty;
 import com.asakusafw.lang.compiler.model.graph.UserOperator;
-import com.asakusafw.lang.utils.common.Lang;
 import com.asakusafw.runtime.core.Result;
 import com.asakusafw.vocabulary.attribute.BufferType;
 import com.asakusafw.vocabulary.operator.CoGroup;
@@ -81,15 +80,16 @@ public class CoGroupOperatorGenerator extends UserOperatorNodeGenerator {
             cast(method, 1, Descriptions.typeOf(CoGroupOperation.Input.class));
             List<ValueRef> arguments = new ArrayList<>();
             arguments.add(impl);
-            for (OperatorInput input : operator.getInputs()) {
+            for (OperatorInput input : getPrimaryInputs(operator)) {
                 if (isReadOnce(input)) {
                     arguments.add(v -> getGroupIterable(v, context, input));
                 } else {
                     arguments.add(v -> getGroupList(v, context, input));
                 }
             }
-            arguments.addAll(Lang.project(operator.getOutputs(), e -> map.get(e)));
-            arguments.addAll(Lang.project(operator.getArguments(), e -> map.get(e)));
+            appendSecondaryInputs(arguments::add, operator, map::get);
+            appendOutputs(arguments::add, operator, map::get);
+            appendArguments(arguments::add, operator, map::get);
             invoke(method, context, operator, arguments);
         });
         return new ClassData(target, writer::toByteArray);

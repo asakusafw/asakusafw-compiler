@@ -23,8 +23,10 @@ import java.net.URLClassLoader;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
 
@@ -57,6 +59,19 @@ public class VanillaCommandEmulator extends CommandEmulator {
     static final int ARG_APPLICATION = ARG_ARGUMENTS + 1;
 
     static final int MINIMUM_TOKENS = ARG_APPLICATION + 1;
+
+    private static final Map<String, String> DEFAULT_ENGINE_CONF;
+    static {
+        Map<String, String> map = new LinkedHashMap<>();
+        map.put("com.asakusafw.dag.view.validate", "TYPE"); //$NON-NLS-1$ //$NON-NLS-2$
+        DEFAULT_ENGINE_CONF = Collections.unmodifiableMap(map);
+    }
+
+    private static final Map<String, String> DEFAULT_HADOOP_CONF;
+    static {
+        Map<String, String> map = new LinkedHashMap<>();
+        DEFAULT_HADOOP_CONF = Collections.unmodifiableMap(map);
+    }
 
     @Override
     public String getName() {
@@ -118,14 +133,29 @@ public class VanillaCommandEmulator extends CommandEmulator {
         Collections.addAll(results, "--flow-id", flowId); //$NON-NLS-1$
         Collections.addAll(results, "--execution-id", executionId); //$NON-NLS-1$
         Collections.addAll(results, "--batch-arguments", batchArguments); //$NON-NLS-1$
+        results.addAll(toKeyValueOptions("--hadoop-conf", DEFAULT_HADOOP_CONF)); //$NON-NLS-1$
         if (hadoopConf.isFile()) {
             Collections.addAll(results, "--hadoop-conf", "@" + hadoopConf.getAbsolutePath()); //$NON-NLS-1$
         }
+        results.addAll(toKeyValueOptions("--engine-conf", DEFAULT_ENGINE_CONF)); //$NON-NLS-1$
         if (engineConf.isFile()) {
             Collections.addAll(results, "--engine-conf", "@" + engineConf.getAbsolutePath()); //$NON-NLS-1$
         }
         // add rest arguments
         results.addAll(rest);
+        return results;
+    }
+
+    private static List<String> toKeyValueOptions(String prefix, Map<String, String> pairs) {
+        List<String> results = new ArrayList<>();
+        pairs.forEach((k, v) -> {
+            results.add(prefix);
+            if (v == null) {
+                results.add(k);
+            } else {
+                results.add(String.format("%s=%s", k, v)); //$NON-NLS-1$
+            }
+        });
         return results;
     }
 

@@ -100,10 +100,8 @@ public final class SummarizedModelUtil {
             ClassLoader classLoader,
             UserOperator operator) throws ClassNotFoundException {
         OperatorUtil.checkOperatorPorts(operator, 1, 1);
-        List<OperatorInput> inputs = operator.getInputs();
-        List<OperatorOutput> outputs = operator.getOutputs();
-        OperatorInput input = inputs.get(Summarize.ID_INPUT);
-        OperatorOutput summarized = outputs.get(Summarize.ID_OUTPUT);
+        OperatorInput input = operator.getInput(Summarize.ID_INPUT);
+        OperatorOutput summarized = operator.getOutput(Summarize.ID_OUTPUT);
         return analyzeSummarize(classLoader, operator, input, summarized);
     }
 

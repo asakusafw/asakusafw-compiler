@@ -68,8 +68,8 @@ public class SummarizeOperatorPatch implements OperatorRewriter {
         Invariants.require(operator.getInputs().size() == 1);
         Invariants.require(operator.getOutputs().size() == 1);
         Invariants.require(operator.getArguments().isEmpty());
-        OperatorInput input = operator.getInputs().get(Summarize.ID_INPUT);
-        OperatorOutput output = operator.getOutputs().get(Summarize.ID_OUTPUT);
+        OperatorInput input = operator.getInput(Summarize.ID_INPUT);
+        OperatorOutput output = operator.getOutput(Summarize.ID_OUTPUT);
         UserOperator.Builder builder = UserOperator.builder(
                 operator.getAnnotation(),
                 operator.getMethod(),

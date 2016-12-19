@@ -57,10 +57,15 @@ public class MasterJoinOperatorGenerator extends MasterJoinLikeOperatorGenerator
     }
 
     @Override
+    protected void validate(Context context, UserOperator operator) {
+        checkPorts(operator, i -> i == 2, i -> i >= 1);
+    }
+
+    @Override
     protected Consumer<MethodVisitor> defineExtraFields(
             ClassVisitor writer, Context context,
             UserOperator operator, ClassDescription target) {
-        OperatorOutput joined = operator.getOutputs().get(MasterJoin.ID_OUTPUT_JOINED);
+        OperatorOutput joined = operator.getOutput(MasterJoin.ID_OUTPUT_JOINED);
         FieldRef field = defineField(writer, target, FIELD_BUFFER, typeOf(joined.getDataType()));
         return method -> {
             method.visitVarInsn(Opcodes.ALOAD, 0);
@@ -78,8 +83,8 @@ public class MasterJoinOperatorGenerator extends MasterJoinLikeOperatorGenerator
             FieldRef impl,
             Map<OperatorProperty, FieldRef> dependencies,
             ClassDescription target) {
-        OperatorOutput joined = operator.getOutputs().get(MasterJoin.ID_OUTPUT_JOINED);
-        OperatorOutput missed = operator.getOutputs().get(MasterJoin.ID_OUTPUT_MISSED);
+        OperatorOutput joined = operator.getOutput(MasterJoin.ID_OUTPUT_JOINED);
+        OperatorOutput missed = operator.getOutput(MasterJoin.ID_OUTPUT_MISSED);
 
         Label onNull = new Label();
         Label end = new Label();
@@ -100,7 +105,7 @@ public class MasterJoinOperatorGenerator extends MasterJoinLikeOperatorGenerator
         method.visitLabel(end);
     }
 
-    private void performJoin(
+    private static void performJoin(
             MethodVisitor method,
             Context context,
             UserOperator operator,
@@ -108,9 +113,9 @@ public class MasterJoinOperatorGenerator extends MasterJoinLikeOperatorGenerator
             FieldRef impl,
             Map<OperatorProperty, FieldRef> dependencies,
             ClassDescription target) {
-        OperatorInput master = operator.getInputs().get(MasterJoin.ID_INPUT_MASTER);
-        OperatorInput tx = operator.getInputs().get(MasterJoin.ID_INPUT_TRANSACTION);
-        OperatorOutput joined = operator.getOutputs().get(MasterJoin.ID_OUTPUT_JOINED);
+        OperatorInput master = operator.getInput(MasterJoin.ID_INPUT_MASTER);
+        OperatorInput tx = operator.getInput(MasterJoin.ID_INPUT_TRANSACTION);
+        OperatorOutput joined = operator.getOutput(MasterJoin.ID_OUTPUT_JOINED);
 
         method.visitVarInsn(Opcodes.ALOAD, 0);
         getField(method, target, FIELD_BUFFER, typeOf(joined.getDataType()));

@@ -30,10 +30,12 @@ import com.asakusafw.dag.runtime.testing.MockDataModel;
 import com.asakusafw.dag.runtime.testing.MockSink;
 import com.asakusafw.lang.compiler.model.description.Descriptions;
 import com.asakusafw.lang.compiler.model.graph.Groups;
+import com.asakusafw.lang.compiler.model.graph.OperatorInput.InputUnit;
 import com.asakusafw.lang.compiler.model.graph.UserOperator;
 import com.asakusafw.lang.compiler.model.graph.UserOperator.Builder;
 import com.asakusafw.lang.compiler.model.testing.OperatorExtractor;
 import com.asakusafw.runtime.core.Result;
+import com.asakusafw.runtime.core.GroupView;
 import com.asakusafw.vocabulary.operator.Fold;
 
 /**
@@ -130,6 +132,34 @@ public class FoldOperatorGeneratorTest extends OperatorNodeGeneratorTestRoot {
     }
 
     /**
+     * w/ data tables.
+     */
+    @Test
+    public void datatable() {
+        UserOperator operator = load("table")
+                .input("t0", Descriptions.typeOf(MockDataModel.class), c -> c
+                        .group(group("key"))
+                        .unit(InputUnit.WHOLE))
+                .build();
+        NodeInfo info = generate(operator);
+        MockTable<MockDataModel> table = new MockTable<>(MockDataModel::getKeyOption)
+                .add(new MockDataModel(1, "X"))
+                .add(new MockDataModel(2, "X"));
+        MockSink<MockDataModel> results = new MockSink<>();
+        loading(info, c -> {
+            Result<Object> r = c.newInstance(table, results);
+            r.add(cogroup(new Object[][] {
+                {
+                    new MockDataModel(1, "A"),
+                    new MockDataModel(2, "A"),
+                }
+            }));
+        });
+        assertThat(results.get(e -> e.getKey()), contains(3));
+        assertThat(results.get(e -> e.getValue()), contains("X"));
+    }
+
+    /**
      * cache - simple case.
      */
     @Test
@@ -191,6 +221,11 @@ public class FoldOperatorGeneratorTest extends OperatorNodeGeneratorTestRoot {
         public void parameterized(MockDataModel a, MockDataModel b, String value) {
             a.setKey(a.getKey() + b.getKey());
             a.setValue(value);
+        }
+
+        @Fold
+        public void table(MockDataModel a, MockDataModel b, GroupView<MockDataModel> t) {
+            parameterized(a, b, t.find(a.getKeyOption()).get(0).getValue());
         }
     }
 }

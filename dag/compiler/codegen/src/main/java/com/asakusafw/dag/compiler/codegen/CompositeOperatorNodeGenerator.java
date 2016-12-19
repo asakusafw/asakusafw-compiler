@@ -26,8 +26,8 @@ import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.graph.CoreOperator;
 import com.asakusafw.lang.compiler.model.graph.Operator;
 import com.asakusafw.lang.compiler.model.graph.Operator.OperatorKind;
-import com.asakusafw.lang.utils.common.Arguments;
 import com.asakusafw.lang.compiler.model.graph.UserOperator;
+import com.asakusafw.lang.utils.common.Arguments;
 
 /**
  * Composite implementation of {@link OperatorNodeGenerator}.

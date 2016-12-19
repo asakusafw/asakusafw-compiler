@@ -60,7 +60,7 @@ public class SplitOperatorGenerator extends UserOperatorNodeGenerator {
         checkArgs(operator, i -> i == 0);
         return new OperatorNodeInfo(
                 context.cache(CacheKey.of(operator), () -> generateClass(context, operator, namer.get())),
-                operator.getInputs().get(Split.ID_INPUT).getDataType(),
+                operator.getInput(Split.ID_INPUT).getDataType(),
                 getDependencies(context, operator));
     }
 
@@ -69,9 +69,9 @@ public class SplitOperatorGenerator extends UserOperatorNodeGenerator {
     }
 
     private static ClassData generateClass(Context context, UserOperator operator, ClassDescription target) {
-        OperatorInput input = operator.getInputs().get(Split.ID_INPUT);
-        OperatorOutput left = operator.getOutputs().get(Split.ID_OUTPUT_LEFT);
-        OperatorOutput right = operator.getOutputs().get(Split.ID_OUTPUT_RIGHT);
+        OperatorInput input = operator.getInput(Split.ID_INPUT);
+        OperatorOutput left = operator.getOutput(Split.ID_OUTPUT_LEFT);
+        OperatorOutput right = operator.getOutput(Split.ID_OUTPUT_RIGHT);
 
         List<VertexElement> dependencies = getDependencies(context, operator);
 
