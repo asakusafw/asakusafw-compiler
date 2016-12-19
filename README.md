@@ -16,6 +16,7 @@ And then import projects from Eclipse
 
 ## Sub projects
 * [Asakusa on Spark](https://github.com/asakusafw/asakusafw-spark)
+* [Asakusa on M<sup>3</sup>BP](https://github.com/asakusafw/asakusafw-m3bp)
 
 ## License
 * [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
