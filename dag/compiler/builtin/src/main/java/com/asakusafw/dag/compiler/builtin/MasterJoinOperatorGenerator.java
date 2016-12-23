@@ -57,11 +57,6 @@ public class MasterJoinOperatorGenerator extends MasterJoinLikeOperatorGenerator
     }
 
     @Override
-    protected void validate(Context context, UserOperator operator) {
-        checkPorts(operator, i -> i == 2, i -> i >= 1);
-    }
-
-    @Override
     protected Consumer<MethodVisitor> defineExtraFields(
             ClassVisitor writer, Context context,
             UserOperator operator, ClassDescription target) {

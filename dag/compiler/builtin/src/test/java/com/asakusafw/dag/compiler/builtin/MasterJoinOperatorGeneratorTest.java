@@ -29,12 +29,14 @@ import com.asakusafw.dag.runtime.table.BasicDataTable;
 import com.asakusafw.dag.runtime.testing.MockDataModel;
 import com.asakusafw.dag.runtime.testing.MockKeyValueModel;
 import com.asakusafw.dag.runtime.testing.MockSink;
+import com.asakusafw.dag.runtime.testing.MockValueModel;
 import com.asakusafw.lang.compiler.model.description.Descriptions;
 import com.asakusafw.lang.compiler.model.graph.OperatorInput.InputUnit;
 import com.asakusafw.lang.compiler.model.graph.UserOperator;
 import com.asakusafw.lang.compiler.model.graph.UserOperator.Builder;
 import com.asakusafw.lang.compiler.model.testing.OperatorExtractor;
 import com.asakusafw.runtime.core.Result;
+import com.asakusafw.runtime.core.View;
 import com.asakusafw.runtime.model.DataModel;
 import com.asakusafw.runtime.value.IntOption;
 import com.asakusafw.runtime.value.StringOption;
@@ -130,6 +132,72 @@ public class MasterJoinOperatorGeneratorTest extends OperatorNodeGeneratorTestRo
     }
 
     /**
+     * w/ extra parameters.
+     */
+    @Test
+    public void parameterized_merge() {
+        UserOperator operator = load("parameterized")
+                .argument("s", Descriptions.valueOf("?"))
+                .build();
+        NodeInfo info = generate(operator);
+        MockSink<MockJoined> j = new MockSink<>();
+        MockSink<MockDataModel> m = new MockSink<>();
+        loading(info, ctor -> {
+            Result<Object> r = ctor.newInstance(j, m, "M1");
+            r.add(cogroup(new Object[][] {
+                {
+                    new MockKeyValueModel(0, "M0"),
+                    new MockKeyValueModel(0, "M1"),
+                    new MockKeyValueModel(0, "M2"),
+                },
+                {
+                    new MockDataModel(0, "T0"),
+                    new MockDataModel(0, "T1"),
+                },
+            }));
+        });
+        assertThat(j.get(MockJoined::getKey), contains(0, 0));
+        assertThat(j.get(MockJoined::getMaster), contains("M1", "M1"));
+        assertThat(j.get(MockJoined::getTx), containsInAnyOrder("T0", "T1"));
+        assertThat(m.get(), hasSize(0));
+    }
+
+    /**
+     * w/ views.
+     */
+    @Test
+    public void view_merge() {
+        UserOperator operator = load("view")
+                .input("view", Descriptions.typeOf(MockValueModel.class), c -> c
+                        .unit(InputUnit.WHOLE)
+                        .group(group()))
+                .build();
+        NodeInfo info = generate(operator);
+        MockTable<MockValueModel> v = new MockTable<MockValueModel>()
+                .add(new MockValueModel("M1"));
+        MockSink<MockJoined> j = new MockSink<>();
+        MockSink<MockDataModel> m = new MockSink<>();
+        loading(info, ctor -> {
+            Result<Object> r = ctor.newInstance(v, j, m);
+            r.add(cogroup(new Object[][] {
+                {
+                    new MockKeyValueModel(0, "M0"),
+                    new MockKeyValueModel(0, "M1"),
+                    new MockKeyValueModel(0, "M2"),
+                },
+                {
+                    new MockDataModel(0, "T0"),
+                    new MockDataModel(0, "T1"),
+                },
+            }));
+        });
+        assertThat(j.get(MockJoined::getKey), contains(0, 0));
+        assertThat(j.get(MockJoined::getMaster), contains("M1", "M1"));
+        assertThat(j.get(MockJoined::getTx), containsInAnyOrder("T0", "T1"));
+        assertThat(m.get(), hasSize(0));
+    }
+
+    /**
      * simple w/ table join.
      */
     @Test
@@ -184,6 +252,62 @@ public class MasterJoinOperatorGeneratorTest extends OperatorNodeGeneratorTestRo
             t.add(key(t, 0), new MockKeyValueModel(0, "M0"));
             t.add(key(t, 0), new MockKeyValueModel(0, "M1"));
             Result<Object> r = ctor.newInstance(t.build(), j, m);
+            r.add(new MockDataModel(0, "T0"));
+            r.add(new MockDataModel(0, "T1"));
+        });
+        assertThat(j.get(MockJoined::getKey), contains(0, 0));
+        assertThat(j.get(MockJoined::getMaster), contains("M1", "M1"));
+        assertThat(j.get(MockJoined::getTx), containsInAnyOrder("T0", "T1"));
+        assertThat(m.get(), hasSize(0));
+    }
+
+    /**
+     * w/ parameters.
+     */
+    @Test
+    public void parameterized_table() {
+        UserOperator operator = loadTable("parameterized")
+                .argument("s", Descriptions.valueOf("?"))
+                .build();
+        NodeInfo info = generate(operator);
+        MockSink<MockJoined> j = new MockSink<>();
+        MockSink<MockDataModel> m = new MockSink<>();
+        loading(info, ctor -> {
+            DataTable.Builder<MockKeyValueModel> t = new BasicDataTable.Builder<>();
+            t.add(key(t, 0), new MockKeyValueModel(0, "M0"));
+            t.add(key(t, 0), new MockKeyValueModel(0, "M1"));
+            t.add(key(t, 0), new MockKeyValueModel(0, "M2"));
+            Result<Object> r = ctor.newInstance(t.build(), j, m, "M1");
+            r.add(new MockDataModel(0, "T0"));
+            r.add(new MockDataModel(0, "T1"));
+        });
+        assertThat(j.get(MockJoined::getKey), contains(0, 0));
+        assertThat(j.get(MockJoined::getMaster), contains("M1", "M1"));
+        assertThat(j.get(MockJoined::getTx), containsInAnyOrder("T0", "T1"));
+        assertThat(m.get(), hasSize(0));
+    }
+
+    /**
+     * w/ views.
+     */
+    @Test
+    public void view_table() {
+        UserOperator operator = loadTable("view")
+                .input("view", Descriptions.typeOf(MockValueModel.class), c -> c
+                        .unit(InputUnit.WHOLE)
+                        .group(group()))
+                .build();
+        NodeInfo info = generate(operator);
+        MockTable<MockValueModel> v = new MockTable<MockValueModel>()
+                .add(new MockValueModel("M1"));
+        MockSink<MockJoined> j = new MockSink<>();
+        MockSink<MockDataModel> m = new MockSink<>();
+        loading(info, ctor -> {
+            DataTable.Builder<MockKeyValueModel> t = new BasicDataTable.Builder<>();
+            t.add(key(t, 0), new MockKeyValueModel(0, "M0"));
+            t.add(key(t, 0), new MockKeyValueModel(0, "M1"));
+            t.add(key(t, 0), new MockKeyValueModel(0, "M2"));
+            Result<Object> r = ctor.newInstance(t.build(), v, j, m);
             r.add(new MockDataModel(0, "T0"));
             r.add(new MockDataModel(0, "T1"));
         });
@@ -276,9 +400,35 @@ public class MasterJoinOperatorGeneratorTest extends OperatorNodeGeneratorTestRo
             throw new AssertionError();
         }
 
+        @MasterJoin(selection = "selector_parameterized")
+        public MockJoined parameterized(MockKeyValueModel m, MockDataModel t, String s) {
+            throw new AssertionError();
+        }
+
+        @MasterJoin(selection = "selector_view")
+        public MockJoined view(MockKeyValueModel m, MockDataModel t, View<MockValueModel> view) {
+            throw new AssertionError();
+        }
+
         @MasterSelection
         public MockKeyValueModel selector(List<MockKeyValueModel> k, MockDataModel v) {
             return k.get(k.size() - 1);
+        }
+
+        @MasterSelection
+        public MockKeyValueModel selector_parameterized(List<MockKeyValueModel> k, MockDataModel v, String s) {
+            return k.stream()
+                    .filter(m -> m.getValueOption().has(s))
+                    .findFirst()
+                    .orElse(null);
+        }
+
+        @MasterSelection
+        public MockKeyValueModel selector_view(List<MockKeyValueModel> k, MockDataModel v, View<MockValueModel> view) {
+            for (MockValueModel m : view) {
+                return selector_parameterized(k, v, m.getValue());
+            }
+            return null;
         }
     }
 

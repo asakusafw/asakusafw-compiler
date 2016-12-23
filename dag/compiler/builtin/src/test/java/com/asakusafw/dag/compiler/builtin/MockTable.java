@@ -45,6 +45,13 @@ public class MockTable<T> implements DataTable<T> {
 
     /**
      * Creates a new instance.
+     */
+    public MockTable() {
+        this(m -> Collections.emptyList(), null);
+    }
+
+    /**
+     * Creates a new instance.
      * @param keys key term extractor
      */
     public MockTable(Function<? super T, ?> keys) {
