@@ -20,6 +20,7 @@ import java.text.MessageFormat;
 import java.util.Objects;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
@@ -83,8 +84,16 @@ public class InternalExporterRetriever extends BaseExporterRetriever<InternalExp
             target = fs.makeQualified(output);
         }
         LOG.debug("deleting output target: {}", target); //$NON-NLS-1$
-        boolean succeed = fs.delete(target, true);
-        LOG.debug("deleted output target (succeed={}): {}", succeed, target); //$NON-NLS-1$
+        try {
+            FileStatus[] stats = fs.globStatus(path);
+            for (FileStatus s : stats) {
+                Path f = s.getPath();
+                boolean deleted = fs.delete(f, true);
+                LOG.debug("deleted output target (succeed={}): {}", deleted, f); //$NON-NLS-1$
+            }
+        } catch (IOException e) {
+            LOG.debug("exception in truncate", e);
+        }
     }
 
     @Override
