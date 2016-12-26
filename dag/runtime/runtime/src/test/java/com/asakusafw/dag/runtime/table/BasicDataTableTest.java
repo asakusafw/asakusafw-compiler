@@ -390,7 +390,7 @@ public class BasicDataTableTest {
         DataTable<Integer> table = builder.build();
 
         assertThat(table.find(k(0)), hasSize(1));
-        AssertUtil.catching(() -> table.find(new LongOption(0)));
+        AssertUtil.catching(() -> table.find(0));
     }
 
     /**
@@ -404,7 +404,7 @@ public class BasicDataTableTest {
         DataTable<Integer> table = builder.build();
 
         assertThat(table.find(k(0), k(1)), hasSize(1));
-        AssertUtil.catching(() -> table.find(k(0), new LongOption(1)));
+        AssertUtil.catching(() -> table.find(k(0), 1));
     }
 
     /**
@@ -418,7 +418,7 @@ public class BasicDataTableTest {
         DataTable<Integer> table = builder.build();
 
         assertThat(table.find(k(0), k(1), k(2)), hasSize(1));
-        AssertUtil.catching(() -> table.find(k(0), k(1), new LongOption(2)));
+        AssertUtil.catching(() -> table.find(k(0), k(1), 2));
     }
 
     /**
@@ -432,7 +432,7 @@ public class BasicDataTableTest {
         DataTable<Integer> table = builder.build();
 
         assertThat(table.find(k(0), k(1), k(2), k(3)), hasSize(1));
-        AssertUtil.catching(() -> table.find(k(0), k(1), k(2), new LongOption(3)));
+        AssertUtil.catching(() -> table.find(k(0), k(1), k(2), 3));
     }
 
     /**
@@ -446,7 +446,7 @@ public class BasicDataTableTest {
         DataTable<Integer> table = builder.build();
 
         assertThat(table.find(k(0), k(1), k(2), k(3), k(4), k(5)), hasSize(1));
-        AssertUtil.catching(() -> table.find(k(0), k(1), k(2), k(3), k(4), new LongOption(5)));
+        AssertUtil.catching(() -> table.find(k(0), k(1), k(2), k(3), k(4), 5));
     }
 
     private <T> BasicDataTable.Builder<T> start() {

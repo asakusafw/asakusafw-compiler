@@ -234,10 +234,10 @@ public class BasicDataTable<T> implements DataTable<T> {
         Class<? extends Object> actual = element.getClass();
         if (actual.equals(keyElementTypes[index]) == false) {
             throw new IllegalArgumentException(MessageFormat.format(
-                    "key element at \"{0}\" must be type of \"{1}\": {2}",
+                    "key element at {0} is inconsistent type: required={1}, actual={2}",
                     index,
-                    keyElementTypes[index],
-                    actual));
+                    keyElementTypes[index].getName(),
+                    actual.getName()));
         }
     }
 
