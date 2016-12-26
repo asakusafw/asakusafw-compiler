@@ -58,23 +58,13 @@ public abstract class MasterJoinLikeOperatorGenerator extends UserOperatorNodeGe
 
     @Override
     protected NodeInfo generate(Context context, UserOperator operator, Supplier<? extends ClassDescription> namer) {
-        validate(context, operator);
+        checkPorts(operator, i -> i >= 2, i -> i >= 1);
         OperatorInput master = MasterJoinOperatorUtil.getMasterInput(operator);
         if (context.isSideData(master)) {
             return genTable(context, operator, namer);
         } else {
             return genMerge(context, operator, namer);
         }
-    }
-
-
-    /**
-     * Validates the given operator.
-     * @param context the current context
-     * @param operator the target operator
-     */
-    protected void validate(Context context, UserOperator operator) {
-        checkPorts(operator, i -> i >= 2, i -> i >= 1);
     }
 
     private NodeInfo genTable(Context context, UserOperator operator, Supplier<? extends ClassDescription> namer) {
@@ -199,6 +189,7 @@ public abstract class MasterJoinLikeOperatorGenerator extends UserOperatorNodeGe
         impl.load(method);
         arguments.add(new LocalVarRef(Opcodes.ALOAD, 1));
         arguments.add(new LocalVarRef(Opcodes.ALOAD, 2));
+        arguments.addAll(Lang.project(getExtraViews(operator), v -> Invariants.requireNonNull(dependencies.get(v))));
         arguments.addAll(Lang.project(operator.getArguments(), v -> Invariants.requireNonNull(dependencies.get(v))));
         for (int i = 0, n = selector.getParameterCount(); i < n; i++) {
             arguments.get(i).load(method);
@@ -265,13 +256,21 @@ public abstract class MasterJoinLikeOperatorGenerator extends UserOperatorNodeGe
     protected static void appendExtraViews(
             Consumer<ValueRef> destination,
             UserOperator operator, Function<? super OperatorInput, ? extends ValueRef> mappings) {
+        for (OperatorInput port : getExtraViews(operator)) {
+            destination.accept(Invariants.requireNonNull(mappings.apply(port)));
+        }
+    }
+
+    private static List<OperatorInput> getExtraViews(UserOperator operator) {
+        List<OperatorInput> results = new ArrayList<>();
         OperatorInput master = MasterJoinOperatorUtil.getMasterInput(operator);
         for (OperatorInput port : getSecondaryInputs(operator)) {
             if (port == master) {
                 continue;
             }
-            destination.accept(Invariants.requireNonNull(mappings.apply(port)));
+            results.add(port);
         }
+        return results;
     }
 
     private enum Strategy {

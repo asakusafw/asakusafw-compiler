@@ -25,6 +25,7 @@ import org.junit.Test;
 import com.asakusafw.dag.compiler.codegen.OperatorNodeGenerator.NodeInfo;
 import com.asakusafw.dag.runtime.testing.MockDataModel;
 import com.asakusafw.dag.runtime.testing.MockKeyModel;
+import com.asakusafw.dag.runtime.testing.MockValueModel;
 import com.asakusafw.lang.compiler.model.description.Descriptions;
 import com.asakusafw.lang.compiler.model.graph.OperatorInput.InputUnit;
 import com.asakusafw.lang.compiler.model.graph.UserOperator;
@@ -32,6 +33,7 @@ import com.asakusafw.lang.compiler.model.graph.UserOperator.Builder;
 import com.asakusafw.lang.compiler.model.testing.OperatorExtractor;
 import com.asakusafw.lang.utils.common.Lang;
 import com.asakusafw.runtime.core.Result;
+import com.asakusafw.runtime.core.View;
 import com.asakusafw.runtime.testing.MockResult;
 import com.asakusafw.vocabulary.operator.MasterCheck;
 import com.asakusafw.vocabulary.operator.MasterSelection;
@@ -117,6 +119,78 @@ public class MasterCheckOperatorGeneratorTest extends OperatorNodeGeneratorTestR
     }
 
     /**
+     * w/ extra parameter.
+     */
+    @Test
+    public void parameterized() {
+        UserOperator operator = load("parameterized")
+                .argument("key", Descriptions.valueOf(-1))
+                .build();
+        NodeInfo info = generate(operator);
+        MockResult<MockDataModel> f = new MockResult<>();
+        MockResult<MockDataModel> m = new MockResult<>();
+        loading(info, ctor -> {
+            Result<Object> r = ctor.newInstance(f, m, 0);
+            r.add(cogroup(new Object[][] {
+                {
+                    new MockKeyModel(0),
+                },
+                {
+                    new MockDataModel(0, "A"),
+                },
+            }));
+            r.add(cogroup(new Object[][] {
+                {
+                    new MockKeyModel(1),
+                },
+                {
+                    new MockDataModel(1, "B"),
+                },
+            }));
+        });
+        assertThat(Lang.project(f.getResults(), e -> e.getValue()), contains("A"));
+        assertThat(Lang.project(m.getResults(), e -> e.getValue()), contains("B"));
+    }
+
+    /**
+     * w/ view.
+     */
+    @Test
+    public void view() {
+        UserOperator operator = load("view")
+                .input("view", Descriptions.typeOf(MockValueModel.class), c -> c
+                        .unit(InputUnit.WHOLE)
+                        .group(group()))
+                .build();
+        NodeInfo info = generate(operator);
+        MockTable<MockKeyModel> v = new MockTable<MockKeyModel>()
+                .add(new MockKeyModel(1));
+        MockResult<MockDataModel> f = new MockResult<>();
+        MockResult<MockDataModel> m = new MockResult<>();
+        loading(info, ctor -> {
+            Result<Object> r = ctor.newInstance(v, f, m);
+            r.add(cogroup(new Object[][] {
+                {
+                    new MockKeyModel(0),
+                },
+                {
+                    new MockDataModel(0, "A"),
+                },
+            }));
+            r.add(cogroup(new Object[][] {
+                {
+                    new MockKeyModel(1),
+                },
+                {
+                    new MockDataModel(1, "B"),
+                },
+            }));
+        });
+        assertThat(Lang.project(f.getResults(), e -> e.getValue()), contains("B"));
+        assertThat(Lang.project(m.getResults(), e -> e.getValue()), contains("A"));
+    }
+
+    /**
      * cache - identical.
      */
     @Test
@@ -193,8 +267,34 @@ public class MasterCheckOperatorGeneratorTest extends OperatorNodeGeneratorTestR
             return;
         }
 
+        @MasterCheck(selection = "selector_parameterized")
+        public void parameterized(MockKeyModel k, MockDataModel v, String s) {
+            return;
+        }
+
+        @MasterCheck(selection = "selector_view")
+        public void view(MockKeyModel k, MockDataModel v, View<MockValueModel> view) {
+            return;
+        }
+
         @MasterSelection
         public MockKeyModel selector(List<MockKeyModel> k, MockDataModel v) {
+            return null;
+        }
+
+        @MasterSelection
+        public MockKeyModel selector_parameterized(List<MockKeyModel> k, MockDataModel v, int key) {
+            return k.stream()
+                    .filter(m -> m.getKey() == key)
+                    .findFirst()
+                    .orElse(null);
+        }
+
+        @MasterSelection
+        public MockKeyModel selector_view(List<MockKeyModel> k, MockDataModel v, View<MockKeyModel> view) {
+            for (MockKeyModel m : view) {
+                return selector_parameterized(k, v, m.getKey());
+            }
             return null;
         }
     }
