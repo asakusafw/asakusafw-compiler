@@ -360,11 +360,15 @@ encoding/<project>=UTF-8
               <include>src/**/*.flex</include>
               <include>src/**/*.jj</include>
               <include>src/**/*.sh</include>
+              <include>src/**/*.hpp</include>
+              <include>src/**/*.cpp</include>
             </includes>
             <encoding>UTF-8</encoding>
             <mapping>
               <flex>JAVADOC_STYLE</flex>
               <jj>JAVADOC_STYLE</jj>
+              <hpp>SLASHSTAR_STYLE</hpp>
+              <cpp>SLASHSTAR_STYLE</cpp>
             </mapping>
           </configuration>
         </plugin>
