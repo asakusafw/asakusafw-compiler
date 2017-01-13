@@ -152,6 +152,27 @@ public class OutputPatternSerDeGenerator {
                     case NATURAL:
                         getEnumConstant(v, OutputPatternSerDe.Format.NATURAL);
                         break;
+                    case BYTE:
+                        getEnumConstant(v, OutputPatternSerDe.Format.BYTE);
+                        break;
+                    case SHORT:
+                        getEnumConstant(v, OutputPatternSerDe.Format.SHORT);
+                        break;
+                    case INT:
+                        getEnumConstant(v, OutputPatternSerDe.Format.INT);
+                        break;
+                    case LONG:
+                        getEnumConstant(v, OutputPatternSerDe.Format.LONG);
+                        break;
+                    case FLOAT:
+                        getEnumConstant(v, OutputPatternSerDe.Format.FLOAT);
+                        break;
+                    case DOUBLE:
+                        getEnumConstant(v, OutputPatternSerDe.Format.DOUBLE);
+                        break;
+                    case DECIMAL:
+                        getEnumConstant(v, OutputPatternSerDe.Format.DECIMAL);
+                        break;
                     case DATE:
                         getEnumConstant(v, OutputPatternSerDe.Format.DATE);
                         break;

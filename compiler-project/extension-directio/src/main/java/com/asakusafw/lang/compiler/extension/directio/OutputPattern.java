@@ -41,6 +41,7 @@ import com.asakusafw.runtime.value.BooleanOption;
 import com.asakusafw.runtime.value.ByteOption;
 import com.asakusafw.runtime.value.DateOption;
 import com.asakusafw.runtime.value.DateTimeOption;
+import com.asakusafw.runtime.value.DecimalOption;
 import com.asakusafw.runtime.value.DoubleOption;
 import com.asakusafw.runtime.value.FloatOption;
 import com.asakusafw.runtime.value.IntOption;
@@ -51,6 +52,8 @@ import com.asakusafw.vocabulary.directio.DirectFileOutputDescription;
 
 /**
  * Processes patterns in {@link DirectFileOutputDescription}.
+ * @since 0.1.0
+ * @version 0.4.1
  */
 public final class OutputPattern {
 
@@ -73,6 +76,21 @@ public final class OutputPattern {
             map.put(Descriptions.classOf(aClass), aClass);
         }
         VALUE_TYPES = Collections.unmodifiableMap(map);
+    }
+
+    private static final Map<Class<?>, Format> FORMATS;
+    static {
+        Map<Class<?>, Format> map = new HashMap<>();
+        map.put(ByteOption.class, Format.BYTE);
+        map.put(ShortOption.class, Format.SHORT);
+        map.put(IntOption.class, Format.INT);
+        map.put(LongOption.class, Format.LONG);
+        map.put(FloatOption.class, Format.FLOAT);
+        map.put(DoubleOption.class, Format.DOUBLE);
+        map.put(DecimalOption.class, Format.DECIMAL);
+        map.put(DateOption.class, Format.DATE);
+        map.put(DateTimeOption.class, Format.DATETIME);
+        FORMATS = Collections.unmodifiableMap(map);
     }
 
     static final int CHAR_BRACE_OPEN = '{';
@@ -342,13 +360,7 @@ public final class OutputPattern {
             return Format.NATURAL;
         }
         Class<?> type = getType(property);
-        if (type == DateOption.class) {
-            return Format.DATE;
-        }
-        if (type == DateTimeOption.class) {
-            return Format.DATETIME;
-        }
-        return null;
+        return FORMATS.get(type);
     }
 
     static Class<?> getType(PropertyReference property) {
