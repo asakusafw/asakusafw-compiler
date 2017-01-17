@@ -33,6 +33,16 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
+      <groupId>com.asakusafw.lang.info</groupId>
+      <artifactId>asakusa-info-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.asakusafw.lang.info</groupId>
+      <artifactId>asakusa-info-directio</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>com.asakusafw</groupId>
       <artifactId>asakusa-directio-vocabulary</artifactId>
     </dependency>

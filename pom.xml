@@ -84,6 +84,7 @@
     <module>compiler-project</module>
     <module>iterative-project</module>
     <module>inspection-project</module>
+    <module>info</module>
     <module>dag</module>
     <module>vanilla</module>
   </modules>
