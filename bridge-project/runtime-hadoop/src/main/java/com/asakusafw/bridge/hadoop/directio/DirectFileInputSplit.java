@@ -152,4 +152,13 @@ public class DirectFileInputSplit extends InputSplit implements Configurable, Wr
     public DirectInputFragment getInputFragment() {
         return fragment;
     }
+
+    @Override
+    public String toString() {
+        return String.format(
+                "DirectFileInputSplit(type=%s, container=%s, fragment=%s)", //$NON-NLS-1$
+                definition.getDataClass().getSimpleName(),
+                containerPath,
+                fragment);
+    }
 }
