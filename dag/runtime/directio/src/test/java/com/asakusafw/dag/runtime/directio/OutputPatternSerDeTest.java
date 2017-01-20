@@ -25,6 +25,7 @@ import java.io.DataInputStream;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -39,8 +40,18 @@ import com.asakusafw.lang.compiler.mapreduce.testing.mock.MockData;
 import com.asakusafw.lang.utils.common.Action;
 import com.asakusafw.lang.utils.common.Lang;
 import com.asakusafw.lang.utils.common.Tuple;
+import com.asakusafw.runtime.value.ByteOption;
 import com.asakusafw.runtime.value.Date;
+import com.asakusafw.runtime.value.DateOption;
 import com.asakusafw.runtime.value.DateTime;
+import com.asakusafw.runtime.value.DateTimeOption;
+import com.asakusafw.runtime.value.DecimalOption;
+import com.asakusafw.runtime.value.DoubleOption;
+import com.asakusafw.runtime.value.FloatOption;
+import com.asakusafw.runtime.value.IntOption;
+import com.asakusafw.runtime.value.LongOption;
+import com.asakusafw.runtime.value.ShortOption;
+import com.asakusafw.runtime.value.StringOption;
 import com.asakusafw.runtime.value.ValueOption;
 
 /**
@@ -85,6 +96,114 @@ public class OutputPatternSerDeTest {
     }
 
     /**
+     * format - natural.
+     */
+    @Test
+    public void format_natural() {
+        String result = format(Format.NATURAL, null, new StringOption("Hello, world!"));
+        assertThat(result, is("Hello, world!"));
+    }
+
+    /**
+     * format - byte.
+     */
+    @Test
+    public void format_byte() {
+        String result = format(Format.BYTE, "0000", new ByteOption((byte) 1));
+        assertThat(result, is("0001"));
+    }
+
+    /**
+     * format - short.
+     */
+    @Test
+    public void format_short() {
+        String result = format(Format.SHORT, "0000", new ShortOption((short) 1));
+        assertThat(result, is("0001"));
+    }
+
+    /**
+     * format - int.
+     */
+    @Test
+    public void format_int() {
+        String result = format(Format.INT, "0000", new IntOption(1));
+        assertThat(result, is("0001"));
+    }
+
+    /**
+     * format - long.
+     */
+    @Test
+    public void format_long() {
+        String result = format(Format.LONG, "0000", new LongOption(1));
+        assertThat(result, is("0001"));
+    }
+
+    /**
+     * format - float.
+     */
+    @Test
+    public void format_float() {
+        String result = format(Format.FLOAT, "0000", new FloatOption(1));
+        assertThat(result, is("0001"));
+    }
+
+    /**
+     * format - double.
+     */
+    @Test
+    public void format_double() {
+        String result = format(Format.DOUBLE, "0000", new DoubleOption(1));
+        assertThat(result, is("0001"));
+    }
+
+    /**
+     * format - decimal.
+     */
+    @Test
+    public void format_decimal() {
+        String result = format(Format.DECIMAL, "0000", new DecimalOption(BigDecimal.valueOf(1)));
+        assertThat(result, is("0001"));
+    }
+
+    /**
+     * format - numeric w/ null.
+     */
+    @Test
+    public void format_numeric_null() {
+        String result = format(Format.BYTE, "0000", new ByteOption());
+        assertThat(result, is("null"));
+    }
+
+    /**
+     * format - double.
+     */
+    @Test
+    public void format_date() {
+        String result = format(Format.DATE, "yyyy-MM", new DateOption(new Date(2001, 2, 3)));
+        assertThat(result, is("2001-02"));
+    }
+
+    /**
+     * format - datetime.
+     */
+    @Test
+    public void format_datetime() {
+        String result = format(Format.DATETIME, "yyyy-MM", new DateTimeOption(new DateTime(2001, 2, 3, 4, 5, 6)));
+        assertThat(result, is("2001-02"));
+    }
+
+    /**
+     * format - double.
+     */
+    @Test
+    public void format_date_null() {
+        String result = format(Format.DATE, "yyyy-MM", new DateOption());
+        assertThat(result, is("null"));
+    }
+
+    /**
      * use property - natural.
      * @throws Exception if failed
      */
@@ -99,6 +218,25 @@ public class OutputPatternSerDeTest {
 
         Object restored = sd.deserializeKey(data(key));
         assertThat(restored, is("p-v"));
+    }
+
+    /**
+     * use property - int.
+     * @throws Exception if failed
+     */
+    @SuppressWarnings("deprecation")
+    @Test
+    public void property_int() throws Exception {
+        OutputPatternSerDe sd = serde(d -> d.getIntValueOption())
+                .text("p-")
+                .property(Format.INT, "0000");
+
+        MockData data = new MockData();
+        data.getIntValueOption().modify(1);
+        byte[] key = dump(o -> sd.serializeKey(data, o));
+
+        Object restored = sd.deserializeKey(data(key));
+        assertThat(restored, is("p-0001"));
     }
 
     /**
@@ -137,6 +275,26 @@ public class OutputPatternSerDeTest {
 
         Object restored = sd.deserializeKey(data(key));
         assertThat(restored, is("p-20000102"));
+    }
+
+    private String format(Format format, String arg, Object value) {
+        OutputPatternSerDe serde = new OutputPatternSerDe() {
+            @Override
+            protected Object getProperty(Object object, int index) {
+                assertThat(index, is(0));
+                return value;
+            }
+            @Override
+            public Object deserializePair(DataInput keyInput, DataInput valueInput) {
+                throw new AssertionError();
+            }
+            @Override
+            public void serializeValue(Object object, DataOutput output) throws IOException, InterruptedException {
+                throw new AssertionError();
+            }
+        }.property(format, arg);
+        byte[] key = dump(o -> serde.serializeKey(null, o));
+        return (String) Lang.safe(() -> serde.deserializeKey(data(key)));
     }
 
     private static Matcher<Object> has(int key, String value) {

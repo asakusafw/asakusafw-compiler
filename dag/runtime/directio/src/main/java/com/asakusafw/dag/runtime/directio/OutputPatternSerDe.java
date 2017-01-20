@@ -18,7 +18,10 @@ package com.asakusafw.dag.runtime.directio;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -30,11 +33,19 @@ import org.apache.hadoop.io.Writable;
 
 import com.asakusafw.dag.api.common.KeyValueSerDe;
 import com.asakusafw.lang.utils.common.Arguments;
+import com.asakusafw.runtime.value.ByteOption;
 import com.asakusafw.runtime.value.Date;
 import com.asakusafw.runtime.value.DateOption;
 import com.asakusafw.runtime.value.DateTime;
 import com.asakusafw.runtime.value.DateTimeOption;
 import com.asakusafw.runtime.value.DateUtil;
+import com.asakusafw.runtime.value.DecimalOption;
+import com.asakusafw.runtime.value.DoubleOption;
+import com.asakusafw.runtime.value.FloatOption;
+import com.asakusafw.runtime.value.IntOption;
+import com.asakusafw.runtime.value.LongOption;
+import com.asakusafw.runtime.value.ShortOption;
+import com.asakusafw.runtime.value.ValueOption;
 
 /**
  * Ser/De for Direct I/O file output patterns.
@@ -134,6 +145,8 @@ public abstract class OutputPatternSerDe implements KeyValueSerDe {
 
     /**
      * Format of each fragment.
+     * @since 0.4.0
+     * @version 0.4.1
      */
     public enum Format {
 
@@ -146,7 +159,119 @@ public abstract class OutputPatternSerDe implements KeyValueSerDe {
                 return new Variable() {
                     @Override
                     void update(Object propertyValue) {
-                        value = (String.valueOf(propertyValue));
+                        setValue(String.valueOf(propertyValue));
+                    }
+                };
+            }
+        },
+
+        /**
+         * Converts numeric value (use {@link DecimalFormat}).
+         * @since 0.4.1
+         */
+        BYTE {
+            @Override
+            public Fragment newFragment(String formatString) {
+                return new NumericVariable<ByteOption>(new DecimalFormat(formatString)) {
+                    @Override
+                    void doUpdate(ByteOption option) {
+                        setValue(option.get());
+                    }
+                };
+            }
+        },
+
+        /**
+         * Converts numeric value (use {@link DecimalFormat}).
+         * @since 0.4.1
+         */
+        SHORT {
+            @Override
+            public Fragment newFragment(String formatString) {
+                return new NumericVariable<ShortOption>(new DecimalFormat(formatString)) {
+                    @Override
+                    void doUpdate(ShortOption option) {
+                        setValue(option.get());
+                    }
+                };
+            }
+        },
+
+        /**
+         * Converts numeric value (use {@link DecimalFormat}).
+         * @since 0.4.1
+         */
+        INT {
+            @Override
+            public Fragment newFragment(String formatString) {
+                return new NumericVariable<IntOption>(new DecimalFormat(formatString)) {
+                    @Override
+                    void doUpdate(IntOption option) {
+                        setValue(option.get());
+                    }
+                };
+            }
+        },
+
+        /**
+         * Converts numeric value (use {@link DecimalFormat}).
+         * @since 0.4.1
+         */
+        LONG {
+            @Override
+            public Fragment newFragment(String formatString) {
+                return new NumericVariable<LongOption>(new DecimalFormat(formatString)) {
+                    @Override
+                    void doUpdate(LongOption option) {
+                        setValue(option.get());
+                    }
+                };
+            }
+        },
+
+        /**
+         * Converts numeric value (use {@link DecimalFormat}).
+         * @since 0.4.1
+         */
+        FLOAT {
+            @Override
+            public Fragment newFragment(String formatString) {
+                return new NumericVariable<FloatOption>(new DecimalFormat(formatString)) {
+                    @Override
+                    void doUpdate(FloatOption option) {
+                        setValue(option.get());
+                    }
+                };
+            }
+        },
+
+        /**
+         * Converts numeric value (use {@link DecimalFormat}).
+         * @since 0.4.1
+         */
+        DOUBLE {
+            @Override
+            public Fragment newFragment(String formatString) {
+                return new NumericVariable<DoubleOption>(new DecimalFormat(formatString)) {
+                    @Override
+                    void doUpdate(DoubleOption option) {
+                        setValue(option.get());
+                    }
+                };
+            }
+        },
+
+        /**
+         * Converts numeric value (use {@link DecimalFormat}).
+         * @since 0.4.1
+         */
+        DECIMAL {
+            @Override
+            public Fragment newFragment(String formatString) {
+                return new NumericVariable<DecimalOption>(new DecimalFormat(formatString)) {
+                    @Override
+                    void doUpdate(DecimalOption option) {
+                        setValue(option.get());
                     }
                 };
             }
@@ -158,20 +283,10 @@ public abstract class OutputPatternSerDe implements KeyValueSerDe {
         DATE {
             @Override
             public Fragment newFragment(String formatString) {
-                Arguments.requireNonNull(formatString);
-                Calendar calendar = Calendar.getInstance();
-                DateFormat dateFormat = new SimpleDateFormat(formatString);
-                return new Variable() {
+                return new DateVariable<DateOption>(new SimpleDateFormat(formatString)) {
                     @Override
-                    void update(Object propertyValue) {
-                        DateOption option = (DateOption) propertyValue;
-                        if (option.isNull()) {
-                            value = String.valueOf(option);
-                        } else {
-                            Date date = option.get();
-                            DateUtil.setDayToCalendar(date.getElapsedDays(), calendar);
-                            value = String.valueOf(dateFormat.format(calendar.getTime()));
-                        }
+                    void doUpdate(DateOption option) {
+                        setValue(option.get());
                     }
                 };
             }
@@ -183,20 +298,10 @@ public abstract class OutputPatternSerDe implements KeyValueSerDe {
         DATETIME {
             @Override
             public Fragment newFragment(String formatString) {
-                Arguments.requireNonNull(formatString);
-                Calendar calendar = Calendar.getInstance();
-                DateFormat dateFormat = new SimpleDateFormat(formatString);
-                return new Variable() {
+                return new DateVariable<DateTimeOption>(new SimpleDateFormat(formatString)) {
                     @Override
-                    void update(Object propertyValue) {
-                        DateTimeOption option = (DateTimeOption) propertyValue;
-                        if (option.isNull()) {
-                            value = String.valueOf(option);
-                        } else {
-                            DateTime date = option.get();
-                            DateUtil.setSecondToCalendar(date.getElapsedSeconds(), calendar);
-                            value = String.valueOf(dateFormat.format(calendar.getTime()));
-                        }
+                    void doUpdate(DateTimeOption option) {
+                        setValue(option.get());
                     }
                 };
             }
@@ -242,13 +347,21 @@ public abstract class OutputPatternSerDe implements KeyValueSerDe {
 
     private abstract static class Variable implements Fragment {
 
-        String value = ""; //$NON-NLS-1$
+        private String value = ""; //$NON-NLS-1$
 
         Variable() {
             return;
         }
 
         abstract void update(Object propertyValue);
+
+        final void setNull() {
+            value = "null"; //$NON-NLS-1$
+        }
+
+        final void setValue(String value) {
+            this.value = value;
+        }
 
         @Override
         public void appendTo(StringBuilder target) {
@@ -263,6 +376,68 @@ public abstract class OutputPatternSerDe implements KeyValueSerDe {
         @Override
         public void readFields(DataInput in) throws IOException {
             value = in.readUTF();
+        }
+    }
+
+    private abstract static class PropertyVariable<T extends ValueOption<T>> extends Variable {
+
+        PropertyVariable() {
+            return;
+        }
+
+        @Override
+        final void update(Object propertyValue) {
+            @SuppressWarnings("unchecked")
+            T option = (T) propertyValue;
+            if (option.isNull()) {
+                setNull();
+            } else {
+                doUpdate(option);
+            }
+        }
+
+        abstract void doUpdate(T option);
+    }
+
+    private abstract static class NumericVariable<T extends ValueOption<T>> extends PropertyVariable<T> {
+
+        private final NumberFormat format;
+
+        NumericVariable(NumberFormat format) {
+            this.format = format;
+        }
+
+        final void setValue(long v) {
+            setValue(format.format(v));
+        }
+
+        final void setValue(double v) {
+            setValue(format.format(v));
+        }
+
+        final void setValue(BigDecimal v) {
+            setValue(format.format(v));
+        }
+    }
+
+    private abstract static class DateVariable<T extends ValueOption<T>> extends PropertyVariable<T> {
+
+        private final DateFormat format;
+
+        private final Calendar calendarBuffer = Calendar.getInstance();
+
+        DateVariable(DateFormat format) {
+            this.format = format;
+        }
+
+        final void setValue(Date value) {
+            DateUtil.setDayToCalendar(value.getElapsedDays(), calendarBuffer);
+            setValue(format.format(calendarBuffer.getTime()));
+        }
+
+        final void setValue(DateTime value) {
+            DateUtil.setSecondToCalendar(value.getElapsedSeconds(), calendarBuffer);
+            setValue(format.format(calendarBuffer.getTime()));
         }
     }
 

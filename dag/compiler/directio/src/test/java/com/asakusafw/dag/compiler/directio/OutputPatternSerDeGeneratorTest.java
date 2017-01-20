@@ -101,6 +101,23 @@ public class OutputPatternSerDeGeneratorTest extends ClassGeneratorTestRoot {
     }
 
     /**
+     * use property - int.
+     * @throws Exception if failed
+     */
+    @SuppressWarnings("deprecation")
+    @Test
+    public void property_int() throws Exception {
+        serde(sd -> {
+            MockData data = new MockData();
+            data.getIntValueOption().modify(1);
+            byte[] key = dump(o -> sd.serializeKey(data, o));
+
+            Object restored = sd.deserializeKey(data(key));
+            assertThat(restored, is("p-0001"));
+        }, "p-{int_value:0000}");
+    }
+
+    /**
      * use property - date.
      * @throws Exception if failed
      */
