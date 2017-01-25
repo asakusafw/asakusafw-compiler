@@ -91,6 +91,9 @@ class AsakusaVanillaSdkBasePlugin implements Plugin<Project> {
                     if (features.hive) {
                         asakusaVanillaCommon "com.asakusafw.lang.compiler:asakusa-compiler-extension-hive:${base.featureVersion}"
                     }
+                    if (features.incubating) {
+                        asakusaVanillaCommon "com.asakusafw.lang.compiler:asakusa-compiler-extension-info:${base.featureVersion}"
+                    }
                 }
                 if (features.testing) {
                     asakusaVanillaTestkit "com.asakusafw.vanilla.runtime:asakusa-vanilla-assembly:${base.featureVersion}"
