@@ -17,8 +17,11 @@ package com.asakusafw.lang.info.directio;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import com.asakusafw.lang.info.Attribute;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -42,10 +45,21 @@ public class DirectFileIoAttribute implements Attribute {
      * @param outputs the output ports
      */
     public DirectFileIoAttribute(
-            @JsonProperty("inputs") Collection<? extends DirectFileInputInfo> inputs,
-            @JsonProperty("outputs")Collection<? extends DirectFileOutputInfo> outputs) {
+            Collection<? extends DirectFileInputInfo> inputs,
+            Collection<? extends DirectFileOutputInfo> outputs) {
         this.inputs = Util.freeze(inputs);
         this.outputs = Util.freeze(outputs);
+    }
+
+    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+    static DirectFileIoAttribute of(
+            @JsonProperty("id") String id,
+            @JsonProperty("inputs") Collection<? extends DirectFileInputInfo> inputs,
+            @JsonProperty("outputs") Collection<? extends DirectFileOutputInfo> outputs) {
+        if (Objects.equals(id, ID) == false) {
+            throw new IllegalArgumentException();
+        }
+        return new DirectFileIoAttribute(inputs, outputs);
     }
 
     @Override
@@ -69,5 +83,38 @@ public class DirectFileIoAttribute implements Attribute {
     @JsonProperty("outputs")
     public List<? extends DirectFileOutputInfo> getOutputs() {
         return outputs;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + Objects.hashCode(inputs);
+        result = prime * result + Objects.hashCode(outputs);
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        DirectFileIoAttribute other = (DirectFileIoAttribute) obj;
+        return Objects.equals(inputs, other.inputs)
+                && Objects.equals(outputs, other.outputs);
+    }
+
+    @Override
+    public String toString() {
+        return String.format(
+                "DirectIO(inputs={%s}, outputs={%s})",
+                inputs.stream().map(DirectFilePortInfo::getName).collect(Collectors.joining()),
+                outputs.stream().map(DirectFilePortInfo::getName).collect(Collectors.joining()));
     }
 }

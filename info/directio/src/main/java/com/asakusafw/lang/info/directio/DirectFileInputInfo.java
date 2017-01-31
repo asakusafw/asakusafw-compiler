@@ -15,6 +15,8 @@
  */
 package com.asakusafw.lang.info.directio;
 
+import java.util.Objects;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -70,6 +72,33 @@ public class DirectFileInputInfo extends DirectFilePortInfo {
     @JsonProperty("optional")
     public boolean isOptional() {
         return optional;
+    }
+
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + Objects.hashCode(filterClass);
+        result = prime * result + Boolean.hashCode(optional);
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!super.equals(obj)) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        DirectFileInputInfo other = (DirectFileInputInfo) obj;
+        return super.equals(other)
+                && Objects.equals(filterClass, other.filterClass)
+                && optional == other.optional;
     }
 
     @Override

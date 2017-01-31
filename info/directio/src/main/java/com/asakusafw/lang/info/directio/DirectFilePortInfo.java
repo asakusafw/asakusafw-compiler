@@ -15,6 +15,8 @@
  */
 package com.asakusafw.lang.info.directio;
 
+import java.util.Objects;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -121,5 +123,38 @@ public abstract class DirectFilePortInfo {
     @JsonProperty(ID_FORMAT)
     public String getFormatClass() {
         return formatClass;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + Objects.hashCode(name);
+        result = prime * result + Objects.hashCode(descriptionClass);
+        result = prime * result + Objects.hashCode(basePath);
+        result = prime * result + Objects.hashCode(resourcePattern);
+        result = prime * result + Objects.hashCode(dataType);
+        result = prime * result + Objects.hashCode(formatClass);
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        DirectFilePortInfo other = (DirectFilePortInfo) obj;
+        return Objects.equals(name, other.name)
+                && Objects.equals(descriptionClass, other.descriptionClass)
+                && Objects.equals(basePath, other.basePath)
+                && Objects.equals(resourcePattern, other.resourcePattern)
+                && Objects.equals(dataType, other.dataType)
+                && Objects.equals(formatClass, other.formatClass);
     }
 }
