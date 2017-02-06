@@ -15,6 +15,8 @@
  */
 package com.asakusafw.lang.info;
 
+import java.util.Objects;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -81,6 +83,35 @@ public class ParameterInfo {
      */
     public String getPattern() {
         return pattern;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + Objects.hashCode(name);
+        result = prime * result + Objects.hashCode(comment);
+        result = prime * result + Boolean.hashCode(mandatory);
+        result = prime * result + Objects.hashCode(pattern);
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        ParameterInfo other = (ParameterInfo) obj;
+        return Objects.equals(name, other.name)
+                && Objects.equals(comment, other.comment)
+                && mandatory == other.mandatory
+                && Objects.equals(pattern, other.pattern);
     }
 
     @Override

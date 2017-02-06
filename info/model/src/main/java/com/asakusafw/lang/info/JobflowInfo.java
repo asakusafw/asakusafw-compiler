@@ -17,6 +17,7 @@ package com.asakusafw.lang.info;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -81,6 +82,36 @@ public class JobflowInfo implements ElementInfo {
     public List<? extends Attribute> getAttributes() {
         return attributes;
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + Objects.hashCode(id);
+        result = prime * result + Objects.hashCode(description);
+        result = prime * result + Objects.hashCode(blockerIds);
+        result = prime * result + Objects.hashCode(attributes);
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        JobflowInfo other = (JobflowInfo) obj;
+        return Objects.equals(id, other.id)
+                && Objects.equals(description, other.description)
+                && Objects.equals(blockerIds, other.blockerIds)
+                && Objects.equals(attributes, other.attributes);
+    }
+
     @Override
     public String toString() {
         return String.format("jobflow(id=%s)", getId()); //$NON-NLS-1$

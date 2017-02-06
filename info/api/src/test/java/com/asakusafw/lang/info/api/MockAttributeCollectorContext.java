@@ -19,8 +19,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.asakusafw.lang.compiler.api.CompilerOptions;
+import com.asakusafw.lang.compiler.model.graph.Batch;
+import com.asakusafw.lang.compiler.model.graph.Jobflow;
 import com.asakusafw.lang.info.Attribute;
-import com.asakusafw.lang.info.api.AttributeCollector;
 
 /**
  * Mock {@link AttributeCollector.Context}.
@@ -84,5 +85,33 @@ public class MockAttributeCollectorContext implements AttributeCollector.Context
     public MockAttributeCollectorContext reset() {
         attributes.clear();
         return this;
+    }
+
+    /**
+     * Collects attributes from the given batch model.
+     * @param collector the collector
+     * @param model the target model
+     * @return the collected attributes
+     */
+    public List<Attribute> collect(Batch model, AttributeCollector collector) {
+        return collect(() -> collector.process(this, model));
+    }
+
+    /**
+     * Collects attributes from the given jobflow model.
+     * @param collector the collector
+     * @param model the target model
+     * @return the collected attributes
+     */
+    public List<Attribute> collect(Jobflow model, AttributeCollector collector) {
+        return collect(() -> collector.process(this, model));
+    }
+
+    private List<Attribute> collect(Runnable action) {
+        attributes.clear();
+        action.run();
+        List<Attribute> results = new ArrayList<>(attributes);
+        attributes.clear();
+        return results;
     }
 }

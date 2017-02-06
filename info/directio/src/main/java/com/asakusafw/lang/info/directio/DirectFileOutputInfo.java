@@ -16,6 +16,7 @@
 package com.asakusafw.lang.info.directio;
 
 import java.util.List;
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -72,6 +73,32 @@ public class DirectFileOutputInfo extends DirectFilePortInfo {
     @JsonProperty("deletePatterns")
     public List<String> getDeletePatterns() {
         return deletePatterns;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + Objects.hashCode(order);
+        result = prime * result + Objects.hashCode(deletePatterns);
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!super.equals(obj)) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        DirectFileOutputInfo other = (DirectFileOutputInfo) obj;
+        return super.equals(other)
+                && Objects.equals(order, other.order)
+                && Objects.equals(deletePatterns, other.deletePatterns);
     }
 
     @Override

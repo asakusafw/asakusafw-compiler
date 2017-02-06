@@ -124,6 +124,37 @@ public class BatchInfo implements ElementInfo {
     }
 
     @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + Objects.hashCode(id);
+        result = prime * result + Objects.hashCode(description);
+        result = prime * result + Objects.hashCode(comment);
+        result = prime * result + Objects.hashCode(jobflows);
+        result = prime * result + Objects.hashCode(attributes);
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        BatchInfo other = (BatchInfo) obj;
+        return Objects.equals(id, other.id)
+                && Objects.equals(description, other.description)
+                && Objects.equals(comment, other.comment)
+                && Objects.equals(jobflows, other.jobflows)
+                && Objects.equals(attributes, other.attributes);
+    }
+
+    @Override
     public String toString() {
         return String.format("batch(id=%s)", getId()); //$NON-NLS-1$
     }
