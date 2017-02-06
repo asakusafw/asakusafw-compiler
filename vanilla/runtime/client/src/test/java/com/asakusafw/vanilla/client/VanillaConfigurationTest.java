@@ -42,6 +42,7 @@ public class VanillaConfigurationTest {
         assertThat(conf.getNumberOfPartitions(), is(conf.getNumberOfThreads()));
         assertThat(conf.getBufferPoolSize(), is(DEFAULT_BUFFER_POOL_SIZE));
         assertThat(conf.getSwapDirectory(), is(DEFAULT_SWAP_DIRECTORY));
+        assertThat(conf.getSwapDivision(), is(DEFAULT_SWAP_DIVISION));
         assertThat(conf.getOutputBufferSize(), is(DEFAULT_OUTPUT_BUFFER_SIZE));
         assertThat(conf.getOutputBufferFlush(), closeTo(DEFAULT_OUTPUT_BUFFER_FLUSH, 0.01));
         assertThat(conf.getOutputRecordSize(), is(DEFAULT_OUTPUT_RECORD_SIZE));
@@ -61,6 +62,7 @@ public class VanillaConfigurationTest {
         pairs.put(KEY_OUTPUT_BUFFER_SIZE, 5);
         pairs.put(KEY_OUTPUT_BUFFER_FLUSH, 6);
         pairs.put(KEY_OUTPUT_RECORD_SIZE, 7);
+        pairs.put(KEY_SWAP_DIVISION, 8);
         pairs.put(KEY_SWAP_DIRECTORY, f);
 
         VanillaConfiguration conf = VanillaConfiguration.extract(key -> Optionals.get(pairs, key)
@@ -72,6 +74,7 @@ public class VanillaConfigurationTest {
         assertThat(conf.getOutputBufferSize(), is(5));
         assertThat(conf.getOutputBufferFlush(), is(6d));
         assertThat(conf.getOutputRecordSize(), is(7));
+        assertThat(conf.getSwapDivision(), is(8));
         assertThat(conf.getSwapDirectory().getCanonicalFile(), is(f));
     }
 

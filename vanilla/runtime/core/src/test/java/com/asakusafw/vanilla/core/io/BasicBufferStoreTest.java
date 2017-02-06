@@ -20,8 +20,12 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.Collections;
 
 import org.junit.Test;
+
+import com.asakusafw.lang.utils.common.Optionals;
 
 /**
  * Test for {@link BasicBufferStore}.
@@ -61,6 +65,37 @@ public class BasicBufferStoreTest {
                 assertThat(read(c1), is("Hello1"));
                 assertThat(read(c2), is("Hello2"));
             }
+        }
+        assertThat(directory.exists(), is(false));
+    }
+
+    /**
+     * w/ division.
+     * @throws Exception if failed
+     */
+    @Test
+    public void division() throws Exception {
+        File directory;
+        try (BasicBufferStore store = new BasicBufferStore(null, 2)) {
+            directory = store.getDirectory();
+            try (DataReader.Provider c0 = store.store(buffer("Hello0"));
+                    DataReader.Provider c1 = store.store(buffer("Hello1"));
+                    DataReader.Provider c2 = store.store(buffer("Hello2"));
+                    DataReader.Provider c3 = store.store(buffer("Hello3"));
+                    DataReader.Provider c4 = store.store(buffer("Hello4"))) {
+                assertThat(read(c0), is("Hello0"));
+                assertThat(read(c1), is("Hello1"));
+                assertThat(read(c2), is("Hello2"));
+                assertThat(read(c3), is("Hello3"));
+                assertThat(read(c4), is("Hello4"));
+            }
+            long count = Optionals.of(directory.listFiles())
+                .map(Arrays::asList)
+                .orElse(Collections.emptyList())
+                .stream()
+                .peek(f -> assertThat(f.isDirectory(), is(true)))
+                .count();
+            assertThat(count, is(3L));
         }
         assertThat(directory.exists(), is(false));
     }

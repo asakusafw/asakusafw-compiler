@@ -30,27 +30,31 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.asakusafw.lang.utils.common.Arguments;
 import com.asakusafw.lang.utils.common.InterruptibleIo;
 import com.asakusafw.vanilla.core.util.SystemProperty;
 
 /**
  * A basic implementation of {@link BufferStore}.
  * @since 0.4.0
+ * @version 0.4.1
  */
 public class BasicBufferStore implements BufferStore, InterruptibleIo {
 
     static final Logger LOG = LoggerFactory.getLogger(BasicBufferStore.class);
 
+    static final int DEFAULT_PARTITION = 0;
+
     private final AtomicInteger counter = new AtomicInteger();
 
     private final File directory;
+
+    private final int division;
 
     /**
      * Creates a new instance.
      */
     public BasicBufferStore() {
-        this(SystemProperty.getTemporaryDirectory());
+        this(null, DEFAULT_PARTITION);
     }
 
     /**
@@ -58,8 +62,28 @@ public class BasicBufferStore implements BufferStore, InterruptibleIo {
      * @param base the base directory
      */
     public BasicBufferStore(File base) {
-        Arguments.requireNonNull(base);
-        this.directory = new File(base, String.format("asakusa-%s.tmp", UUID.randomUUID()));
+        this(base, DEFAULT_PARTITION);
+    }
+
+    /**
+     * Creates a new instance.
+     * @param base the base directory
+     * @param division the maximum number of files in each sub-directory, or {@code 0} to disabled
+     * @since 0.4.1
+     */
+    public BasicBufferStore(File base, int division) {
+        this.directory = new File(
+                base != null ? base : SystemProperty.getTemporaryDirectory(),
+                String.format("asakusa-%s.tmp", UUID.randomUUID()));
+        this.division = division;
+    }
+
+    /**
+     * Creates a new builder for {@link BasicBufferStore}.
+     * @return the created builder
+     */
+    public static Builder builder() {
+        return new Builder();
     }
 
     /**
@@ -72,17 +96,30 @@ public class BasicBufferStore implements BufferStore, InterruptibleIo {
 
     @Override
     public DataReader.Provider store(ByteBuffer buffer) throws IOException, InterruptedException {
-        if (directory.mkdirs() == false && directory.isDirectory() == false) {
-            throw new IOException();
-        }
-        File file = new File(directory, String.format("%d.buf", counter.incrementAndGet())); //$NON-NLS-1$
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("saving buffer: {}bytes -> {}", buffer.remaining(), file);
-        }
+        File file = prepare();
         try (WritableByteChannel channel = Files.newByteChannel(file.toPath(), EnumSet.of(WRITE, CREATE_NEW))) {
             channel.write(buffer);
         }
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("saving buffer: {}bytes -> {}", buffer.remaining(), file);
+        }
         return new FileEntry(file);
+    }
+
+    private File prepare() throws IOException {
+        int id = counter.getAndIncrement();
+        File dir;
+        if (division == 0) {
+            dir = directory;
+        } else {
+            dir = new File(directory, String.valueOf(id / division));
+        }
+        if (dir.isDirectory() == false
+                && dir.mkdirs() == false
+                && dir.isDirectory() == false) {
+            throw new IOException();
+        }
+        return new File(dir, String.format("%d.buf", id)); //$NON-NLS-1$
     }
 
     @Override
@@ -110,6 +147,45 @@ public class BasicBufferStore implements BufferStore, InterruptibleIo {
     @Override
     public String toString() {
         return String.format("BufferStore(%s)", directory); //$NON-NLS-1$
+    }
+
+    /**
+     * A builder for {@link BasicBufferStore}.
+     * @since 0.4.1
+     */
+    public static final class Builder {
+
+        private File directory;
+
+        private int division = DEFAULT_PARTITION;
+
+        /**
+         * Sets the directory.
+         * @param newValue the directory
+         * @return this
+         */
+        public Builder withDirectory(File newValue) {
+            this.directory = newValue;
+            return this;
+        }
+
+        /**
+         * Sets the partition.
+         * @param newValue the partition
+         * @return this
+         */
+        public Builder withDivision(int newValue) {
+            this.division = newValue;
+            return this;
+        }
+
+        /**
+         * Builds a {@link BasicBufferStore}.
+         * @return the created instance
+         */
+        public BasicBufferStore build() {
+            return new BasicBufferStore(directory, division);
+        }
     }
 
     private static final class FileEntry implements DataReader.Provider {

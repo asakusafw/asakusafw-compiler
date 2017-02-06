@@ -39,6 +39,7 @@ import com.asakusafw.vanilla.core.util.SystemProperty;
 /**
  * A configuration of Asakusa Vanilla runtime.
  * @since 0.4.0
+ * @version 0.4.1
  */
 public class VanillaConfiguration {
 
@@ -62,6 +63,13 @@ public class VanillaConfiguration {
      * ({@value}: {@link #DEFAULT_SWAP_DIRECTORY}).
      */
     public static final String KEY_SWAP_DIRECTORY = KEY_ENGINE_PREFIX + "pool.swap"; //$NON-NLS-1$
+
+    /**
+     * The configuration key of max entries in each swap sub-directory, or {@code 0} to disable it
+     * ({@value}: {@value #DEFAULT_SWAP_DIVISION}).
+     * @since 0.4.1
+     */
+    public static final String KEY_SWAP_DIVISION = KEY_ENGINE_PREFIX + "pool.division"; //$NON-NLS-1$
 
     /**
      * The configuration key of output buffer size in bytes({@value}: {@value #DEFAULT_OUTPUT_BUFFER_SIZE}).
@@ -96,6 +104,12 @@ public class VanillaConfiguration {
     public static final File DEFAULT_SWAP_DIRECTORY = SystemProperty.getTemporaryDirectory();
 
     /**
+     * The default value of {@link #KEY_SWAP_DIVISION} (disabled).
+     * @since 0.4.1
+     */
+    public static final int DEFAULT_SWAP_DIVISION = 0;
+
+    /**
      * The default value of {@link #KEY_OUTPUT_BUFFER_SIZE}.
      */
     public static final int DEFAULT_OUTPUT_BUFFER_SIZE = 4 * 1024 * 1024;
@@ -119,6 +133,8 @@ public class VanillaConfiguration {
     private OptionalLong bufferPoolSize = OptionalLong.empty();
 
     private Optional<File> swapDirectory = Optional.empty();
+
+    private OptionalInt swapDivision = OptionalInt.empty();
 
     private OptionalInt outputBufferSize = OptionalInt.empty();
 
@@ -195,6 +211,24 @@ public class VanillaConfiguration {
     }
 
     /**
+     * Returns the swap division.
+     * @return the swap division
+     * @since 0.4.1
+     */
+    public int getSwapDivision() {
+        return swapDivision.orElse(DEFAULT_SWAP_DIVISION);
+    }
+
+    /**
+     * Sets the swap division.
+     * @param newValue the swap division
+     * @since 0.4.1
+     */
+    public void setSwapDivision(int newValue) {
+        this.swapDivision = OptionalInt.of(newValue);
+    }
+
+    /**
      * Returns the individual output buffer size.
      * @return the output buffer size, in bytes
      * @see #KEY_OUTPUT_BUFFER_SIZE
@@ -268,6 +302,7 @@ public class VanillaConfiguration {
         configureInt(conf::setNumberOfPartitions, options, KEY_PARTITION_COUNT);
         configureLong(conf::setBufferPoolSize, options, KEY_BUFFER_POOL_SIZE);
         configureFile(conf::setSwapDirectory, options, KEY_SWAP_DIRECTORY);
+        configureInt(conf::setSwapDivision, options, KEY_SWAP_DIVISION);
         configureInt(conf::setOutputBufferSize, options, KEY_OUTPUT_BUFFER_SIZE);
         configureDouble(conf::setOutputBufferFlush, options, KEY_OUTPUT_BUFFER_FLUSH);
         configureInt(conf::setOutputRecordSize, options, KEY_OUTPUT_RECORD_SIZE);
@@ -288,6 +323,8 @@ public class VanillaConfiguration {
                     KEY_SWAP_DIRECTORY, Optionals.of(conf.getSwapDirectory())
                         .map(File::getAbsolutePath)
                         .orElse("N/A"))); //$NON-NLS-1$
+            LOG.debug(MessageFormat.format("{0}: {1}", //$NON-NLS-1$
+                    KEY_SWAP_DIVISION, conf.getSwapDivision()));
         }
         return conf;
     }
