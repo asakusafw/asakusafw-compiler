@@ -282,11 +282,12 @@ public class VanillaLauncher {
         Arguments.requireNonNull(context);
         Arguments.requireNonNull(configuration);
         Arguments.requireNonNull(graph);
+        BasicBufferStore.Builder storeBuilder = BasicBufferStore.builder();
+        Optionals.of(configuration.getSwapDirectory()).ifPresent(storeBuilder::withDirectory);
+
         GraphMirror mirror = GraphMirror.of(graph);
         VertexScheduler scheduler = new BasicVertexScheduler();
-        try (BasicBufferStore store = Optionals.of(configuration.getSwapDirectory())
-                        .map(BasicBufferStore::new)
-                        .orElseGet(BasicBufferStore::new);
+        try (BasicBufferStore store = storeBuilder.build();
                 BasicEdgeDriver edges = new BasicEdgeDriver(
                         context.getClassLoader(),
                         mirror,
