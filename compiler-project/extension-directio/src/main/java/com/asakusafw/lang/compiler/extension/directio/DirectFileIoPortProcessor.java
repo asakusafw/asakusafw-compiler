@@ -360,13 +360,15 @@ public class DirectFileIoPortProcessor
                         "output resource pattern with wildcards (*) "
                         + "must not contain any properties ('{'name'}') nor random numbers ([m..n]) "
                         + "({0}.getResourcePattern()): {1}",
-                        context.target.getClassName()));
+                        context.target.getClassName(),
+                        resourcePattern));
             }
             if (orders.isEmpty() == false) {
                 context.error(MessageFormat.format(
                         "output resource pattern with wildcards (*) must not contain any orders "
                         + "({0}.getOrder()): {1}",
-                        context.target.getClassName()));
+                        context.target.getClassName(),
+                        orders));
             }
         }
     }
