@@ -28,12 +28,14 @@ import com.asakusafw.dag.runtime.adapter.ObjectCombiner;
 import com.asakusafw.dag.runtime.adapter.ObjectCopier;
 import com.asakusafw.dag.runtime.adapter.OutputAdapter;
 import com.asakusafw.dag.runtime.adapter.OutputHandler;
+import com.asakusafw.dag.runtime.skeleton.EdgeOutputHandler.AggregationStrategy;
 import com.asakusafw.dag.runtime.skeleton.EdgeOutputHandler.OutputSpec;
 import com.asakusafw.lang.utils.common.Arguments;
 
 /**
  * {@link OutputAdapter} for edge output.
  * @since 0.4.0
+ * @version 0.4.1
  */
 public class EdgeOutputAdapter implements OutputAdapter {
 
@@ -44,13 +46,28 @@ public class EdgeOutputAdapter implements OutputAdapter {
             "com.asakusafw.dag.output.aggregate.window.size"; //$NON-NLS-1$
 
     /**
+     * The configuration key of the aggregation strategy.
+     * @since 0.4.1
+     */
+    public static final String KEY_AGGREGATION_STRATEGY =
+            "com.asakusafw.dag.output.aggregate.strategy"; //$NON-NLS-1$
+
+    /**
      * The default value of {@link #KEY_AGGREGATION_WINDOW_SIZE}.
      */
     public static final int DEFAULT_AGGREGATION_WINDOW_SIZE = 256;
 
+    /**
+     * The default value of {@link #KEY_AGGREGATION_STRATEGY}.
+     * @since 0.4.1
+     */
+    static final AggregationStrategy DEFAULT_AGGREGATION_STRATEGY = AggregationStrategy.MAP;
+
     private final List<OutputSpec> specs = new ArrayList<>();
 
-    private final int aggregationWindowSize;
+    final int aggregationWindowSize;
+
+    final AggregationStrategy aggregationStrategy;
 
     private final Supplier<? extends KeyBuffer> keyBufferFactory;
 
@@ -62,17 +79,13 @@ public class EdgeOutputAdapter implements OutputAdapter {
         Arguments.requireNonNull(context);
         this.aggregationWindowSize = Util.getProperty(
                 context,
-                "window size",
+                "aggregation window size",
                 KEY_AGGREGATION_WINDOW_SIZE, DEFAULT_AGGREGATION_WINDOW_SIZE);
+        this.aggregationStrategy = Util.getProperty(
+                context,
+                "aggregation strategy",
+                KEY_AGGREGATION_STRATEGY, DEFAULT_AGGREGATION_STRATEGY);
         this.keyBufferFactory = Util.getKeyBufferSupplier(context);
-    }
-
-    /**
-     * Returns the aggregation window size.
-     * @return the aggregation window size, or {@code <= 0} if on-edge aggregation is not enabled
-     */
-    public int getAggregationWindowSize() {
-        return aggregationWindowSize;
     }
 
     /**
@@ -115,8 +128,11 @@ public class EdgeOutputAdapter implements OutputAdapter {
             Supplier<? extends Function<?, ?>> mapper,
             Supplier<? extends ObjectCopier<?>> copier, Supplier<? extends ObjectCombiner<?>> combiner) {
         Arguments.requireNonNull(name);
-        int window = copier == null || combiner == null ? 0 : aggregationWindowSize;
-        specs.add(new OutputSpec(name, mapper, copier, combiner, keyBufferFactory, window));
+        AggregationStrategy strategy = aggregationStrategy;
+        if (copier == null || combiner == null || aggregationWindowSize <= 0) {
+            strategy = AggregationStrategy.DISABLED;
+        }
+        specs.add(new OutputSpec(name, mapper, copier, combiner, keyBufferFactory, aggregationWindowSize, strategy));
         return this;
     }
 
