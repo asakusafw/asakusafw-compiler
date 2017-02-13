@@ -1,0 +1,37 @@
+#!/bin/bash
+#
+# Copyright 2011-2017 Asakusa Framework Team.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+if [ "$ASAKUSA_HOME" = "" ]
+then
+    echo '$ASAKUSA_HOME is not defined' 1>&2
+    exit 1
+fi
+
+_SCRIPT="$ASAKUSA_HOME/vanilla/bin/execute.sh"
+
+if [ ! -e "$_SCRIPT" ]
+then
+    echo "launcher script is not found: $_SCRIPT"
+fi
+
+_BATCH_ID={{{BATCH_ID}}}
+_FLOW_ID={{{FLOW_ID}}}
+_EXECUTION_ID="$(echo -n $(od -An -t x4 -N4 /dev/random))"
+_BATCH_ARGUMENTS="-"
+_APPLICATION={{{APPLICATION}}}
+
+exec "$_SCRIPT" "$_BATCH_ID" "$_FLOW_ID" "$_EXECUTION_ID" "$_BATCH_ARGUMENTS" "$_APPLICATION" "$@"

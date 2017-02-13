@@ -21,6 +21,7 @@
     <module>internalio</module>
     <module>directio</module>
     <module>jdbc</module>
+    <module>iterative</module>
 
     <!-- extensions -->
     <module>extension/counter</module>

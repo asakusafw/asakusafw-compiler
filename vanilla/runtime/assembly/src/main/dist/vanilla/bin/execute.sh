@@ -34,6 +34,7 @@ Parameters:
         The arguments for this execution
         This must be form of "key1=value1,key2=value2,...",
         and the special characters '=', ',', '\' can be escaped by '\'.
+        Or '-' to launch as direct mode.
     class-name
         Fully qualified class name of program entry
     direct-arguments...
@@ -73,7 +74,14 @@ _OPT_FLOW_ID="$1"
 shift
 _OPT_EXECUTION_ID="$1"
 shift
-_OPT_BATCH_ARGUMENTS="$1"
+if [ "$1" = "-" ]
+then
+    _JAVA_MAIN=com.asakusafw.vanilla.client.VanillaDirect
+    _OPT_BATCH_ARGUMENTS=""
+else
+    _JAVA_MAIN=com.asakusafw.vanilla.client.VanillaLauncher
+    _OPT_BATCH_ARGUMENTS="$1"
+fi
 shift
 _OPT_APPLICATION="$1"
 shift
@@ -135,7 +143,7 @@ then
     export HADOOP_CLIENT_OPTS="$HADOOP_CLIENT_OPTS $ASAKUSA_VANILLA_OPTS"
     export HADOOP_CLASSPATH="$HADOOP_CLASSPATH:$(IFS=:; echo "${_CLASSPATH[*]}")"
     "${_EXEC[@]}" \
-        "com.asakusafw.vanilla.client.VanillaLauncher" \
+        "$_JAVA_MAIN" \
         --client "$_OPT_APPLICATION" \
         --batch-id "$_OPT_BATCH_ID" \
         --flow-id "$_OPT_FLOW_ID" \
@@ -147,7 +155,7 @@ else
     "${_EXEC[@]}" \
         $ASAKUSA_VANILLA_OPTS \
         -classpath "$(IFS=:; echo "${_CLASSPATH[*]}")" \
-        "com.asakusafw.vanilla.client.VanillaLauncher" \
+        "$_JAVA_MAIN" \
         --client "$_OPT_APPLICATION" \
         --batch-id "$_OPT_BATCH_ID" \
         --flow-id "$_OPT_FLOW_ID" \

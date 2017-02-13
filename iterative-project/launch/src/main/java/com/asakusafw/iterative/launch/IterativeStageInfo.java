@@ -15,7 +15,10 @@
  */
 package com.asakusafw.iterative.launch;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -33,8 +36,11 @@ import com.asakusafw.iterative.common.basic.CursorUtil;
 /**
  * Provides {@link StageInfo} for each round.
  * @since 0.3.0
+ * @version 0.4.1
  */
 public class IterativeStageInfo implements Iterable<StageInfo> {
+
+    private static final Option[] EMPTY_OPTIONS = new Option[0];
 
     static final String DEFAULT_STAGE_ID_PREFIX = "round"; //$NON-NLS-1$
 
@@ -46,16 +52,44 @@ public class IterativeStageInfo implements Iterable<StageInfo> {
 
     private final ParameterTable parameterTable;
 
+    private final Set<Option> options;
+
     /**
      * Creates a new instance.
      * @param origin the original (non-iterative) stage information
      * @param parameterTable the iterative parameter table
      */
     public IterativeStageInfo(StageInfo origin, ParameterTable parameterTable) {
+        this(origin, parameterTable, EMPTY_OPTIONS);
+    }
+
+    /**
+     * Creates a new instance.
+     * @param origin the original (non-iterative) stage information
+     * @param parameterTable the iterative parameter table
+     * @param options the stage options
+     * @since 0.4.1
+     */
+    public IterativeStageInfo(StageInfo origin, ParameterTable parameterTable, Option... options) {
+        this(origin, parameterTable, Arrays.asList(Objects.requireNonNull(options)));
+    }
+
+    /**
+     * Creates a new instance.
+     * @param origin the original (non-iterative) stage information
+     * @param parameterTable the iterative parameter table
+     * @param options the stage options
+     * @since 0.4.1
+     */
+    public IterativeStageInfo(StageInfo origin, ParameterTable parameterTable, Collection<Option> options) {
         Objects.requireNonNull(origin);
         Objects.requireNonNull(parameterTable);
+        Objects.requireNonNull(options);
         this.origin = origin;
         this.parameterTable = parameterTable;
+        EnumSet<Option> opts = EnumSet.noneOf(Option.class);
+        opts.addAll(options);
+        this.options = Collections.unmodifiableSet(opts);
     }
 
     /**
@@ -141,9 +175,9 @@ public class IterativeStageInfo implements Iterable<StageInfo> {
      */
     public Cursor newCursor() {
         if (parameterTable.isEmpty()) {
-            return new Cursor(origin, NON_ITERATIVE.newCursor());
+            return new Cursor(origin, NON_ITERATIVE.newCursor(), options);
         } else {
-            return new Cursor(origin, parameterTable.newCursor());
+            return new Cursor(origin, parameterTable.newCursor(), options);
         }
     }
 
@@ -152,9 +186,12 @@ public class IterativeStageInfo implements Iterable<StageInfo> {
         return CursorUtil.toIterator(newCursor());
     }
 
-    static StageInfo merge(StageInfo origin, int round, ParameterSet parameters) {
+    static StageInfo merge(StageInfo origin, int round, ParameterSet parameters, Set<Option> options) {
         String originalStageId = origin.getStageId() == null ? DEFAULT_STAGE_ID_PREFIX : origin.getStageId();
         String newStageId = String.format("%s_%d", originalStageId, round); //$NON-NLS-1$
+        String originalExecutionId = origin.getExecutionId();
+        String newExecutionId = options.contains(Option.QUALIFY_EXECUTION_ID)
+                ? String.format("%s_%d", originalExecutionId, round) : originalExecutionId;
         Map<String, String> newBatchArguments = new LinkedHashMap<>();
         newBatchArguments.putAll(origin.getBatchArguments());
         newBatchArguments.putAll(parameters.toMap());
@@ -163,7 +200,7 @@ public class IterativeStageInfo implements Iterable<StageInfo> {
                 origin.getBatchId(),
                 origin.getFlowId(),
                 newStageId,
-                origin.getExecutionId(),
+                newExecutionId,
                 newBatchArguments);
     }
 
@@ -181,11 +218,14 @@ public class IterativeStageInfo implements Iterable<StageInfo> {
 
         private final ParameterTable.Cursor parameters;
 
+        private final Set<Option> options;
+
         private int index = INVALID_INDEX;
 
-        Cursor(StageInfo origin, ParameterTable.Cursor parameters) {
+        Cursor(StageInfo origin, ParameterTable.Cursor parameters, Set<Option> options) {
             this.origin = origin;
             this.parameters = parameters;
+            this.options = options;
         }
 
         /**
@@ -212,7 +252,7 @@ public class IterativeStageInfo implements Iterable<StageInfo> {
         public StageInfo get() {
             checkRound();
             ParameterSet current = parameters.get();
-            return merge(origin, index, current);
+            return merge(origin, index, current, options);
         }
 
         /**
@@ -249,5 +289,17 @@ public class IterativeStageInfo implements Iterable<StageInfo> {
                 throw new IllegalStateException();
             }
         }
+    }
+
+    /**
+     * Available options of {@link IterativeStageInfo}.
+     * @since 0.4.1
+     */
+    public enum Option {
+
+        /**
+         * Qualifies execution ID.
+         */
+        QUALIFY_EXECUTION_ID,
     }
 }

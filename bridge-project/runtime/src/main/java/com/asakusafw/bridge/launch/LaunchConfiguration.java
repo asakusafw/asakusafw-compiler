@@ -34,7 +34,7 @@ import com.asakusafw.bridge.stage.StageInfo;
 /**
  * Provides launching configuration.
  */
-public class LaunchConfiguration {
+public class LaunchConfiguration implements LaunchInfo {
 
     static final Logger LOG = LoggerFactory.getLogger(LaunchConfiguration.class);
 
@@ -156,34 +156,22 @@ public class LaunchConfiguration {
         return commands;
     }
 
-    /**
-     * Returns the stage client class.
-     * @return the stage client class
-     */
+    @Override
     public Class<?> getStageClient() {
         return stageClient;
     }
 
-    /**
-     * Returns the stage information.
-     * @return the stage information
-     */
+    @Override
     public StageInfo getStageInfo() {
         return stageInfo;
     }
 
-    /**
-     * Returns the properties for Hadoop platform.
-     * @return the Hadoop properties
-     */
+    @Override
     public Map<String, String> getHadoopProperties() {
         return hadoopProperties;
     }
 
-    /**
-     * Returns the properties for stage engine.
-     * @return the properties for stage engine
-     */
+    @Override
     public Map<String, String> getEngineProperties() {
         return engineProperties;
     }
