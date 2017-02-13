@@ -21,7 +21,7 @@ then
     exit 1
 fi
 
-_SCRIPT="$ASAKUSA_HOME/vanilla/bin/execute.sh"
+_SCRIPT="$ASAKUSA_HOME/"{{{SCRIPT}}}
 
 if [ ! -e "$_SCRIPT" ]
 then
