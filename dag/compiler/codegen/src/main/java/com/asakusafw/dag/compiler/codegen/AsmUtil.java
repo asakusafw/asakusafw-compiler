@@ -43,8 +43,11 @@ import com.asakusafw.lang.compiler.model.description.ImmediateDescription;
 import com.asakusafw.lang.compiler.model.description.MethodDescription;
 import com.asakusafw.lang.compiler.model.description.TypeDescription;
 import com.asakusafw.lang.compiler.model.description.TypeDescription.TypeKind;
+import com.asakusafw.lang.compiler.model.graph.OperatorProperty;
 import com.asakusafw.lang.utils.common.Arguments;
+import com.asakusafw.lang.utils.common.Invariants;
 import com.asakusafw.lang.utils.common.Lang;
+import com.asakusafw.lang.utils.common.Tuple;
 import com.asakusafw.runtime.core.Result;
 import com.asakusafw.runtime.value.ValueOption;
 
@@ -591,12 +594,12 @@ public final class AsmUtil {
      * @param callback the callback for building the extra constructor statements
      * @return the dependency map
      */
-    public static Map<VertexElement, FieldRef> defineDependenciesConstructor(
+    public static List<Tuple<VertexElement, FieldRef>> defineDependenciesConstructor(
             ClassDescription aClass,
             ClassVisitor writer,
             Iterable<? extends VertexElement> dependencies,
             Consumer<MethodVisitor> callback) {
-        return defineDependenciesConstructor(aClass, writer, dependencies, method -> {
+        return defineDependenciesConstructor0(aClass, writer, dependencies, method -> {
             method.visitVarInsn(Opcodes.ALOAD, 0);
             method.visitMethodInsn(Opcodes.INVOKESPECIAL,
                     typeOf(Object.class).getInternalName(),
@@ -608,20 +611,71 @@ public final class AsmUtil {
 
     /**
      * Adds a constructor with dependencies.
+     * @param <T> the property type
+     * @param context the current context
+     * @param properties the dependency properties
      * @param aClass the target class
      * @param writer the current writer
-     * @param dependencies the target dependencies
+     * @param callback the callback for building the extra constructor statements
+     * @return the field map
+     * @since 0.4.1
+     */
+    public static <T extends OperatorProperty> Map<T, FieldRef> defineDependenciesConstructor(
+            OperatorNodeGenerator.Context context,
+            List<? extends T> properties,
+            ClassDescription aClass,
+            ClassVisitor writer,
+            Consumer<MethodVisitor> callback) {
+        return defineDependenciesConstructor(context, properties, aClass, writer, method -> {
+            method.visitVarInsn(Opcodes.ALOAD, 0);
+            method.visitMethodInsn(Opcodes.INVOKESPECIAL,
+                    typeOf(Object.class).getInternalName(),
+                    CONSTRUCTOR_NAME,
+                    Type.getMethodDescriptor(Type.VOID_TYPE),
+                    false);
+        }, callback);
+    }
+
+    /**
+     * Adds a constructor with dependencies.
+     * @param <T> the property type
+     * @param context the current context
+     * @param properties the dependency properties
+     * @param aClass the target class
+     * @param writer the current writer
      * @param superConstructor super constructor invocation
      * @param callback the callback for building the extra constructor statements
-     * @return the dependency map
+     * @return the field map
+     * @since 0.4.1
      */
-    public static Map<VertexElement, FieldRef> defineDependenciesConstructor(
+    public static <T extends OperatorProperty> Map<T, FieldRef> defineDependenciesConstructor(
+            OperatorNodeGenerator.Context context,
+            List<? extends T> properties,
+            ClassDescription aClass,
+            ClassVisitor writer,
+            Consumer<MethodVisitor> superConstructor,
+            Consumer<MethodVisitor> callback) {
+        List<Tuple<VertexElement, FieldRef>> fields = defineDependenciesConstructor0(
+                aClass, writer, context.getDependencies(properties), superConstructor, callback);
+        Invariants.require(fields.size() == properties.size());
+        Map<T, FieldRef> results = new LinkedHashMap<>();
+        int index = 0;
+        for (T property : properties) {
+            Tuple<VertexElement, FieldRef> pair = fields.get(index++);
+            VertexElement element = context.getDependency(property);
+            Invariants.require(pair.left() == element);
+            results.put(property, pair.right());
+        }
+        return results;
+    }
+
+    private static List<Tuple<VertexElement, FieldRef>> defineDependenciesConstructor0(
             ClassDescription aClass,
             ClassVisitor writer,
             Iterable<? extends VertexElement> dependencies,
             Consumer<MethodVisitor> superConstructor,
             Consumer<MethodVisitor> callback) {
-        Map<VertexElement, FieldRef> results = new LinkedHashMap<>();
+        List<Tuple<VertexElement, FieldRef>> results = new ArrayList<>();
         int index = 0;
         int varIndex = 1;
         List<Type> parameterTypes = new ArrayList<>();
@@ -639,7 +693,7 @@ public final class AsmUtil {
                 putField(v, ref);
             });
             varIndex += categoryOf(element.getRuntimeType());
-            results.put(element, ref);
+            results.add(new Tuple<>(element, ref));
         }
         MethodVisitor method = writer.visitMethod(
                 Opcodes.ACC_PUBLIC,

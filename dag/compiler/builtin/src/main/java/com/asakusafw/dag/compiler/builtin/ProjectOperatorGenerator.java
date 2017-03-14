@@ -41,6 +41,7 @@ import com.asakusafw.lang.compiler.model.graph.CoreOperator;
 import com.asakusafw.lang.compiler.model.graph.CoreOperator.CoreOperatorKind;
 import com.asakusafw.lang.compiler.model.graph.OperatorInput;
 import com.asakusafw.lang.compiler.model.graph.OperatorOutput;
+import com.asakusafw.lang.compiler.model.graph.OperatorProperty;
 import com.asakusafw.runtime.core.Result;
 import com.asakusafw.vocabulary.operator.Project;
 
@@ -84,8 +85,8 @@ public class ProjectOperatorGenerator extends CoreOperatorNodeGenerator {
         ClassWriter writer = newWriter(target, Object.class, Result.class);
         FieldRef bufferField = defineField(writer, target, "buffer", typeOf(outputType));
 
-        List<VertexElement> dependencies = getDependencies(context, operator);
-        Map<VertexElement, FieldRef> deps = defineDependenciesConstructor(target, writer, dependencies, method -> {
+        Map<OperatorProperty, FieldRef> deps = defineDependenciesConstructor(
+                context, operator.getOutputs(), target, writer, method -> {
             method.visitVarInsn(Opcodes.ALOAD, 0);
             getNew(method, outputType.getDeclaration());
             putField(method, bufferField);
@@ -104,7 +105,7 @@ public class ProjectOperatorGenerator extends CoreOperatorNodeGenerator {
             mapping(method, loader, mappings, inputs, outputs);
 
             method.visitVarInsn(Opcodes.ALOAD, 0);
-            getField(method, deps.get(dependencies.get(0)));
+            getField(method, deps.get(operator.getOutput(Project.ID_OUTPUT)));
             method.visitVarInsn(Opcodes.ALOAD, 2);
             invokeResultAdd(method);
         });

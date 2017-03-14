@@ -50,8 +50,10 @@ import com.asakusafw.vanilla.compiler.tester.externalio.TestIoTaskExecutor;
 import com.asakusafw.vocabulary.external.ImporterDescription.DataSize;
 import com.asakusafw.vocabulary.flow.processor.PartialAggregation;
 import com.asakusafw.vocabulary.model.Key;
+import com.asakusafw.vocabulary.operator.Branch;
 import com.asakusafw.vocabulary.operator.CoGroup;
 import com.asakusafw.vocabulary.operator.Convert;
+import com.asakusafw.vocabulary.operator.Extract;
 import com.asakusafw.vocabulary.operator.Fold;
 import com.asakusafw.vocabulary.operator.MasterJoinUpdate;
 import com.asakusafw.vocabulary.operator.Update;
@@ -667,6 +669,100 @@ public class VanillaJobflowProcessorTest extends VanillaCompilerTesterRoot {
     }
 
     /**
+     * cache conflict (branch).
+     * @throws Exception if failed
+     */
+    @Test
+    public void cache_branch() throws Exception {
+        testio.input("i0", MockDataModel.class, o -> {
+            o.write(new MockDataModel(0, "A"));
+            o.write(new MockDataModel(1, "B"));
+            o.write(new MockDataModel(2, "C"));
+        });
+        testio.input("i1", MockDataModel.class, o -> {
+            o.write(new MockDataModel(3, "A"));
+            o.write(new MockDataModel(4, "B"));
+            o.write(new MockDataModel(5, "C"));
+        });
+        testio.output("o0", MockDataModel.class, o -> {
+            assertThat(o, hasItem(new MockDataModel(0, "A")));
+            assertThat(o, hasItem(new MockDataModel(1, "B")));
+            assertThat(o, hasItem(new MockDataModel(3, "A")));
+        });
+        testio.output("o1", MockDataModel.class, o -> {
+            assertThat(o, hasItem(new MockDataModel(2, "C")));
+            assertThat(o, hasItem(new MockDataModel(4, "B")));
+            assertThat(o, hasItem(new MockDataModel(5, "C")));
+        });
+        run(profile, executor, g -> g
+                .input("i0", TestInput.of("i0", MockDataModel.class))
+                .input("i1", TestInput.of("i1", MockDataModel.class))
+                .operator("x0", Ops.class, "branch3", b -> b
+                        .input("in", typeOf(MockDataModel.class))
+                        .output("a", typeOf(MockDataModel.class))
+                        .output("b", typeOf(MockDataModel.class))
+                        .output("c", typeOf(MockDataModel.class))
+                        .build())
+                .operator("x1", Ops.class, "branch3", b -> b
+                        .input("in", typeOf(MockDataModel.class))
+                        .output("a", typeOf(MockDataModel.class))
+                        .output("b", typeOf(MockDataModel.class))
+                        .output("c", typeOf(MockDataModel.class))
+                        .build())
+                .output("o0", TestOutput.of("o0", MockDataModel.class))
+                .output("o1", TestOutput.of("o1", MockDataModel.class))
+                .connect("i0", "x0")
+                .connect("i1", "x1")
+                .connect("x0.a", "o0")
+                .connect("x0.b", "o0")
+                .connect("x0.c", "o1")
+                .connect("x1.a", "o0")
+                .connect("x1.b", "o1")
+                .connect("x1.c", "o1"));
+    }
+
+    /**
+     * cache conflict (extract).
+     * @throws Exception if failed
+     */
+    @Test
+    public void cache_extract() throws Exception {
+        testio.input("in", MockDataModel.class, o -> {
+            o.write(new MockDataModel(0, "OK"));
+        });
+        testio.output("o0", MockDataModel.class, o -> {
+            assertThat(o, hasSize(3));
+        });
+        testio.output("o1", MockDataModel.class, o -> {
+            assertThat(o, hasSize(3));
+        });
+        run(profile, executor, g -> g
+                .input("in", TestInput.of("in", MockDataModel.class))
+                .operator("x0", Ops.class, "extract3", b -> b
+                        .input("in", typeOf(MockDataModel.class))
+                        .output("a", typeOf(MockDataModel.class))
+                        .output("b", typeOf(MockDataModel.class))
+                        .output("c", typeOf(MockDataModel.class))
+                        .build())
+                .operator("x1", Ops.class, "extract3", b -> b
+                        .input("in", typeOf(MockDataModel.class))
+                        .output("a", typeOf(MockDataModel.class))
+                        .output("b", typeOf(MockDataModel.class))
+                        .output("c", typeOf(MockDataModel.class))
+                        .build())
+                .output("o0", TestOutput.of("o0", MockDataModel.class))
+                .output("o1", TestOutput.of("o1", MockDataModel.class))
+                .connect("in", "x0")
+                .connect("in", "x1")
+                .connect("x0.a", "o0")
+                .connect("x0.b", "o0")
+                .connect("x0.c", "o1")
+                .connect("x1.a", "o0")
+                .connect("x1.b", "o1")
+                .connect("x1.c", "o1"));
+    }
+
+    /**
      * w/ view.
      * @throws Exception if failed
      */
@@ -778,10 +874,28 @@ public class VanillaJobflowProcessorTest extends VanillaCompilerTesterRoot {
             return kv;
         }
 
+        @Extract
+        public void extract3(MockDataModel model,
+                Result<MockDataModel> a, Result<MockDataModel> b, Result<MockDataModel> c) {
+            a.add(model);
+            b.add(model);
+            c.add(model);
+        }
+
+        @Branch
+        public Trinary branch3(MockDataModel model) {
+            return Trinary.valueOf(model.getValue());
+        }
+
         @Update
         public void view(MockDataModel model,
                 @Key(group = "key", order="sort") GroupView<MockDataModel> table) {
             model.setValue(model.getValue() + table.find(model.getKeyOption()).get(0).getValue());
         }
+    }
+
+    @SuppressWarnings("javadoc")
+    public enum Trinary {
+        A, B, C,
     }
 }

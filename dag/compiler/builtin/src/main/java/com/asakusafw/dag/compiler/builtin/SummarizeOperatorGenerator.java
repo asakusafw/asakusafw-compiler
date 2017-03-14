@@ -155,9 +155,7 @@ public class SummarizeOperatorGenerator extends UserOperatorNodeGenerator {
                 Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC);
 
         OperatorOutput output = operator.getOutput(Summarize.ID_OUTPUT);
-        List<VertexElement> dependencies = getDependencies(context, operator);
-        Invariants.require(dependencies.size() == 1);
-        defineDependenciesConstructor(target, writer, dependencies,
+        defineDependenciesConstructor(context, operator.getOutputs(), target, writer,
                 method -> {
                     method.visitVarInsn(Opcodes.ALOAD, 0);
                     getNew(method, combinerClass);

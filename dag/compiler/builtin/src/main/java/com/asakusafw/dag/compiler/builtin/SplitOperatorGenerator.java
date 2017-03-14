@@ -73,8 +73,6 @@ public class SplitOperatorGenerator extends UserOperatorNodeGenerator {
         OperatorOutput left = operator.getOutput(Split.ID_OUTPUT_LEFT);
         OperatorOutput right = operator.getOutput(Split.ID_OUTPUT_RIGHT);
 
-        List<VertexElement> dependencies = getDependencies(context, operator);
-
         List<PropertyMapping> mappings = Invariants.safe(
                 () -> JoinedModelUtil.getPropertyMappings(context.getClassLoader(), operator));
 
@@ -82,7 +80,8 @@ public class SplitOperatorGenerator extends UserOperatorNodeGenerator {
         FieldRef leftField = defineField(writer, target, "leftBuffer", typeOf(left.getDataType()));
         FieldRef rightField = defineField(writer, target, "rightBuffer", typeOf(right.getDataType()));
 
-        Map<VertexElement, FieldRef> deps = defineDependenciesConstructor(target, writer, dependencies, method -> {
+        Map<OperatorOutput, FieldRef> deps = defineDependenciesConstructor(
+                context, operator.getOutputs(), target, writer, method -> {
             method.visitVarInsn(Opcodes.ALOAD, 0);
             getNew(method, left.getDataType());
             putField(method, leftField);
@@ -110,12 +109,12 @@ public class SplitOperatorGenerator extends UserOperatorNodeGenerator {
             mapping(method, context.getDataModelLoader(), mappings, inputs, outputs);
 
             method.visitVarInsn(Opcodes.ALOAD, 0);
-            getField(method, deps.get(dependencies.get(0)));
+            getField(method, deps.get(left));
             leftVar.load(method);
             invokeResultAdd(method);
 
             method.visitVarInsn(Opcodes.ALOAD, 0);
-            getField(method, deps.get(dependencies.get(1)));
+            getField(method, deps.get(right));
             rightVar.load(method);
             invokeResultAdd(method);
         });

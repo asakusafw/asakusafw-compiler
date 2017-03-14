@@ -21,7 +21,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -166,15 +165,7 @@ final class Util {
             ClassVisitor writer,
             Consumer<MethodVisitor> superConstructor,
             Consumer<MethodVisitor> body) {
-        Map<OperatorProperty, VertexElement> elements = new LinkedHashMap<>();
-        for (OperatorProperty property : properties) {
-            elements.put(property, context.getDependency(property));
-        }
-        Map<VertexElement, FieldRef> deps = AsmUtil.defineDependenciesConstructor(
-                aClass, writer, elements.values(), superConstructor, body);
-        Map<OperatorProperty, FieldRef> results = new LinkedHashMap<>();
-        elements.forEach((k, v) -> results.put(k, Invariants.requireNonNull(deps.get(v))));
-        return results;
+        return defineDependenciesConstructor(context, properties, aClass, writer, superConstructor, body);
     }
 
     static List<OperatorInput> getPrimaryInputs(Operator operator) {
