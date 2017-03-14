@@ -18,7 +18,6 @@ package com.asakusafw.dag.compiler.codegen;
 import static com.asakusafw.dag.compiler.codegen.AsmUtil.*;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 import org.objectweb.asm.ClassWriter;
@@ -35,6 +34,7 @@ import com.asakusafw.lang.compiler.model.description.Descriptions;
 import com.asakusafw.lang.compiler.model.description.ReifiableTypeDescription;
 import com.asakusafw.lang.compiler.model.description.TypeDescription;
 import com.asakusafw.lang.utils.common.Arguments;
+import com.asakusafw.lang.utils.common.Tuple;
 import com.asakusafw.runtime.core.Result;
 
 /**
@@ -81,7 +81,7 @@ public final class BufferOperatorGenerator {
         TypeDescription dataType = getDataType(successors);
         ClassWriter writer = newWriter(target, Object.class, Result.class);
         FieldRef buffer = defineField(writer, target, "buffer", typeOf(dataType));
-        Map<VertexElement, FieldRef> deps = defineDependenciesConstructor(target, writer, successors, v -> {
+        List<Tuple<VertexElement, FieldRef>> pairs = defineDependenciesConstructor(target, writer, successors, v -> {
             v.visitVarInsn(Opcodes.ALOAD, 0);
             getNew(v, dataType);
             putField(v, buffer);
@@ -92,9 +92,9 @@ public final class BufferOperatorGenerator {
             self.load(method);
             getField(method, buffer);
             LocalVarRef buf = putLocalVar(method, Type.OBJECT, 2);
-            for (int i = 0, n = successors.size(); i < n; i++) {
+            for (int i = 0, n = pairs.size(); i < n; i++) {
                 self.load(method);
-                getField(method, deps.get(successors.get(i)));
+                getField(method, pairs.get(i).right());
                 if (i < n - 1) {
                     buf.load(method);
                     input.load(method);

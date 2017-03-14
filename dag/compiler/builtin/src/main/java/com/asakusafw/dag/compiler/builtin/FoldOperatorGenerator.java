@@ -20,7 +20,6 @@ import static com.asakusafw.dag.compiler.codegen.AsmUtil.*;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -97,7 +96,7 @@ public class FoldOperatorGenerator extends UserOperatorNodeGenerator {
     }
 
     private static List<VertexElement> getDependencies(Context context, UserOperator operator) {
-        return Collections.singletonList(context.getDependency(operator.getOutput(Fold.ID_OUTPUT)));
+        return context.getDependencies(operator.getOutputs());
     }
 
     private static ClassDescription getCombinerName(ClassDescription outer) {
@@ -114,21 +113,18 @@ public class FoldOperatorGenerator extends UserOperatorNodeGenerator {
                 Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC);
 
         OperatorInput input = operator.getInput(Fold.ID_INPUT);
-        List<VertexElement> dependencies = getDependencies(context, operator);
-        defineDependenciesConstructor(target, writer, dependencies,
-                method -> {
-                    method.visitVarInsn(Opcodes.ALOAD, 0);
-                    getNew(method, combinerClass);
-                    getNew(method, input.getDataType());
-                    method.visitVarInsn(Opcodes.ALOAD, 1);
-                    method.visitMethodInsn(Opcodes.INVOKESPECIAL,
-                            typeOf(CombineResult.class).getInternalName(),
-                            "<init>",
-                            Type.getMethodDescriptor(Type.VOID_TYPE,
-                                    typeOf(ObjectCombiner.class), typeOf(DataModel.class), typeOf(Result.class)),
-                            false);
-                },
-                method -> Lang.pass());
+        defineDependenciesConstructor(context, operator.getOutputs(), target, writer, method -> {
+            method.visitVarInsn(Opcodes.ALOAD, 0);
+            getNew(method, combinerClass);
+            getNew(method, input.getDataType());
+            method.visitVarInsn(Opcodes.ALOAD, 1);
+            method.visitMethodInsn(Opcodes.INVOKESPECIAL,
+                    typeOf(CombineResult.class).getInternalName(),
+                    "<init>",
+                    Type.getMethodDescriptor(Type.VOID_TYPE,
+                            typeOf(ObjectCombiner.class), typeOf(DataModel.class), typeOf(Result.class)),
+                    false);
+        }, Lang.discard());
         writer.visitEnd();
 
         return new ClassData(target, writer::toByteArray);

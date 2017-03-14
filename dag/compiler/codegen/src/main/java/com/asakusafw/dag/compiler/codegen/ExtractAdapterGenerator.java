@@ -18,7 +18,7 @@ package com.asakusafw.dag.compiler.codegen;
 import static com.asakusafw.dag.compiler.codegen.AsmUtil.*;
 
 import java.util.Arrays;
-import java.util.Map;
+import java.util.List;
 
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
@@ -31,7 +31,9 @@ import com.asakusafw.dag.runtime.adapter.ExtractOperation;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.description.Descriptions;
 import com.asakusafw.lang.utils.common.Arguments;
+import com.asakusafw.lang.utils.common.Invariants;
 import com.asakusafw.lang.utils.common.Lang;
+import com.asakusafw.lang.utils.common.Tuple;
 import com.asakusafw.runtime.core.Result;
 
 /**
@@ -51,10 +53,11 @@ public class ExtractAdapterGenerator {
     public ClassData generate(VertexElement successor, ClassDescription target) {
         Arguments.require(successor.getRuntimeType().equals(RESULT_TYPE));
         ClassWriter writer = newWriter(target, Object.class, Result.class);
-        Map<VertexElement, FieldRef> deps = defineDependenciesConstructor(
+        List<Tuple<VertexElement, FieldRef>> pairs = defineDependenciesConstructor(
                 target, writer, Arrays.asList(successor), Lang.discard());
+        Invariants.require(pairs.size() == 1);
         defineResultAdd(writer, method -> {
-            deps.get(successor).load(method);
+            pairs.get(0).right().load(method);
             method.visitVarInsn(Opcodes.ALOAD, 1);
             method.visitTypeInsn(Opcodes.CHECKCAST, typeOf(ExtractOperation.Input.class).getInternalName());
             method.visitMethodInsn(Opcodes.INVOKEINTERFACE,
