@@ -21,13 +21,16 @@ import static com.asakusafw.dag.compiler.codegen.AsmUtil.*;
 import java.lang.annotation.Annotation;
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.apache.hadoop.io.Text;
 import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
@@ -102,6 +105,8 @@ public class SummarizeOperatorGenerator extends UserOperatorNodeGenerator {
 
     static final String SUFFIX_COMBINER = "$Combiner";
 
+    private static final String METHOD_CHECK_NON_NULL = "checkNonNull";
+
     @Override
     protected Class<? extends Annotation> getAnnotationClass() {
         return Summarize.class;
@@ -163,7 +168,7 @@ public class SummarizeOperatorGenerator extends UserOperatorNodeGenerator {
                     method.visitVarInsn(Opcodes.ALOAD, 1);
                     method.visitMethodInsn(Opcodes.INVOKESPECIAL,
                             typeOf(CombineResult.class).getInternalName(),
-                            "<init>",
+                            CONSTRUCTOR_NAME,
                             Type.getMethodDescriptor(Type.VOID_TYPE,
                                     typeOf(ObjectCombiner.class), typeOf(DataModel.class), typeOf(Result.class)),
                             false);
@@ -201,17 +206,13 @@ public class SummarizeOperatorGenerator extends UserOperatorNodeGenerator {
         LocalVarRef outputVar = putLocalVar(method, Type.OBJECT, 2);
 
         outputVar.load(method);
-        method.visitMethodInsn(
-                Opcodes.INVOKEVIRTUAL,
-                typeOf(output.getDataType()).getInternalName(),
-                "reset",
-                Type.getMethodDescriptor(Type.VOID_TYPE),
-                false);
+        resetDataModel(method, output.getDataType());
 
         List<PropertyFolding> foldings = Invariants.safe(
                 () -> SummarizedModelUtil.getPropertyFoldings(context.getClassLoader(), operator));
         DataModelReference inputModel = context.getDataModelLoader().load(input.getDataType());
         DataModelReference outputModel = context.getDataModelLoader().load(output.getDataType());
+        Set<PropertyReference> nullChecked = new HashSet<>();
         for (PropertyFolding folding : foldings) {
             PropertyMapping mapping = folding.getMapping();
             Aggregation aggregation = folding.getAggregation();
@@ -219,36 +220,42 @@ public class SummarizeOperatorGenerator extends UserOperatorNodeGenerator {
                     inputModel.findProperty(mapping.getSourceProperty()));
             PropertyReference dst = Invariants.requireNonNull(
                     outputModel.findProperty(mapping.getDestinationProperty()));
-            mapping(method, aggregation, src, dst, inputVar, outputVar);
+            mapping(method, target, aggregation, src, dst, inputVar, outputVar, nullChecked);
         }
 
         outputVar.load(method);
         method.visitInsn(Opcodes.ARETURN);
         method.visitMaxs(0, 0);
         method.visitEnd();
+
+        if (nullChecked.isEmpty() == false) {
+            defineCheckNull(writer, operator, inputModel);
+        }
+
         return context.addClassFile(new ClassData(target, writer::toByteArray));
     }
 
     private static void mapping(
-            MethodVisitor method,
+            MethodVisitor method, ClassDescription target,
             Aggregation aggregation,
             PropertyReference src, PropertyReference dst,
-            LocalVarRef srcVar, LocalVarRef dstVar) {
+            LocalVarRef srcVar, LocalVarRef dstVar,
+            Set<PropertyReference> nullChecked) {
         switch (aggregation) {
         case COUNT:
             countMapper(method, src, dst, srcVar, dstVar);
             break;
         case ANY:
-            simpleMapper(method, src, dst, srcVar, dstVar);
+            copyMapper(method, target, src, dst, srcVar, dstVar, null);
             break;
         case MAX:
-            simpleMapper(method, src, dst, srcVar, dstVar);
+            copyMapper(method, target, src, dst, srcVar, dstVar, nullChecked);
             break;
         case MIN:
-            simpleMapper(method, src, dst, srcVar, dstVar);
+            copyMapper(method, target, src, dst, srcVar, dstVar, nullChecked);
             break;
         case SUM:
-            sumMapper(method, src, dst, srcVar, dstVar);
+            sumMapper(method, target, src, dst, srcVar, dstVar, nullChecked);
             break;
         default:
             throw new AssertionError(aggregation);
@@ -260,7 +267,6 @@ public class SummarizeOperatorGenerator extends UserOperatorNodeGenerator {
             PropertyReference src, PropertyReference dst,
             LocalVarRef srcVar, LocalVarRef dstVar) {
         Invariants.require(dst.getType().equals(LONG_DESC));
-
         dstVar.load(method);
         getOption(method, dst);
         getConst(method, 1L);
@@ -271,28 +277,32 @@ public class SummarizeOperatorGenerator extends UserOperatorNodeGenerator {
                 false);
     }
 
-    private static void simpleMapper(
-            MethodVisitor method,
+    private static void copyMapper(
+            MethodVisitor method, ClassDescription target,
             PropertyReference src, PropertyReference dst,
-            LocalVarRef srcVar, LocalVarRef dstVar) {
+            LocalVarRef srcVar, LocalVarRef dstVar,
+            Set<PropertyReference> nullChecked) {
         Invariants.require(src.getType().equals(dst.getType()));
         dstVar.load(method);
         getOption(method, dst);
         srcVar.load(method);
         getOption(method, src);
+        if (nullChecked != null) {
+            checkNull(method, target, src, srcVar, nullChecked);
+        }
         copyOption(method, src.getType());
     }
 
     private static void sumMapper(
-            MethodVisitor method,
+            MethodVisitor method, ClassDescription target,
             PropertyReference src, PropertyReference dst,
-            LocalVarRef srcVar, LocalVarRef dstVar) {
+            LocalVarRef srcVar, LocalVarRef dstVar,
+            Set<PropertyReference> nullChecked) {
         dstVar.load(method);
         getOption(method, dst);
-
         srcVar.load(method);
         getOption(method, src);
-
+        checkNull(method, target, src, srcVar, nullChecked);
         TypeDescription srcOptionType = src.getType();
         Type srcEntityType = Invariants.requireNonNull(ENTITY_TYPE_MAP.get(srcOptionType));
         method.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
@@ -312,6 +322,83 @@ public class SummarizeOperatorGenerator extends UserOperatorNodeGenerator {
                 "modify",
                 Type.getMethodDescriptor(typeOf(dstOptionType), dstEntityType),
                 false);
+    }
+
+    private static void checkNull(
+            MethodVisitor method, ClassDescription target,
+            PropertyReference property, LocalVarRef variable,
+            Set<PropertyReference> finished) {
+        if (finished.contains(property)) {
+            return;
+        }
+        finished.add(property);
+
+        method.visitInsn(Opcodes.DUP);
+        variable.load(method);
+        getConst(method, property.getName().toName());
+        method.visitMethodInsn(
+                Opcodes.INVOKESTATIC,
+                typeOf(target).getInternalName(),
+                METHOD_CHECK_NON_NULL,
+                Type.getMethodDescriptor(Type.VOID_TYPE,
+                        typeOf(ValueOption.class), typeOf(Object.class), typeOf(String.class)),
+                false);
+    }
+
+    private static void defineCheckNull(ClassWriter writer,
+            UserOperator operator, DataModelReference inputType) {
+
+        MethodVisitor method = writer.visitMethod(
+                Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC,
+                METHOD_CHECK_NON_NULL,
+                Type.getMethodDescriptor(Type.VOID_TYPE,
+                        typeOf(ValueOption.class), typeOf(Object.class), typeOf(String.class)),
+                null,
+                null);
+
+        LocalVarRef optionVar = new LocalVarRef(Opcodes.ALOAD, 0);
+        LocalVarRef objectVar = new LocalVarRef(Opcodes.ALOAD, 1);
+        LocalVarRef nameVar = new LocalVarRef(Opcodes.ALOAD, 2);
+
+        // if (option.isNull()) {
+        Label ifEnd = new Label();
+        optionVar.load(method);
+        getNullity(method, VALUE_DESC);
+        method.visitJumpInsn(Opcodes.IFEQ, ifEnd);
+
+        // new NullPointerException ...
+        method.visitTypeInsn(Opcodes.NEW, typeOf(NullPointerException.class).getInternalName());
+        method.visitInsn(Opcodes.DUP);
+
+        // str = String.format("<type>.%s must not be null (in <operator>): %s", name, object)
+        getConst(method, String.format("%s.%%s must not be null (in %s.%s): %%s",
+                inputType.getDeclaration().getSimpleName(),
+                operator.getMethod().getDeclaringClass().getSimpleName(),
+                operator.getMethod().getName()));
+
+        getArray(method, typeOf(Object.class), new LocalVarRef[] { nameVar, objectVar });
+        method.visitMethodInsn(
+                Opcodes.INVOKESTATIC,
+                typeOf(String.class).getInternalName(),
+                "format",
+                Type.getMethodDescriptor(typeOf(String.class), typeOf(String.class), typeOf(Object[].class)),
+                false);
+
+        // throw new NullPointerException(str)
+        method.visitMethodInsn(
+                Opcodes.INVOKESPECIAL,
+                typeOf(NullPointerException.class).getInternalName(),
+                CONSTRUCTOR_NAME,
+                Type.getMethodDescriptor(Type.VOID_TYPE, typeOf(String.class)),
+                false);
+
+        method.visitInsn(Opcodes.ATHROW);
+
+        method.visitLabel(ifEnd);
+        // }
+        method.visitInsn(Opcodes.RETURN);
+        method.visitMaxs(0, 0);
+        method.visitEnd();
     }
 
     static ClassDescription generateCombinerClass(Context context, UserOperator operator, ClassDescription outer) {
