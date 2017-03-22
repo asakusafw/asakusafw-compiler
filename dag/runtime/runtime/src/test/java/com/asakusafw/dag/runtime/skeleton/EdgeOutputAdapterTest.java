@@ -40,6 +40,7 @@ import com.asakusafw.dag.runtime.adapter.OutputHandler;
 import com.asakusafw.dag.runtime.skeleton.EdgeOutputAdapterTest.Pair.PairCombiner;
 import com.asakusafw.dag.runtime.skeleton.EdgeOutputAdapterTest.Pair.PairCopier;
 import com.asakusafw.dag.runtime.skeleton.EdgeOutputAdapterTest.Pair.ToPairMapper;
+import com.asakusafw.dag.runtime.skeleton.EdgeOutputHandler.AggregationStrategy;
 import com.asakusafw.lang.utils.common.Lang;
 import com.asakusafw.lang.utils.common.Tuple;
 import com.asakusafw.runtime.core.Result;
@@ -139,15 +140,54 @@ public class EdgeOutputAdapterTest {
     }
 
     /**
+     * w/ custom window size.
+     */
+    @Test
+    public void window_size() {
+        try (EdgeOutputAdapter adapter = new EdgeOutputAdapter(new MockVertexProcessorContext()
+                .withProperty(EdgeOutputAdapter.KEY_AGGREGATION_WINDOW_SIZE, "123"))) {
+            assertThat(adapter.aggregationWindowSize, is(123));
+        } catch (Exception e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    /**
+     * w/ custom window size.
+     */
+    @Test
+    public void aggregate_strategy() {
+        try (EdgeOutputAdapter adapter = new EdgeOutputAdapter(new MockVertexProcessorContext()
+                .withProperty(EdgeOutputAdapter.KEY_AGGREGATION_STRATEGY, AggregationStrategy.HASH.name()))) {
+            assertThat(adapter.aggregationStrategy, is(AggregationStrategy.HASH));
+        } catch (Exception e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    /**
      * w/ combining.
      */
-    @SuppressWarnings("unchecked")
     @Test
     public void combining() {
+        combining0(AggregationStrategy.MAP);
+    }
+
+    /**
+     * w/ combining.
+     */
+    @Test
+    public void combining_hash() {
+        combining0(AggregationStrategy.HASH);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static void combining0(AggregationStrategy strategy) {
         List<Object> results = new ArrayList<>();
         MockTaskProcessorContext tc = new MockTaskProcessorContext("t")
                 .withOutput("o", results::add);
-        try (EdgeOutputAdapter adapter = new EdgeOutputAdapter(new MockVertexProcessorContext())) {
+        try (EdgeOutputAdapter adapter = new EdgeOutputAdapter(new MockVertexProcessorContext()
+                .withProperty(EdgeOutputAdapter.KEY_AGGREGATION_STRATEGY, strategy.name()))) {
             adapter.bind("o", null, PairCopier.class, PairCombiner.class);
             adapter.initialize();
             OutputHandler<? super TaskProcessorContext> handler = adapter.newHandler();
@@ -170,13 +210,26 @@ public class EdgeOutputAdapterTest {
     /**
      * w/ mapping + combining.
      */
-    @SuppressWarnings("unchecked")
     @Test
     public void mapping_combining() {
+        mapping_combining0(AggregationStrategy.MAP);
+    }
+
+    /**
+     * w/ mapping + combining.
+     */
+    @Test
+    public void mapping_combining_hash() {
+        mapping_combining0(AggregationStrategy.HASH);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static void mapping_combining0(AggregationStrategy strategy) {
         List<Object> results = new ArrayList<>();
         MockTaskProcessorContext tc = new MockTaskProcessorContext("t")
                 .withOutput("o", results::add);
-        try (EdgeOutputAdapter adapter = new EdgeOutputAdapter(new MockVertexProcessorContext())) {
+        try (EdgeOutputAdapter adapter = new EdgeOutputAdapter(new MockVertexProcessorContext()
+                .withProperty(EdgeOutputAdapter.KEY_AGGREGATION_STRATEGY, strategy.name()))) {
             adapter.bind("o", ToPairMapper.class, PairCopier.class, PairCombiner.class);
             adapter.initialize();
             OutputHandler<? super TaskProcessorContext> handler = adapter.newHandler();
@@ -197,42 +250,41 @@ public class EdgeOutputAdapterTest {
     }
 
     /**
-     * w/ custom window size.
+     * w/ combining.
      */
     @Test
-    public void window_size() {
-        try (EdgeOutputAdapter adapter = new EdgeOutputAdapter(new MockVertexProcessorContext()
-                .withProperty(EdgeOutputAdapter.KEY_AGGREGATION_WINDOW_SIZE, "123"))) {
-            assertThat(adapter.getAggregationWindowSize(), is(123));
-        } catch (Exception e) {
-            throw new AssertionError(e);
-        }
+    public void combining_flush() {
+        combining_flush0(100, AggregationStrategy.MAP);
     }
 
     /**
      * w/ combining.
      */
     @Test
-    public void combining_flush() {
-        int window = 100;
+    public void combining_flush_hash() {
+        combining_flush0(100, AggregationStrategy.HASH);
+    }
+
+    private static void combining_flush0(int windowSize, AggregationStrategy strategy) {
         List<Object> results = new ArrayList<>();
         MockTaskProcessorContext tc = new MockTaskProcessorContext("t")
                 .withOutput("o", results::add);
         try (EdgeOutputAdapter adapter = new EdgeOutputAdapter(new MockVertexProcessorContext()
-                .withProperty(EdgeOutputAdapter.KEY_AGGREGATION_WINDOW_SIZE, String.valueOf(window)))) {
+                .withProperty(EdgeOutputAdapter.KEY_AGGREGATION_WINDOW_SIZE, String.valueOf(windowSize))
+                .withProperty(EdgeOutputAdapter.KEY_AGGREGATION_STRATEGY, strategy.name()))) {
             adapter.bind("o", null, PairCopier.class, PairCombiner.class);
             adapter.initialize();
             OutputHandler<? super TaskProcessorContext> handler = adapter.newHandler();
             Result<Pair> r = handler.getSink(Pair.class, "o");
             try (Session s = handler.start(tc)) {
-                for (int i = 0; i < window * 10; i++) {
-                    r.add(new Pair(i % (window + 1), i));
+                for (int i = 0; i < windowSize * 10; i++) {
+                    r.add(new Pair(i % (windowSize + 1), i));
                 }
             }
         } catch (Exception e) {
             throw new AssertionError(e);
         }
-        assertThat(results, hasSize(greaterThan(window)));
+        assertThat(results, hasSize(greaterThan(windowSize)));
     }
 
     @SuppressWarnings("javadoc")
