@@ -32,6 +32,7 @@ import com.asakusafw.lang.utils.common.Optionals;
 /**
  * Represents a JDBC target database profile.
  * @since 0.4.0
+ * @version 0.4.1
  */
 public final class JdbcProfile {
 
@@ -79,6 +80,15 @@ public final class JdbcProfile {
      */
     public ConnectionPool.Handle acquire() throws IOException, InterruptedException {
         return connectionPool.acquire();
+    }
+
+    /**
+     * Returns the connection pool.
+     * @return the connection pool
+     * @since 0.4.1
+     */
+    public ConnectionPool getConnectionPool() {
+        return connectionPool;
     }
 
     /**

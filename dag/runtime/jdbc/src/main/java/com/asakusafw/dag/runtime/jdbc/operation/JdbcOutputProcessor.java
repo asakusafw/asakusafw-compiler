@@ -22,6 +22,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
@@ -68,13 +69,15 @@ public class JdbcOutputProcessor implements VertexProcessor {
 
     private volatile int maxConcurrency = -1;
 
-    private volatile IoCallable<TaskProcessor> lazy;
-
     private final AtomicReference<String> uniqueProfileName = new AtomicReference<>();
 
     private final List<Spec<JdbcOperationDriver>> initializeSpecs = new ArrayList<>();
 
     private final List<Spec<JdbcOutputDriver>> outputSpecs = new ArrayList<>();
+
+    private volatile IoCallable<TaskProcessor> processors;
+
+    private final Closer closer = new Closer();
 
     /**
      * Adds an initializer.
@@ -150,7 +153,6 @@ public class JdbcOutputProcessor implements VertexProcessor {
     public Optional<? extends TaskSchedule> initialize(
             VertexProcessorContext context) throws IOException, InterruptedException {
         Arguments.requireNonNull(context);
-        Invariants.require(lazy == null);
         String profileName = uniqueProfileName.get();
         if (profileName == null) {
             // no operations
@@ -184,11 +186,19 @@ public class JdbcOutputProcessor implements VertexProcessor {
     }
 
     private void configureProcessor(JdbcProfile profile) {
-        this.maxConcurrency = profile.getMaxOutputConcurrency()
-                .orElse(DEFAULT_MAX_CONCURRENCY);
+        this.maxConcurrency = computeMaxConcurrency(profile);
         if (LOG.isDebugEnabled()) {
             LOG.debug("JDBC output concurrency: {}", maxConcurrency);
         }
+    }
+
+    private static int computeMaxConcurrency(JdbcProfile profile) {
+        OptionalInt limit = profile.getConnectionPool().size();
+        OptionalInt concurrency = profile.getMaxOutputConcurrency();
+        if (limit.isPresent() == false && concurrency.isPresent() == false) {
+            return DEFAULT_MAX_CONCURRENCY;
+        }
+        return Math.max(1, Math.min(limit.orElse(Integer.MAX_VALUE), concurrency.orElse(1)));
     }
 
     private void runInitializers(JdbcContext context, JdbcProfile profile) throws IOException, InterruptedException {
@@ -203,27 +213,32 @@ public class JdbcOutputProcessor implements VertexProcessor {
         }
     }
 
-    private void prepareOutputs(JdbcContext context, JdbcProfile profile, CounterRepository counters) {
+    private void prepareOutputs(
+            JdbcContext context, JdbcProfile profile,
+            CounterRepository counters) throws IOException, InterruptedException {
         if (outputSpecs.isEmpty()) {
-            this.lazy = VoidTaskProcessor::new;
+            processors = VoidTaskProcessor::new;
             return;
         }
         List<Tuple<String, JdbcOutputDriver>> resolved = new ArrayList<>();
         for (Spec<JdbcOutputDriver> spec : outputSpecs) {
             resolved.add(new Tuple<String, JdbcOutputDriver>(spec.id, spec.provider.apply(context)));
         }
-        this.lazy = () -> {
-            try (Closer closer = new Closer()) {
+        processors = () -> {
+            try (Closer c = new Closer()) {
                 List<CoarseTaskUnit> units = new ArrayList<>();
                 for (Tuple<String, JdbcOutputDriver> r : resolved) {
                     String id = r.left();
                     JdbcOutputDriver driver = r.right();
                     JdbcCounterGroup counter = counters.get(JdbcCounterGroup.CATEGORY_OUTPUT, id);
-                    units.add(closer.add(new CoarseTaskUnit(id, driver, counter)));
+                    units.add(c.add(new CoarseTaskUnit(id, driver, counter)));
                 }
-                return new CoarseTask(profile, units.toArray(new CoarseTaskUnit[units.size()]), closer.move());
+                return new CoarseTask(profile, units.toArray(new CoarseTaskUnit[units.size()]), c.move());
             }
         };
+        if (maxConcurrency > 0) {
+            processors = closer.add(new ConcurrencyLimitter(processors, maxConcurrency));
+        }
     }
 
     @Override
@@ -233,8 +248,13 @@ public class JdbcOutputProcessor implements VertexProcessor {
 
     @Override
     public TaskProcessor createTaskProcessor() throws IOException, InterruptedException {
-        Invariants.require(lazy != null);
-        return lazy.call();
+        Invariants.require(processors != null);
+        return processors.call();
+    }
+
+    @Override
+    public void close() throws IOException, InterruptedException {
+        closer.close();
     }
 
     @Override
