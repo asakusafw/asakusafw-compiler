@@ -16,11 +16,21 @@
 package com.asakusafw.dag.runtime.jdbc.operation;
 
 import java.io.IOException;
-import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.asakusafw.bridge.stage.StageInfo;
 import com.asakusafw.dag.api.counter.CounterRepository;
@@ -45,8 +55,11 @@ import com.asakusafw.lang.utils.common.Invariants;
 /**
  * {@link InputAdapter} for JDBC inputs.
  * @since 0.4.0
+ * @version 0.4.2
  */
 public class JdbcInputAdapter implements InputAdapter<ExtractOperation.Input> {
+
+    static final Logger LOG = LoggerFactory.getLogger(JdbcInputAdapter.class);
 
     private final JdbcContext jdbc;
 
@@ -55,6 +68,8 @@ public class JdbcInputAdapter implements InputAdapter<ExtractOperation.Input> {
     private final AtomicReference<String> uniqueProfileName = new AtomicReference<>();
 
     private final CounterRepository counters;
+
+    private final boolean maxConcurrencyEnabled;
 
     /**
      * Creates a new instance.
@@ -69,6 +84,8 @@ public class JdbcInputAdapter implements InputAdapter<ExtractOperation.Input> {
         this.jdbc = new JdbcContext.Basic(environment, stage::resolveUserVariables);
         this.counters = context.getResource(CounterRepository.class)
                 .orElse(CounterRepository.DETACHED);
+        // TODO remove workaround
+        this.maxConcurrencyEnabled = Util.isMaxConcurrencyEnabled(context);
     }
 
     /**
@@ -117,19 +134,52 @@ public class JdbcInputAdapter implements InputAdapter<ExtractOperation.Input> {
             assert specs.isEmpty();
             return new BasicTaskSchedule();
         }
-
         JdbcProfile profile = jdbc.getEnvironment().getProfile(profileName);
+        List<Task> tasks = collectTasks(profile);
+        BasicTaskSchedule result = new BasicTaskSchedule(tasks);
+        OptionalInt maxConcurrency = profile.getMaxInputConcurrency();
+        if (maxConcurrency.isPresent()) {
+            result = result.withMaxConcurrency(maxConcurrency.getAsInt());
+        }
+        return result;
+    }
+
+    private List<Task> collectTasks(JdbcProfile profile) throws IOException, InterruptedException {
+        List<SubTask> subs = new ArrayList<>();
         try (ConnectionPool.Handle handle = profile.acquire()) {
-            List<Task> tasks = new ArrayList<>();
             for (Spec spec : specs) {
                 JdbcCounterGroup counter = counters.get(JdbcCounterGroup.CATEGORY_INPUT, spec.id);
                 JdbcInputDriver driver = spec.provider.apply(jdbc);
                 List<? extends Partition> partitions = driver.getPartitions(handle.getConnection());
                 for (JdbcInputDriver.Partition partition : partitions) {
-                    tasks.add(new Task(profile, partition, counter));
+                    subs.add(new SubTask(spec, partition, counter));
                 }
             }
-            return new BasicTaskSchedule(tasks);
+        }
+        // unknown size -> larger tasks first
+        subs.sort((a, b) -> {
+            OptionalDouble aRow = a.partition.getEsitimatedRowCount();
+            OptionalDouble bRow = b.partition.getEsitimatedRowCount();
+            if (aRow.isPresent() == false) {
+                return bRow.isPresent() ? -1 : 0;
+            } else if (bRow.isPresent() == false) {
+                return +1;
+            } else {
+                return Double.compare(bRow.getAsDouble(), aRow.getAsDouble());
+            }
+        });
+        OptionalInt maxConcurrency = profile.getMaxInputConcurrency();
+        if (maxConcurrencyEnabled || maxConcurrency.isPresent() == false || subs.size() <= maxConcurrency.getAsInt()) {
+            return subs.stream()
+                    .map(it -> new LinkedList<>(Collections.singletonList(it)))
+                    .map(it -> new Task(profile, it))
+                    .collect(Collectors.toList());
+        } else {
+            // share partitions
+            Queue<SubTask> queue = new ConcurrentLinkedQueue<>(subs);
+            return IntStream.range(0, maxConcurrency.getAsInt())
+                    .mapToObj(i -> new Task(profile, queue))
+                    .collect(Collectors.toList());
         }
     }
 
@@ -169,39 +219,54 @@ public class JdbcInputAdapter implements InputAdapter<ExtractOperation.Input> {
 
         private final JdbcProfile profile;
 
-        private final JdbcInputDriver.Partition partition;
+        private final Queue<SubTask> tasks;
 
-        private final JdbcCounterGroup counter;
-
-        Task(JdbcProfile profile, JdbcInputDriver.Partition partition, JdbcCounterGroup counter) {
+        Task(JdbcProfile profile, Queue<SubTask> tasks) {
             this.profile = profile;
+            this.tasks = tasks;
+        }
+
+        Driver newDriver() throws IOException, InterruptedException {
+            return new Driver(profile.acquire(), tasks);
+        }
+    }
+
+    private static final class SubTask {
+
+        private final Spec spec;
+
+        final JdbcInputDriver.Partition partition;
+
+        final JdbcCounterGroup counter;
+
+        SubTask(Spec spec, Partition partition, JdbcCounterGroup counter) {
+            this.spec = spec;
             this.partition = partition;
             this.counter = counter;
         }
 
-        Driver newDriver() throws IOException, InterruptedException {
-            try (Closer closer = new Closer()) {
-                Connection connection = closer.add(profile.acquire()).getConnection();
-                return new Driver(partition.open(connection), counter, closer.move());
-            }
+        @Override
+        public String toString() {
+            return String.format("%s:%s", spec, partition);
         }
     }
 
     private static final class Driver
             implements InputSession<ExtractOperation.Input>, ExtractOperation.Input {
 
-        private final ObjectReader reader;
+        private final ConnectionPool.Handle handle;
 
-        private final JdbcCounterGroup counter;
+        private final Queue<SubTask> rest;
 
-        private final Closer resource;
+        private ObjectReader reader;
+
+        private JdbcCounterGroup counter;
 
         private long count;
 
-        Driver(ObjectReader reader, JdbcCounterGroup counter, Closer resource) {
-            this.reader = reader;
-            this.counter = counter;
-            this.resource = resource;
+        Driver(ConnectionPool.Handle handle, Queue<SubTask> tasks) {
+            this.handle = handle;
+            this.rest = tasks;
         }
 
         @Override
@@ -211,11 +276,23 @@ public class JdbcInputAdapter implements InputAdapter<ExtractOperation.Input> {
 
         @Override
         public boolean next() throws IOException, InterruptedException {
-            if (reader.nextObject()) {
-                count++;
-                return true;
+            while (true) {
+                if (reader == null) {
+                    if (rest.isEmpty()) {
+                        return false;
+                    } else {
+                        SubTask task = rest.poll();
+                        reader = task.partition.open(handle.getConnection());
+                        counter = task.counter;
+                    }
+                }
+                if (reader.nextObject()) {
+                    count++;
+                    return true;
+                } else {
+                    closeCurrent();
+                }
             }
-            return false;
         }
 
         @SuppressWarnings("unchecked")
@@ -227,12 +304,23 @@ public class JdbcInputAdapter implements InputAdapter<ExtractOperation.Input> {
         @Override
         public void close() throws IOException, InterruptedException {
             try {
-                reader.close();
+                closeCurrent();
+            } finally {
+                handle.close();
+            }
+        }
+
+        private void closeCurrent() throws IOException, InterruptedException {
+            if (reader == null) {
+                return;
+            }
+            reader.close();
+            if (count != 0) {
                 counter.add(count);
                 count = 0;
-            } finally {
-                resource.close();
             }
+            reader = null;
+            counter = null;
         }
     }
 }

@@ -79,6 +79,8 @@ public class JdbcOutputProcessor implements VertexProcessor {
 
     private final Closer closer = new Closer();
 
+    private volatile boolean maxConcurrencyEnabled;
+
     /**
      * Adds an initializer.
      * @param id the output ID
@@ -174,6 +176,10 @@ public class JdbcOutputProcessor implements VertexProcessor {
         configureProcessor(profile);
         runInitializers(jdbc, profile);
         prepareOutputs(jdbc, profile, counters);
+
+        // TODO remove workaround
+        this.maxConcurrencyEnabled = Util.isMaxConcurrencyEnabled(context);
+
         return getSchedule();
     }
 
@@ -236,7 +242,7 @@ public class JdbcOutputProcessor implements VertexProcessor {
                 return new CoarseTask(profile, units.toArray(new CoarseTaskUnit[units.size()]), c.move());
             }
         };
-        if (maxConcurrency > 0) {
+        if (maxConcurrency > 0 && maxConcurrencyEnabled == false) {
             processors = closer.add(new ConcurrencyLimitter(processors, maxConcurrency));
         }
     }

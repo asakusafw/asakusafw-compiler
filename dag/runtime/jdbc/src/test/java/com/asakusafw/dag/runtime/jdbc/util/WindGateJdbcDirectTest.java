@@ -30,6 +30,7 @@ import com.asakusafw.dag.runtime.jdbc.JdbcDagTestRoot;
 import com.asakusafw.dag.runtime.jdbc.JdbcInputDriver;
 import com.asakusafw.dag.runtime.jdbc.JdbcOperationDriver;
 import com.asakusafw.dag.runtime.jdbc.JdbcOutputDriver;
+import com.asakusafw.dag.runtime.jdbc.basic.BasicJdbcInputDriver;
 import com.asakusafw.dag.runtime.jdbc.operation.OutputClearKind;
 import com.asakusafw.dag.runtime.jdbc.testing.KsvJdbcAdapter;
 import com.asakusafw.dag.runtime.jdbc.testing.KsvModel;
@@ -143,6 +144,56 @@ public class WindGateJdbcDirectTest extends JdbcDagTestRoot {
                     .flatMap(Collection::stream)
                     .sorted((a, b) -> Long.compare(a.getKey(), b.getKey()))
                     .collect(Collectors.toList()), is(in));
+        });
+    }
+
+    /**
+     * input - w/ oracle partitions.
+     * @throws Exception if failed
+     */
+    @Test
+    public void input_oracle_partition() throws Exception {
+        edit(b -> b
+                .withOption(WindGateJdbcDirect.OPTIMIAZATION_ORACLE_PARTITION)
+                .withMaxInputConcurrency(2));
+        context("testing", c -> {
+            JdbcInputDriver driver = WindGateJdbcDirect.input("testing", TABLE, COLUMNS, KsvJdbcAdapter::new)
+                    .withOption(WindGateJdbcDirect.OPTIMIAZATION_ORACLE_PARTITION)
+                    .build(c);
+            assertThat(driver, is(not(instanceOf(BasicJdbcInputDriver.class))));
+        });
+    }
+
+    /**
+     * input - w/ oracle partitions - w/o input option.
+     * @throws Exception if failed
+     */
+    @Test
+    public void input_oracle_partition_missing_input_option() throws Exception {
+        edit(b -> b
+                .withOption(WindGateJdbcDirect.OPTIMIAZATION_ORACLE_PARTITION)
+                .withMaxInputConcurrency(2));
+        context("testing", c -> {
+            JdbcInputDriver driver = WindGateJdbcDirect.input("testing", TABLE, COLUMNS, KsvJdbcAdapter::new)
+                    .build(c);
+            assertThat(driver, is(instanceOf(BasicJdbcInputDriver.class)));
+        });
+    }
+
+    /**
+     * input - w/ oracle partitions - w/ input concurrency = 1.
+     * @throws Exception if failed
+     */
+    @Test
+    public void input_oracle_partition_no_concurrency_moment() throws Exception {
+        edit(b -> b
+                .withOption(WindGateJdbcDirect.OPTIMIAZATION_ORACLE_PARTITION)
+                .withMaxInputConcurrency(1));
+        context("testing", c -> {
+            JdbcInputDriver driver = WindGateJdbcDirect.input("testing", TABLE, COLUMNS, KsvJdbcAdapter::new)
+                    .withOption(WindGateJdbcDirect.OPTIMIAZATION_ORACLE_PARTITION)
+                    .build(c);
+            assertThat(driver, is(instanceOf(BasicJdbcInputDriver.class)));
         });
     }
 

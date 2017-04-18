@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -39,6 +40,7 @@ import com.asakusafw.dag.runtime.jdbc.basic.BasicJdbcOutputDriver;
 import com.asakusafw.dag.runtime.jdbc.basic.SplitJdbcInputDriver;
 import com.asakusafw.dag.runtime.jdbc.operation.JdbcContext;
 import com.asakusafw.dag.runtime.jdbc.operation.OutputClearKind;
+import com.asakusafw.dag.runtime.jdbc.oracle.PartitionedJdbcInputDriver;
 import com.asakusafw.lang.utils.common.Arguments;
 import com.asakusafw.lang.utils.common.Lang;
 import com.asakusafw.lang.utils.common.Optionals;
@@ -46,6 +48,7 @@ import com.asakusafw.lang.utils.common.Optionals;
 /**
  * WindGate adapter for JDBC operations.
  * @since 0.4.0
+ * @version 0.4.2
  */
 public final class WindGateJdbcDirect {
 
@@ -53,6 +56,12 @@ public final class WindGateJdbcDirect {
      * Copy of {@code com.asakusafw.windgate.core.vocabulary.JdbcProcess.OptionSymbols.CORE_SPLIT_PREFIX}.
      */
     static final String OPTIMIAZATION_CORE_SPLIT_PREFIX = "CORE_SPLIT_BY:"; //$NON-NLS-1$
+
+    /**
+     * Copy of {@code com.asakusafw.windgate.core.vocabulary.JdbcProcess.OptionSymbols.ORACLE_PARTITION}.
+     * @since 0.4.2
+     */
+    static final String OPTIMIAZATION_ORACLE_PARTITION = "ORACLE_PARTITION"; //$NON-NLS-1$
 
     /**
      * Copy of {@code com.asakusafw.windgate.core.vocabulary.JdbcProcess.OptionSymbols.ORACLE_DIRPATH}.
@@ -92,9 +101,7 @@ public final class WindGateJdbcDirect {
             Optional<String> cond = resolve(context, condition);
             Optional<String> split = getSplit(options)
                     .filter(s -> profile.getMaxInputConcurrency().orElse(1) > 1);
-            return split
-                    .map(s -> buildSplitInput(profile, tableName, columnNames, cond, s, adapters, options))
-                    .orElseGet(() -> buildBasicInput(profile, tableName, columnNames, cond, adapters, options));
+            return buildInput(profile, tableName, columnNames, cond, split, adapters, options);
         };
     }
 
@@ -110,6 +117,23 @@ public final class WindGateJdbcDirect {
                     columns));
         }
         return columns.stream().findAny();
+    }
+
+    private static JdbcInputDriver buildInput(
+            JdbcProfile profile,
+            String tableName,
+            List<String> columnNames,
+            Optional<String> cond,
+            Optional<String> splitColumn,
+            Supplier<? extends ResultSetAdapter<?>> adapters,
+            Set<String> options) {
+        if (splitColumn.isPresent()) {
+            return buildSplitInput(profile, tableName, columnNames, cond, splitColumn.get(), adapters, options);
+        } else if (isActive(profile, options, OPTIMIAZATION_ORACLE_PARTITION)) {
+            return buildPartitionedInput(profile, tableName, columnNames, cond, adapters, options);
+        } else {
+            return buildBasicInput(profile, tableName, columnNames, cond, adapters, options);
+        }
     }
 
     private static JdbcInputDriver buildBasicInput(
@@ -138,6 +162,23 @@ public final class WindGateJdbcDirect {
                 profile, tableName, columnNames,
                 splitColumn, count,
                 condition, adapters);
+    }
+
+    private static JdbcInputDriver buildPartitionedInput(
+            JdbcProfile profile,
+            String tableName,
+            List<String> columnNames,
+            Optional<String> cond,
+            Supplier<? extends ResultSetAdapter<?>> adapters,
+            Set<String> options) {
+        OptionalInt concurrency = profile.getMaxInputConcurrency();
+        if (concurrency.orElse(1) == 1) {
+            return buildBasicInput(profile, tableName, columnNames, cond, adapters, options);
+        } else {
+            return new PartitionedJdbcInputDriver(
+                    profile, tableName, columnNames,
+                    cond.orElse(null), adapters);
+        }
     }
 
     /**

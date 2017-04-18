@@ -13,31 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.asakusafw.dag.api.processor;
+package com.asakusafw.dag.runtime.jdbc.operation;
 
-import java.util.List;
-import java.util.OptionalInt;
+import com.asakusafw.dag.api.processor.ProcessorContext;
 
-/**
- * Represents a custom task schedule.
- * @since 0.4.0
- * @version 0.4.2
- */
-@FunctionalInterface
-public interface TaskSchedule {
+final class Util {
 
-    /**
-     * Returns the custom tasks schedule.
-     * @return the custom tasks schedule
-     */
-    List<? extends TaskInfo> getTasks();
+    static final String KEY_WORKAROUND_CONCURRENCY = JdbcEnvironmentInstaller.KEY_PREFIX + "workaround.concurrency";
 
-    /**
-     * Returns the number of max concurrency.
-     * @return the number of max concurrency, or empty if it is not limited
-     * @since 0.4.2
-     */
-    default OptionalInt getMaxConcurrency() {
-        return OptionalInt.empty();
+    private Util() {
+        return;
+    }
+
+    static boolean isMaxConcurrencyEnabled(ProcessorContext context) {
+        return context.getProperty(KEY_WORKAROUND_CONCURRENCY)
+                .map(Boolean::parseBoolean)
+                .orElse(false);
     }
 }

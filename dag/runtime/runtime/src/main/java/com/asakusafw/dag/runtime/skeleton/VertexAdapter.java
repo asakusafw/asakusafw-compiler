@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalInt;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -80,6 +82,8 @@ public class VertexAdapter implements VertexProcessor {
     private final AtomicReference<OperationAdapter<?>> operationAdapter = new AtomicReference<>();
 
     private final List<OutputAdapter> outputAdapters = Collections.synchronizedList(new ArrayList<>());
+
+    private final AtomicInteger maxConcurrency = new AtomicInteger(-1);
 
     /**
      * Sets an {@link InputAdapter} class for the vertex input.
@@ -194,8 +198,12 @@ public class VertexAdapter implements VertexProcessor {
     public Optional<? extends TaskSchedule> initialize(
             VertexProcessorContext context) throws IOException, InterruptedException {
         initializeAdapters(context);
-        TaskSchedule schedule = inputAdapter.get().getSchedule();
-        return Optionals.of(schedule);
+        Optional<TaskSchedule> schedule = Optionals.of(inputAdapter.get().getSchedule());
+        schedule
+            .map(TaskSchedule::getMaxConcurrency)
+            .orElse(OptionalInt.empty())
+            .ifPresent(maxConcurrency::set);
+        return schedule;
     }
 
     private void initializeAdapters(VertexProcessorContext context) throws IOException, InterruptedException {
@@ -229,6 +237,11 @@ public class VertexAdapter implements VertexProcessor {
             target.accept(adapter);
             adapter.initialize();
         }
+    }
+
+    @Override
+    public int getMaxConcurrency() {
+        return maxConcurrency.get();
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
