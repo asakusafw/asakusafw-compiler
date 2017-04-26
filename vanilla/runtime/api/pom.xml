@@ -6,7 +6,7 @@
   <parent>
     <artifactId>project</artifactId>
     <groupId>com.asakusafw.vanilla.runtime</groupId>
-    <version>0.4.1-SNAPSHOT</version>
+    <version>0.4.1</version>
   </parent>
 
   <packaging>jar</packaging>
