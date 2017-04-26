@@ -28,7 +28,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,6 +60,7 @@ import com.asakusafw.lang.compiler.model.graph.OperatorOutput;
 import com.asakusafw.lang.compiler.model.graph.OperatorProperty;
 import com.asakusafw.lang.compiler.model.graph.Operators;
 import com.asakusafw.lang.compiler.model.graph.UserOperator;
+import com.asakusafw.lang.compiler.model.info.ExternalOutputInfo;
 import com.asakusafw.lang.compiler.model.info.JobflowInfo;
 import com.asakusafw.lang.compiler.optimizer.OperatorCharacterizers;
 import com.asakusafw.lang.compiler.optimizer.OperatorRewriters;
@@ -73,6 +76,7 @@ import com.asakusafw.lang.compiler.planning.PlanMarkers;
 import com.asakusafw.lang.compiler.planning.Planning;
 import com.asakusafw.lang.compiler.planning.SubPlan;
 import com.asakusafw.lang.compiler.planning.util.GraphStatistics;
+import com.asakusafw.lang.utils.common.Optionals;
 import com.asakusafw.utils.graph.Graph;
 
 /**
@@ -606,6 +610,8 @@ public final class DagPlanning {
             assert marker != null;
             switch (marker) {
             case CHECKPOINT:
+                return findOppositeExternalOutput(port)
+                        .orElseGet(operator::getDataType);
             case BROADCAST:
                 return operator.getDataType();
             case GATHER:
@@ -614,6 +620,25 @@ public final class DagPlanning {
             default:
                 return PlanAssembler.DEFAULT_EQUIVALENCE.extract(port.getOwner(), operator);
             }
+        }
+
+        private static Optional<Object> findOppositeExternalOutput(SubPlan.Output port) {
+            ExternalOutput found = null;
+            for (SubPlan.Input opposite : port.getOpposites()) {
+                for (OperatorInput input : opposite.getOperator().getOutput().getOpposites()) {
+                    if (found == null && input.getOwner().getOperatorKind() == OperatorKind.OUTPUT) {
+                        found = (ExternalOutput) input.getOwner();
+                    } else {
+                        return Optionals.empty();
+                    }
+                }
+            }
+            return Optionals.of(found)
+                    .filter(ExternalOutput::isExternal)
+                    .map(ExternalOutput::getInfo)
+                    .map(ExternalOutputInfo::getContents)
+                    .filter(it -> it != null)
+                    .map(Function.identity());
         }
     }
 
