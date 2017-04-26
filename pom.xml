@@ -4,7 +4,7 @@
   <name>Asakusa Framework Language Project</name>
   <groupId>com.asakusafw.lang</groupId>
   <artifactId>project</artifactId>
-  <version>0.4.1-SNAPSHOT</version>
+  <version>0.4.2-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <url>http://asakusafw.com</url>
@@ -56,8 +56,8 @@
     <plugin.surefire-report.version>2.19.1</plugin.surefire-report.version>
 
     <!-- artifact versions -->
-    <asakusafw.version>0.9.1-SNAPSHOT</asakusafw.version>
-    <asakusafw-sdk.version>0.9.1-SNAPSHOT</asakusafw-sdk.version>
+    <asakusafw.version>0.9.2-SNAPSHOT</asakusafw.version>
+    <asakusafw-sdk.version>0.9.2-SNAPSHOT</asakusafw-sdk.version>
     <hadoop.version>2.7.3</hadoop.version>
     <commons-cli.version>1.2</commons-cli.version>
     <asm.version>5.1</asm.version>
