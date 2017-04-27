@@ -16,6 +16,8 @@
 package com.asakusafw.dag.runtime.skeleton;
 
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -40,7 +42,7 @@ import com.asakusafw.runtime.model.DataModel;
 /**
  * {@link InputAdapter} for co-group edge inputs.
  * @since 0.4.0
- * @version 0.4.1
+ * @version 0.4.2
  */
 public class CoGroupInputAdapter implements InputAdapter<CoGroupOperation.Input> {
 
@@ -53,6 +55,14 @@ public class CoGroupInputAdapter implements InputAdapter<CoGroupOperation.Input>
             "com.asakusafw.dag.input.file.window.size"; //$NON-NLS-1$
 
     /**
+     * The configuration key of the temporary directory of file mapped inputs.
+     * @see BufferType#FILE
+     * @since 0.4.2
+     */
+    public static final String KEY_FILE_DIRECTORY =
+            "com.asakusafw.dag.input.file.directory"; //$NON-NLS-1$
+
+    /**
      * The default value of {@link #KEY_FILE_WINDOW_SIZE}.
      */
     public static final int DEFAULT_FILE_WINDOW_SIZE = 256;
@@ -62,6 +72,8 @@ public class CoGroupInputAdapter implements InputAdapter<CoGroupOperation.Input>
     private final Closer closer = new Closer();
 
     private final int fileWindowSize;
+
+    private final Path temporaryDirectory;
 
     /**
      * Creates a new instance.
@@ -73,6 +85,9 @@ public class CoGroupInputAdapter implements InputAdapter<CoGroupOperation.Input>
                 context,
                 "window size",
                 KEY_FILE_WINDOW_SIZE, DEFAULT_FILE_WINDOW_SIZE);
+        this.temporaryDirectory = context.getProperty(KEY_FILE_DIRECTORY)
+                .map(Paths::get)
+                .orElse(null);
     }
 
     /**
@@ -124,7 +139,9 @@ public class CoGroupInputAdapter implements InputAdapter<CoGroupOperation.Input>
             if (fileWindowSize <= 0) {
                 return new HeapListBuilder<>(adapter);
             } else {
-                return new SpillListBuilder<>(adapter, fileWindowSize);
+                return new SpillListBuilder<>(adapter, new SpillListBuilder.Options()
+                        .withWindowSize(fileWindowSize)
+                        .withDirectory(temporaryDirectory));
             }
         default:
             throw new AssertionError(bufferType);
