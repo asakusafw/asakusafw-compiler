@@ -15,7 +15,9 @@
  */
 package com.asakusafw.dag.compiler.model.build;
 
+import java.text.MessageFormat;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -150,11 +152,14 @@ public class GraphInfoBuilder {
             if (targets.isEmpty()) {
                 continue;
             }
-            // FIXME check - each descriptor must be compatible
-            EdgeDescriptor descriptor = targets.stream()
+            List<EdgeDescriptor> candidates = targets.stream()
                 .map(ResolvedInputInfo::getDescriptor)
-                .findFirst()
-                .orElseThrow(IllegalStateException::new);
+                .distinct()
+                .collect(Collectors.toList());
+            Invariants.require(candidates.size() == 1, () -> MessageFormat.format(
+                    "ambiguous edges: {}",
+                    candidates));
+            EdgeDescriptor descriptor = candidates.get(0);
             PortInfo upstream = entry.getValue();
             targets.stream()
                 .map(is::get)

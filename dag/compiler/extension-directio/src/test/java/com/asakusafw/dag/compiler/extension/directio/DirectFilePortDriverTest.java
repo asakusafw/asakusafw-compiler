@@ -215,6 +215,35 @@ public class DirectFilePortDriverTest extends VanillaCompilerTesterRoot {
         });
     }
 
+    /**
+     * multiple output from single input.
+     * @throws Exception if failed
+     */
+    @Test
+    public void output_multiple() throws Exception {
+        testio.input("t", MockDataModel.class, o -> {
+            o.write(new MockDataModel(0, "Hello1"));
+            o.write(new MockDataModel(0, "Hello2"));
+        });
+        enableDirectIo();
+        run(profile, executor, g -> g
+                .input("in", TestInput.of("t", MockDataModel.class))
+                .output("o0", DirectFileOutput.of("o0", "{key}.bin", MockDataFormat.class).withOrder("+value"))
+                .output("o1", DirectFileOutput.of("o1", "{key}.bin", MockDataFormat.class).withOrder("-value"))
+                .connect("in", "o0")
+                .connect("in", "o1"));
+        helper.output("o0", "0.bin", MockDataFormat.class, o -> {
+            assertThat(o, contains(
+                    new MockDataModel(0, "Hello1"),
+                    new MockDataModel(0, "Hello2")));
+        });
+        helper.output("o1", "0.bin", MockDataFormat.class, o -> {
+            assertThat(o, contains(
+                    new MockDataModel(0, "Hello2"),
+                    new MockDataModel(0, "Hello1")));
+        });
+    }
+
     private void enableDirectIo() {
         Configuration configuration = helper.getContext().newConfiguration();
         profile.forFrameworkInstallation().add(LOCATION_CORE_CONFIGURATION, o -> configuration.writeXml(o));
