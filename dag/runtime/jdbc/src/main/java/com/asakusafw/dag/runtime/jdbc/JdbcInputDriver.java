@@ -18,6 +18,7 @@ package com.asakusafw.dag.runtime.jdbc;
 import java.io.IOException;
 import java.sql.Connection;
 import java.util.List;
+import java.util.OptionalDouble;
 
 import com.asakusafw.dag.api.processor.ObjectReader;
 
@@ -40,6 +41,7 @@ public interface JdbcInputDriver {
     /**
      * Represents a partition of JDBC input.
      * @since 0.4.0
+     * @version 0.4.2
      */
     @FunctionalInterface
     interface Partition {
@@ -52,5 +54,13 @@ public interface JdbcInputDriver {
          * @throws InterruptedException if interrupted while computing input partitions
          */
         ObjectReader open(Connection connection) throws IOException, InterruptedException;
+
+        /**
+         * Returns the number of estimated rows in this partition.
+         * @return the estimated row count
+         */
+        default OptionalDouble getEsitimatedRowCount() {
+            return OptionalDouble.empty();
+        }
     }
 }

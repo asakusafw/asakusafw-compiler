@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.OptionalInt;
 
 import com.asakusafw.dag.api.processor.TaskInfo;
 import com.asakusafw.dag.api.processor.TaskSchedule;
@@ -28,10 +29,13 @@ import com.asakusafw.lang.utils.common.Arguments;
 /**
  * A basic implementation of {@link TaskSchedule}.
  * @since 0.4.0
+ * @version 0.4.2
  */
 public class BasicTaskSchedule implements TaskSchedule {
 
     private final List<TaskInfo> tasks;
+
+    private final int maxConcurrency;
 
     /**
      * Creates a new empty instance.
@@ -45,8 +49,7 @@ public class BasicTaskSchedule implements TaskSchedule {
      * @param tasks each task information
      */
     public BasicTaskSchedule(List<? extends TaskInfo> tasks) {
-        Arguments.requireNonNull(tasks);
-        this.tasks = new ArrayList<>(tasks);
+        this(new ArrayList<>(Arguments.requireNonNull(tasks)), -1);
     }
 
     /**
@@ -57,9 +60,34 @@ public class BasicTaskSchedule implements TaskSchedule {
         this(Arrays.asList(tasks));
     }
 
+    private BasicTaskSchedule(List<TaskInfo> tasks, int maxConcurrency) {
+        Arguments.requireNonNull(tasks);
+        this.tasks = tasks;
+        this.maxConcurrency = maxConcurrency;
+    }
+
+    /**
+     * Returns a new schedule with the given max concurrency.
+     * @param newValue the new max concurrency
+     * @return the created object
+     * @since 0.4.2
+     */
+    public BasicTaskSchedule withMaxConcurrency(int newValue) {
+        return new BasicTaskSchedule(tasks, newValue);
+    }
+
     @Override
     public List<TaskInfo> getTasks() {
         return Collections.unmodifiableList(tasks);
+    }
+
+    @Override
+    public OptionalInt getMaxConcurrency() {
+        if (maxConcurrency >= 1) {
+            return OptionalInt.of(maxConcurrency);
+        } else {
+            return OptionalInt.empty();
+        }
     }
 
     @Override

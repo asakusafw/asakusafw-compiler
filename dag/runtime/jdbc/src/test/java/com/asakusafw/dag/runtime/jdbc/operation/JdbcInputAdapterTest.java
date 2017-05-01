@@ -89,8 +89,75 @@ public class JdbcInputAdapterTest extends JdbcDagTestRoot {
         }
     }
 
-    private BasicJdbcInputDriver driver() {
+    /**
+     * multiple tasks.
+     * @throws Exception if failed
+     */
+    @Test
+    public void multiple_tasks_separate() throws Exception {
+        insert(1, null, "Hello1");
+        insert(2, null, "Hello2");
+        insert(3, null, "Hello3");
+        insert(4, null, "Hello4");
+        insert(5, null, "Hello5");
+        JdbcEnvironment environment = environment(PROFILE);
+        MockVertexProcessorContext vc = new MockVertexProcessorContext()
+                .withResource(StageInfo.class, STAGE)
+                .withResource(JdbcEnvironment.class, environment);
+        try (JdbcInputAdapter adapter = new JdbcInputAdapter(vc)) {
+            adapter.input("t1", PROFILE, driver("M_KEY = 1"));
+            adapter.input("t2", PROFILE, driver("M_KEY = 2"));
+            adapter.input("t3", PROFILE, driver("M_KEY = 3"));
+            adapter.input("t4", PROFILE, driver("M_KEY = 4"));
+            adapter.input("t5", PROFILE, driver("M_KEY = 5"));
+            adapter.initialize();
+            assertThat(collect(adapter), contains(
+                    new KsvModel(1, null, "Hello1"),
+                    new KsvModel(2, null, "Hello2"),
+                    new KsvModel(3, null, "Hello3"),
+                    new KsvModel(4, null, "Hello4"),
+                    new KsvModel(5, null, "Hello5")));
+        }
+    }
+
+    /**
+     * multiple tasks.
+     * @throws Exception if failed
+     */
+    @Test
+    public void multiple_tasks_share() throws Exception {
+        edit(it -> it.withMaxInputConcurrency(2));
+        insert(1, null, "Hello1");
+        insert(2, null, "Hello2");
+        insert(3, null, "Hello3");
+        insert(4, null, "Hello4");
+        insert(5, null, "Hello5");
+        JdbcEnvironment environment = environment(PROFILE);
+        MockVertexProcessorContext vc = new MockVertexProcessorContext()
+                .withResource(StageInfo.class, STAGE)
+                .withResource(JdbcEnvironment.class, environment);
+        try (JdbcInputAdapter adapter = new JdbcInputAdapter(vc)) {
+            adapter.input("t1", PROFILE, driver("M_KEY = 1"));
+            adapter.input("t2", PROFILE, driver("M_KEY = 2"));
+            adapter.input("t3", PROFILE, driver("M_KEY = 3"));
+            adapter.input("t4", PROFILE, driver("M_KEY = 4"));
+            adapter.input("t5", PROFILE, driver("M_KEY = 5"));
+            adapter.initialize();
+            assertThat(collect(adapter), contains(
+                    new KsvModel(1, null, "Hello1"),
+                    new KsvModel(2, null, "Hello2"),
+                    new KsvModel(3, null, "Hello3"),
+                    new KsvModel(4, null, "Hello4"),
+                    new KsvModel(5, null, "Hello5")));
+        }
+    }
+
+    private static BasicJdbcInputDriver driver() {
         return new BasicJdbcInputDriver(SELECT, KsvJdbcAdapter::new);
+    }
+
+    private static BasicJdbcInputDriver driver(String condition) {
+        return new BasicJdbcInputDriver(String.format("%s WHERE %s", SELECT, condition), KsvJdbcAdapter::new);
     }
 
     private static List<KsvModel> collect(JdbcInputAdapter adapter) throws IOException, InterruptedException {
