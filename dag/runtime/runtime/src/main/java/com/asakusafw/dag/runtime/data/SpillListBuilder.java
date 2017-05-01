@@ -32,11 +32,13 @@ import org.slf4j.LoggerFactory;
 
 import com.asakusafw.dag.api.common.ObjectCursor;
 import com.asakusafw.lang.utils.buffer.nio.ResizableNioDataBuffer;
+import com.asakusafw.lang.utils.common.Arguments;
 
 /**
  * A {@link ListBuilder} which provides temporary file backed lists.
  * @param <T> the element type
  * @since 0.4.1
+ * @version 0.4.2
  */
 public class SpillListBuilder<T> implements ListBuilder<T> {
 
@@ -53,7 +55,7 @@ public class SpillListBuilder<T> implements ListBuilder<T> {
      * @param adapter the data adapter
      */
     public SpillListBuilder(DataAdapter<T> adapter) {
-        this(adapter, DEFAULT_CACHE_SIZE, DEFAULT_BUFFER_SOFT_LIMIT);
+        this(adapter, new Options());
     }
 
     /**
@@ -62,7 +64,8 @@ public class SpillListBuilder<T> implements ListBuilder<T> {
      * @param cacheSize the number of objects should be cached on Java heap
      */
     public SpillListBuilder(DataAdapter<T> adapter, int cacheSize) {
-        this.entity = new Entity<>(adapter, cacheSize, DEFAULT_BUFFER_SOFT_LIMIT);
+        this(adapter, new Options()
+                .withWindowSize(cacheSize));
     }
 
     /**
@@ -72,7 +75,20 @@ public class SpillListBuilder<T> implements ListBuilder<T> {
      * @param bufferSoftLimit the buffer size soft limit in bytes
      */
     public SpillListBuilder(DataAdapter<T> adapter, int cacheSize, int bufferSoftLimit) {
-        this.entity = new Entity<>(adapter, cacheSize, bufferSoftLimit);
+        this(adapter, new Options()
+                .withWindowSize(cacheSize)
+                .withBufferSoftLimit(bufferSoftLimit));
+    }
+
+    /**
+     * Creates a new instance.
+     * @param adapter the data adapter
+     * @param options the list options
+     * @since 0.4.2
+     */
+    public SpillListBuilder(DataAdapter<T> adapter, Options options) {
+        Arguments.requireNonNull(options);
+        this.entity = new Entity<>(adapter, options);
     }
 
     @Override
@@ -85,6 +101,49 @@ public class SpillListBuilder<T> implements ListBuilder<T> {
     public void close() throws IOException, InterruptedException {
         Arrays.fill(entity.elements, null);
         entity.store.close();
+    }
+
+    /**
+     * Options of {@link SpillListBuilder}.
+     * @since 0.4.2
+     */
+    public static class Options {
+
+        int windowSize = DEFAULT_CACHE_SIZE;
+
+        int bufferSoftLimit = DEFAULT_BUFFER_SOFT_LIMIT;
+
+        Path directory = null;
+
+        /**
+         * Sets the number of objects should be cached on Java heap.
+         * @param newValue the new value
+         * @return this
+         */
+        public Options withWindowSize(int newValue) {
+            this.windowSize = newValue;
+            return this;
+        }
+
+        /**
+         * Sets the buffer size soft limit in bytes.
+         * @param newValue the new value
+         * @return this
+         */
+        public Options withBufferSoftLimit(int newValue) {
+            this.bufferSoftLimit = newValue;
+            return this;
+        }
+
+        /**
+         * Sets the spill out directory.
+         * @param newValue the new value
+         * @return this
+         */
+        public Options withDirectory(Path newValue) {
+            this.directory = newValue;
+            return this;
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -100,10 +159,10 @@ public class SpillListBuilder<T> implements ListBuilder<T> {
 
         int sizeInList;
 
-        Entity(DataAdapter<T> adapter, int pageSize, int bufferSoftLimit) {
-            this.store = new Store<>(bufferSoftLimit);
+        Entity(DataAdapter<T> adapter, Options options) {
+            this.store = new Store<>(options.directory, options.bufferSoftLimit);
             this.adapter = adapter;
-            this.elements = (T[]) new Object[pageSize];
+            this.elements = (T[]) new Object[options.windowSize];
             this.currentPageIndex = 0;
             this.sizeInList = 0;
         }
@@ -172,6 +231,8 @@ public class SpillListBuilder<T> implements ListBuilder<T> {
 
         private final int bufferSoftLimit;
 
+        private final Path directory;
+
         private Path path;
 
         private FileChannel channel;
@@ -186,7 +247,8 @@ public class SpillListBuilder<T> implements ListBuilder<T> {
 
         private final ResizableNioDataBuffer buffer = new ResizableNioDataBuffer();
 
-        Store(int bufferSoftLimit) {
+        Store(Path directory, int bufferSoftLimit) {
+            this.directory = directory;
             this.bufferSoftLimit = bufferSoftLimit;
         }
 
@@ -196,7 +258,12 @@ public class SpillListBuilder<T> implements ListBuilder<T> {
 
         void putPage(DataAdapter<T> adapter, int index, T[] elements, int count) throws IOException {
             if (path == null) {
-                path = Files.createTempFile("spill-", ".bin");
+                if (directory == null) {
+                    path = Files.createTempFile("spill-", ".bin");
+                } else {
+                    Files.createDirectories(directory);
+                    path = Files.createTempFile(directory, "spill-", ".bin");
+                }
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("generating list spill: {}", path);
                 }

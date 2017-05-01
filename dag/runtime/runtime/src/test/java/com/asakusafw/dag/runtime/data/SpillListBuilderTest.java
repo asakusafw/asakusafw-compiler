@@ -15,19 +15,29 @@
  */
 package com.asakusafw.dag.runtime.data;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
+import java.io.File;
 import java.util.List;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 import com.asakusafw.runtime.value.IntOption;
+import com.asakusafw.dag.runtime.data.SpillListBuilder.Options;
 
 /**
  * Test for {@link SpillListBuilder}.
  */
 public class SpillListBuilderTest {
+
+    /**
+     * temporary folder.
+     */
+    @Rule
+    public final TemporaryFolder temporary = new TemporaryFolder();
 
     /**
      * simple case.
@@ -275,6 +285,22 @@ public class SpillListBuilderTest {
             }
             long t2 = System.currentTimeMillis();
             System.out.printf("fragments - write: %,dms, read: %,dms%n", t1 - t0, t2 - t1);
+        }
+    }
+
+    /**
+     * w/ directory.
+     * @throws Exception if failed
+     */
+    @Test
+    public void custom_directory() throws Exception {
+        File dir = temporary.newFolder();
+        dir.delete();
+        try (SpillListBuilder<IntOption> builder = new SpillListBuilder<>(new IntOptionAdapter(), new Options()
+                .withWindowSize(4)
+                .withDirectory(dir.toPath()))) {
+            builder.build(IntOptionAdapter.range(0, 5));
+            assertThat(dir.isDirectory(), is(true));
         }
     }
 
