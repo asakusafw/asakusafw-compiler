@@ -226,7 +226,7 @@ public class BasicDataTable<T> implements DataTable<T> {
         }
         if (element == null) {
             throw new IllegalArgumentException(MessageFormat.format(
-                    "key element must be never null (at {0})",
+                    "key element must never be null (at {0})",
                     index));
         }
         assert keyElementTypes != null;
