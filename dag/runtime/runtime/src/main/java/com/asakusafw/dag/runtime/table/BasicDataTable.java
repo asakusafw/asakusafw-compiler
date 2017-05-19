@@ -234,7 +234,7 @@ public class BasicDataTable<T> implements DataTable<T> {
         Class<? extends Object> actual = element.getClass();
         if (actual.equals(keyElementTypes[index]) == false) {
             throw new IllegalArgumentException(MessageFormat.format(
-                    "key element at {0} is inconsistent type: required={1}, actual={2}",
+                    "key element at {0} has an inconsistent type: required={1}, actual={2}",
                     index,
                     keyElementTypes[index].getName(),
                     actual.getName()));
