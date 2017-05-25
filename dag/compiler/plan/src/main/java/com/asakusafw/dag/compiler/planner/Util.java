@@ -175,7 +175,8 @@ final class Util {
             .filter(x -> x.isEmpty() == false)
             .peek(x -> Invariants.require(x.size() == 1))
             .map(x -> x.iterator().next().getOwner())
-            .map(o -> Invariants.requireNonNull(map.get(o)))
+            .filter(map::containsKey)
+            .map(map::get)
             .collect(Collectors.toList());
         Invariants.require(results.size() == primary.size());
         return results;

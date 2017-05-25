@@ -42,6 +42,7 @@ import com.asakusafw.lang.compiler.tester.CompilerProfile;
 import com.asakusafw.lang.compiler.tester.executor.JobflowExecutor;
 import com.asakusafw.lang.compiler.tester.externalio.TestInput;
 import com.asakusafw.lang.compiler.tester.externalio.TestOutput;
+import com.asakusafw.lang.utils.common.Lang;
 import com.asakusafw.runtime.core.GroupView;
 import com.asakusafw.runtime.core.Result;
 import com.asakusafw.runtime.windows.WindowsSupport;
@@ -801,6 +802,60 @@ public class VanillaJobflowProcessorTest extends VanillaCompilerTesterRoot {
                 .connect("op", "out"));
     }
 
+    /**
+     * group w/ view.
+     * @throws Exception if failed
+     */
+    @Test
+    public void group_view() throws Exception {
+        testio.input("t", MockDataModel.class, o -> {
+            o.write(new MockDataModel(0, "A"));
+            o.write(new MockDataModel(1, "B"));
+            o.write(new MockDataModel(2, "C"));
+        });
+        testio.input("u", MockDataModel.class, o -> {
+            Lang.pass();
+        });
+        testio.input("v", MockDataModel.class, o -> {
+            o.write(new MockDataModel(3, "B"));
+            o.write(new MockDataModel(4, "C"));
+            o.write(new MockDataModel(5, "C"));
+            o.write(new MockDataModel(6, "D"));
+        });
+        testio.output("t", MockDataModel.class, o -> {
+            assertThat(o, containsInAnyOrder(
+                    new MockDataModel(0, "A@0"),
+                    new MockDataModel(1, "B@1"),
+                    new MockDataModel(2, "C@2")));
+        });
+        /*
+         * [In(t)] -+
+         *           \
+         * [In(t)] ---+-> [CoGroup] -> [Out]
+         *                |
+         * [In(v)] -------/
+         */
+        run(profile, executor, g -> g
+                .input("in0", TestInput.of("t", MockDataModel.class))
+                .input("in1", TestInput.of("u", MockDataModel.class))
+                .input("side", TestInput.of("v", MockDataModel.class))
+                .operator("op", Ops.class, "group_view", b -> b
+                        .input("in0", typeOf(MockDataModel.class), c -> c
+                                .group(group("=key", "+sort")))
+                        .input("in1", typeOf(MockDataModel.class), c -> c
+                                .group(group("=key", "+sort")))
+                        .input("view", typeOf(MockDataModel.class), c -> c
+                                .group(group("=value"))
+                                .unit(InputUnit.WHOLE))
+                        .output("out", typeOf(MockDataModel.class))
+                        .build())
+                .output("out", TestOutput.of("t", MockDataModel.class))
+                .connect("in0", "op.in0")
+                .connect("in1", "op.in1")
+                .connect("side", "op.view")
+                .connect("op", "out"));
+    }
+
     private static BigDecimal d(long value) {
         return new BigDecimal(value);
     }
@@ -862,6 +917,7 @@ public class VanillaJobflowProcessorTest extends VanillaCompilerTesterRoot {
         //@Sticky
         @Update
         public void sticky(MockDataModel model) {
+            Lang.pass(model);
             STICKY.set(true);
         }
 
@@ -891,6 +947,19 @@ public class VanillaJobflowProcessorTest extends VanillaCompilerTesterRoot {
         public void view(MockDataModel model,
                 @Key(group = "key", order="sort") GroupView<MockDataModel> table) {
             model.setValue(model.getValue() + table.find(model.getKeyOption()).get(0).getValue());
+        }
+
+        @CoGroup
+        public void group_view(
+                @Key(group = "key", order="sort") List<MockDataModel> in0,
+                @Key(group = "key", order="sort") List<MockDataModel> in1,
+                @Key(group = "value") GroupView<MockDataModel> table,
+                Result<MockDataModel> out) {
+            Lang.pass(in1);
+            for (MockDataModel model : in0) {
+                model.setValue(model.getValue() + "@" + table.find(model.getValueOption()).size());
+                out.add(model);
+            }
         }
     }
 
