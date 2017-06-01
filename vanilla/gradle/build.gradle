@@ -25,7 +25,7 @@ ext.parentPom = { f ->
         hadoopVersion : xml['properties']['hadoop.version'].text(),
     ]
 }(project.file('../../pom.xml')) // I'm on './vanilla/gradle/build.gradle'.
- 
+
 group = 'com.asakusafw.vanilla'
 version = parentPom.projectVersion
 
@@ -71,6 +71,19 @@ tasks.withType(AbstractCompile) { task ->
 
 eclipse.jdt {
     javaRuntimeName = "JavaSE-${sourceCompatibility}"
+}
+if (project.hasProperty('referProject')) {
+    eclipse.classpath.file.whenMerged { classpath ->
+        classpath.entries = classpath.entries.collect { entry ->
+            if (entry instanceof org.gradle.plugins.ide.eclipse.model.Library \
+                    && entry.moduleVersion \
+                    && entry.moduleVersion.name == 'asakusa-gradle-plugins') {
+                new org.gradle.plugins.ide.eclipse.model.ProjectDependency('/asakusa-gradle-plugins')
+            } else {
+                entry
+            }
+        }.unique() as List
+    }
 }
 
 groovydoc {
