@@ -16,5 +16,6 @@
     <module>model</module>
     <module>api</module>
     <module>directio</module>
+    <module>windgate</module>
   </modules>
 </project>
