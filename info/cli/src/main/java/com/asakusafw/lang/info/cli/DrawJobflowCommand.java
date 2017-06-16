@@ -74,7 +74,7 @@ public class DrawJobflowCommand extends InfoCommand {
         writer.println("}");
     }
 
-    private String analyzeJobflow(JobflowInfo it){
+    private String analyzeJobflow(JobflowInfo it) {
         if (showAll || showJobflowType) {
             return String.join("\n",
                     it.getId(),
