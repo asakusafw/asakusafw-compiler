@@ -29,6 +29,7 @@ public class WindGateOutputInfo extends WindGatePortInfo {
     /**
      * Creates a new instance.
      * @param name the port name
+     * @param descriptionClass the description class
      * @param profileName the profile name
      * @param resourceName the resource name
      * @param configuration the driver configuration
@@ -36,10 +37,11 @@ public class WindGateOutputInfo extends WindGatePortInfo {
     @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
     public WindGateOutputInfo(
             @JsonProperty(ID_NAME) String name,
+            @JsonProperty(ID_DESCRIPTION) String descriptionClass,
             @JsonProperty(ID_PROFILE_NAME) String profileName,
             @JsonProperty(ID_RESOURCE_NAME) String resourceName,
             @JsonProperty(ID_CONFIGURATION) Map<String, String> configuration) {
-        super(name, profileName, resourceName, configuration);
+        super(name, descriptionClass, profileName, resourceName, configuration);
     }
 
     @Override

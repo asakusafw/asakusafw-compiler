@@ -36,6 +36,7 @@ public class WindGateOutputInfoTest {
                 WindGateOutputInfo.class,
                 new WindGateOutputInfo(
                         "test-name",
+                        "com.example.WGI",
                         "test-profile",
                         "test-resource",
                         Arrays.stream(new String[][] {

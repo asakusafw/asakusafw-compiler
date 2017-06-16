@@ -81,6 +81,7 @@ public class WindGateIoAttributeCollector implements AttributeCollector {
 
         T newInstance(
                 String name,
+                String descriptionClass,
                 String profileName,
                 String resourceName,
                 Map<String, String> configuration);
@@ -93,6 +94,9 @@ public class WindGateIoAttributeCollector implements AttributeCollector {
                 DriverScript script = model.getDriverScript();
                 return Optional.of(newInstance(
                         port.getName(),
+                        Optional.ofNullable(info.getDescriptionClass())
+                            .map(ClassDescription::getBinaryName)
+                            .orElse(null),
                         model.getProfileName(),
                         script.getResourceName(),
                         script.getConfiguration()));
