@@ -17,5 +17,6 @@
     <module>api</module>
     <module>directio</module>
     <module>windgate</module>
+    <module>cli</module>
   </modules>
 </project>

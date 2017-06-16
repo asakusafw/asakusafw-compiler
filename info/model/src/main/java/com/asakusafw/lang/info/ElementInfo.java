@@ -16,6 +16,7 @@
 package com.asakusafw.lang.info;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Represents a DSL element.
@@ -40,4 +41,18 @@ public interface ElementInfo {
      * @return the attributes
      */
     List<? extends Attribute> getAttributes();
+
+    /**
+     * Returns an attribute of this elements.
+     * @param <T> the attribute type
+     * @param type the attribute type
+     * @return the attribute, or empty if it is not found
+     * @since 0.4.2
+     */
+    default <T extends Attribute> Optional<T> findAttribute(Class<T> type) {
+        return getAttributes().stream()
+                .filter(type::isInstance)
+                .map(type::cast)
+                .findFirst();
+    }
 }

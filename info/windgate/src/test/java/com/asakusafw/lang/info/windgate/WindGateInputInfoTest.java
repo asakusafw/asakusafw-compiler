@@ -36,6 +36,7 @@ public class WindGateInputInfoTest {
                 WindGateInputInfo.class,
                 new WindGateInputInfo(
                         "test-name",
+                        "com.example.WGD",
                         "test-profile",
                         "test-resource",
                         Arrays.stream(new String[][] {

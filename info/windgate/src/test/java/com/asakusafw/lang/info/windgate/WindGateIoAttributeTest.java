@@ -38,6 +38,7 @@ public class WindGateIoAttributeTest {
                 new WindGateIoAttribute(
                         Arrays.asList(new WindGateInputInfo(
                                 "test-name",
+                                "com.example.WGI",
                                 "test-profile",
                                 "test-resource",
                                 Arrays.stream(new String[][] {
@@ -47,6 +48,7 @@ public class WindGateIoAttributeTest {
                                 }).collect(Collectors.toMap(it -> it[0], it -> it[1])))),
                         Arrays.asList(new WindGateOutputInfo(
                                 "test-name",
+                                "com.example.WGO",
                                 "test-profile",
                                 "test-resource",
                                 Arrays.stream(new String[][] {

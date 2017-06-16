@@ -28,6 +28,8 @@ public abstract class WindGatePortInfo {
 
     static final String ID_NAME = "name";
 
+    static final String ID_DESCRIPTION = "description";
+
     static final String ID_PROFILE_NAME = "profile";
 
     static final String ID_RESOURCE_NAME = "resource";
@@ -35,6 +37,8 @@ public abstract class WindGatePortInfo {
     static final String ID_CONFIGURATION = "configuration";
 
     private final String name;
+
+    private final String descriptionClass;
 
     private final String profileName;
 
@@ -45,16 +49,19 @@ public abstract class WindGatePortInfo {
     /**
      * Creates a new instance.
      * @param name the port name
+     * @param descriptionClass the description class
      * @param profileName the profile name
      * @param resourceName the resource name
      * @param configuration the driver configuration
      */
     protected WindGatePortInfo(
             String name,
+            String descriptionClass,
             String profileName,
             String resourceName,
             Map<String, String> configuration) {
         this.name = name;
+        this.descriptionClass = descriptionClass;
         this.profileName = profileName;
         this.resourceName = resourceName;
         this.configuration = Util.freeze(configuration);
@@ -67,6 +74,15 @@ public abstract class WindGatePortInfo {
     @JsonProperty(ID_NAME)
     public String getName() {
         return name;
+    }
+
+    /**
+     * Returns the description class name.
+     * @return the description class name
+     */
+    @JsonProperty(ID_DESCRIPTION)
+    public String getDescriptionClass() {
+        return descriptionClass;
     }
 
     /**
@@ -101,6 +117,7 @@ public abstract class WindGatePortInfo {
         final int prime = 31;
         int result = 1;
         result = prime * result + Objects.hashCode(name);
+        result = prime * result + Objects.hashCode(descriptionClass);
         result = prime * result + Objects.hashCode(profileName);
         result = prime * result + Objects.hashCode(resourceName);
         result = prime * result + Objects.hashCode(configuration);
@@ -120,6 +137,7 @@ public abstract class WindGatePortInfo {
         }
         WindGatePortInfo other = (WindGatePortInfo) obj;
         return Objects.equals(name, other.name)
+                && Objects.equals(descriptionClass, other.descriptionClass)
                 && Objects.equals(profileName, other.profileName)
                 && Objects.equals(resourceName, other.resourceName)
                 && Objects.equals(configuration, other.configuration);

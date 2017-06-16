@@ -15,6 +15,8 @@
  */
 package com.asakusafw.lang.info;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
@@ -31,9 +33,12 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 public interface Attribute {
 
     /**
-     * Returns the attribute ID.
+     * Returns the attribute ID (optional).
      * @return the attribute ID
      */
     @JsonProperty
-    String getId();
+    @JsonInclude(Include.NON_NULL)
+    default String getId() {
+        return null;
+    }
 }
