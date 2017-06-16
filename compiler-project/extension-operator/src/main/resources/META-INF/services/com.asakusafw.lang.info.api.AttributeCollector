@@ -1,0 +1,2 @@
+com.asakusafw.lang.compiler.operator.info.OperatorGraphAttributeCollector
+com.asakusafw.lang.compiler.operator.info.PlanAttributeCollector

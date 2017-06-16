@@ -39,8 +39,7 @@ public final class FlowOperatorSpec implements OperatorSpec {
     }
 
     @JsonCreator
-    static FlowOperatorSpec restore(
-            @JsonProperty(Constants.ID_CLASS) String descriptionClass) {
+    static FlowOperatorSpec restore(@JsonProperty(Constants.ID_CLASS) String descriptionClass) {
         return of(Optional.ofNullable(descriptionClass)
                 .map(ClassInfo::of)
                 .orElse(null));
@@ -100,6 +99,7 @@ public final class FlowOperatorSpec implements OperatorSpec {
 
     @Override
     public String toString() {
-        return String.format("Flow(%s)", descriptionClass);
+        return String.format("Flow(%s)",
+                descriptionClass);
     }
 }

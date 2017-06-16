@@ -35,6 +35,7 @@ import com.asakusafw.dag.compiler.internalio.InternalInputAdapterGenerator;
 import com.asakusafw.dag.compiler.internalio.InternalOutputPrepareGenerator;
 import com.asakusafw.dag.compiler.model.ClassData;
 import com.asakusafw.dag.compiler.model.build.GraphInfoBuilder;
+import com.asakusafw.dag.compiler.model.build.ResolvedEdgeInfo;
 import com.asakusafw.dag.compiler.model.build.ResolvedInputInfo;
 import com.asakusafw.dag.compiler.model.build.ResolvedVertexInfo;
 import com.asakusafw.dag.compiler.model.plan.Implementation;
@@ -325,10 +326,15 @@ public final class DataFlowUtil {
         SubPlan.Input entry = getOutputSource(vertex);
         ResolvedInputInfo input = new ResolvedInputInfo(
                 InternalOutputPrepare.INPUT_NAME,
-                descriptors.newOneToOneEdge(port.getDataType()));
+                new ResolvedEdgeInfo(
+                        descriptors.newOneToOneEdge(port.getDataType()),
+                        ResolvedEdgeInfo.Movement.ONE_TO_ONE,
+                        port.getDataType(),
+                        null));
         ResolvedVertexInfo info = new ResolvedVertexInfo(
                 vertex.getId(),
                 descriptors.newVertex(vertexClass),
+                String.valueOf(port),
                 Collections.singletonMap(entry, input),
                 Collections.emptyMap());
         register(target, vertex, info, vertexClass);

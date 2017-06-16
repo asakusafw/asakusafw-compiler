@@ -132,7 +132,7 @@ public final class UserOperatorSpec implements OperatorSpec {
     @Override
     public int hashCode() {
         final int prime = 31;
-        int result = 1;
+        int result = Objects.hashCode(getOperatorKind());
         result = prime * result + Objects.hashCode(annotation);
         result = prime * result + Objects.hashCode(implementationClass);
         result = prime * result + Objects.hashCode(declaringClass);

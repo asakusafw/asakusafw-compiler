@@ -44,6 +44,7 @@ import com.asakusafw.dag.compiler.jdbc.windgate.WindGateJdbcModel;
 import com.asakusafw.dag.compiler.jdbc.windgate.WindGateJdbcOutputModel;
 import com.asakusafw.dag.compiler.jdbc.windgate.WindGateJdbcOutputProcessorGenerator;
 import com.asakusafw.dag.compiler.model.build.GraphInfoBuilder;
+import com.asakusafw.dag.compiler.model.build.ResolvedEdgeInfo;
 import com.asakusafw.dag.compiler.model.build.ResolvedInputInfo;
 import com.asakusafw.dag.compiler.model.build.ResolvedVertexInfo;
 import com.asakusafw.dag.compiler.model.plan.VertexSpec;
@@ -226,10 +227,15 @@ public class WindGateJdbcPortDriver implements ExternalPortDriver {
         });
         ResolvedInputInfo input = new ResolvedInputInfo(
                 JdbcOutputProcessor.INPUT_NAME,
-                descriptors.newOneToOneEdge(Descriptions.classOf(UnionRecord.class), serdeSupplier));
+                new ResolvedEdgeInfo(
+                        descriptors.newOneToOneEdge(Descriptions.classOf(UnionRecord.class), serdeSupplier),
+                        ResolvedEdgeInfo.Movement.ONE_TO_ONE,
+                        Descriptions.classOf(UnionRecord.class),
+                        null));
         ResolvedVertexInfo info = new ResolvedVertexInfo(
                 getOutputId(profileName),
                 descriptors.newVertex(proc),
+                String.format("JDBC(%s)", profileName),
                 ports.stream()
                     .map(outputOwners::get)
                     .filter(v -> isEmptyOutput(v) == false)
@@ -269,6 +275,7 @@ public class WindGateJdbcPortDriver implements ExternalPortDriver {
             ResolvedVertexInfo barrier = new ResolvedVertexInfo(
                     getBarrierId(profileName),
                     descriptors.newVertex(Descriptions.classOf(VoidVertexProcessor.class)),
+                    null,
                     Collections.emptyMap(),
                     Collections.emptyMap(),
                     upstreams);

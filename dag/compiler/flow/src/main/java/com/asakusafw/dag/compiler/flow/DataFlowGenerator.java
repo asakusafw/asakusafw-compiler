@@ -28,6 +28,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +50,7 @@ import com.asakusafw.dag.compiler.codegen.VertexAdapterGenerator;
 import com.asakusafw.dag.compiler.flow.adapter.OperatorNodeGeneratorContextAdapter;
 import com.asakusafw.dag.compiler.model.ClassData;
 import com.asakusafw.dag.compiler.model.build.GraphInfoBuilder;
+import com.asakusafw.dag.compiler.model.build.ResolvedEdgeInfo;
 import com.asakusafw.dag.compiler.model.build.ResolvedInputInfo;
 import com.asakusafw.dag.compiler.model.build.ResolvedOutputInfo;
 import com.asakusafw.dag.compiler.model.build.ResolvedVertexInfo;
@@ -85,6 +87,7 @@ import com.asakusafw.lang.compiler.model.graph.MarkerOperator;
 import com.asakusafw.lang.compiler.model.graph.Operator;
 import com.asakusafw.lang.compiler.model.graph.Operator.OperatorKind;
 import com.asakusafw.lang.compiler.model.graph.OperatorArgument;
+import com.asakusafw.lang.compiler.model.graph.OperatorGraph;
 import com.asakusafw.lang.compiler.model.graph.OperatorInput;
 import com.asakusafw.lang.compiler.model.graph.OperatorInput.InputUnit;
 import com.asakusafw.lang.compiler.model.graph.OperatorOutput;
@@ -92,9 +95,23 @@ import com.asakusafw.lang.compiler.model.graph.OperatorPort;
 import com.asakusafw.lang.compiler.model.graph.OperatorProperty;
 import com.asakusafw.lang.compiler.model.graph.Operators;
 import com.asakusafw.lang.compiler.model.info.JobflowInfo;
+import com.asakusafw.lang.compiler.operator.info.OperatorGraphConverter;
+import com.asakusafw.lang.compiler.operator.info.PlanAttributeStore;
 import com.asakusafw.lang.compiler.planning.Plan;
 import com.asakusafw.lang.compiler.planning.Planning;
 import com.asakusafw.lang.compiler.planning.SubPlan;
+import com.asakusafw.lang.info.graph.Input;
+import com.asakusafw.lang.info.graph.Node;
+import com.asakusafw.lang.info.graph.Output;
+import com.asakusafw.lang.info.operator.InputAttribute;
+import com.asakusafw.lang.info.operator.OperatorAttribute;
+import com.asakusafw.lang.info.operator.OperatorSpec;
+import com.asakusafw.lang.info.operator.OutputAttribute;
+import com.asakusafw.lang.info.plan.DataExchange;
+import com.asakusafw.lang.info.plan.PlanAttribute;
+import com.asakusafw.lang.info.plan.PlanInputSpec;
+import com.asakusafw.lang.info.plan.PlanOutputSpec;
+import com.asakusafw.lang.info.plan.PlanVertexSpec;
 import com.asakusafw.lang.utils.common.Invariants;
 import com.asakusafw.runtime.core.Result;
 import com.asakusafw.runtime.flow.VoidResult;
@@ -176,6 +193,7 @@ public final class DataFlowGenerator {
         resolveOutputs();
         resolveOperations();
         resolvePlan();
+        savePlanInfo();
         return builder.build(descriptors::newVoidEdge);
     }
 
@@ -213,6 +231,7 @@ public final class DataFlowGenerator {
         ResolvedVertexInfo info = new ResolvedVertexInfo(
                 vertex.getId(),
                 descriptors.newVertex(vertexClass),
+                vertex.getLabel(),
                 inputs,
                 outputs);
         register(builder, vertex, info, vertexClass);
@@ -503,12 +522,20 @@ public final class DataFlowGenerator {
             if (type == InputType.EXTRACT) {
                 ResolvedInputInfo info = new ResolvedInputInfo(
                         spec.getId(),
-                        descriptors.newOneToOneEdge(spec.getDataType()));
+                        new ResolvedEdgeInfo(
+                                descriptors.newOneToOneEdge(spec.getDataType()),
+                                ResolvedEdgeInfo.Movement.ONE_TO_ONE,
+                                spec.getDataType(),
+                                null));
                 results.put(port, info);
             } else if (type == InputType.BROADCAST) {
                 ResolvedInputInfo info = new ResolvedInputInfo(
                         spec.getId(),
-                        descriptors.newBroadcastEdge(spec.getDataType()));
+                        new ResolvedEdgeInfo(
+                                descriptors.newBroadcastEdge(spec.getDataType()),
+                                ResolvedEdgeInfo.Movement.BROADCAST,
+                                spec.getDataType(),
+                                null));
                 results.put(port, info);
             } else if (type == InputType.CO_GROUP) {
                 ClassDescription mapperType = null;
@@ -524,7 +551,13 @@ public final class DataFlowGenerator {
                 }
                 ResolvedInputInfo info = new ResolvedInputInfo(
                         spec.getId(),
-                        descriptors.newScatterGatherEdge(spec.getDataType(), spec.getPartitionInfo()),
+                        new ResolvedEdgeInfo(
+                                descriptors.newScatterGatherEdge(spec.getDataType(), spec.getPartitionInfo()),
+                                combinerType == null
+                                        ? ResolvedEdgeInfo.Movement.SCATTER_GATHER
+                                        : ResolvedEdgeInfo.Movement.AGGREGATE,
+                                spec.getDataType(),
+                                spec.getPartitionInfo()),
                         mapperType, copierType, combinerType);
                 results.put(port, info);
             }
@@ -582,5 +615,108 @@ public final class DataFlowGenerator {
     private ClassDescription generate(
             VertexSpec vertex, String name, Function<ClassDescription, ClassData> generator) {
         return DataFlowUtil.generate(generatorContext, vertex, name, generator);
+    }
+
+    private void savePlanInfo() {
+        try {
+            Node root = new Node();
+            Map<ResolvedInputInfo, Input> inputs = new HashMap<>();
+            Map<ResolvedOutputInfo, Output> outputs = new HashMap<>();
+
+            for (ResolvedVertexInfo vertex : builder.getVertices()) {
+                Node node = root.newElement();
+                buildPlanVertex(vertex, node, inputs, outputs);
+            }
+            outputs.forEach((upstream, output) -> {
+                upstream.getDownstreams().forEach(downstream -> {
+                    Input input = inputs.get(downstream);
+                    output.connect(input);
+                });
+            });
+            PlanAttributeStore.save(processorContext, new PlanAttribute(root));
+        } catch (RuntimeException e) {
+            LOG.warn("error occurred while saving execution plan", e);
+        }
+    }
+
+    private static void buildPlanVertex(
+            ResolvedVertexInfo vertex,
+            Node node,
+            Map<ResolvedInputInfo, Input> inputs,
+            Map<ResolvedOutputInfo, Output> outputs) {
+        node.withAttribute(new OperatorAttribute(PlanVertexSpec.of(
+                vertex.getId(),
+                vertex.getLabel(),
+                vertex.getImplicitDependencies().stream()
+                    .map(ResolvedVertexInfo::getId)
+                    .collect(Collectors.toList()))));
+        vertex.getInputs().forEach((s, r) -> inputs.put(r, node.newInput().withAttribute(new InputAttribute(
+                r.getId(),
+                OperatorGraphConverter.convert(s.getOperator().getDataType()),
+                null, null))));
+        vertex.getOutputs().forEach((s, r) -> outputs.put(r, node.newOutput().withAttribute(new OutputAttribute(
+                r.getId(),
+                OperatorGraphConverter.convert(s.getOperator().getDataType())))));
+        List<SubPlan> candidates = Stream.concat(
+                vertex.getInputs().keySet().stream(),
+                vertex.getOutputs().keySet().stream())
+            .map(SubPlan.Port::getOwner)
+            .distinct()
+            .collect(Collectors.toList());
+        if (candidates.size() == 1) {
+            SubPlan sub = candidates.get(0);
+            OperatorGraphConverter converter = buildConverter(vertex, sub);
+            OperatorGraph graph = new OperatorGraph(sub.getOperators());
+            converter.process(graph, node);
+        }
+    }
+
+    private static OperatorGraphConverter buildConverter(ResolvedVertexInfo vertex, SubPlan sub) {
+        Map<MarkerOperator, OperatorSpec> mapper = new HashMap<>();
+        vertex.getInputs().forEach((s, r) -> mapper.put(s.getOperator(), PlanInputSpec.of(
+                    r.getId(),
+                    translate(r.getEdgeInfo().getMovement()),
+                    OperatorGraphConverter.convert(r.getEdgeInfo().getGroup()))));
+        vertex.getOutputs().forEach((s, r) -> mapper.put(s.getOperator(), r.getDownstreams().stream()
+                    .map(ResolvedInputInfo::getEdgeInfo)
+                    .map(edge -> PlanOutputSpec.of(
+                            r.getId(),
+                            translate(edge.getMovement()),
+                            OperatorGraphConverter.convert(edge.getGroup())))
+                    .findFirst()
+                    .orElseGet(() -> PlanOutputSpec.of(r.getId(), DataExchange.UNKNOWN, null))));
+        sub.getInputs().stream()
+            .filter(it -> mapper.containsKey(it) == false)
+            .map(InputSpec::get)
+            .forEach(spec -> mapper.put(spec.getOrigin().getOperator(), PlanInputSpec.of(
+                    spec.getId(),
+                    spec.getInputType() == InputType.NO_DATA ? DataExchange.NOTHING : DataExchange.UNKNOWN,
+                    null)));
+        sub.getOutputs().stream()
+            .filter(it -> mapper.containsKey(it) == false)
+            .map(OutputSpec::get)
+            .forEach(spec -> mapper.put(spec.getOrigin().getOperator(), PlanOutputSpec.of(
+                    spec.getId(),
+                    spec.getOutputType() == OutputType.DISCARD ? DataExchange.NOTHING : DataExchange.UNKNOWN,
+                            null)));
+        OperatorGraphConverter converter = new OperatorGraphConverter(mapper::get);
+        return converter;
+    }
+
+    private static DataExchange translate(ResolvedEdgeInfo.Movement movement) {
+        switch (movement) {
+        case NOTHING:
+            return DataExchange.NOTHING;
+        case ONE_TO_ONE:
+            return DataExchange.MOVE;
+        case BROADCAST:
+            return DataExchange.BROADCAST;
+        case SCATTER_GATHER:
+            return DataExchange.SCATTER_GATHER;
+        case AGGREGATE:
+            return DataExchange.AGGREGATE;
+        default:
+            return DataExchange.UNKNOWN;
+        }
     }
 }

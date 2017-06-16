@@ -25,7 +25,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * Represents a {@link Class} value.
  * @since 0.4.2
  */
-public final class ClassInfo implements ValueInfo {
+public final class ClassInfo implements ValueInfo, Comparable<ClassInfo> {
 
     static final String KIND = "class"; //$NON-NLS-1$
 
@@ -152,6 +152,11 @@ public final class ClassInfo implements ValueInfo {
         }
         ClassInfo other = (ClassInfo) obj;
         return Objects.equals(name, other.name);
+    }
+
+    @Override
+    public int compareTo(ClassInfo o) {
+        return name.compareTo(o.name);
     }
 
     @Override

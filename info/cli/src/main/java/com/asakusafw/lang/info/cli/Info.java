@@ -59,6 +59,7 @@ public final class Info {
             .withCommand(ListParameterCommand.class)
             .withCommand(ListJobflowCommand.class)
             .withCommand(ListOperatorCommand.class)
+            .withCommand(ListPlanCommand.class)
             .withCommand(ListDirectFileInputCommand.class)
             .withCommand(ListDirectFileOutputCommand.class)
             .withCommand(ListWindGateInputCommand.class)
@@ -68,7 +69,8 @@ public final class Info {
             .withDescription("Generates Graphviz DOT scripts")
             .withDefaultCommand(DrawUsageCommand.class)
             .withCommand(DrawJobflowCommand.class)
-            .withCommand(DrawOperatorCommand.class);
+            .withCommand(DrawOperatorCommand.class)
+            .withCommand(DrawPlanCommand.class);
 
         Cli<Runnable> cli = builder.build();
         Runnable command;

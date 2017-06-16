@@ -26,6 +26,7 @@ import com.asakusafw.lang.info.graph.Node;
 import com.asakusafw.lang.info.graph.NodeTestUtil;
 import com.asakusafw.lang.info.operator.CoreOperatorSpec;
 import com.asakusafw.lang.info.operator.CoreOperatorSpec.CoreOperatorKind;
+import com.asakusafw.lang.info.operator.OperatorSpec.OperatorKind;
 import com.asakusafw.lang.info.operator.CustomOperatorSpec;
 import com.asakusafw.lang.info.operator.InputAttribute;
 import com.asakusafw.lang.info.operator.InputGranularity;
@@ -71,8 +72,8 @@ public class OperatorGraphViewTest {
 
         OperatorGraphView view = new OperatorGraphView(new OperatorGraphAttribute(root));
         assertThat(view.getOperators(), hasSize(1));
-        assertThat(view.getInputs().keySet(), is(empty()));
-        assertThat(view.getOutputs().keySet(), is(empty()));
+        assertThat(view.getOperatorMap(OperatorKind.INPUT).keySet(), is(empty()));
+        assertThat(view.getOperatorMap(OperatorKind.OUTPUT).keySet(), is(empty()));
 
         OperatorView v = view.getOperators().stream().findAny().get();
         NodeTestUtil.contentEquals(v.getEntity(), op);
@@ -118,11 +119,11 @@ public class OperatorGraphViewTest {
 
         OperatorGraphView view = new OperatorGraphView(new OperatorGraphAttribute(root));
         assertThat(view.getOperators(), hasSize(2));
-        assertThat(view.getInputs().keySet(), containsInAnyOrder("in"));
-        assertThat(view.getOutputs().keySet(), containsInAnyOrder("out"));
+        assertThat(view.getOperatorMap(OperatorKind.INPUT).keySet(), containsInAnyOrder("in"));
+        assertThat(view.getOperatorMap(OperatorKind.OUTPUT).keySet(), containsInAnyOrder("out"));
 
-        OperatorView v0 = view.getInputs().get("in");
-        OperatorView v1 = view.getOutputs().get("out");
+        OperatorView v0 = view.getOperatorMap(OperatorKind.INPUT).get("in");
+        OperatorView v1 = view.getOperatorMap(OperatorKind.OUTPUT).get("out");
 
         assertThat(v0.getOutputs(), hasSize(1));
         assertThat(v1.getInputs(), hasSize(1));
@@ -142,16 +143,16 @@ public class OperatorGraphViewTest {
 
         OperatorGraphView view = new OperatorGraphView(new OperatorGraphAttribute(root));
         assertThat(view.getOperators(), hasSize(1));
-        assertThat(view.getInputs().keySet(), is(empty()));
-        assertThat(view.getOutputs().keySet(), is(empty()));
+        assertThat(view.getOperatorMap(OperatorKind.INPUT).keySet(), is(empty()));
+        assertThat(view.getOperatorMap(OperatorKind.OUTPUT).keySet(), is(empty()));
 
         OperatorView parent = view.getOperators().stream().findAny().get();
         assertThat(((CustomOperatorSpec) parent.getSpec()).getCategory(), is("parent"));
 
         OperatorGraphView inner = parent.getElementGraph();
         assertThat(inner.getOperators(), hasSize(1));
-        assertThat(inner.getInputs().keySet(), is(empty()));
-        assertThat(inner.getOutputs().keySet(), is(empty()));
+        assertThat(inner.getOperatorMap(OperatorKind.INPUT).keySet(), is(empty()));
+        assertThat(inner.getOperatorMap(OperatorKind.OUTPUT).keySet(), is(empty()));
 
         OperatorView child = inner.getOperators().stream().findAny().get();
         assertThat(((CustomOperatorSpec) child.getSpec()).getCategory(), is("child"));

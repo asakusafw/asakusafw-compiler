@@ -30,8 +30,8 @@ import org.slf4j.LoggerFactory;
 
 import com.asakusafw.lang.compiler.api.reference.BatchReference;
 import com.asakusafw.lang.compiler.common.Location;
+import com.asakusafw.lang.compiler.core.BatchCompiler;
 import com.asakusafw.lang.compiler.core.BatchCompiler.Context;
-import com.asakusafw.lang.compiler.core.CompilerContext;
 import com.asakusafw.lang.compiler.core.basic.AbstractCompilerParticipant;
 import com.asakusafw.lang.compiler.model.graph.Batch;
 import com.asakusafw.lang.compiler.model.graph.BatchElement;
@@ -69,12 +69,12 @@ public class BatchInfoParticipant extends AbstractCompilerParticipant {
         write(context, info, Location.of(PATH));
     }
 
-    static BatchInfo analyzeBatch(CompilerContext context, Batch batch) {
+    static BatchInfo analyzeBatch(BatchCompiler.Context context, Batch batch) {
         AttributeCollectorContextAdapter adapter = new AttributeCollectorContextAdapter(context);
         List<AttributeCollector> collectors = collectors(context.getProject().getClassLoader());
         List<JobflowInfo> jobflows = new ArrayList<>();
         for (BatchElement element : batch.getElements()) {
-            adapter.reset();
+            adapter.reset(element.getJobflow());
             collectors.forEach(c -> c.process(adapter, element.getJobflow()));
             jobflows.add(new JobflowInfo(
                     element.getJobflow().getFlowId(),
@@ -84,7 +84,7 @@ public class BatchInfoParticipant extends AbstractCompilerParticipant {
                         .collect(Collectors.toList()),
                     adapter.getAttributes()));
         }
-        adapter.reset();
+        adapter.reset(null);
         collectors.forEach(c -> c.process(adapter, batch));
         return new BatchInfo(
                 batch.getBatchId(),

@@ -44,7 +44,11 @@ public class OperatorView implements OperatorInfo {
         this.info = Util.extract(entity, OperatorAttribute.class);
     }
 
-    Node getEntity() {
+    /**
+     * Returns the entity element.
+     * @return the entity element
+     */
+    public Node getEntity() {
         return entity;
     }
 

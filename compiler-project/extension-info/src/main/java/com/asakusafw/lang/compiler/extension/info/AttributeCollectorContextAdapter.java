@@ -15,11 +15,22 @@
  */
 package com.asakusafw.lang.compiler.extension.info;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FilterInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import com.asakusafw.lang.compiler.api.CompilerOptions;
-import com.asakusafw.lang.compiler.core.CompilerContext;
+import com.asakusafw.lang.compiler.common.Location;
+import com.asakusafw.lang.compiler.core.BatchCompiler;
+import com.asakusafw.lang.compiler.core.basic.JobflowPackager;
+import com.asakusafw.lang.compiler.model.info.JobflowInfo;
+import com.asakusafw.lang.compiler.packaging.FileContainer;
 import com.asakusafw.lang.info.Attribute;
 import com.asakusafw.lang.info.api.AttributeCollector;
 
@@ -29,15 +40,17 @@ import com.asakusafw.lang.info.api.AttributeCollector;
  */
 class AttributeCollectorContextAdapter implements AttributeCollector.Context {
 
-    private final CompilerContext delegate;
+    private final BatchCompiler.Context delegate;
 
     private final List<Attribute> attributes = new ArrayList<>();
+
+    private JobflowInfo current;
 
     /**
      * Creates a new instance.
      * @param delegate the delegate
      */
-    AttributeCollectorContextAdapter(CompilerContext delegate) {
+    AttributeCollectorContextAdapter(BatchCompiler.Context delegate) {
         this.delegate = delegate;
     }
 
@@ -56,6 +69,47 @@ class AttributeCollectorContextAdapter implements AttributeCollector.Context {
         attributes.add(attribute);
     }
 
+    @Override
+    public InputStream findResourceFile(Location location) throws IOException {
+        if (current == null) {
+            File file = delegate.getOutput().toFile(location);
+            if (file.isFile()) {
+                return new FileInputStream(file);
+            } else {
+                return null;
+            }
+        } else {
+            FileContainer root = delegate.getOutput();
+            File library = root.toFile(JobflowPackager.getLibraryLocation(current.getFlowId()));
+            if (library.isFile() == false) {
+                return null;
+            }
+            ZipFile zip = new ZipFile(library);
+            boolean success = false;
+            try {
+                ZipEntry entry = zip.getEntry(location.toPath());
+                if (entry == null) {
+                    return null;
+                }
+                success = true;
+                return new FilterInputStream(zip.getInputStream(entry)) {
+                    @Override
+                    public void close() throws IOException {
+                        try {
+                            super.close();
+                        } finally {
+                            zip.close();
+                        }
+                    }
+                };
+            } finally {
+                if (success == false) {
+                    zip.close();
+                }
+            }
+        }
+    }
+
     /**
      * Returns the batch attributes.
      * @return the batch attributes
@@ -66,8 +120,10 @@ class AttributeCollectorContextAdapter implements AttributeCollector.Context {
 
     /**
      * Resets this context.
+     * @param next the next target jobflow (nullable)
      */
-    public void reset() {
+    public void reset(JobflowInfo next) {
+        this.current = next;
         attributes.clear();
     }
 }

@@ -37,7 +37,7 @@ public interface InputInfo {
 
     /**
      * Returns the input granularity.
-     * @return the input granularity
+     * @return the input granularity, or {@code null} if is not defined
      */
     InputGranularity getGranulatity();
 

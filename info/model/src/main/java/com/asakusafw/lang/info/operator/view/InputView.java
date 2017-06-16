@@ -44,6 +44,14 @@ public class InputView implements InputInfo {
     }
 
     /**
+     * Returns the entity element.
+     * @return the entity element
+     */
+    public Input getEntity() {
+        return entity;
+    }
+
+    /**
      * Returns the owner of this port.
      * @return the owner
      */

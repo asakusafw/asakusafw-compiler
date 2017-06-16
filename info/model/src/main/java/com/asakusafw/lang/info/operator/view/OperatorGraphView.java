@@ -25,10 +25,10 @@ import java.util.stream.Stream;
 import com.asakusafw.lang.info.graph.Input;
 import com.asakusafw.lang.info.graph.Node;
 import com.asakusafw.lang.info.graph.Output;
-import com.asakusafw.lang.info.operator.InputOperatorSpec;
+import com.asakusafw.lang.info.operator.NamedOperatorSpec;
 import com.asakusafw.lang.info.operator.OperatorGraphAttribute;
 import com.asakusafw.lang.info.operator.OperatorSpec.OperatorKind;
-import com.asakusafw.lang.info.operator.OutputOperatorSpec;
+import com.asakusafw.lang.info.plan.PlanAttribute;
 
 /**
  * A view of operator graph.
@@ -49,7 +49,15 @@ public class OperatorGraphView {
      * @param graph the source graph
      */
     public OperatorGraphView(OperatorGraphAttribute graph) {
-        this.root = graph.getRoot();
+        this(graph.getRoot());
+    }
+
+    /**
+     * Creates a new instance.
+     * @param plan the source execution plan
+     */
+    public OperatorGraphView(PlanAttribute plan) {
+        this(plan.getRoot());
     }
 
     OperatorGraphView(Node entity) {
@@ -73,26 +81,27 @@ public class OperatorGraphView {
     }
 
     /**
-     * Returns the input operators.
-     * @return the input operators
+     * Returns the element operators.
+     * @param kind the operator kind
+     * @return the operators
      */
-    public Map<String, OperatorView> getInputs() {
+    public Collection<OperatorView> getOperators(OperatorKind kind) {
         return all()
-                .filter(it -> it.getSpec().getOperatorKind() == OperatorKind.INPUT)
-                .collect(Collectors.toMap(
-                        it -> ((InputOperatorSpec) it.getSpec()).getName(),
-                        Function.identity()));
+                .filter(it -> it.getSpec().getOperatorKind() == kind)
+                .collect(Collectors.toList());
     }
 
     /**
-     * Returns the output operators.
-     * @return the output operators
+     * Returns the element operators.
+     * @param kind the operator kind
+     * @return the pairs of name and its operator
      */
-    public Map<String, OperatorView> getOutputs() {
+    public Map<String, OperatorView> getOperatorMap(OperatorKind kind) {
         return all()
-                .filter(it -> it.getSpec().getOperatorKind() == OperatorKind.OUTPUT)
+                .filter(it -> it.getSpec().getOperatorKind() == kind)
+                .filter(it -> it.getSpec() instanceof NamedOperatorSpec)
                 .collect(Collectors.toMap(
-                        it -> ((OutputOperatorSpec) it.getSpec()).getName(),
+                        it -> ((NamedOperatorSpec) it.getSpec()).getName(),
                         Function.identity()));
     }
 
