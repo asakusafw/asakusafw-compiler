@@ -77,6 +77,7 @@ public abstract class BaseCommand implements Runnable {
                 return s;
             }
         } catch (IOException e) {
+
             LOG.error("error occurred while processing command", e);
             return Status.PROCESS_ERROR;
         }

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.asakusafw.lang.compiler.extension.info;
+package com.asakusafw.lang.compiler.operator.info;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -21,16 +21,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.function.Function;
 
-import com.asakusafw.lang.compiler.model.PropertyName;
+import com.asakusafw.lang.compiler.model.description.TypeDescription;
 import com.asakusafw.lang.compiler.model.graph.CoreOperator;
 import com.asakusafw.lang.compiler.model.graph.CustomOperator;
 import com.asakusafw.lang.compiler.model.graph.ExternalInput;
 import com.asakusafw.lang.compiler.model.graph.ExternalOutput;
 import com.asakusafw.lang.compiler.model.graph.FlowOperator;
 import com.asakusafw.lang.compiler.model.graph.Group;
-import com.asakusafw.lang.compiler.model.graph.Jobflow;
 import com.asakusafw.lang.compiler.model.graph.MarkerOperator;
 import com.asakusafw.lang.compiler.model.graph.Operator;
 import com.asakusafw.lang.compiler.model.graph.OperatorArgument;
@@ -38,7 +37,6 @@ import com.asakusafw.lang.compiler.model.graph.OperatorGraph;
 import com.asakusafw.lang.compiler.model.graph.OperatorInput;
 import com.asakusafw.lang.compiler.model.graph.OperatorOutput;
 import com.asakusafw.lang.compiler.model.graph.UserOperator;
-import com.asakusafw.lang.info.api.AttributeCollector;
 import com.asakusafw.lang.info.graph.Input;
 import com.asakusafw.lang.info.graph.Node;
 import com.asakusafw.lang.info.graph.Output;
@@ -46,38 +44,52 @@ import com.asakusafw.lang.info.operator.CoreOperatorSpec;
 import com.asakusafw.lang.info.operator.CustomOperatorSpec;
 import com.asakusafw.lang.info.operator.FlowOperatorSpec;
 import com.asakusafw.lang.info.operator.InputAttribute;
-import com.asakusafw.lang.info.operator.InputGranularity;
 import com.asakusafw.lang.info.operator.InputGroup;
 import com.asakusafw.lang.info.operator.InputOperatorSpec;
 import com.asakusafw.lang.info.operator.MarkerOperatorSpec;
 import com.asakusafw.lang.info.operator.OperatorAttribute;
-import com.asakusafw.lang.info.operator.OperatorGraphAttribute;
 import com.asakusafw.lang.info.operator.OperatorSpec;
 import com.asakusafw.lang.info.operator.OutputAttribute;
 import com.asakusafw.lang.info.operator.OutputOperatorSpec;
 import com.asakusafw.lang.info.operator.ParameterInfo;
 import com.asakusafw.lang.info.operator.UserOperatorSpec;
+import com.asakusafw.lang.info.value.ClassInfo;
 
 /**
- * Collects {@link OperatorGraphAttribute}.
+ * Converts {@link OperatorGraph} into information models.
  * @since 0.4.2
  */
-public class OperatorGraphAttributeCollector implements AttributeCollector {
+public class OperatorGraphConverter {
 
-    @Override
-    public void process(Context context, Jobflow jobflow) {
-        Node root = new Node();
-        process(context, jobflow.getOperatorGraph(), root);
-        context.putAttribute(new OperatorGraphAttribute(root));
+    private final Function<? super Operator, ? extends OperatorSpec> customTranslator;
+
+    /**
+     * Creates a new instance.
+     */
+    public OperatorGraphConverter() {
+        this(any -> null);
     }
 
-    static void process(Context context, OperatorGraph graph, Node info) {
+    /**
+     * Creates a new instance.
+     * @param translator the custom operator translator
+     */
+    public OperatorGraphConverter(Function<? super Operator, ? extends OperatorSpec> translator) {
+        this.customTranslator = translator;
+    }
+
+    /**
+     * Converts the operator graph and set them into the given node.
+     * @param graph the source operator graph
+     * @param destination the destination node
+     */
+    public void process(OperatorGraph graph, Node destination) {
         Map<OperatorInput, Input> downstreams = new HashMap<>();
         Map<OperatorOutput, Output> upstreams = new HashMap<>();
         Collection<Operator> operators = sort(graph);
         for (Operator operator : operators) {
             List<ParameterInfo> parameters = new ArrayList<>();
-            Node node = info.newElement();
+            Node node = destination.newElement();
             for (OperatorInput input : operator.getInputs()) {
                 InputAttribute attr = convert(input);
                 Input result = node.newInput().withAttribute(attr);
@@ -95,7 +107,7 @@ public class OperatorGraphAttributeCollector implements AttributeCollector {
             OperatorSpec spec = convert(operator);
             node.withAttribute(new OperatorAttribute(spec, parameters));
             if (operator.getOperatorKind() == Operator.OperatorKind.FLOW) {
-                process(context, ((FlowOperator) operator).getOperatorGraph(), node);
+                process(((FlowOperator) operator).getOperatorGraph(), node);
             }
         }
         for (Operator operator : operators) {
@@ -116,7 +128,11 @@ public class OperatorGraphAttributeCollector implements AttributeCollector {
         return graph.getOperators(false);
     }
 
-    private static OperatorSpec convert(Operator operator) {
+    private OperatorSpec convert(Operator operator) {
+        OperatorSpec spec = customTranslator.apply(operator);
+        if (spec != null) {
+            return spec;
+        }
         switch (operator.getOperatorKind()) {
         case CORE:
             return convert0((CoreOperator) operator);
@@ -201,45 +217,8 @@ public class OperatorGraphAttributeCollector implements AttributeCollector {
         return new InputAttribute(
                 input.getName(),
                 Util.convert(input.getDataType()),
-                translate(input.getInputUnit()),
-                translate(input.getGroup()));
-    }
-
-    private static InputGranularity translate(OperatorInput.InputUnit kind) {
-        switch (kind) {
-        case RECORD:
-            return InputGranularity.RECORD;
-        case GROUP:
-            return InputGranularity.RECORD;
-        case WHOLE:
-            return InputGranularity.RECORD;
-        default:
-            throw new AssertionError(kind);
-        }
-    }
-
-    private static InputGroup translate(Group group) {
-        if (group == null) {
-            return null;
-        }
-        return new InputGroup(
-                group.getGrouping().stream()
-                    .map(PropertyName::toName)
-                    .collect(Collectors.toList()),
-                group.getOrdering().stream()
-                    .map(it -> new InputGroup.Order(it.getPropertyName().toName(), translate(it.getDirection())))
-                    .collect(Collectors.toList()));
-    }
-
-    private static InputGroup.Direction translate(Group.Direction kind) {
-        switch (kind) {
-        case ASCENDANT:
-            return InputGroup.Direction.ASCENDANT;
-        case DESCENDANT:
-            return InputGroup.Direction.ASCENDANT;
-        default:
-            throw new AssertionError(kind);
-        }
+                Util.translate(input.getInputUnit()),
+                Util.translate(input.getGroup()));
     }
 
     private static OutputAttribute convert(OperatorOutput output) {
@@ -253,5 +232,23 @@ public class OperatorGraphAttributeCollector implements AttributeCollector {
                 argument.getName(),
                 Util.convert(argument.getValue().getValueType()),
                 Util.convert(argument.getValue()));
+    }
+
+    /**
+     * Converts types.
+     * @param type the original value
+     * @return the converted value
+     */
+    public static ClassInfo convert(TypeDescription type) {
+        return Util.convert(type);
+    }
+
+    /**
+     * Converts groups.
+     * @param group the original value
+     * @return the converted value
+     */
+    public static InputGroup convert(Group group) {
+        return Util.translate(group);
     }
 }

@@ -27,7 +27,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * Represents an operator detail of flow outputs.
  * @since 0.4.2
  */
-public final class OutputOperatorSpec implements OperatorSpec {
+public final class OutputOperatorSpec implements NamedOperatorSpec {
 
     static final String KIND = "output";
 
@@ -75,10 +75,7 @@ public final class OutputOperatorSpec implements OperatorSpec {
         return OperatorKind.OUTPUT;
     }
 
-    /**
-     * Returns the name of this port.
-     * @return the name
-     */
+    @Override
     public String getName() {
         return name;
     }

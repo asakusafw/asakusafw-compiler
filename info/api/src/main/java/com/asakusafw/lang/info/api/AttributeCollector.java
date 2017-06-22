@@ -15,7 +15,11 @@
  */
 package com.asakusafw.lang.info.api;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 import com.asakusafw.lang.compiler.api.CompilerOptions;
+import com.asakusafw.lang.compiler.common.Location;
 import com.asakusafw.lang.compiler.model.graph.Batch;
 import com.asakusafw.lang.compiler.model.graph.Jobflow;
 import com.asakusafw.lang.info.Attribute;
@@ -47,6 +51,7 @@ public interface AttributeCollector {
     /**
      * Represents a context object for {@link AttributeCollector}.
      * @since 0.4.1
+     * @version 0.4.2
      */
     public interface Context {
 
@@ -67,5 +72,14 @@ public interface AttributeCollector {
          * @param attribute the attribute to add
          */
         void putAttribute(Attribute attribute);
+
+        /**
+         * Returns a resource from the current output.
+         * @param location the resource location in the target package
+         * @return the jobflow resource, or {@code null} if it does not exist
+         * @throws IOException if failed to open the file
+         * @since 0.4.2
+         */
+        InputStream findResourceFile(Location location) throws IOException;
     }
 }

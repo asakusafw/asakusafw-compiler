@@ -17,6 +17,7 @@ package com.asakusafw.lang.info.cli;
 
 import java.io.File;
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -62,7 +63,7 @@ final class ListUtil {
                 .orElse("N/A");
     }
 
-    private static String padding(int count) {
+    static String padding(int count) {
         if (count < 0) {
             return "";
         }
@@ -73,7 +74,7 @@ final class ListUtil {
         return buf.toString();
     }
 
-    static void printBlock(PrintWriter writer, int indent, Map<String, Object> members) {
+    static void printBlock(PrintWriter writer, int indent, Map<String, ?> members) {
         if (members.isEmpty()) {
             return;
         }
@@ -87,5 +88,14 @@ final class ListUtil {
                     k,
                     normalize(v));
         });
+    }
+
+    static void printBlock(PrintWriter writer, int indent, String title, List<?> members) {
+        if (members.isEmpty()) {
+            writer.printf("%s%s: -%n", ListUtil.padding(indent), normalize(title));
+        } else {
+            writer.printf("%s%s:%n", ListUtil.padding(indent), normalize(title));
+            members.forEach(it -> writer.printf("%s%s%n", ListUtil.padding(indent + 4), normalize(it)));
+        }
     }
 }

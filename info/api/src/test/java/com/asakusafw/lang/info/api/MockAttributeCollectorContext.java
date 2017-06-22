@@ -15,10 +15,13 @@
  */
 package com.asakusafw.lang.info.api;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.asakusafw.lang.compiler.api.CompilerOptions;
+import com.asakusafw.lang.compiler.common.Location;
 import com.asakusafw.lang.compiler.model.graph.Batch;
 import com.asakusafw.lang.compiler.model.graph.Jobflow;
 import com.asakusafw.lang.info.Attribute;
@@ -68,6 +71,11 @@ public class MockAttributeCollectorContext implements AttributeCollector.Context
     @Override
     public void putAttribute(Attribute attribute) {
         attributes.add(attribute);
+    }
+
+    @Override
+    public InputStream findResourceFile(Location location) throws IOException {
+        throw new IllegalStateException();
     }
 
     /**

@@ -15,12 +15,17 @@
  */
 package com.asakusafw.lang.info.operator;
 
+import java.util.Arrays;
 import java.util.Collections;
 
 import org.junit.Test;
 
 import com.asakusafw.lang.info.InfoSerDe;
 import com.asakusafw.lang.info.operator.CoreOperatorSpec.CoreOperatorKind;
+import com.asakusafw.lang.info.plan.DataExchange;
+import com.asakusafw.lang.info.plan.PlanInputSpec;
+import com.asakusafw.lang.info.plan.PlanOutputSpec;
+import com.asakusafw.lang.info.plan.PlanVertexSpec;
 import com.asakusafw.lang.info.value.AnnotationInfo;
 import com.asakusafw.lang.info.value.ClassInfo;
 
@@ -63,6 +68,9 @@ public class OperatorSpecTest {
         InfoSerDe.checkRestore(
                 OperatorSpec.class,
                 FlowOperatorSpec.of(ClassInfo.of("com.example.Flow")));
+        InfoSerDe.checkRestore(
+                OperatorSpec.class,
+                FlowOperatorSpec.of((ClassInfo) null));
     }
 
     /**
@@ -109,5 +117,35 @@ public class OperatorSpecTest {
         InfoSerDe.checkRestore(
                 OperatorSpec.class,
                 CustomOperatorSpec.of("testing"));
+    }
+
+    /**
+     * plan vertex.
+     */
+    @Test
+    public void plan_vertex() {
+        InfoSerDe.checkRestore(
+                OperatorSpec.class,
+                PlanVertexSpec.of("testing", "label", Arrays.asList("a", "b", "c")));
+    }
+
+    /**
+     * plan inputs.
+     */
+    @Test
+    public void plan_input() {
+        InfoSerDe.checkRestore(
+                OperatorSpec.class,
+                PlanInputSpec.of("testing", DataExchange.MOVE, InputGroup.parse(Arrays.asList("=key", "+order"))));
+    }
+
+    /**
+     * plan outputs.
+     */
+    @Test
+    public void plan_output() {
+        InfoSerDe.checkRestore(
+                OperatorSpec.class,
+                PlanOutputSpec.of("testing", DataExchange.MOVE, InputGroup.parse(Arrays.asList("=key", "+order"))));
     }
 }

@@ -84,6 +84,9 @@ public abstract class Port<
     public abstract List<TOpposite> getOpposites();
 
     TSelf connect(Output upstream, Input downstream, Consumer<? super Wire> configure) {
+        Util.require(upstream.getParent().getParent() != null, () -> String.format(
+                "port of the root node must not be connected: %s",
+                upstream));
         Util.require(upstream.getParent().getParent() == downstream.getParent().getParent(), () -> String.format(
                 "both %s and %s must be on the same node",
                 upstream.getParent(),

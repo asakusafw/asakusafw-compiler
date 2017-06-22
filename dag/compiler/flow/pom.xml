@@ -28,6 +28,11 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
+      <groupId>com.asakusafw.lang.compiler</groupId>
+      <artifactId>asakusa-compiler-extension-operator</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>com.asakusafw</groupId>
       <artifactId>asakusa-runtime</artifactId>
     </dependency>

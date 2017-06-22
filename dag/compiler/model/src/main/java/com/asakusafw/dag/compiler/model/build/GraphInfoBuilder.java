@@ -16,6 +16,8 @@
 package com.asakusafw.dag.compiler.model.build;
 
 import java.text.MessageFormat;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +36,7 @@ import com.asakusafw.lang.utils.common.Invariants;
 /**
  * Builds {@link GraphInfo}.
  * @since 0.4.0
+ * @version 0.4.2
  */
 public class GraphInfoBuilder {
 
@@ -114,6 +117,15 @@ public class GraphInfoBuilder {
      */
     public ResolvedOutputInfo get(SubPlan.Output port) {
         return outputMap.get(port);
+    }
+
+    /**
+     * Returns the all vertices.
+     * @return the vertices
+     * @since 0.4.2
+     */
+    public Collection<ResolvedVertexInfo> getVertices() {
+        return Collections.unmodifiableCollection(vertices.values());
     }
 
     /**

@@ -42,6 +42,14 @@ public class OutputView implements OutputInfo {
     }
 
     /**
+     * Returns the entity element.
+     * @return the entity element
+     */
+    public Output getEntity() {
+        return entity;
+    }
+
+    /**
      * Returns the owner of this port.
      * @return the owner
      */

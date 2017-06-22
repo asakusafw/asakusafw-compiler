@@ -29,7 +29,7 @@ public class ResolvedInputInfo {
 
     private final String tag;
 
-    private final EdgeDescriptor descriptor;
+    private final ResolvedEdgeInfo edgeInfo;
 
     private final ClassDescription mapperType;
 
@@ -40,57 +40,59 @@ public class ResolvedInputInfo {
     /**
      * Creates a new instance.
      * @param id the input ID
-     * @param descriptor the descriptor
+     * @param edgeInfo the edge information
      */
-    public ResolvedInputInfo(String id, EdgeDescriptor descriptor) {
-        this(id, null, descriptor, null, null, null);
+    public ResolvedInputInfo(String id, ResolvedEdgeInfo edgeInfo) {
+        this(id, null, edgeInfo, null, null, null);
     }
 
     /**
      * Creates a new instance.
      * @param id the input ID
-     * @param descriptor the descriptor
+     * @param edgeInfo the edge information
      * @param mapperType the mapper type (nullable)
      * @param copierType the copier type (nullable)
      * @param combinerType the combiner type (nullable)
      */
     public ResolvedInputInfo(
-            String id, EdgeDescriptor descriptor,
+            String id,
+            ResolvedEdgeInfo edgeInfo,
             ClassDescription mapperType,
             ClassDescription copierType,
             ClassDescription combinerType) {
-        this(id, null, descriptor, mapperType, copierType, combinerType);
+        this(id, null, edgeInfo, mapperType, copierType, combinerType);
     }
 
     /**
      * Creates a new instance.
      * @param id the input ID
      * @param tag the optional port tag (nullable)
-     * @param descriptor the descriptor
+     * @param edgeInfo the edge information
      */
-    public ResolvedInputInfo(String id, String tag, EdgeDescriptor descriptor) {
-        this(id, descriptor, null, null, null);
+    public ResolvedInputInfo(String id, String tag, ResolvedEdgeInfo edgeInfo) {
+        this(id, tag, edgeInfo, null, null, null);
     }
 
     /**
      * Creates a new instance.
      * @param id the input ID
      * @param tag the optional port tag
-     * @param descriptor the descriptor
+     * @param edgeInfo the edge information
      * @param mapperType the mapper type (nullable)
      * @param copierType the copier type (nullable)
      * @param combinerType the combiner type (nullable)
      */
     public ResolvedInputInfo(
-            String id, String tag, EdgeDescriptor descriptor,
+            String id, String tag,
+            ResolvedEdgeInfo edgeInfo,
             ClassDescription mapperType,
             ClassDescription copierType,
             ClassDescription combinerType) {
         Arguments.requireNonNull(id);
-        Arguments.requireNonNull(descriptor);
+        Arguments.requireNonNull(edgeInfo);
         this.id = id;
         this.tag = tag;
-        this.descriptor = descriptor;
+        this.edgeInfo = edgeInfo;
         this.mapperType = mapperType;
         this.copierType = copierType;
         this.combinerType = combinerType;
@@ -113,11 +115,19 @@ public class ResolvedInputInfo {
     }
 
     /**
+     * Returns the edge information.
+     * @return the edge information
+     */
+    public ResolvedEdgeInfo getEdgeInfo() {
+        return edgeInfo;
+    }
+
+    /**
      * Returns the descriptor.
      * @return the descriptor
      */
     public EdgeDescriptor getDescriptor() {
-        return descriptor;
+        return edgeInfo.getDescriptor();
     }
 
     /**

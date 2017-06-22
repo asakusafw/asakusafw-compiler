@@ -15,6 +15,9 @@
  */
 package com.asakusafw.lang.info.operator;
 
+import com.asakusafw.lang.info.plan.PlanInputSpec;
+import com.asakusafw.lang.info.plan.PlanOutputSpec;
+import com.asakusafw.lang.info.plan.PlanVertexSpec;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
@@ -38,6 +41,9 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
     @Type(value = OutputOperatorSpec.class, name = OutputOperatorSpec.KIND),
     @Type(value = MarkerOperatorSpec.class, name = MarkerOperatorSpec.KIND),
     @Type(value = CustomOperatorSpec.class, name = CustomOperatorSpec.KIND),
+    @Type(value = PlanVertexSpec.class, name = PlanVertexSpec.KIND),
+    @Type(value = PlanInputSpec.class, name = PlanInputSpec.KIND),
+    @Type(value = PlanOutputSpec.class, name = PlanOutputSpec.KIND),
 })
 public interface OperatorSpec {
 
@@ -90,5 +96,20 @@ public interface OperatorSpec {
          * This will be appeared in some optimization phases.
          */
         @JsonProperty(CustomOperatorSpec.KIND) CUSTOM,
+
+        /**
+         * Pseudo operators for plan vertices.
+         */
+        @JsonProperty(PlanVertexSpec.KIND) PLAN_VERTEX,
+
+        /**
+         * Pseudo operators for plan vertex inputs.
+         */
+        @JsonProperty(PlanInputSpec.KIND) PLAN_INPUT,
+
+        /**
+         * Pseudo operators for plan vertex outputs.
+         */
+        @JsonProperty(PlanOutputSpec.KIND) PLAN_OUTPUT,
     }
 }

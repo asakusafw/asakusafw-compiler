@@ -28,7 +28,6 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.asakusafw.dag.api.model.EdgeDescriptor;
 import com.asakusafw.dag.compiler.codegen.ClassGeneratorContext;
 import com.asakusafw.dag.compiler.directio.DirectFileInputAdapterGenerator;
 import com.asakusafw.dag.compiler.directio.DirectFileOutputCommitGenerator;
@@ -39,6 +38,7 @@ import com.asakusafw.dag.compiler.flow.DagDescriptorFactory;
 import com.asakusafw.dag.compiler.flow.ExternalPortDriver;
 import com.asakusafw.dag.compiler.flow.ExternalPortDriverProvider;
 import com.asakusafw.dag.compiler.model.build.GraphInfoBuilder;
+import com.asakusafw.dag.compiler.model.build.ResolvedEdgeInfo;
 import com.asakusafw.dag.compiler.model.build.ResolvedInputInfo;
 import com.asakusafw.dag.compiler.model.build.ResolvedVertexInfo;
 import com.asakusafw.dag.compiler.model.plan.VertexSpec;
@@ -177,6 +177,7 @@ public class DirectFilePortDriver implements ExternalPortDriver {
         ResolvedVertexInfo info = new ResolvedVertexInfo(
                 ID_OUTPUT_SETUP,
                 descriptors.newVertex(proc),
+                null,
                 Collections.emptyMap(),
                 Collections.emptyMap());
         return register(builder, plan, info, proc);
@@ -197,22 +198,27 @@ public class DirectFilePortDriver implements ExternalPortDriver {
                 model.getBasePath(),
                 gather ? null : model.getResourcePattern(),
                 model.getFormatClass()));
-        EdgeDescriptor edge;
+        ResolvedEdgeInfo edge;
         if (gather) {
             ClassDescription serde = generate(context, vertex, "serde.directio", c -> { //$NON-NLS-1$
                 return new OutputPatternSerDeGenerator().generate(ref, pattern, c);
             });
-            List<Group.Ordering> orderings = pattern.getOrders().stream()
+            Group group = new Group(Collections.emptyList(), pattern.getOrders().stream()
                     .map(o -> new Group.Ordering(
                             o.getTarget().getName(),
                             o.isAscend() ? Group.Direction.ASCENDANT : Group.Direction.DESCENDANT))
-                    .collect(Collectors.toList());
-            edge = descriptors.newScatterGatherEdge(
+                    .collect(Collectors.toList()));
+            edge = new ResolvedEdgeInfo(
+                    descriptors.newScatterGatherEdge(output.getDataType(), serde, group),
+                    ResolvedEdgeInfo.Movement.SCATTER_GATHER,
                     output.getDataType(),
-                    serde,
-                    new Group(Collections.emptyList(), orderings));
+                    group);
         } else {
-            edge = descriptors.newOneToOneEdge(output.getDataType());
+            edge = new ResolvedEdgeInfo(
+                    descriptors.newOneToOneEdge(output.getDataType()),
+                    ResolvedEdgeInfo.Movement.ONE_TO_ONE,
+                    output.getDataType(),
+                    null);
         }
         ClassDescription vertexClass = generate(context, vertex, "output.directio", c -> { //$NON-NLS-1$
             return new DirectFileOutputPrepareGenerator().generate(context, specs, c);
@@ -224,6 +230,7 @@ public class DirectFilePortDriver implements ExternalPortDriver {
         ResolvedVertexInfo info = new ResolvedVertexInfo(
                 vertex.getId(),
                 descriptors.newVertex(vertexClass),
+                String.valueOf(output),
                 Collections.singletonMap(entry, input),
                 Collections.emptyMap(),
                 Collections.singleton(setup));
@@ -248,6 +255,7 @@ public class DirectFilePortDriver implements ExternalPortDriver {
         ResolvedVertexInfo info = new ResolvedVertexInfo(
                 ID_OUTPUT_COMMIT,
                 descriptors.newVertex(proc),
+                null,
                 Collections.emptyMap(),
                 Collections.emptyMap(),
                 prepares);

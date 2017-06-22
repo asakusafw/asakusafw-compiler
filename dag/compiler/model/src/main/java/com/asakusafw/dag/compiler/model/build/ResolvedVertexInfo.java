@@ -34,6 +34,8 @@ public class ResolvedVertexInfo {
 
     private final VertexDescriptor descriptor;
 
+    private final String label;
+
     private final Map<SubPlan.Input, ResolvedInputInfo> inputs;
 
     private final Map<SubPlan.Output, ResolvedOutputInfo> outputs;
@@ -44,21 +46,24 @@ public class ResolvedVertexInfo {
      * Creates a new instance.
      * @param id the vertex ID
      * @param descriptor the vertex descriptor
+     * @param label the vertex label (nullable)
      * @param inputs the inputs
      * @param outputs the outputs
      */
     public ResolvedVertexInfo(
             String id,
             VertexDescriptor descriptor,
+            String label,
             Map<? extends SubPlan.Input, ? extends ResolvedInputInfo> inputs,
             Map<? extends SubPlan.Output, ? extends ResolvedOutputInfo> outputs) {
-        this(id, descriptor, inputs, outputs, Collections.emptySet());
+        this(id, descriptor, label, inputs, outputs, Collections.emptySet());
     }
 
     /**
      * Creates a new instance.
      * @param id the vertex ID
      * @param descriptor the vertex descriptor
+     * @param label the vertex label (nullable)
      * @param inputs the inputs
      * @param outputs the outputs
      * @param implicitDependencies the implicit dependency targets
@@ -66,6 +71,7 @@ public class ResolvedVertexInfo {
     public ResolvedVertexInfo(
             String id,
             VertexDescriptor descriptor,
+            String label,
             Map<? extends SubPlan.Input, ? extends ResolvedInputInfo> inputs,
             Map<? extends SubPlan.Output, ? extends ResolvedOutputInfo> outputs,
             Collection<? extends ResolvedVertexInfo> implicitDependencies) {
@@ -76,6 +82,7 @@ public class ResolvedVertexInfo {
         Arguments.requireNonNull(implicitDependencies);
         this.id = id;
         this.descriptor = descriptor;
+        this.label = label;
         this.inputs = Arguments.freeze(inputs);
         this.outputs = Arguments.freeze(outputs);
         this.implicitDependencies = Arguments.copyToSet(implicitDependencies);
@@ -95,6 +102,14 @@ public class ResolvedVertexInfo {
      */
     public VertexDescriptor getDescriptor() {
         return descriptor;
+    }
+
+    /**
+     * Returns the label.
+     * @return the label, or {@code null} if it is not defined
+     */
+    public String getLabel() {
+        return label;
     }
 
     /**
