@@ -418,7 +418,10 @@ public final class FlowGraphAnalyzer {
     }
 
     static boolean isCheckpoint(FlowElementDescription description) {
-        return description.getAttribute(FlowBoundary.class) == FlowBoundary.STAGE;
+        return description.getKind() == FlowElementKind.PSEUD
+                && description.getInputPorts().size() >= 1
+                && description.getOutputPorts().size() >= 1
+                && description.getAttribute(FlowBoundary.class) == FlowBoundary.STAGE;
     }
 
     private static ReifiableTypeDescription typeOf(java.lang.reflect.Type type) {
