@@ -15,13 +15,19 @@
  */
 package com.asakusafw.lang.info.plan;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
 import com.asakusafw.lang.info.operator.InputGroup;
 import com.asakusafw.lang.info.operator.NamedOperatorSpec;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 /**
  * Represents a pseudo-operator detail of outputs in execution plan.
@@ -43,10 +49,15 @@ public final class PlanOutputSpec implements NamedOperatorSpec {
     @JsonProperty(Constants.ID_GROUP)
     private final InputGroup group;
 
-    private PlanOutputSpec(String name, DataExchange exchange, InputGroup group) {
+    @JsonProperty(Constants.ID_EXTRA)
+    @JsonInclude(Include.NON_EMPTY)
+    private final List<String> extraOperations;
+
+    private PlanOutputSpec(String name, DataExchange exchange, InputGroup group, Collection<String> extra) {
         this.name = name;
         this.exchange = exchange;
         this.group = group;
+        this.extraOperations = Collections.unmodifiableList(new ArrayList<>(extra));
     }
 
     /**
@@ -56,12 +67,29 @@ public final class PlanOutputSpec implements NamedOperatorSpec {
      * @param group the data exchanging group (nullable)
      * @return the instance
      */
+    public static PlanOutputSpec of(
+            String name,
+            DataExchange exchange,
+            InputGroup group) {
+        return of(name, exchange, group, null);
+    }
+
+    /**
+     * Creates a new instance.
+     * @param name the port name
+     * @param exchange the data exchanging strategy
+     * @param group the data exchanging group (nullable)
+     * @param extraOperations the extra operations (nullable)
+     * @return the instance
+     */
     @JsonCreator
     public static PlanOutputSpec of(
             @JsonProperty(Constants.ID_NAME) String name,
             @JsonProperty(Constants.ID_EXCHANGE) DataExchange exchange,
-            @JsonProperty(Constants.ID_GROUP) InputGroup group) {
-        return new PlanOutputSpec(name, exchange, group);
+            @JsonProperty(Constants.ID_GROUP) InputGroup group,
+            @JsonProperty(Constants.ID_EXTRA) Collection<String> extraOperations) {
+        return new PlanOutputSpec(name, exchange, group, Optional.ofNullable(extraOperations)
+                .orElse(Collections.emptyList()));
     }
 
     @Override
@@ -90,6 +118,14 @@ public final class PlanOutputSpec implements NamedOperatorSpec {
         return group;
     }
 
+    /**
+     * Returns the extra operations.
+     * @return the extra operations
+     */
+    public List<String> getExtraOperations() {
+        return extraOperations;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -97,6 +133,7 @@ public final class PlanOutputSpec implements NamedOperatorSpec {
         result = prime * result + Objects.hashCode(name);
         result = prime * result + Objects.hashCode(exchange);
         result = prime * result + Objects.hashCode(group);
+        result = prime * result + Objects.hashCode(extraOperations);
         return result;
     }
 
@@ -114,7 +151,8 @@ public final class PlanOutputSpec implements NamedOperatorSpec {
         PlanOutputSpec other = (PlanOutputSpec) obj;
         return Objects.equals(name, other.name)
                 && Objects.equals(exchange, other.exchange)
-                && Objects.equals(group, other.group);
+                && Objects.equals(group, other.group)
+                && Objects.equals(extraOperations, other.extraOperations);
     }
 
     @Override

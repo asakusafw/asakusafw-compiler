@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import com.asakusafw.lang.compiler.api.CompilerOptions;
+import com.asakusafw.lang.compiler.api.reference.BatchReference;
+import com.asakusafw.lang.compiler.api.reference.JobflowReference;
 import com.asakusafw.lang.compiler.common.Location;
 import com.asakusafw.lang.compiler.model.graph.Batch;
 import com.asakusafw.lang.compiler.model.graph.Jobflow;
@@ -27,6 +29,7 @@ import com.asakusafw.lang.info.Attribute;
 /**
  * Collects {@link Attribute} from batch.
  * @since 0.4.1
+ * @version 0.4.2
  */
 public interface AttributeCollector {
 
@@ -45,6 +48,26 @@ public interface AttributeCollector {
      * @param jobflow the target jobflow
      */
     default void process(Context context, Jobflow jobflow) {
+        return;
+    }
+
+    /**
+     * Collects {@link Attribute} from the given batch.
+     * @param context the current context
+     * @param batch the target batch
+     * @since 0.4.2
+     */
+    default void process(Context context, BatchReference batch) {
+        return;
+    }
+
+    /**
+     * Collects {@link Attribute} from the given jobflow.
+     * @param context the current context
+     * @param jobflow the target jobflow
+     * @since 0.4.2
+     */
+    default void process(Context context, JobflowReference jobflow) {
         return;
     }
 

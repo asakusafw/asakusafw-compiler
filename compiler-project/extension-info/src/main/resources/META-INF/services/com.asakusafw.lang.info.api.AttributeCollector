@@ -1,1 +1,2 @@
 com.asakusafw.lang.compiler.extension.info.ParameterListAttributeCollector
+com.asakusafw.lang.compiler.extension.info.TaskListAttributeCollector

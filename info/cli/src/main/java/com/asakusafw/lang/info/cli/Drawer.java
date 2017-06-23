@@ -98,14 +98,24 @@ class Drawer {
         return this;
     }
 
-    void dump(PrintWriter writer, Node root) {
+    void dump(PrintWriter writer, Node root, Map<String, ?> options) {
         validateNode(root);
         Draw draw = elements.get(root);
         if (draw.shape != Shape.GRAPH) {
             throw new IllegalStateException();
         }
         writer.println("digraph {");
-        writer.println("compound = true;");
+        options.forEach((k, v) -> {
+            if (v instanceof Map<?, ?>) {
+                writer.printf("%s [%n%s];%n", k, ((Map<?, ?>) v).entrySet().stream()
+                        .map(it -> String.format("    %s = %s,%n",
+                                it.getKey(),
+                                literal(String.valueOf(it.getValue()))))
+                        .collect(Collectors.joining()));
+            } else {
+                writer.printf("%s = %s;%n", k, literal(String.valueOf(v)));
+            }
+        });
         if (draw.label.isEmpty() == false) {
             writer.printf("label = %s;%n", literal(draw.label));
         }
@@ -242,7 +252,7 @@ class Drawer {
         Draw draw = elements.get(element);
         if (element instanceof Port<?, ?>) {
             if (draw == null) {
-                return getSimpleId(element.getParent());
+                return toQualifiedId(element.getParent(), incoming);
             } else if (draw.shape == Shape.REDIRECT) {
                 return toQualifiedId(draw.destination, incoming);
             } else if (draw.shape == Shape.MEMBER) {
@@ -279,6 +289,9 @@ class Drawer {
     }
 
     private Optional<String> toClusterId(Element element) {
+        if (elements.containsKey(element) == false && element instanceof Port<?, ?>) {
+            return toClusterId(element.getParent());
+        }
         return Optional.ofNullable(elements.get(element))
                 .filter(d -> d.shape == Shape.GRAPH)
                 .map(it -> "cluster" + getSimpleId(it));

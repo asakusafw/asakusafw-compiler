@@ -64,22 +64,13 @@ class DrawEngine {
 
     void draw(
             PrintWriter writer, OperatorGraphView root,
-            int limitDepth, Optional<String> label,
-            Consumer<? super Drawer> extension) {
-        drawer.add(root.getRoot(), Shape.GRAPH, label);
-        analyzeGraph(root, 1, limitDepth);
-        Optional.ofNullable(extension).ifPresent(it -> it.accept(drawer));
-        drawer.dump(writer, root.getRoot());
-    }
-
-    void draw(
-            PrintWriter writer, OperatorGraphView root,
             int limitDepth, List<String> label,
+            Map<String, ?> options,
             Consumer<? super Drawer> extension) {
         drawer.add(root.getRoot(), Shape.GRAPH, label);
         analyzeGraph(root, 1, limitDepth);
         Optional.ofNullable(extension).ifPresent(it -> it.accept(drawer));
-        drawer.dump(writer, root.getRoot());
+        drawer.dump(writer, root.getRoot(), options);
     }
 
     private void analyzeGraph(OperatorGraphView graph, int currentDepth, int limitDepth) {
@@ -305,6 +296,9 @@ class DrawEngine {
     private List<String> analyzePlanOutput(OperatorView operator, PlanOutputSpec spec) {
         List<String> body = new ArrayList<>();
         body.add(spec.getExchange().toString());
+        if (features.contains(Feature.EDGE_OPERATION)) {
+            body.addAll(spec.getExtraOperations());
+        }
         if (features.contains(Feature.EDGE_TYPE)) {
             operator.getInputs().stream()
                 .findAny()
@@ -377,6 +371,8 @@ class DrawEngine {
         PORT_TYPE(true),
 
         PORT_KEY(true),
+
+        EDGE_OPERATION(false),
 
         EDGE_TYPE(false),
 
