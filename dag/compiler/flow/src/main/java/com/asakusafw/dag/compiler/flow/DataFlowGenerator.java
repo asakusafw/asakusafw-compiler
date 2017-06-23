@@ -686,14 +686,14 @@ public final class DataFlowGenerator {
                     .findFirst()
                     .orElseGet(() -> PlanOutputSpec.of(r.getId(), DataExchange.UNKNOWN, null))));
         sub.getInputs().stream()
-            .filter(it -> mapper.containsKey(it) == false)
+            .filter(it -> vertex.getInputs().containsKey(it) == false)
             .map(InputSpec::get)
             .forEach(spec -> mapper.put(spec.getOrigin().getOperator(), PlanInputSpec.of(
                     spec.getId(),
                     spec.getInputType() == InputType.NO_DATA ? DataExchange.NOTHING : DataExchange.UNKNOWN,
                     null)));
         sub.getOutputs().stream()
-            .filter(it -> mapper.containsKey(it) == false)
+            .filter(it -> vertex.getOutputs().containsKey(it) == false)
             .map(OutputSpec::get)
             .forEach(spec -> mapper.put(spec.getOrigin().getOperator(), PlanOutputSpec.of(
                     spec.getId(),
