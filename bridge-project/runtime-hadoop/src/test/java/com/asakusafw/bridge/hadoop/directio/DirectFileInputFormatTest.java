@@ -132,6 +132,64 @@ public class DirectFileInputFormatTest {
         assertThat(results.keySet(), hasSize(0));
     }
 
+    /**
+     * w/ combine.
+     * @throws Exception if failed
+     */
+    @Test
+    public void combine() throws Exception {
+        try (ModelOutput<MockData> out = WritableModelOutput.create(context.file("a.txt"))) {
+            MockData.put(out, 0, "Hello0");
+        }
+        try (ModelOutput<MockData> out = WritableModelOutput.create(context.file("b.txt"))) {
+            MockData.put(out, 1, "Hello1");
+        }
+        try (ModelOutput<MockData> out = WritableModelOutput.create(context.file("c.txt"))) {
+            MockData.put(out, 2, "Hello2");
+        }
+        try (ModelOutput<MockData> out = WritableModelOutput.create(context.file("d.txt"))) {
+            MockData.put(out, 3, "Hello3");
+        }
+        Configuration conf = conf("/", "*.txt", null, null, null);
+        conf.set(DirectFileInputFormat.KEY_COMBINE, "2");
+
+        Map<Integer, String> results = collect(conf);
+        assertThat(results.keySet(), hasSize(4));
+        assertThat(results, hasEntry(0, "Hello0"));
+        assertThat(results, hasEntry(1, "Hello1"));
+        assertThat(results, hasEntry(2, "Hello2"));
+        assertThat(results, hasEntry(3, "Hello3"));
+    }
+
+    /**
+     * w/ combine.
+     * @throws Exception if failed
+     */
+    @Test
+    public void combine1() throws Exception {
+        try (ModelOutput<MockData> out = WritableModelOutput.create(context.file("a.txt"))) {
+            MockData.put(out, 0, "Hello0");
+        }
+        try (ModelOutput<MockData> out = WritableModelOutput.create(context.file("b.txt"))) {
+            MockData.put(out, 1, "Hello1");
+        }
+        try (ModelOutput<MockData> out = WritableModelOutput.create(context.file("c.txt"))) {
+            MockData.put(out, 2, "Hello2");
+        }
+        try (ModelOutput<MockData> out = WritableModelOutput.create(context.file("d.txt"))) {
+            MockData.put(out, 3, "Hello3");
+        }
+        Configuration conf = conf("/", "*.txt", null, null, null);
+        conf.set(DirectFileInputFormat.KEY_COMBINE, "1");
+
+        Map<Integer, String> results = collect(conf);
+        assertThat(results.keySet(), hasSize(4));
+        assertThat(results, hasEntry(0, "Hello0"));
+        assertThat(results, hasEntry(1, "Hello1"));
+        assertThat(results, hasEntry(2, "Hello2"));
+        assertThat(results, hasEntry(3, "Hello3"));
+    }
+
     private Configuration conf(String basePath, String resourcePath, Class<?> filter, String optional, String args) {
         Configuration conf = context.newConfiguration();
         conf.set(DirectFileInputFormat.KEY_BASE_PATH, basePath);
