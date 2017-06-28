@@ -49,7 +49,7 @@ import io.airlift.airline.Option;
         description = "Generates operator graph as Graphviz DOT script",
         hidden = false
 )
-public class DrawOperatorCommand extends SingleJobflowInfoCommand {
+public class DrawOperatorCommand extends DrawCommand {
 
     @Option(
             name = { "--depth", },
@@ -140,7 +140,7 @@ public class DrawOperatorCommand extends SingleJobflowInfoCommand {
         }
         Set<Feature> features = extractFeatures();
         DrawEngine engine = new DrawEngine(features);
-        engine.draw(writer, graph, limitDepth, label, null);
+        engine.draw(writer, graph, limitDepth, label, getGraphOptions(), null);
     }
 
     private Set<Feature> extractFeatures() {

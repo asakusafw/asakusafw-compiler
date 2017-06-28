@@ -18,6 +18,7 @@ package com.asakusafw.dag.compiler.flow;
 import static com.asakusafw.dag.compiler.flow.DataFlowUtil.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -25,6 +26,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -51,6 +53,7 @@ import com.asakusafw.dag.compiler.flow.adapter.OperatorNodeGeneratorContextAdapt
 import com.asakusafw.dag.compiler.model.ClassData;
 import com.asakusafw.dag.compiler.model.build.GraphInfoBuilder;
 import com.asakusafw.dag.compiler.model.build.ResolvedEdgeInfo;
+import com.asakusafw.dag.compiler.model.build.ResolvedEdgeInfo.Movement;
 import com.asakusafw.dag.compiler.model.build.ResolvedInputInfo;
 import com.asakusafw.dag.compiler.model.build.ResolvedOutputInfo;
 import com.asakusafw.dag.compiler.model.build.ResolvedVertexInfo;
@@ -94,6 +97,7 @@ import com.asakusafw.lang.compiler.model.graph.OperatorOutput;
 import com.asakusafw.lang.compiler.model.graph.OperatorPort;
 import com.asakusafw.lang.compiler.model.graph.OperatorProperty;
 import com.asakusafw.lang.compiler.model.graph.Operators;
+import com.asakusafw.lang.compiler.model.graph.UserOperator;
 import com.asakusafw.lang.compiler.model.info.JobflowInfo;
 import com.asakusafw.lang.compiler.operator.info.OperatorGraphConverter;
 import com.asakusafw.lang.compiler.operator.info.PlanAttributeStore;
@@ -682,7 +686,8 @@ public final class DataFlowGenerator {
                     .map(edge -> PlanOutputSpec.of(
                             r.getId(),
                             translate(edge.getMovement()),
-                            OperatorGraphConverter.convert(edge.getGroup())))
+                            OperatorGraphConverter.convert(edge.getGroup()),
+                            computeAggregation(s, edge)))
                     .findFirst()
                     .orElseGet(() -> PlanOutputSpec.of(r.getId(), DataExchange.UNKNOWN, null))));
         sub.getInputs().stream()
@@ -718,5 +723,18 @@ public final class DataFlowGenerator {
         default:
             return DataExchange.UNKNOWN;
         }
+    }
+
+    private static List<String> computeAggregation(SubPlan.Output output, ResolvedEdgeInfo edge) {
+        if (edge.getMovement() != Movement.AGGREGATE) {
+            return Collections.emptyList();
+        }
+        return Optional.ofNullable(OutputSpec.get(output).getAggregationInfo())
+                .filter(it -> it instanceof UserOperator)
+                .map(it -> (UserOperator) it)
+                .map(o -> Arrays.asList(
+                        o.getMethod().getDeclaringClass().getSimpleName(),
+                        o.getMethod().getName()))
+                .orElse(Collections.emptyList());
     }
 }

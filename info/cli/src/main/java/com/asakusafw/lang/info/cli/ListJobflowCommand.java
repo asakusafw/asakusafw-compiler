@@ -17,11 +17,11 @@ package com.asakusafw.lang.info.cli;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.asakusafw.lang.info.BatchInfo;
 import com.asakusafw.lang.info.JobflowInfo;
+import com.asakusafw.lang.info.task.TaskListAttribute;
 
 import io.airlift.airline.Command;
 import io.airlift.airline.Option;
@@ -49,10 +49,30 @@ public class ListJobflowCommand extends InfoCommand {
     protected void process(PrintWriter writer, BatchInfo info) throws IOException {
         if (showVerbose) {
             for (JobflowInfo jobflow : info.getJobflows()) {
-                Map<String, Object> members = new LinkedHashMap<>();
-                members.put("class", jobflow.getDescriptionClass());
-                writer.printf("%s:%n", jobflow.getId());
-                ListUtil.printBlock(writer, 4, members);
+                writer.printf("%s (%s):%n",
+                        jobflow.getId(),
+                        ListUtil.normalize(jobflow.getDescriptionClass()));
+                ListUtil.printBlock(
+                        writer,
+                        4,
+                        "blockers",
+                        jobflow.getBlockerIds().stream()
+                            .sorted()
+                            .collect(Collectors.toList()));
+                jobflow.findAttribute(TaskListAttribute.class)
+                    .map(TaskListAttribute::getPhases)
+                    .ifPresent(phases -> phases.forEach((phase, tasks) -> {
+                        ListUtil.printBlock(
+                                writer,
+                                4,
+                                phase.getSymbol(),
+                                tasks.stream()
+                                    .map(it -> String.format(
+                                            "%s (@%s)",
+                                            it.getModuleName(),
+                                            ListUtil.normalize(it.getProfileName())))
+                                    .collect(Collectors.toList()));
+                    }));
             }
         } else {
             info.getJobflows().forEach(it -> writer.println(it.getId()));

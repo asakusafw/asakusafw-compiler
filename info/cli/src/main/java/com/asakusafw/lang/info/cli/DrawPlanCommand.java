@@ -46,7 +46,7 @@ import io.airlift.airline.Option;
         description = "Generates execution plan as Graphviz DOT script",
         hidden = false
 )
-public class DrawPlanCommand extends SingleJobflowInfoCommand {
+public class DrawPlanCommand extends DrawCommand {
 
     @Option(
             name = { "--vertex", },
@@ -71,6 +71,14 @@ public class DrawPlanCommand extends SingleJobflowInfoCommand {
             arity = 0,
             required = false)
     boolean showArgument = false;
+
+    @Option(
+            name = { "--show-edge-operation", },
+            title = "display operations on edge",
+            description = "display operations on edge",
+            arity = 0,
+            required = false)
+    boolean showEdgeOperation = false;
 
     @Option(
             name = { "--show-io", },
@@ -154,7 +162,7 @@ public class DrawPlanCommand extends SingleJobflowInfoCommand {
         }
         Set<Feature> features = extractFeatures();
         DrawEngine engine = new DrawEngine(features);
-        engine.draw(writer, graph, depth, label, null);
+        engine.draw(writer, graph, depth, label, getGraphOptions(), null);
     }
 
     private Set<Feature> extractFeatures() {
@@ -167,6 +175,9 @@ public class DrawPlanCommand extends SingleJobflowInfoCommand {
         }
         if (showExternalIo) {
             results.add(Feature.EXTERNAL_IO_CLASS);
+        }
+        if (showEdgeOperation) {
+            results.add(Feature.EDGE_OPERATION);
         }
         if (showPortName) {
             results.add(Feature.PORT_NAME);

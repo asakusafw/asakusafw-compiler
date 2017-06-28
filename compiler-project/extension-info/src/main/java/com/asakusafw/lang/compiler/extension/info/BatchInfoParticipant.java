@@ -21,6 +21,7 @@ import java.io.OutputStream;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
 import java.util.stream.Collectors;
@@ -65,17 +66,20 @@ public class BatchInfoParticipant extends AbstractCompilerParticipant {
 
     @Override
     public void afterBatch(Context context, Batch batch, BatchReference reference) {
-        BatchInfo info = analyzeBatch(context, batch);
+        BatchInfo info = analyzeBatch(context, batch, reference);
         write(context, info, Location.of(PATH));
     }
 
-    static BatchInfo analyzeBatch(BatchCompiler.Context context, Batch batch) {
+    static BatchInfo analyzeBatch(BatchCompiler.Context context, Batch batch, BatchReference reference) {
         AttributeCollectorContextAdapter adapter = new AttributeCollectorContextAdapter(context);
         List<AttributeCollector> collectors = collectors(context.getProject().getClassLoader());
         List<JobflowInfo> jobflows = new ArrayList<>();
         for (BatchElement element : batch.getElements()) {
             adapter.reset(element.getJobflow());
             collectors.forEach(c -> c.process(adapter, element.getJobflow()));
+            Optional.ofNullable(reference.find(element.getJobflow().getFlowId()))
+                .ifPresent(it -> collectors.forEach(c -> c.process(adapter, it)));
+
             jobflows.add(new JobflowInfo(
                     element.getJobflow().getFlowId(),
                     element.getJobflow().getDescriptionClass().getBinaryName(),
@@ -86,6 +90,7 @@ public class BatchInfoParticipant extends AbstractCompilerParticipant {
         }
         adapter.reset(null);
         collectors.forEach(c -> c.process(adapter, batch));
+        collectors.forEach(c -> c.process(adapter, reference));
         return new BatchInfo(
                 batch.getBatchId(),
                 batch.getDescriptionClass().getBinaryName(),

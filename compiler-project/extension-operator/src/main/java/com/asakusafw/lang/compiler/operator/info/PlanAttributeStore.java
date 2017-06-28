@@ -38,7 +38,7 @@ public final class PlanAttributeStore {
 
     static final Logger LOG = LoggerFactory.getLogger(PlanAttributeCollector.class);
 
-    static final Location SERIALIZE_LOCATION = Location.of("asakusafw-info/plan.json");
+    static final Location SERIALIZE_LOCATION = Location.of("META-INF/asakusafw-info/plan.json");
 
     private PlanAttributeStore() {
         return;

@@ -13,29 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.asakusafw.lang.info.plan;
-
-final class Constants {
-
-    static final String ID_ID = "id";
-
-    static final String ID_ROOT = "root";
-
-    static final String ID_NAME = "name";
-
-    static final String ID_LABEL = "label";
-
-    static final String ID_DEPENDENCIES = "blockers";
-
-    static final String ID_INDEX = "index";
-
-    static final String ID_EXCHANGE = "exchange";
-
-    static final String ID_GROUP = "group";
-
-    static final String ID_EXTRA = "extra";
-
-    private Constants() {
-        return;
-    }
-}
+/**
+ * Asakusa task information models.
+ */
+package com.asakusafw.lang.info.task;
