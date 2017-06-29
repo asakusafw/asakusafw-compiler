@@ -34,6 +34,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.asakusafw.bridge.hadoop.ModelInputRecordReader;
+import com.asakusafw.bridge.hadoop.combine.CombinedInputSplit;
+import com.asakusafw.bridge.hadoop.combine.CombinedRecordReader;
+import com.asakusafw.bridge.hadoop.combine.DefaultSplitCombiner;
+import com.asakusafw.bridge.hadoop.combine.SplitCombiner;
 import com.asakusafw.bridge.stage.StageInfo;
 import com.asakusafw.runtime.directio.Counter;
 import com.asakusafw.runtime.directio.DataDefinition;
@@ -52,6 +56,8 @@ import com.asakusafw.runtime.stage.input.BridgeInputFormat.NullRecordReader;
 /**
  * An Hadoop {@code InputFormat} for Direct I/O file inputs.
  * This requires {@link StageInfo} object onto Hadoop configuration as {@link StageInfo#KEY_NAME}.
+ * @since 0.1.0
+ * @version 0.4.2
  */
 public class DirectFileInputFormat extends InputFormat<NullWritable, Object> {
 
@@ -89,6 +95,12 @@ public class DirectFileInputFormat extends InputFormat<NullWritable, Object> {
      */
     public static final String KEY_OPTIONAL = KEY_PREFIX + "optional"; //$NON-NLS-1$
 
+    /**
+     * The attribute key name of max number of combined input splits.
+     * @since 0.4.2
+     */
+    public static final String KEY_COMBINE = KEY_PREFIX + "combine"; //$NON-NLS-1$
+
     @Override
     public List<InputSplit> getSplits(JobContext context) throws IOException, InterruptedException {
         Configuration conf = context.getConfiguration();
@@ -108,10 +120,16 @@ public class DirectFileInputFormat extends InputFormat<NullWritable, Object> {
         if (results.isEmpty()) {
             results.add(new NullInputSplit());
         }
-        return results;
+        int splits = context.getConfiguration().getInt(KEY_COMBINE, -1);
+        if (splits >= 1 && splits < results.size()) {
+            SplitCombiner combiner = new DefaultSplitCombiner();
+            return combiner.combine(context, splits, results);
+        } else {
+            return results;
+        }
     }
 
-    private List<DirectInputFragment> findFragments(
+    private static List<DirectInputFragment> findFragments(
             DirectFileInputInfo<?> info,
             DirectDataSourceRepository repository) throws IOException, InterruptedException {
         String containerPath = repository.getContainerPath(info.basePath);
@@ -137,7 +155,7 @@ public class DirectFileInputFormat extends InputFormat<NullWritable, Object> {
         return fragments;
     }
 
-    private DirectFileInputInfo<?> extractInfo(JobContext context) {
+    private static DirectFileInputInfo<?> extractInfo(JobContext context) {
         Configuration conf = context.getConfiguration();
         String basePath = extract(conf, KEY_BASE_PATH, true, true);
         String resourcePath = extract(conf, KEY_RESOURCE_PATH, true, true);
@@ -206,6 +224,8 @@ public class DirectFileInputFormat extends InputFormat<NullWritable, Object> {
             DirectFileInputSplit info = (DirectFileInputSplit) split;
             DataDefinition<?> definition = info.getDataDefinition();
             return createRecordReader(definition, info, context);
+        } else if (split instanceof CombinedInputSplit) {
+            return new CombinedRecordReader<>(this);
         } else if (split instanceof NullInputSplit) {
             return createNullRecordReader(context);
         } else {
@@ -215,7 +235,7 @@ public class DirectFileInputFormat extends InputFormat<NullWritable, Object> {
         }
     }
 
-    private <T> RecordReader<NullWritable, Object> createRecordReader(
+    private static <T> RecordReader<NullWritable, Object> createRecordReader(
             DataDefinition<T> definition,
             DirectFileInputSplit split,
             TaskAttemptContext context) throws IOException, InterruptedException {
@@ -230,7 +250,7 @@ public class DirectFileInputFormat extends InputFormat<NullWritable, Object> {
         return new ModelInputRecordReader<>(input, buffer, counter, fragment.getSize());
     }
 
-    private <T> ModelInput<T> createInput(
+    private static <T> ModelInput<T> createInput(
             TaskAttemptContext context,
             String containerPath,
             DataDefinition<T> definition,
@@ -246,7 +266,7 @@ public class DirectFileInputFormat extends InputFormat<NullWritable, Object> {
         return ds.openInput(definition, fragment, counter);
     }
 
-    private RecordReader<NullWritable, Object> createNullRecordReader(TaskAttemptContext context) {
+    private static RecordReader<NullWritable, Object> createNullRecordReader(TaskAttemptContext context) {
         assert context != null;
         return new NullRecordReader<>();
     }
