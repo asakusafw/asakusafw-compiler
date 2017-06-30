@@ -24,10 +24,10 @@ import org.junit.Test;
 import com.asakusafw.dag.api.model.GraphInfo;
 import com.asakusafw.dag.api.model.PortInfo;
 import com.asakusafw.dag.api.model.VertexInfo;
+import com.asakusafw.dag.api.model.basic.BasicEdgeDescriptor.Movement;
 import com.asakusafw.dag.runtime.skeleton.VoidVertexProcessor;
 import com.asakusafw.dag.runtime.testing.IntSerDe;
 import com.asakusafw.dag.runtime.testing.MockDataModelUtil;
-import com.asakusafw.vanilla.api.VanillaEdgeDescriptor.Movement;
 
 /**
  * Test for {@link GraphMirror}.

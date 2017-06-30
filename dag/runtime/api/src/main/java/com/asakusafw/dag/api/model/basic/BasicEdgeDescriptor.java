@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.asakusafw.vanilla.api;
+package com.asakusafw.dag.api.model.basic;
 
 import java.text.MessageFormat;
 import java.util.Objects;
@@ -26,10 +26,10 @@ import com.asakusafw.dag.api.model.EdgeDescriptor;
 import com.asakusafw.lang.utils.common.Arguments;
 
 /**
- * An implementation of {@link EdgeDescriptor} for Asakusa Vanilla.
- * @since 0.4.0
+ * A basic implementation of {@link EdgeDescriptor}.
+ * @since 0.4.2
  */
-public class VanillaEdgeDescriptor implements EdgeDescriptor {
+public class BasicEdgeDescriptor implements EdgeDescriptor {
 
     private static final long serialVersionUID = 1L;
 
@@ -45,12 +45,8 @@ public class VanillaEdgeDescriptor implements EdgeDescriptor {
      * @param serde information of supplier which provides
      *     either {@link ValueSerDe} or {@link KeyValueSerDe} (nullable)
      * @param comparator information of supplier which provides {@link DataComparator} (nullable)
-     * @see #newNothing()
-     * @see #newOneToOne(SupplierInfo)
-     * @see #newBroadcast(SupplierInfo)
-     * @see #newScatterGather(SupplierInfo, SupplierInfo)
      */
-    public VanillaEdgeDescriptor(Movement movement, SupplierInfo serde, SupplierInfo comparator) {
+    public BasicEdgeDescriptor(Movement movement, SupplierInfo serde, SupplierInfo comparator) {
         Arguments.requireNonNull(movement);
         switch (movement) {
         case ONE_TO_ONE:
@@ -71,42 +67,6 @@ public class VanillaEdgeDescriptor implements EdgeDescriptor {
         this.movement = movement;
         this.serde = serde;
         this.comparator = comparator;
-    }
-
-    /**
-     * Creates a new nothing edge descriptor.
-     * @return the created instance.
-     */
-    public static VanillaEdgeDescriptor newNothing() {
-        return new VanillaEdgeDescriptor(Movement.NOTHING, null, null);
-    }
-
-    /**
-     * Creates a new one-to-one edge descriptor.
-     * @param serde information of supplier which provides {@link ValueSerDe}
-     * @return the created instance
-     */
-    public static VanillaEdgeDescriptor newOneToOne(SupplierInfo serde) {
-        return new VanillaEdgeDescriptor(Movement.ONE_TO_ONE, serde, null);
-    }
-
-    /**
-     * Creates a new broadcast edge descriptor.
-     * @param serde information of supplier which provides {@link ValueSerDe}
-     * @return the created instance
-     */
-    public static VanillaEdgeDescriptor newBroadcast(SupplierInfo serde) {
-        return new VanillaEdgeDescriptor(Movement.BROADCAST, serde, null);
-    }
-
-    /**
-     * Creates a new scatter-gather edge descriptor.
-     * @param serde information of supplier which provides {@link KeyValueSerDe}
-     * @param comparator the value comparator (nullable)
-     * @return the created instance
-     */
-    public static VanillaEdgeDescriptor newScatterGather(SupplierInfo serde, SupplierInfo comparator) {
-        return new VanillaEdgeDescriptor(Movement.SCATTER_GATHER, serde, comparator);
     }
 
     /**
@@ -154,7 +114,7 @@ public class VanillaEdgeDescriptor implements EdgeDescriptor {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        VanillaEdgeDescriptor other = (VanillaEdgeDescriptor) obj;
+        BasicEdgeDescriptor other = (BasicEdgeDescriptor) obj;
         if (movement != other.movement) {
             return false;
         }
@@ -176,7 +136,7 @@ public class VanillaEdgeDescriptor implements EdgeDescriptor {
 
     /**
      * Represents data exchange operation type.
-     * @since 0.4.0
+     * @since 0.4.2
      */
     public enum Movement {
 
@@ -218,7 +178,7 @@ public class VanillaEdgeDescriptor implements EdgeDescriptor {
 
     /**
      * Represents data type of each I/O port.
-     * @since 0.4.0
+     * @since 0.4.2
      */
     public enum PortType {
 

@@ -27,10 +27,10 @@ import com.asakusafw.dag.api.common.TaggedSupplier;
 import com.asakusafw.dag.api.common.ValueSerDe;
 import com.asakusafw.dag.api.model.PortId;
 import com.asakusafw.dag.api.model.PortInfo;
+import com.asakusafw.dag.api.model.basic.BasicEdgeDescriptor;
+import com.asakusafw.dag.api.model.basic.BasicEdgeDescriptor.PortType;
 import com.asakusafw.lang.utils.common.Arguments;
 import com.asakusafw.lang.utils.common.Invariants;
-import com.asakusafw.vanilla.api.VanillaEdgeDescriptor;
-import com.asakusafw.vanilla.api.VanillaEdgeDescriptor.PortType;
 
 /**
  * An abstract implementation of I/O port mirror of vertices.
@@ -42,7 +42,7 @@ public abstract class PortMirror {
 
     private final PortInfo info;
 
-    private final VanillaEdgeDescriptor descriptor;
+    private final BasicEdgeDescriptor descriptor;
 
     /**
      * Creates a new instance.
@@ -50,7 +50,7 @@ public abstract class PortMirror {
      * @param info the original information
      * @param descriptor the edge descriptor
      */
-    public PortMirror(VertexMirror owner, PortInfo info, VanillaEdgeDescriptor descriptor) {
+    public PortMirror(VertexMirror owner, PortInfo info, BasicEdgeDescriptor descriptor) {
         this.owner = owner;
         this.info = info;
         this.descriptor = descriptor;
@@ -76,7 +76,7 @@ public abstract class PortMirror {
      * Returns the movement type.
      * @return the movement type
      */
-    public VanillaEdgeDescriptor.Movement getMovement() {
+    public BasicEdgeDescriptor.Movement getMovement() {
         return descriptor.getMovement();
     }
 
@@ -156,7 +156,7 @@ public abstract class PortMirror {
          * @param info the original information
          * @param descriptor the edge descriptor
          */
-        public Abstract(VertexMirror owner, PortInfo info, VanillaEdgeDescriptor descriptor) {
+        public Abstract(VertexMirror owner, PortInfo info, BasicEdgeDescriptor descriptor) {
             super(owner, info, descriptor);
         }
 

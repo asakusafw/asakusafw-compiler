@@ -17,8 +17,8 @@ package com.asakusafw.vanilla.core.mirror;
 
 import com.asakusafw.dag.api.model.PortInfo;
 import com.asakusafw.dag.api.model.PortInfo.Direction;
+import com.asakusafw.dag.api.model.basic.BasicEdgeDescriptor;
 import com.asakusafw.lang.utils.common.Arguments;
-import com.asakusafw.vanilla.api.VanillaEdgeDescriptor;
 
 /**
  * Represents an input port of vertices.
@@ -32,7 +32,7 @@ public class InputPortMirror extends PortMirror.Abstract<InputPortMirror, Output
      * @param info the original information
      * @param descriptor the edge descriptor
      */
-    public InputPortMirror(VertexMirror owner, PortInfo info, VanillaEdgeDescriptor descriptor) {
+    public InputPortMirror(VertexMirror owner, PortInfo info, BasicEdgeDescriptor descriptor) {
         super(owner, info, descriptor);
         Arguments.require(info.getDirection() == Direction.INPUT);
     }

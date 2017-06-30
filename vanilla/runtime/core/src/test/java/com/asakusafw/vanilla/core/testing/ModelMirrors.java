@@ -20,9 +20,11 @@ import java.util.function.Supplier;
 import com.asakusafw.dag.api.common.KeyValueSerDe;
 import com.asakusafw.dag.api.common.SupplierInfo;
 import com.asakusafw.dag.api.common.ValueSerDe;
+import com.asakusafw.dag.api.model.basic.BasicEdgeDescriptor;
+import com.asakusafw.dag.api.model.basic.BasicEdgeDescriptor.Movement;
+import com.asakusafw.dag.api.model.basic.BasicVertexDescriptor;
 import com.asakusafw.dag.api.processor.VertexProcessor;
-import com.asakusafw.vanilla.api.VanillaEdgeDescriptor;
-import com.asakusafw.vanilla.api.VanillaVertexDescriptor;
+import com.asakusafw.lang.utils.common.Optionals;
 
 /**
  * A common utilities for Vanilla mirror models.
@@ -52,29 +54,29 @@ public final class ModelMirrors {
     }
 
     /**
-     * Returns a {@link VanillaVertexDescriptor} of the given {@link VertexProcessor}.
+     * Returns a {@link BasicVertexDescriptor} of the given {@link VertexProcessor}.
      * @param processor the processor class
      * @return the created descriptor
      */
-    public static VanillaVertexDescriptor vertex(Class<?> processor) {
-        return new VanillaVertexDescriptor(supplier(processor));
+    public static BasicVertexDescriptor vertex(Class<?> processor) {
+        return new BasicVertexDescriptor(supplier(processor));
     }
 
     /**
-     * Returns a {@link VanillaVertexDescriptor} of the given {@link VertexProcessor}.
+     * Returns a {@link BasicVertexDescriptor} of the given {@link VertexProcessor}.
      * @param processor the processor supplier
      * @return the created descriptor
      */
-    public static VanillaVertexDescriptor vertex(Supplier<VertexProcessor> processor) {
-        return new VanillaVertexDescriptor(supplier(processor));
+    public static BasicVertexDescriptor vertex(Supplier<VertexProcessor> processor) {
+        return new BasicVertexDescriptor(supplier(processor));
     }
 
     /**
      * Creates a new nothing edge descriptor.
      * @return the created instance.
      */
-    public static VanillaEdgeDescriptor nothing() {
-        return VanillaEdgeDescriptor.newNothing();
+    public static BasicEdgeDescriptor nothing() {
+        return new BasicEdgeDescriptor(Movement.NOTHING, null, null);
     }
 
     /**
@@ -82,8 +84,8 @@ public final class ModelMirrors {
      * @param serde information of supplier which provides {@link ValueSerDe}
      * @return the created instance
      */
-    public static VanillaEdgeDescriptor oneToOne(Class<?> serde) {
-        return VanillaEdgeDescriptor.newOneToOne(supplier(serde));
+    public static BasicEdgeDescriptor oneToOne(Class<?> serde) {
+        return new BasicEdgeDescriptor(Movement.ONE_TO_ONE, supplier(serde), null);
     }
 
     /**
@@ -91,8 +93,8 @@ public final class ModelMirrors {
      * @param serde information of supplier which provides {@link ValueSerDe}
      * @return the created instance
      */
-    public static VanillaEdgeDescriptor broadcast(Class<?> serde) {
-        return VanillaEdgeDescriptor.newBroadcast(supplier(serde));
+    public static BasicEdgeDescriptor broadcast(Class<?> serde) {
+        return new BasicEdgeDescriptor(Movement.BROADCAST, supplier(serde), null);
     }
 
     /**
@@ -101,9 +103,9 @@ public final class ModelMirrors {
      * @param comparator the value comparator (nullable)
      * @return the created instance
      */
-    public static VanillaEdgeDescriptor scatterGather(Class<?> serde, Class<?> comparator) {
-        return VanillaEdgeDescriptor.newScatterGather(
-                supplier(serde),
-                comparator == null ? null : supplier(comparator));
+    public static BasicEdgeDescriptor scatterGather(Class<?> serde, Class<?> comparator) {
+        return new BasicEdgeDescriptor(Movement.SCATTER_GATHER, supplier(serde), Optionals.of(comparator)
+                .map(ModelMirrors::supplier)
+                .orElse(null));
     }
 }

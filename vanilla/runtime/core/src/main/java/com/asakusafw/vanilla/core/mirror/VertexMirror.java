@@ -23,11 +23,11 @@ import java.util.Map;
 import com.asakusafw.dag.api.model.PortInfo;
 import com.asakusafw.dag.api.model.VertexId;
 import com.asakusafw.dag.api.model.VertexInfo;
+import com.asakusafw.dag.api.model.basic.BasicEdgeDescriptor;
+import com.asakusafw.dag.api.model.basic.BasicVertexDescriptor;
 import com.asakusafw.dag.api.processor.VertexProcessor;
 import com.asakusafw.lang.utils.common.Arguments;
 import com.asakusafw.lang.utils.common.Invariants;
-import com.asakusafw.vanilla.api.VanillaEdgeDescriptor;
-import com.asakusafw.vanilla.api.VanillaVertexDescriptor;
 
 /**
  * Represents a vertex.
@@ -37,7 +37,7 @@ public final class VertexMirror {
 
     private final VertexId id;
 
-    private final VanillaVertexDescriptor descriptor;
+    private final BasicVertexDescriptor descriptor;
 
     private final Map<String, InputPortMirror> inputs = new LinkedHashMap<>();
 
@@ -50,7 +50,7 @@ public final class VertexMirror {
     public VertexMirror(VertexInfo info) {
         Arguments.requireNonNull(info);
         this.id = info.getId();
-        this.descriptor = (VanillaVertexDescriptor) info.getDescriptor();
+        this.descriptor = (BasicVertexDescriptor) info.getDescriptor();
     }
 
     /**
@@ -111,7 +111,7 @@ public final class VertexMirror {
      * @param edge the corresponded edge information
      * @return the created port
      */
-    public InputPortMirror addInput(PortInfo port, VanillaEdgeDescriptor edge) {
+    public InputPortMirror addInput(PortInfo port, BasicEdgeDescriptor edge) {
         Arguments.requireNonNull(port);
         Arguments.requireNonNull(edge);
         return addPort(new InputPortMirror(this, port, edge), inputs);
@@ -123,7 +123,7 @@ public final class VertexMirror {
      * @param edge the corresponded edge information
      * @return the created port
      */
-    public OutputPortMirror addOutput(PortInfo port, VanillaEdgeDescriptor edge) {
+    public OutputPortMirror addOutput(PortInfo port, BasicEdgeDescriptor edge) {
         Arguments.requireNonNull(port);
         Arguments.requireNonNull(edge);
         return addPort(new OutputPortMirror(this, port, edge), outputs);

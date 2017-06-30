@@ -18,6 +18,9 @@ package com.asakusafw.vanilla.compiler.core;
 import com.asakusafw.dag.api.common.SupplierInfo;
 import com.asakusafw.dag.api.model.EdgeDescriptor;
 import com.asakusafw.dag.api.model.VertexDescriptor;
+import com.asakusafw.dag.api.model.basic.BasicEdgeDescriptor;
+import com.asakusafw.dag.api.model.basic.BasicEdgeDescriptor.Movement;
+import com.asakusafw.dag.api.model.basic.BasicVertexDescriptor;
 import com.asakusafw.dag.compiler.codegen.ClassGeneratorContext;
 import com.asakusafw.dag.compiler.codegen.DataComparatorGenerator;
 import com.asakusafw.dag.compiler.codegen.KeyValueSerDeGenerator;
@@ -28,8 +31,6 @@ import com.asakusafw.lang.compiler.model.description.TypeDescription;
 import com.asakusafw.lang.compiler.model.graph.Group;
 import com.asakusafw.lang.utils.common.Arguments;
 import com.asakusafw.lang.utils.common.Optionals;
-import com.asakusafw.vanilla.api.VanillaEdgeDescriptor;
-import com.asakusafw.vanilla.api.VanillaVertexDescriptor;
 
 /**
  * Provides descriptors of DAG API.
@@ -50,26 +51,26 @@ public class VanillaDescriptorFactory implements DagDescriptorFactory {
 
     @Override
     public VertexDescriptor newVertex(ClassDescription processor) {
-        return new VanillaVertexDescriptor(toSupplier(processor));
+        return new BasicVertexDescriptor(toSupplier(processor));
     }
 
     @Override
     public EdgeDescriptor newVoidEdge() {
-        return VanillaEdgeDescriptor.newNothing();
+        return new BasicEdgeDescriptor(Movement.NOTHING, null, null);
     }
 
     @Override
     public EdgeDescriptor newOneToOneEdge(TypeDescription dataType, ClassDescription serde) {
         Arguments.requireNonNull(dataType);
         Arguments.requireNonNull(serde);
-        return VanillaEdgeDescriptor.newOneToOne(toSupplier(serde));
+        return new BasicEdgeDescriptor(Movement.ONE_TO_ONE, toSupplier(serde), null);
     }
 
     @Override
     public EdgeDescriptor newBroadcastEdge(TypeDescription dataType, ClassDescription serde) {
         Arguments.requireNonNull(dataType);
         Arguments.requireNonNull(serde);
-        return VanillaEdgeDescriptor.newBroadcast(toSupplier(serde));
+        return new BasicEdgeDescriptor(Movement.BROADCAST, toSupplier(serde), null);
     }
 
     @Override
@@ -81,7 +82,7 @@ public class VanillaDescriptorFactory implements DagDescriptorFactory {
                 .map(o -> DataComparatorGenerator.get(context, dataType, o))
                 .map(VanillaDescriptorFactory::toSupplier)
                 .orElse(null);
-        return VanillaEdgeDescriptor.newScatterGather(toSupplier(serde), comparatorInfo);
+        return new BasicEdgeDescriptor(Movement.SCATTER_GATHER, toSupplier(serde), comparatorInfo);
     }
 
     @Override

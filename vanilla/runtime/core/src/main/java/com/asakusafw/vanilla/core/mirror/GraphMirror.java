@@ -28,10 +28,10 @@ import com.asakusafw.dag.api.model.PortId;
 import com.asakusafw.dag.api.model.PortInfo.Direction;
 import com.asakusafw.dag.api.model.VertexId;
 import com.asakusafw.dag.api.model.VertexInfo;
+import com.asakusafw.dag.api.model.basic.BasicEdgeDescriptor;
 import com.asakusafw.lang.utils.common.Arguments;
 import com.asakusafw.lang.utils.common.Invariants;
 import com.asakusafw.lang.utils.common.Tuple;
-import com.asakusafw.vanilla.api.VanillaEdgeDescriptor;
 
 /**
  * Represents a graph.
@@ -48,10 +48,10 @@ public class GraphMirror {
      */
     public static GraphMirror of(GraphInfo info) {
         GraphMirror result = new GraphMirror();
-        Map<PortId, VanillaEdgeDescriptor> ports = new HashMap<>();
+        Map<PortId, BasicEdgeDescriptor> ports = new HashMap<>();
         info.getEdges().stream()
             .flatMap(e -> Stream.of(new Tuple<>(e.getUpstreamId(), e), new Tuple<>(e.getDownstreamId(), e)))
-            .map(t -> new Tuple<>(t.left(), (VanillaEdgeDescriptor) t.right().getDescriptor()))
+            .map(t -> new Tuple<>(t.left(), (BasicEdgeDescriptor) t.right().getDescriptor()))
             .forEach(t -> ports.merge(t.left(), t.right(), (a, b) -> {
                 Invariants.require(a.equals(b), () -> MessageFormat.format(
                         "conflict edge type on {0}: {1} <=> {2}",

@@ -30,10 +30,10 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.asakusafw.dag.api.model.basic.BasicEdgeDescriptor.Movement;
 import com.asakusafw.lang.utils.common.Invariants;
 import com.asakusafw.utils.graph.Graph;
 import com.asakusafw.utils.graph.Graphs;
-import com.asakusafw.vanilla.api.VanillaEdgeDescriptor.Movement;
 import com.asakusafw.vanilla.core.mirror.GraphMirror;
 import com.asakusafw.vanilla.core.mirror.InputPortMirror;
 import com.asakusafw.vanilla.core.mirror.OutputPortMirror;
