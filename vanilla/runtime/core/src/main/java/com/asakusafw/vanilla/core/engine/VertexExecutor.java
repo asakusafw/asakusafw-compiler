@@ -38,6 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.asakusafw.dag.api.model.PortId;
+import com.asakusafw.dag.api.model.basic.BasicEdgeDescriptor.Movement;
 import com.asakusafw.dag.api.processor.EdgeIoProcessorContext;
 import com.asakusafw.dag.api.processor.EdgeReader;
 import com.asakusafw.dag.api.processor.EdgeWriter;
@@ -57,7 +58,6 @@ import com.asakusafw.lang.utils.common.InterruptibleIo.Closer;
 import com.asakusafw.lang.utils.common.Invariants;
 import com.asakusafw.lang.utils.common.Lang;
 import com.asakusafw.lang.utils.common.Optionals;
-import com.asakusafw.vanilla.api.VanillaEdgeDescriptor.Movement;
 import com.asakusafw.vanilla.core.mirror.PortMirror;
 import com.asakusafw.vanilla.core.mirror.VertexMirror;
 

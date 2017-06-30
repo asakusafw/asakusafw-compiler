@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.asakusafw.vanilla.api;
+package com.asakusafw.dag.api.model.basic;
 
 import java.text.MessageFormat;
 import java.util.Objects;
@@ -24,10 +24,10 @@ import com.asakusafw.dag.api.processor.VertexProcessor;
 import com.asakusafw.lang.utils.common.Arguments;
 
 /**
- * An implementation of {@link VertexDescriptor} for Asakusa Vanilla.
- * @since 0.4.0
+ * A basic implementation of {@link VertexDescriptor}.
+ * @since 0.4.2
  */
-public class VanillaVertexDescriptor implements VertexDescriptor {
+public class BasicVertexDescriptor implements VertexDescriptor {
 
     private static final long serialVersionUID = 1L;
 
@@ -37,7 +37,7 @@ public class VanillaVertexDescriptor implements VertexDescriptor {
      * Creates a new instance.
      * @param processor information of supplier which provides {@link VertexProcessor}
      */
-    public VanillaVertexDescriptor(SupplierInfo processor) {
+    public BasicVertexDescriptor(SupplierInfo processor) {
         Arguments.requireNonNull(processor);
         this.processor = processor;
     }
@@ -69,7 +69,7 @@ public class VanillaVertexDescriptor implements VertexDescriptor {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        VanillaVertexDescriptor other = (VanillaVertexDescriptor) obj;
+        BasicVertexDescriptor other = (BasicVertexDescriptor) obj;
         if (!Objects.equals(processor, other.processor)) {
             return false;
         }

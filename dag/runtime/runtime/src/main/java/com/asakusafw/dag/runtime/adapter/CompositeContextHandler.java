@@ -78,7 +78,7 @@ public final class CompositeContextHandler<T extends ProcessorContext> implement
     public static <T extends ProcessorContext> ContextHandler<T> of(
             Optional<? extends ContextHandler<? super T>> element) {
         Arguments.requireNonNull(element);
-        return element.map(h -> (ContextHandler<T>) new SafeContextHandler<T>(h)).orElseGet(NullContextHandler::new);
+        return element.map(h -> (ContextHandler<T>) new SafeContextHandler<>(h)).orElseGet(NullContextHandler::new);
     }
 
     @Override

@@ -23,6 +23,7 @@ import java.util.function.Supplier;
 
 import com.asakusafw.dag.api.common.SupplierInfo;
 import com.asakusafw.dag.api.model.GraphInfo;
+import com.asakusafw.dag.api.model.basic.BasicVertexDescriptor;
 import com.asakusafw.dag.api.processor.TaskProcessor;
 import com.asakusafw.dag.api.processor.TaskSchedule;
 import com.asakusafw.dag.api.processor.VertexProcessor;
@@ -30,7 +31,6 @@ import com.asakusafw.dag.api.processor.VertexProcessorContext;
 import com.asakusafw.dag.api.processor.basic.BasicTaskInfo;
 import com.asakusafw.dag.api.processor.basic.BasicTaskSchedule;
 import com.asakusafw.lang.utils.common.Optionals;
-import com.asakusafw.vanilla.api.VanillaVertexDescriptor;
 
 /**
  * A simple application for testing.
@@ -45,7 +45,7 @@ public class SimpleApplication implements Supplier<GraphInfo> {
     @Override
     public GraphInfo get() {
         GraphInfo graph = new GraphInfo();
-        graph.addVertex("check", new VanillaVertexDescriptor(SupplierInfo.of(Check.class.getName())));
+        graph.addVertex("check", new BasicVertexDescriptor(SupplierInfo.of(Check.class.getName())));
         return graph;
     }
 
