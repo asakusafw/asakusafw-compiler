@@ -60,9 +60,9 @@ public final class VanillaDirect {
      * @param args launching configurations
      * @return the exit code
      * @throws LaunchConfigurationException if launching configuration is something wrong
-     * @see VanillaLauncher#EXEC_SUCCESS
-     * @see VanillaLauncher#EXEC_ERROR
-     * @see VanillaLauncher#EXEC_INTERRUPTED
+     * @see LaunchUtil#EXEC_SUCCESS
+     * @see LaunchUtil#EXEC_ERROR
+     * @see LaunchUtil#EXEC_INTERRUPTED
      */
     public static int exec(ClassLoader loader, String... args) throws LaunchConfigurationException {
         DirectLaunchConfiguration conf = DirectLaunchConfiguration.parse(loader, Arrays.asList(args));
@@ -74,10 +74,10 @@ public final class VanillaDirect {
         while (cursor.next()) {
             LOG.info("Round: {}/{}", ++currentRound, numberOfRounds);
             int result = new VanillaLauncher(cursor.get(), hadoop).exec();
-            if (result != VanillaLauncher.EXEC_SUCCESS) {
+            if (result != LaunchUtil.EXEC_SUCCESS) {
                 return result;
             }
         }
-        return VanillaLauncher.EXEC_SUCCESS;
+        return LaunchUtil.EXEC_SUCCESS;
     }
 }
