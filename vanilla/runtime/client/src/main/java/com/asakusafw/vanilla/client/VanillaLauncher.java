@@ -15,35 +15,26 @@
  */
 package com.asakusafw.vanilla.client;
 
-import static com.asakusafw.vanilla.client.VanillaConstants.*;
-
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.Arrays;
-import java.util.function.Supplier;
-import java.util.regex.Pattern;
 
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.asakusafw.bridge.api.activate.ApiActivator;
 import com.asakusafw.bridge.broker.ResourceBroker;
 import com.asakusafw.bridge.broker.ResourceSession;
 import com.asakusafw.bridge.launch.LaunchConfiguration;
 import com.asakusafw.bridge.launch.LaunchConfigurationException;
 import com.asakusafw.bridge.launch.LaunchInfo;
-import com.asakusafw.bridge.stage.StageInfo;
 import com.asakusafw.dag.api.model.GraphInfo;
 import com.asakusafw.dag.api.processor.ProcessorContext;
 import com.asakusafw.dag.api.processor.basic.BasicProcessorContext;
 import com.asakusafw.dag.api.processor.extension.ProcessorContextExtension;
 import com.asakusafw.lang.utils.common.Arguments;
 import com.asakusafw.lang.utils.common.InterruptibleIo;
-import com.asakusafw.lang.utils.common.Invariants;
 import com.asakusafw.lang.utils.common.Optionals;
-import com.asakusafw.runtime.core.HadoopConfiguration;
-import com.asakusafw.runtime.core.ResourceConfiguration;
 import com.asakusafw.runtime.core.context.RuntimeContext;
 import com.asakusafw.vanilla.core.engine.BasicEdgeDriver;
 import com.asakusafw.vanilla.core.engine.BasicVertexScheduler;
@@ -56,29 +47,11 @@ import com.asakusafw.vanilla.core.mirror.GraphMirror;
 /**
  * Asakusa Vanilla application entry.
  * @since 0.4.0
+ * @version 0.4.2
  */
 public class VanillaLauncher {
 
     static final Logger LOG = LoggerFactory.getLogger(VanillaLauncher.class);
-
-    private static final Pattern SENSITIVE_KEY = Pattern.compile("pass", Pattern.CASE_INSENSITIVE); //$NON-NLS-1$
-
-    private static final String SENSITIVE_VALUE_MASK = "****"; //$NON-NLS-1$
-
-    /**
-     * Exit status: execution was successfully completed.
-     */
-    public static final int EXEC_SUCCESS = 0;
-
-    /**
-     * Exit status: execution was finished with error.
-     */
-    public static final int EXEC_ERROR = 1;
-
-    /**
-     * Exit status: execution was interrupted.
-     */
-    public static final int EXEC_INTERRUPTED = 2;
 
     private final LaunchInfo configuration;
 
@@ -119,14 +92,15 @@ public class VanillaLauncher {
     /**
      * Executes DAG.
      * @return the exit status
-     * @see #EXEC_SUCCESS
-     * @see #EXEC_ERROR
-     * @see #EXEC_INTERRUPTED
+     * @see LaunchUtil#EXEC_SUCCESS
+     * @see LaunchUtil#EXEC_ERROR
+     * @see LaunchUtil#EXEC_INTERRUPTED
      */
     public int exec() {
-        BasicProcessorContext context = newContext();
+        BasicProcessorContext context =
+                LaunchUtil.createProcessorContext(applicationLoader, configuration, hadoop);
         VanillaConfiguration conf = VanillaConfiguration.extract(context::getProperty);
-        GraphInfo graph = extract(configuration.getStageClient());
+        GraphInfo graph = LaunchUtil.extract(configuration.getStageClient());
         try (InterruptibleIo extension = extend(context)) {
             long start = System.currentTimeMillis();
             LOG.info(MessageFormat.format(
@@ -140,57 +114,18 @@ public class VanillaLauncher {
                     configuration.getStageInfo(),
                     graph.getVertices().size(),
                     finish - start));
-            return EXEC_SUCCESS;
+            return LaunchUtil.EXEC_SUCCESS;
         } catch (IOException e) {
             LOG.error(MessageFormat.format(
                     "DAG failed: {0}",
                     configuration.getStageInfo()), e);
-            return EXEC_ERROR;
+            return LaunchUtil.EXEC_ERROR;
         } catch (InterruptedException e) {
             LOG.warn(MessageFormat.format(
                     "DAG interrupted: {0}",
                     configuration.getStageInfo()), e);
-            return EXEC_INTERRUPTED;
+            return LaunchUtil.EXEC_INTERRUPTED;
         }
-    }
-
-    private BasicProcessorContext newContext() {
-        BasicProcessorContext context = new BasicProcessorContext(applicationLoader);
-        configuration.getEngineProperties().forEach((k, v) -> {
-            if (k.startsWith(KEY_HADOOP_PREFIX) == false) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Engine configuration: {}={}", k, shadow(k, v));
-                }
-                context.withProperty(k, v);
-            }
-        });
-
-        configuration.getHadoopProperties().forEach((k, v) -> {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Hadoop configuration: {}={}", k, shadow(k, v));
-            }
-            hadoop.set(k, v);
-        });
-        configuration.getEngineProperties().forEach((k, v) -> {
-            if (k.startsWith(KEY_HADOOP_PREFIX)) {
-                String subKey = k.substring(KEY_HADOOP_PREFIX.length());
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Hadoop configuration: {}={}", subKey, shadow(subKey, v));
-                }
-                hadoop.set(subKey, v);
-            }
-        });
-
-        context.withResource(StageInfo.class, configuration.getStageInfo());
-        context.withResource(Configuration.class, hadoop);
-        return context;
-    }
-
-    private static String shadow(String key, String value) {
-        if (SENSITIVE_KEY.matcher(key).find()) {
-            return SENSITIVE_VALUE_MASK;
-        }
-        return value;
     }
 
     private static InterruptibleIo extend(BasicProcessorContext context) throws IOException, InterruptedException {
@@ -244,29 +179,20 @@ public class VanillaLauncher {
     }
 
     /**
-     * Extracts {@link GraphInfo} from the specified class.
-     * @param entry the target class
-     * @return the loaded graph
-     * @throws IllegalStateException if failed to extract DAG from the target class
+     * Executes the given DAG.
+     * @param context the current context
+     * @param graph the target DAG
+     * @throws IOException if I/O error was occurred while executing the given DAG
+     * @throws InterruptedException if interrupted while executing the given DAG
+     * @since 0.4.2
      */
-    public static GraphInfo extract(Class<?> entry) {
-        Arguments.requireNonNull(entry);
-        try {
-            Object object = entry.newInstance();
-            Invariants.require(object instanceof Supplier<?>, () -> MessageFormat.format(
-                    "entry class must be a Supplier: {0}",
-                    object.getClass().getName()));
-            Object info = ((Supplier<?>) object).get();
-            Invariants.require(info instanceof GraphInfo, () -> MessageFormat.format(
-                    "entry class must supply GraphInfo: {0}",
-                    object.getClass().getName(),
-                    Optionals.of(info).map(Object::getClass).map(Class::getName).orElse(null)));
-            return (GraphInfo) info;
-        } catch (ReflectiveOperationException e) {
-            throw new IllegalStateException(MessageFormat.format(
-                    "exception occurred while loading DAG: {0}",
-                    entry), e);
-        }
+    public static void execute(
+            ProcessorContext context,
+            GraphInfo graph) throws IOException, InterruptedException {
+        Arguments.requireNonNull(context);
+        Arguments.requireNonNull(graph);
+        VanillaConfiguration configuration = VanillaConfiguration.extract(context::getProperty);
+        execute(context, configuration, graph);
     }
 
     /**
@@ -298,13 +224,7 @@ public class VanillaLauncher {
                         configuration.getOutputBufferSize(),
                         configuration.getOutputBufferFlush(),
                         configuration.getNumberOfOutputRecords());
-                ResourceSession session = ResourceBroker.attach(ResourceBroker.Scope.VM, s -> {
-                    s.put(StageInfo.class,
-                            context.getResource(StageInfo.class).get());
-                    s.put(ResourceConfiguration.class,
-                            new HadoopConfiguration(context.getResource(Configuration.class).get()));
-                    ApiActivator.load(context.getClassLoader()).forEach(a -> s.schedule(a.activate()));
-                })) {
+                ResourceSession session = LaunchUtil.attachSession(context, ResourceBroker.Scope.VM)) {
             if (RuntimeContext.get().isSimulation() == false) {
                 new GraphExecutor(context, mirror,
                         scheduler, edges,
