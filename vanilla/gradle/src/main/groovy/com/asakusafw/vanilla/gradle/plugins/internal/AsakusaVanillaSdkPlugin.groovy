@@ -18,7 +18,6 @@ package com.asakusafw.vanilla.gradle.plugins.internal
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
-import com.asakusafw.gradle.plugins.AsakusafwBasePlugin
 import com.asakusafw.gradle.plugins.AsakusafwCompilerExtension
 import com.asakusafw.gradle.plugins.AsakusafwPluginConvention
 import com.asakusafw.gradle.plugins.internal.AsakusaSdkPlugin

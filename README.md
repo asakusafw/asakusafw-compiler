@@ -12,7 +12,14 @@ This project provides a compiler framework for the [Asakusa DSL](https://github.
 ./mvnw install eclipse:eclipse -DskipTests
 ```
 
-And then import projects from Eclipse
+And then import projects from Eclipse.
+
+## How to build Gradle Plugin
+
+```sh
+cd gradle
+./gradlew clean build [install] [-PmavenLocal]
+```
 
 ## Sub projects
 * [Asakusa on Spark](https://github.com/asakusafw/asakusafw-spark)

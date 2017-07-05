@@ -24,9 +24,9 @@ ext.parentPom = { f ->
         sdkVersion : xml['properties']['asakusafw-sdk.version'].text(),
         hadoopVersion : xml['properties']['hadoop.version'].text(),
     ]
-}(project.file('../../pom.xml')) // I'm on './vanilla/gradle/build.gradle'.
+}(project.file('../pom.xml'))
 
-group = 'com.asakusafw.vanilla'
+group = 'com.asakusafw.lang'
 version = parentPom.projectVersion
 
 defaultTasks 'clean', 'build', 'install'
@@ -52,9 +52,7 @@ repositories {
 
 dependencies {
     compile gradleApi()
-    compile group: 'com.asakusafw.lang', name: 'asakusa-lang-gradle', version: version
-    testCompile gradleTestKit()
-    testCompile group: 'com.asakusafw', name: 'asakusa-gradle-plugins', version: parentPom.sdkVersion, classifier: 'tests'
+    compile group: 'com.asakusafw', name: 'asakusa-gradle-plugins', version: parentPom.sdkVersion
     testCompile 'junit:junit:4.11'
     deployerJars 'org.springframework.build:aws-maven:5.0.0.RELEASE'
 }
@@ -77,8 +75,8 @@ if (project.hasProperty('referProject')) {
         classpath.entries = classpath.entries.collect { entry ->
             if (entry instanceof org.gradle.plugins.ide.eclipse.model.Library \
                     && entry.moduleVersion \
-                    && entry.moduleVersion.name in ['asakusa-gradle-plugins', 'asakusa-lang-gradle']) {
-                new org.gradle.plugins.ide.eclipse.model.ProjectDependency("/${entry.moduleVersion.name}")
+                    && entry.moduleVersion.name == 'asakusa-gradle-plugins') {
+                new org.gradle.plugins.ide.eclipse.model.ProjectDependency('/asakusa-gradle-plugins')
             } else {
                 entry
             }
@@ -87,13 +85,13 @@ if (project.hasProperty('referProject')) {
 }
 
 groovydoc {
-    docTitle "Asakusa Vanilla Gradle Plugins ${version}"
-    windowTitle "Asakusa Vanilla Gradle Plugins ${version}"
+    docTitle "Asakusa Language tools Gradle Plugins ${version}"
+    windowTitle "Asakusa Language tools Gradle Plugins ${version}"
     footer "Copyright 2011-${new Date().format('yyyy')} Asakusa Framework Team."
 }
 
 processResources {
-    File outputFile = new File(destinationDir, 'META-INF/asakusa-vanilla-gradle/artifact.properties')
+    File outputFile = new File(destinationDir, 'META-INF/asakusa-lang-gradle/artifact.properties')
     inputs.properties parentPom
     outputs.file outputFile
     doLast {

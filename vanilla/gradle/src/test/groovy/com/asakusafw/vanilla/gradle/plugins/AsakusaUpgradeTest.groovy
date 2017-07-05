@@ -23,6 +23,7 @@ import org.junit.rules.TestName
 
 import com.asakusafw.gradle.plugins.AsakusafwBasePlugin
 import com.asakusafw.gradle.plugins.GradleTestkitHelper
+import com.asakusafw.lang.gradle.plugins.AsakusafwLangPlugin
 
 /**
  * Tests for cross Gradle versions compatibility.
@@ -81,6 +82,8 @@ class AsakusaUpgradeTest {
         Set<File> classpath = GradleTestkitHelper.toClasspath(
             AsakusafwBasePlugin,
             'META-INF/gradle-plugins/asakusafw-sdk.properties',
+            AsakusafwLangPlugin,
+            'META-INF/gradle-plugins/asakusafw-lang.properties',
             AsakusafwVanillaPlugin,
             'META-INF/gradle-plugins/asakusafw-vanilla.properties')
         String script = GradleTestkitHelper.getSimpleBuildScript(classpath, 'asakusafw-sdk', 'asakusafw-organizer', 'asakusafw-vanilla')

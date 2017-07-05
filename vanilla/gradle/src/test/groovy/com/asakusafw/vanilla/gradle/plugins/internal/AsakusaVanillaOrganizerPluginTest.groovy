@@ -24,6 +24,7 @@ import org.junit.runner.Description
 import org.junit.runners.model.Statement
 
 import com.asakusafw.gradle.plugins.AsakusafwOrganizerPluginConvention
+import com.asakusafw.lang.gradle.plugins.internal.AsakusaLangOrganizerPlugin
 import com.asakusafw.vanilla.gradle.plugins.AsakusafwOrganizerVanillaExtension
 
 /**
@@ -52,6 +53,7 @@ class AsakusaVanillaOrganizerPluginTest {
     void base() {
         assert project.plugins.hasPlugin('asakusafw-organizer') != null
         assert project.plugins.hasPlugin(AsakusaVanillaBasePlugin) != null
+        assert project.plugins.hasPlugin(AsakusaLangOrganizerPlugin) != null
     }
 
     /**

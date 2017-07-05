@@ -25,7 +25,7 @@ cd ..
 
 ```sh
 cd gradle
-./gradlew clean [build] install
+./gradlew clean build [install] [-PmavenLocal]
 ```
 
 ## How to use
