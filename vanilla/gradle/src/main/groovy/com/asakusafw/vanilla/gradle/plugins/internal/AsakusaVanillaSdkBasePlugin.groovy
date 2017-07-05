@@ -21,6 +21,7 @@ import org.gradle.api.Project
 import com.asakusafw.gradle.plugins.AsakusafwSdkExtension
 import com.asakusafw.gradle.plugins.internal.AsakusaSdkPlugin
 import com.asakusafw.gradle.plugins.internal.PluginUtils
+import com.asakusafw.lang.gradle.plugins.internal.AsakusaLangSdkPlugin
 
 /**
  * A base plug-in of {@link AsakusaVanillaSdkPlugin}.
@@ -35,7 +36,7 @@ class AsakusaVanillaSdkBasePlugin implements Plugin<Project> {
     void apply(Project project) {
         this.project = project
 
-        project.apply plugin: AsakusaSdkPlugin
+        project.apply plugin: AsakusaLangSdkPlugin
         project.apply plugin: AsakusaVanillaBasePlugin
 
         configureTestkit()
@@ -51,15 +52,17 @@ class AsakusaVanillaSdkBasePlugin implements Plugin<Project> {
         project.configurations {
             asakusaVanillaCommon {
                 description 'Common libraries of Asakusa DSL Compiler for Vanilla'
+                extendsFrom project.configurations.asakusaLangCommon
                 exclude group: 'asm', module: 'asm'
             }
             asakusaVanillaCompiler {
                 description 'Full classpath of Asakusa DSL Compiler for Vanilla'
-                extendsFrom project.configurations.compile
+                extendsFrom project.configurations.asakusaLangCompiler
                 extendsFrom project.configurations.asakusaVanillaCommon
             }
             asakusaVanillaTestkit {
                 description 'Asakusa DSL testkit classpath for Vanilla'
+                extendsFrom project.configurations.asakusaLangTestkit
                 extendsFrom project.configurations.asakusaVanillaCommon
                 exclude group: 'com.asakusafw', module: 'asakusa-test-mapreduce'
             }
@@ -70,29 +73,12 @@ class AsakusaVanillaSdkBasePlugin implements Plugin<Project> {
             project.dependencies {
                 if (features.core) {
                     asakusaVanillaCommon "com.asakusafw.vanilla.compiler:asakusa-vanilla-compiler-core:${base.featureVersion}"
-                    asakusaVanillaCommon "com.asakusafw.lang.compiler:asakusa-compiler-extension-cleanup:${base.featureVersion}"
-                    asakusaVanillaCommon "com.asakusafw.lang.compiler:asakusa-compiler-extension-redirector:${base.featureVersion}"
-                    asakusaVanillaCommon "com.asakusafw.lang.compiler:asakusa-compiler-extension-yaess:${base.featureVersion}"
-                    asakusaVanillaCommon "com.asakusafw.lang.compiler:asakusa-compiler-cli:${base.featureVersion}"
-                    asakusaVanillaCommon "com.asakusafw:simple-graph:${base.coreVersion}"
-                    asakusaVanillaCommon "com.asakusafw:java-dom:${base.coreVersion}"
-                    asakusaVanillaCompiler "com.asakusafw:asakusa-dsl-vocabulary:${base.coreVersion}"
-                    asakusaVanillaCompiler "com.asakusafw:asakusa-runtime:${base.coreVersion}"
-                    asakusaVanillaCompiler "com.asakusafw:asakusa-yaess-core:${base.coreVersion}"
 
                     if (features.directio) {
                         asakusaVanillaCommon "com.asakusafw.dag.compiler:asakusa-dag-compiler-extension-directio:${base.featureVersion}"
-                        asakusaVanillaCompiler "com.asakusafw:asakusa-directio-vocabulary:${base.coreVersion}"
                     }
                     if (features.windgate) {
                         asakusaVanillaCommon "com.asakusafw.dag.compiler:asakusa-dag-compiler-extension-windgate:${base.featureVersion}"
-                        asakusaVanillaCompiler "com.asakusafw:asakusa-windgate-vocabulary:${base.coreVersion}"
-                    }
-                    if (features.hive) {
-                        asakusaVanillaCommon "com.asakusafw.lang.compiler:asakusa-compiler-extension-hive:${base.featureVersion}"
-                    }
-                    if (features.incubating) {
-                        asakusaVanillaCommon "com.asakusafw.lang.compiler:asakusa-compiler-extension-info:${base.featureVersion}"
                     }
                 }
                 if (features.testing) {
