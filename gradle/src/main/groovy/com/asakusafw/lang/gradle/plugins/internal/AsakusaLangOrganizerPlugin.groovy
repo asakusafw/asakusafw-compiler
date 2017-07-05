@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.asakusafw.vanilla.gradle.plugins.internal
+package com.asakusafw.lang.gradle.plugins.internal
 
 import org.gradle.api.NamedDomainObjectCollection
 import org.gradle.api.Plugin
@@ -23,29 +23,25 @@ import org.gradle.api.Task
 import com.asakusafw.gradle.plugins.AsakusafwOrganizerPlugin
 import com.asakusafw.gradle.plugins.AsakusafwOrganizerPluginConvention
 import com.asakusafw.gradle.plugins.AsakusafwOrganizerProfile
-import com.asakusafw.gradle.plugins.internal.PluginUtils
-import com.asakusafw.lang.gradle.plugins.internal.AsakusaLangOrganizerPlugin
-import com.asakusafw.vanilla.gradle.plugins.AsakusafwOrganizerVanillaExtension
 
 /**
- * A Gradle sub plug-in for Asakusa Vanilla project organizer.
- * @since 0.4.0
+ * A Gradle sub plug-in for Asakusa Language projects organizer.
+ * @since 0.4.2
  */
-class AsakusaVanillaOrganizerPlugin implements Plugin<Project> {
+class AsakusaLangOrganizerPlugin implements Plugin<Project> {
 
     private Project project
 
-    private NamedDomainObjectCollection<AsakusaVanillaOrganizer> organizers
+    private NamedDomainObjectCollection<AsakusaLangOrganizer> organizers
 
     @Override
     void apply(Project project) {
         this.project = project
-        this.organizers = project.container(AsakusaVanillaOrganizer)
+        this.organizers = project.container(AsakusaLangOrganizer)
 
-        project.apply plugin: AsakusaLangOrganizerPlugin
-        project.apply plugin: AsakusaVanillaBasePlugin
+        project.apply plugin: 'asakusafw-organizer'
+        project.apply plugin: AsakusaLangBasePlugin
 
-        configureConvention()
         configureProfiles()
         configureTasks()
     }
@@ -54,19 +50,8 @@ class AsakusaVanillaOrganizerPlugin implements Plugin<Project> {
      * Returns the organizers for each profile (only for testing).
      * @return the organizers for each profile
      */
-    NamedDomainObjectCollection<AsakusaVanillaOrganizer> getOrganizers() {
+    NamedDomainObjectCollection<AsakusaLangOrganizer> getOrganizers() {
         return organizers
-    }
-
-    private void configureConvention() {
-        AsakusaVanillaBaseExtension base = AsakusaVanillaBasePlugin.get(project)
-        AsakusafwOrganizerPluginConvention convention = project.asakusafwOrganizer
-        AsakusafwOrganizerVanillaExtension extension = convention.extensions.create('vanilla', AsakusafwOrganizerVanillaExtension)
-        extension.conventionMapping.with {
-            enabled = { false }
-            useSystemHadoop = { false }
-        }
-        PluginUtils.injectVersionProperty(extension, { base.featureVersion })
     }
 
     private void configureProfiles() {
@@ -77,23 +62,14 @@ class AsakusaVanillaOrganizerPlugin implements Plugin<Project> {
     }
 
     private void configureProfile(AsakusafwOrganizerProfile profile) {
-        AsakusaVanillaBaseExtension base = AsakusaVanillaBasePlugin.get(project)
-        AsakusafwOrganizerVanillaExtension extension = profile.extensions.create('vanilla', AsakusafwOrganizerVanillaExtension)
-        AsakusafwOrganizerVanillaExtension parent = project.asakusafwOrganizer.vanilla
-        extension.conventionMapping.with {
-            enabled = { parent.enabled }
-            useSystemHadoop = { parent.useSystemHadoop }
-        }
-        PluginUtils.injectVersionProperty(extension, { base.featureVersion })
-        AsakusaVanillaOrganizer organizer = new AsakusaVanillaOrganizer(project, profile, extension)
+        AsakusaLangOrganizer organizer = new AsakusaLangOrganizer(project, profile)
         organizer.configureProfile()
         organizers << organizer
     }
 
     private void configureTasks() {
         defineFacadeTasks([
-            attachComponentVanilla : 'Attaches Asakusa Vanilla components to assemblies.',
-            attachVanillaBatchapps : 'Attaches Asakusa Vanilla batch applications to assemblies.',
+            attachComponentLangTools : 'Attaches Asakusa Language tools to assemblies.',
         ])
     }
 
@@ -104,7 +80,7 @@ class AsakusaVanillaOrganizerPlugin implements Plugin<Project> {
                     task.group AsakusafwOrganizerPlugin.ASAKUSAFW_ORGANIZER_GROUP
                     task.description desc
                 }
-                organizers.all { AsakusaVanillaOrganizer organizer ->
+                organizers.all { AsakusaLangOrganizer organizer ->
                     task.dependsOn organizer.task(task.name)
                 }
             }

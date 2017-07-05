@@ -25,6 +25,7 @@ import com.asakusafw.gradle.plugins.internal.AsakusaSdkPlugin
 import com.asakusafw.gradle.plugins.internal.PluginUtils
 import com.asakusafw.gradle.tasks.AsakusaCompileTask
 import com.asakusafw.gradle.tasks.internal.ResolutionUtils
+import com.asakusafw.lang.gradle.plugins.internal.AsakusaLangSdkPlugin
 
 /**
  * A Gradle sub plug-in for Asakusa Vanilla SDK.
@@ -46,6 +47,7 @@ class AsakusaVanillaSdkPlugin implements Plugin<Project> {
     void apply(Project project) {
         this.project = project
 
+        project.apply plugin: AsakusaLangSdkPlugin
         project.apply plugin: AsakusaVanillaSdkBasePlugin
         this.extension = AsakusaSdkPlugin.get(project).extensions.create('vanilla', AsakusafwCompilerExtension)
 
