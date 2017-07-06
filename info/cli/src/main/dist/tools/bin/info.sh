@@ -33,4 +33,4 @@ then
     exit 1
 fi
 
-exec java -jar "$_ROOT/lib/asakusa-info.jar" "$@"
+exec java $JAVA_OPTS -Dinfo.cli.name=info.sh -jar "$_ROOT/lib/asakusa-info.jar" "$@"
