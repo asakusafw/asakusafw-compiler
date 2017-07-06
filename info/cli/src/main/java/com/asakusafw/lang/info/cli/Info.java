@@ -15,7 +15,13 @@
  */
 package com.asakusafw.lang.info.cli;
 
+import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.text.MessageFormat;
 import java.util.Arrays;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +37,8 @@ import io.airlift.airline.ParseException;
 public final class Info {
 
     static final Logger LOG = LoggerFactory.getLogger(Info.class);
+
+    static final String KEY_COMMAND_NAME = "info.cli.name";
 
     private Info() {
         return;
@@ -48,7 +56,11 @@ public final class Info {
     }
 
     static int exec(String... args) {
-        Cli.CliBuilder<Runnable> builder = Cli.<Runnable>builder("java -jar asakusa-info.jar")
+        String name = Optional.ofNullable(System.getProperty(KEY_COMMAND_NAME))
+                .orElseGet(() -> Optional.ofNullable(findLibraryByClass(Info.class))
+                        .map(it -> String.format("java -jar %s", it.getName()))
+                        .orElse("java -jar <self.jar>"));
+        Cli.CliBuilder<Runnable> builder = Cli.<Runnable>builder(name)
                 .withDefaultCommand(Help.class)
                 .withCommand(Help.class);
 
@@ -97,5 +109,104 @@ public final class Info {
         } else {
             return 0;
         }
+    }
+
+    static File findLibraryByClass(Class<?> aClass) {
+        URL resource = toUrl(aClass);
+        if (resource == null) {
+            LOG.warn(MessageFormat.format(
+                    "failed to locate the class file: {0}",
+                    aClass.getName()));
+            return null;
+        }
+        String resourcePath = aClass.getName().replace('.', '/') + ".class";
+        return findLibraryFromUrl(resource, resourcePath);
+    }
+
+    private static URL toUrl(Class<?> aClass) {
+        String className = aClass.getName();
+        int start = className.lastIndexOf('.') + 1;
+        String name = className.substring(start);
+        URL resource = aClass.getResource(name + ".class");
+        return resource;
+    }
+
+    private static File findLibraryFromUrl(URL resource, String resourcePath) {
+        assert resource != null;
+        assert resourcePath != null;
+        String protocol = resource.getProtocol();
+        if (protocol.equals("file")) { //$NON-NLS-1$
+            try {
+                File file = new File(resource.toURI());
+                return toClassPathRoot(file, resourcePath);
+            } catch (URISyntaxException e) {
+                LOG.warn(MessageFormat.format(
+                        "failed to locate the library path (cannot convert to local file): {0}",
+                        resource), e);
+                return null;
+            }
+        }
+        if (protocol.equals("jar")) { //$NON-NLS-1$
+            String path = resource.getPath();
+            return toClassPathRoot(path, resourcePath);
+        } else {
+            LOG.warn(MessageFormat.format(
+                    "failed to locate the library path (unsupported protocol {0}): {1}",
+                    resource,
+                    resourcePath));
+            return null;
+        }
+    }
+
+    private static File toClassPathRoot(File resourceFile, String resourcePath) {
+        assert resourceFile != null;
+        assert resourcePath != null;
+        assert resourceFile.isFile();
+        File current = resourceFile.getParentFile();
+        assert current != null && current.isDirectory() : resourceFile;
+        for (int start = resourcePath.indexOf('/'); start >= 0; start = resourcePath.indexOf('/', start + 1)) {
+            current = current.getParentFile();
+            if (current == null || current.isDirectory() == false) {
+                LOG.warn(MessageFormat.format(
+                        "failed to locate the library path: {0} ({1})",
+                        resourceFile,
+                        resourcePath));
+                return null;
+            }
+        }
+        return current;
+    }
+
+    private static File toClassPathRoot(String uriQualifiedPath, String resourceName) {
+        assert uriQualifiedPath != null;
+        assert resourceName != null;
+        int entry = uriQualifiedPath.lastIndexOf('!');
+        String qualifier;
+        if (entry >= 0) {
+            qualifier = uriQualifiedPath.substring(0, entry);
+        } else {
+            qualifier = uriQualifiedPath;
+        }
+        URI archive;
+        try {
+            archive = new URI(qualifier);
+        } catch (URISyntaxException e) {
+            LOG.warn(MessageFormat.format(
+                    "failed to locate the JAR library file {0}: {1}",
+                    qualifier,
+                    resourceName),
+                    e);
+            throw new UnsupportedOperationException(qualifier, e);
+        }
+        if (archive.getScheme().equals("file") == false) { //$NON-NLS-1$
+            LOG.warn(MessageFormat.format(
+                    "failed to locate the library path (unsupported protocol {0}): {1}",
+                    archive,
+                    resourceName));
+            return null;
+        }
+        File file = new File(archive);
+        assert file.isFile() : file;
+        return file;
     }
 }
