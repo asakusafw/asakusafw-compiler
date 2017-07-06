@@ -18,14 +18,19 @@ package com.asakusafw.vanilla.gradle.plugins.internal
 import org.gradle.api.Project
 
 import com.asakusafw.gradle.plugins.AsakusaTestkit
-import com.asakusafw.gradle.plugins.AsakusafwPluginConvention
-import com.asakusafw.gradle.plugins.internal.AsakusaSdkPlugin
+import com.asakusafw.gradle.plugins.AsakusafwSdkExtension
 
 /**
  * An implementation of {@link AsakusaTestkit} which uses Asakusa Vanilla.
  * @since 0.4.0
  */
 class AsakusaVanillaTestkit implements AsakusaTestkit {
+
+    private final AsakusafwSdkExtension features
+
+    AsakusaVanillaTestkit(AsakusafwSdkExtension features) {
+        this.features = features
+    }
 
     @Override
     String getName() {
@@ -34,7 +39,11 @@ class AsakusaVanillaTestkit implements AsakusaTestkit {
 
     @Override
     int getPriority() {
-        return 10
+        if (features.incubating) {
+            return 1000
+        } else {
+            return 10
+        }
     }
 
     @Override
