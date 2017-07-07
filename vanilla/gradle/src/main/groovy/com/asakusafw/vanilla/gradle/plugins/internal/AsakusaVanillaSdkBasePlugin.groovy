@@ -19,6 +19,7 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 
 import com.asakusafw.gradle.plugins.AsakusafwSdkExtension
+import com.asakusafw.gradle.plugins.AsakusafwSdkPluginParticipant
 import com.asakusafw.gradle.plugins.internal.AsakusaSdkPlugin
 import com.asakusafw.gradle.plugins.internal.PluginUtils
 import com.asakusafw.lang.gradle.plugins.internal.AsakusaLangSdkPlugin
@@ -45,7 +46,7 @@ class AsakusaVanillaSdkBasePlugin implements Plugin<Project> {
 
     private void configureTestkit() {
         AsakusafwSdkExtension sdk = AsakusaSdkPlugin.get(project).sdk
-        sdk.availableTestkits << new AsakusaVanillaTestkit()
+        sdk.availableTestkits << new AsakusaVanillaTestkit(sdk)
     }
 
     private void configureConfigurations() {
@@ -93,6 +94,23 @@ class AsakusaVanillaSdkBasePlugin implements Plugin<Project> {
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * A participant descriptor for {@link AsakusaVanillaSdkBasePlugin}.
+     * @since 0.9.2
+     */
+    static class Participant implements AsakusafwSdkPluginParticipant {
+
+        @Override
+        String getName() {
+            return descriptor.simpleName
+        }
+
+        @Override
+        Class<?> getDescriptor() {
+            return AsakusaVanillaSdkBasePlugin
         }
     }
 }
