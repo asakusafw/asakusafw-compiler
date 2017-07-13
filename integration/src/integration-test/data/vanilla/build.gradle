@@ -42,7 +42,7 @@ asakusafwOrganizer {
         assembly.into('.') {
             from 'src/main/conf'
             replace([
-                'project.home.path' : file(System.getenv('PROJECT_HOME')).absolutePath,
+                'project.home.path' : file(System.getenv('PROJECT_HOME')).absolutePath.replace('\\', '/'),
                 'project.home.uri' : uri(System.getenv('PROJECT_HOME')).toString(),
             ])
         }

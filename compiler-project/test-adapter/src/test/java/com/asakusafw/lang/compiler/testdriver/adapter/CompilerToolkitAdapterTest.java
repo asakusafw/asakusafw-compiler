@@ -115,7 +115,7 @@ public class CompilerToolkitAdapterTest {
         try (CompilerSession session = tk.newSession(conf)) {
             ArtifactMirror artifact = session.compileBatch(SimpleBatch.class);
             check(artifact);
-            assertThat(artifact.getBatch().getBatchId(), is("batch.simple"));
+            assertThat(artifact.getBatch().getId(), is("batch.simple"));
 
             JobflowMirror single = single(artifact.getBatch());
             checkSimpleJobflow(single);
@@ -123,7 +123,7 @@ public class CompilerToolkitAdapterTest {
     }
 
     private void checkSimpleJobflow(JobflowMirror single) {
-        assertThat(single.getFlowId(), is("simple"));
+        assertThat(single.getId(), is("simple"));
 
         assertThat(single.getInputs(), hasSize(1));
         PortMirror<? extends ImporterDescription> i0 = single.findInput("IN");
@@ -146,7 +146,7 @@ public class CompilerToolkitAdapterTest {
         return conf;
     }
 
-    private JobflowMirror single(BatchMirror batch) {
+    private static JobflowMirror single(BatchMirror batch) {
         assertThat(batch.getElements(), hasSize(1));
         return batch.getElements().iterator().next();
     }
@@ -155,7 +155,7 @@ public class CompilerToolkitAdapterTest {
         File batchDir = artifact.getContents();
         assertThat(batchDir.isDirectory(), is(true));
         for (JobflowMirror jobflow : artifact.getBatch().getElements()) {
-            File jobflowLib = CompilerConstants.getJobflowLibraryPath(batchDir, jobflow.getFlowId());
+            File jobflowLib = CompilerConstants.getJobflowLibraryPath(batchDir, jobflow.getId());
             assertThat(jobflowLib.isFile(), is(true));
         }
     }

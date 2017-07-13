@@ -140,6 +140,15 @@ public class VanillaTest {
     }
 
     /**
+     * {@code test} flow-parts w/o installAsakusafw.
+     */
+    @Test
+    public void test_nohome_flowpart() {
+        AsakusaProject project = provider.newInstance("prj");
+        project.gradle("test", "--tests", "*FlowPartTest");
+    }
+
+    /**
      * {@code yaess-batch.sh}.
      */
     @Test

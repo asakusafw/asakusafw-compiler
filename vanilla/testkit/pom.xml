@@ -12,6 +12,7 @@
   <packaging>pom</packaging>
 
   <modules>
+    <module>common</module>
     <module>adapter</module>
     <module>inprocess</module>
   </modules>

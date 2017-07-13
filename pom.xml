@@ -620,6 +620,18 @@ encoding/<project>=UTF-8
         <scope>provided</scope>
       </dependency>
       <dependency>
+        <groupId>com.asakusafw.workflow</groupId>
+        <artifactId>asakusa-workflow-model</artifactId>
+        <version>${asakusafw.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.asakusafw.workflow</groupId>
+        <artifactId>asakusa-workflow-executor</artifactId>
+        <version>${asakusafw.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
         <groupId>com.asakusafw</groupId>
         <artifactId>asakusa-runtime</artifactId>
         <version>${asakusafw.version}</version>
