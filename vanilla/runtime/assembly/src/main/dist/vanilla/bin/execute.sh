@@ -94,38 +94,28 @@ import "$_ROOT/libexec/validate-env.sh"
 cd
 
 _EXEC=()
-_LIBRARYPATH=()
 _CLASSPATH=()
 _APP_OPTIONS=()
 
-if [ -d "$_ROOT/lib/hadoop" ]
-then
-    _USE_HADOOP_CMD=0
-    import "$_ROOT/libexec/configure-java-cmd.sh"
-else
-    _USE_HADOOP_CMD=1
-    import "$_ROOT/libexec/configure-hadoop-cmd.sh"
-fi
-
-import "$_ROOT/libexec/configure-classpath.sh"
-import "$_ROOT/libexec/configure-options.sh"
-
-if [ "$ASAKUSA_VANILLA_ARGS" != "" ]
-then
-    _APP_OPTIONS+=($ASAKUSA_VANILLA_ARGS)
-fi
+import "$_ROOT/libexec/configure-hadoop.sh"
 
 if [ "$ASAKUSA_VANILLA_LAUNCHER" != "" ]
 then
     _EXEC+=($ASAKUSA_VANILLA_LAUNCHER)
 fi
 
-if [ $_USE_HADOOP_CMD -eq 1 ]
+if [ "$_HADOOP_CMD" = "" ]
 then
-    _EXEC+=("$HADOOP_CMD")
+    _USE_HADOOP_CMD=0
+    import "$ASAKUSA_HOME/core/libexec/configure-java.sh"
+    _EXEC+=("$_JAVA_CMD")
 else
-    _EXEC+=("$JAVA_CMD")
+    _USE_HADOOP_CMD=1
+    _EXEC+=("$_HADOOP_CMD")
 fi
+
+import "$_ROOT/libexec/configure-classpath.sh"
+import "$_ROOT/libexec/configure-options.sh"
 
 echo "Starting Asakusa Vanilla:"
 echo "              Launcher: ${_EXEC[@]}"
@@ -151,7 +141,9 @@ then
         --batch-arguments "$_OPT_BATCH_ARGUMENTS," \
         "${_APP_OPTIONS[@]}" \
         "$@"
+    _RET=$?
 else
+    _CLASSPATH+=("${_HADOOP_EMBED_CLASSPATH[@]}")
     "${_EXEC[@]}" \
         $ASAKUSA_VANILLA_OPTS \
         -classpath "$(IFS=:; echo "${_CLASSPATH[*]}")" \
@@ -163,9 +155,9 @@ else
         --batch-arguments "$_OPT_BATCH_ARGUMENTS," \
         "${_APP_OPTIONS[@]}" \
         "$@"
+    _RET=$?
 fi
 
-_RET=$?
 if [ $_RET -ne 0 ]
 then
     echo "Asakusa Vanilla failed with exit code: $_RET" 1>&2

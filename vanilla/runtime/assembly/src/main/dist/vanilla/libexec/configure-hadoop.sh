@@ -14,18 +14,15 @@
 # limitations under the License.
 #
 
-if [ "$JAVA_CMD" != "" -a -x "$JAVA_CMD" ]
+if [ -d "$_ROOT/lib/hadoop" ]
 then
-    :
-elif [ -x "$JAVA_HOME/bin/java" ]
-then
-    JAVA_CMD="$JAVA_HOME/bin/java"
+    unset _HADOOP_CMD
+    _HADOOP_EMBED_CLASSPATH=()
+    _HADOOP_EMBED_LOGGING_CLASSPATH=()
+    for f in $(ls "$_ROOT/lib/hadoop")
+    do
+        _HADOOP_EMBED_CLASSPATH+=("$_ROOT/lib/hadoop/$f")
+    done
 else
-    JAVA_CMD=$(which java)
-fi
-
-if [ ! -x "$JAVA_CMD" ]
-then
-    echo 'valid $JAVA_CMD is not defined' 1>&2
-    exit 1
+    . "$ASAKUSA_HOME/hadoop/libexec/configure-hadoop.sh"
 fi

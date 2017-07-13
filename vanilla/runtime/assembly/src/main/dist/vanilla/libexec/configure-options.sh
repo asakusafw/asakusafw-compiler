@@ -25,3 +25,8 @@ then
     _APP_OPTIONS+=("--engine-conf")
     _APP_OPTIONS+=("@$_ROOT/conf/vanilla.properties")
 fi
+
+if [ "$ASAKUSA_VANILLA_ARGS" != "" ]
+then
+    _APP_OPTIONS+=($ASAKUSA_VANILLA_ARGS)
+fi
