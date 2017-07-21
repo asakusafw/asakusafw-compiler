@@ -63,7 +63,6 @@ class AsakusaVanillaBasePlugin implements Plugin<Project> {
         driveProperties(ARTIFACT_INFO_PATH, [
             'feature-version': 'Asakusa Vanilla',
             'core-version': 'Asakusa Core libraries',
-            'sdk-version': 'Asakusa SDK',
             'hadoop-version': 'Hadoop',
         ])
         project.logger.info "Asakusa Vanilla: ${extension.featureVersion}"

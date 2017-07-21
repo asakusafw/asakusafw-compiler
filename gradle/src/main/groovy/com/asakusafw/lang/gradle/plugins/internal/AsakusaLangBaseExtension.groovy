@@ -33,11 +33,6 @@ class AsakusaLangBaseExtension {
     String coreVersion
 
     /**
-     * The SDK libraries version.
-     */
-    String sdkVersion
-
-    /**
      * The Hadoop version.
      */
     String hadoopVersion
