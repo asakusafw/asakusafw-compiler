@@ -24,18 +24,18 @@ import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.asakusafw.info.directio.DirectFileInputInfo;
+import com.asakusafw.info.directio.DirectFileIoAttribute;
+import com.asakusafw.info.directio.DirectFileOutputInfo;
 import com.asakusafw.lang.compiler.extension.directio.DirectFileInputModel;
 import com.asakusafw.lang.compiler.extension.directio.DirectFileIoConstants;
 import com.asakusafw.lang.compiler.extension.directio.DirectFileOutputModel;
+import com.asakusafw.lang.compiler.info.AttributeCollector;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.graph.ExternalPort;
 import com.asakusafw.lang.compiler.model.graph.Jobflow;
 import com.asakusafw.lang.compiler.model.info.ExternalInputInfo;
 import com.asakusafw.lang.compiler.model.info.ExternalOutputInfo;
-import com.asakusafw.lang.info.api.AttributeCollector;
-import com.asakusafw.lang.info.directio.DirectFileInputInfo;
-import com.asakusafw.lang.info.directio.DirectFileIoAttribute;
-import com.asakusafw.lang.info.directio.DirectFileOutputInfo;
 
 /**
  * An implementation of {@link AttributeCollector} for Direct I/O files.

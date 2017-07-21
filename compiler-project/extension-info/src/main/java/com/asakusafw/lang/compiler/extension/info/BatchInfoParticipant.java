@@ -29,16 +29,16 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.asakusafw.info.BatchInfo;
+import com.asakusafw.info.JobflowInfo;
 import com.asakusafw.lang.compiler.api.reference.BatchReference;
 import com.asakusafw.lang.compiler.common.Location;
 import com.asakusafw.lang.compiler.core.BatchCompiler;
 import com.asakusafw.lang.compiler.core.BatchCompiler.Context;
 import com.asakusafw.lang.compiler.core.basic.AbstractCompilerParticipant;
+import com.asakusafw.lang.compiler.info.AttributeCollector;
 import com.asakusafw.lang.compiler.model.graph.Batch;
 import com.asakusafw.lang.compiler.model.graph.BatchElement;
-import com.asakusafw.lang.info.BatchInfo;
-import com.asakusafw.lang.info.JobflowInfo;
-import com.asakusafw.lang.info.api.AttributeCollector;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 

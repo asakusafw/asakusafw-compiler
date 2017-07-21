@@ -19,11 +19,11 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import com.asakusafw.info.ParameterInfo;
+import com.asakusafw.info.ParameterListAttribute;
+import com.asakusafw.lang.compiler.info.AttributeCollector;
 import com.asakusafw.lang.compiler.model.graph.Batch;
 import com.asakusafw.lang.compiler.model.info.BatchInfo;
-import com.asakusafw.lang.info.ParameterInfo;
-import com.asakusafw.lang.info.ParameterListAttribute;
-import com.asakusafw.lang.info.api.AttributeCollector;
 
 /**
  * Collects {@link ParameterListAttribute}.

@@ -67,16 +67,19 @@ class AsakusaLangSdkPlugin implements Plugin<Project> {
                     asakusaLangCommon "com.asakusafw.lang.compiler:asakusa-compiler-extension-yaess:${base.featureVersion}"
                     asakusaLangCommon "com.asakusafw:simple-graph:${base.coreVersion}"
                     asakusaLangCommon "com.asakusafw:java-dom:${base.coreVersion}"
+                    asakusaLangCommon "com.asakusafw.info:asakusa-info-model:${base.coreVersion}"
                     asakusaLangCompiler "com.asakusafw:asakusa-dsl-vocabulary:${base.coreVersion}"
                     asakusaLangCompiler "com.asakusafw:asakusa-runtime:${base.coreVersion}"
                     asakusaLangCompiler "com.asakusafw:asakusa-yaess-core:${base.coreVersion}"
 
                     if (features.directio) {
                         asakusaLangCommon "com.asakusafw.lang.compiler:asakusa-compiler-extension-directio:${base.featureVersion}"
+                        asakusaLangCommon "com.asakusafw.info:asakusa-info-directio:${base.coreVersion}"
                         asakusaLangCompiler "com.asakusafw:asakusa-directio-vocabulary:${base.coreVersion}"
                     }
                     if (features.windgate) {
                         asakusaLangCommon "com.asakusafw.lang.compiler:asakusa-compiler-extension-windgate:${base.featureVersion}"
+                        asakusaLangCommon "com.asakusafw.info:asakusa-info-windgate:${base.coreVersion}"
                         asakusaLangCompiler "com.asakusafw:asakusa-windgate-vocabulary:${base.coreVersion}"
                     }
                     if (features.hive) {

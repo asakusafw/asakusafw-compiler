@@ -36,6 +36,7 @@
     <module>mapreduce</module>
     <module>inspection</module>
     <module>redirector</module>
+    <module>info</module>
 
     <!-- extensions -->
     <module>extension-externalio</module>
