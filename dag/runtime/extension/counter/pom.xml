@@ -6,7 +6,7 @@
   <parent>
     <artifactId>project</artifactId>
     <groupId>com.asakusafw.dag.runtime</groupId>
-    <version>0.4.2-RC1</version>
+    <version>0.4.2-SNAPSHOT</version>
     <relativePath>../..</relativePath>
   </parent>
 
