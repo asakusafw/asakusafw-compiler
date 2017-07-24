@@ -21,7 +21,6 @@ ext.parentPom = { f ->
     return [
         projectVersion : xml.version.text(),
         coreVersion : xml['properties']['asakusafw.version'].text(),
-        sdkVersion : xml['properties']['asakusafw-sdk.version'].text(),
         hadoopVersion : xml['properties']['hadoop.version'].text(),
     ]
 }(project.file('../pom.xml'))
@@ -52,7 +51,7 @@ repositories {
 
 dependencies {
     compile gradleApi()
-    compile group: 'com.asakusafw', name: 'asakusa-gradle-plugins', version: parentPom.sdkVersion
+    compile group: 'com.asakusafw', name: 'asakusa-gradle-plugins', version: parentPom.coreVersion
     testCompile 'junit:junit:4.11'
     deployerJars 'org.springframework.build:aws-maven:5.0.0.RELEASE'
 }
@@ -103,7 +102,6 @@ processResources {
         Properties p = new Properties()
         p.put('feature-version', parentPom.projectVersion)
         p.put("core-version", parentPom.coreVersion)
-        p.put("sdk-version", parentPom.sdkVersion)
         p.put('hadoop-version', parentPom.hadoopVersion)
         outputFile.withOutputStream { s ->
             p.store(s, null)

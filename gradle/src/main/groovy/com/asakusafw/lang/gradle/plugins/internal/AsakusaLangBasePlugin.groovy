@@ -63,7 +63,6 @@ class AsakusaLangBasePlugin implements Plugin<Project> {
         driveProperties(ARTIFACT_INFO_PATH, [
             'feature-version': 'Asakusa Language',
             'core-version': 'Asakusa Core libraries',
-            'sdk-version': 'Asakusa SDK',
             'hadoop-version': 'Hadoop',
         ])
         project.logger.info "Asakusa Language: ${extension.featureVersion}"
