@@ -20,19 +20,21 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.asakusafw.directio.hive.info.InputInfo;
-import com.asakusafw.directio.hive.info.LocationInfo;
-import com.asakusafw.directio.hive.info.OutputInfo;
-import com.asakusafw.directio.hive.info.TableInfo;
+import com.asakusafw.info.hive.HiveInputInfo;
+import com.asakusafw.info.hive.HiveOutputInfo;
+import com.asakusafw.info.hive.LocationInfo;
+import com.asakusafw.info.hive.TableInfo;
 import com.asakusafw.lang.compiler.api.JobflowProcessor;
 import com.asakusafw.lang.compiler.common.Location;
 import com.asakusafw.lang.compiler.extension.directio.DirectFileInputModel;
 import com.asakusafw.lang.compiler.extension.directio.DirectFileIoModels;
 import com.asakusafw.lang.compiler.extension.directio.DirectFileOutputModel;
+import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.graph.ExternalInput;
 import com.asakusafw.lang.compiler.model.graph.ExternalOutput;
 import com.asakusafw.lang.compiler.model.graph.Jobflow;
@@ -66,22 +68,22 @@ public class HiveSchemaCollectorProcessor implements JobflowProcessor {
             return;
         }
         LOG.debug("collecting Hive inputs: {}", source.getFlowId());
-        List<InputInfo> inputs = collectInputs(loader, source.getOperatorGraph().getInputs().values());
-        List<OutputInfo> outputs = collectOutputs(loader, source.getOperatorGraph().getOutputs().values());
+        List<HiveInputInfo> inputs = collectInputs(loader, source.getOperatorGraph().getInputs().values());
+        List<HiveOutputInfo> outputs = collectOutputs(loader, source.getOperatorGraph().getOutputs().values());
         LOG.debug("generating Hive input table schema: {} entries", inputs.size());
         try (OutputStream stream = context.addResourceFile(PATH_INPUT)) {
-            Persistent.write(InputInfo.class, inputs, stream);
+            Persistent.write(HiveInputInfo.class, inputs, stream);
         }
         LOG.debug("generating Hive output table schema: {} entries", outputs.size());
         try (OutputStream stream = context.addResourceFile(PATH_OUTPUT)) {
-            Persistent.write(OutputInfo.class, outputs, stream);
+            Persistent.write(HiveOutputInfo.class, outputs, stream);
         }
     }
 
-    private List<InputInfo> collectInputs(ClassLoader classLoader, Collection<ExternalInput> elements) {
-        List<InputInfo> results = new ArrayList<>();
+    private static List<HiveInputInfo> collectInputs(ClassLoader classLoader, Collection<ExternalInput> elements) {
+        List<HiveInputInfo> results = new ArrayList<>();
         for (ExternalInput port : elements) {
-            InputInfo schema = extract(classLoader, port);
+            HiveInputInfo schema = extract(classLoader, port);
             if (schema != null) {
                 LOG.debug("found hive schema info: {}=>{}", port.getInfo(), schema);
                 results.add(schema);
@@ -90,10 +92,10 @@ public class HiveSchemaCollectorProcessor implements JobflowProcessor {
         return Util.normalize(results);
     }
 
-    private List<OutputInfo> collectOutputs(ClassLoader classLoader, Collection<ExternalOutput> elements) {
-        List<OutputInfo> results = new ArrayList<>();
+    private static List<HiveOutputInfo> collectOutputs(ClassLoader classLoader, Collection<ExternalOutput> elements) {
+        List<HiveOutputInfo> results = new ArrayList<>();
         for (ExternalOutput port : elements) {
-            OutputInfo schema = extract(classLoader, port);
+            HiveOutputInfo schema = extract(classLoader, port);
             if (schema != null) {
                 LOG.debug("found hive schema info: {}=>{}", port.getInfo(), schema);
                 results.add(schema);
@@ -102,7 +104,7 @@ public class HiveSchemaCollectorProcessor implements JobflowProcessor {
         return Util.normalize(results);
     }
 
-    private InputInfo extract(ClassLoader classLoader, ExternalInput port) {
+    private static HiveInputInfo extract(ClassLoader classLoader, ExternalInput port) {
         if (port.isExternal() == false) {
             LOG.trace("not external: {}", port);
             return null;
@@ -121,7 +123,11 @@ public class HiveSchemaCollectorProcessor implements JobflowProcessor {
                 LOG.trace("not hive data format: {}", info);
                 return null;
             }
-            return new InputInfo(
+            return new HiveInputInfo(
+                    port.getName(),
+                    Optional.ofNullable(info.getDescriptionClass())
+                            .map(ClassDescription::getClassName)
+                            .orElse(null),
                     new LocationInfo(model.getBasePath(), model.getResourcePattern()),
                     ((TableInfo.Provider) format).getSchema());
         } catch (IllegalArgumentException | ReflectiveOperationException e) {
@@ -130,7 +136,7 @@ public class HiveSchemaCollectorProcessor implements JobflowProcessor {
         }
     }
 
-    private OutputInfo extract(ClassLoader classLoader, ExternalOutput port) {
+    private static HiveOutputInfo extract(ClassLoader classLoader, ExternalOutput port) {
         if (port.isExternal() == false) {
             LOG.trace("not external: {}", port);
             return null;
@@ -149,7 +155,11 @@ public class HiveSchemaCollectorProcessor implements JobflowProcessor {
                 LOG.trace("not hive data format: {}", info);
                 return null;
             }
-            return new OutputInfo(
+            return new HiveOutputInfo(
+                    port.getName(),
+                    Optional.ofNullable(info.getDescriptionClass())
+                            .map(ClassDescription::getClassName)
+                            .orElse(null),
                     new LocationInfo(model.getBasePath(), model.getResourcePattern()),
                     ((TableInfo.Provider) format).getSchema());
         } catch (ReflectiveOperationException e) {

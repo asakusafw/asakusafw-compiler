@@ -19,10 +19,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SequenceWriter;
 
@@ -42,9 +42,8 @@ final class Persistent {
 
     static <T> List<T> read(Class<T> type, InputStream input) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
-        try {
-            List<T> results = new ArrayList<>();
-            Iterator<T> iterator = mapper.readerFor(type).readValues(input);
+        List<T> results = new ArrayList<>();
+        try (MappingIterator<T> iterator = mapper.readerFor(type).readValues(input)) {
             while (iterator.hasNext()) {
                 results.add(iterator.next());
             }

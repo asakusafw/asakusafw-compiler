@@ -555,12 +555,6 @@ encoding/<project>=UTF-8
       </dependency>
       <dependency>
         <groupId>com.asakusafw</groupId>
-        <artifactId>asakusa-hive-info</artifactId>
-        <version>${asakusafw.version}</version>
-        <scope>provided</scope>
-      </dependency>
-      <dependency>
-        <groupId>com.asakusafw</groupId>
         <artifactId>asakusa-iterative-common</artifactId>
         <version>${asakusafw.version}</version>
         <scope>provided</scope>
@@ -616,6 +610,12 @@ encoding/<project>=UTF-8
       <dependency>
         <groupId>com.asakusafw.info</groupId>
         <artifactId>asakusa-info-windgate</artifactId>
+        <version>${asakusafw.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.asakusafw.info</groupId>
+        <artifactId>asakusa-info-hive</artifactId>
         <version>${asakusafw.version}</version>
         <scope>provided</scope>
       </dependency>
