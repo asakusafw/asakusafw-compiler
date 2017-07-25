@@ -41,6 +41,8 @@ public class InspectionExtensionParticipantTest extends CompilerTestRoot {
      */
     @Test
     public void simple() {
+        options.withProperty(InspectionExtensionParticipant.KEY_DSL, "true");
+        options.withProperty(InspectionExtensionParticipant.KEY_TASK, "true");
         AtomicBoolean jobflowExecuted = new AtomicBoolean();
         AtomicBoolean batchExecuted = new AtomicBoolean();
         externalPortProcessors.add(new SimpleExternalPortProcessor());
@@ -72,7 +74,7 @@ public class InspectionExtensionParticipantTest extends CompilerTestRoot {
      */
     @Test
     public void no_dsl() {
-        options.withProperty(InspectionExtensionParticipant.KEY_DSL, "false");
+        options.withProperty(InspectionExtensionParticipant.KEY_TASK, "true");
         externalPortProcessors.add(new SimpleExternalPortProcessor());
         compilerParticipants.add(new InspectionExtensionParticipant());
         jobflowProcessors.add(new SimpleJobflowProcessor());
@@ -90,7 +92,7 @@ public class InspectionExtensionParticipantTest extends CompilerTestRoot {
      */
     @Test
     public void no_task() {
-        options.withProperty(InspectionExtensionParticipant.KEY_TASK, "false");
+        options.withProperty(InspectionExtensionParticipant.KEY_DSL, "true");
         externalPortProcessors.add(new SimpleExternalPortProcessor());
         compilerParticipants.add(new InspectionExtensionParticipant());
         jobflowProcessors.add(new SimpleJobflowProcessor());
