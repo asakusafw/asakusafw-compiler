@@ -16,11 +16,7 @@
 package com.asakusafw.integration.lang;
 
 import static com.asakusafw.integration.lang.Util.*;
-import static org.hamcrest.Matchers.*;
 
-import java.util.Optional;
-
-import org.junit.Assume;
 import org.junit.ClassRule;
 import org.junit.Test;
 
@@ -84,7 +80,6 @@ public class ToolsInfoTest {
      */
     @Test
     public void info_list_jobflow() {
-        checkInfo();
         framework.withLaunch(CMD, "list", "jobflow", "-v",
                 "vanilla.perf.average.sort");
     }
@@ -94,7 +89,6 @@ public class ToolsInfoTest {
      */
     @Test
     public void info_list_plan() {
-        checkInfo();
         framework.withLaunch(CMD, "list", "plan", "-v",
                 "vanilla.perf.average.sort");
     }
@@ -104,7 +98,6 @@ public class ToolsInfoTest {
      */
     @Test
     public void info_list_operator() {
-        checkInfo();
         framework.withLaunch(CMD, "list", "operator", "-v",
                 "vanilla.perf.average.sort");
     }
@@ -114,7 +107,6 @@ public class ToolsInfoTest {
      */
     @Test
     public void info_list_directio() {
-        checkInfo();
         framework.withLaunch(CMD, "list", "directio");
     }
 
@@ -123,7 +115,6 @@ public class ToolsInfoTest {
      */
     @Test
     public void info_list_directio_input() {
-        checkInfo();
         framework.withLaunch(CMD, "list", "directio", "input", "-v",
                 "vanilla.perf.average.sort");
     }
@@ -133,7 +124,6 @@ public class ToolsInfoTest {
      */
     @Test
     public void info_list_directio_output() {
-        checkInfo();
         framework.withLaunch(CMD, "list", "directio", "output", "-v",
                 "vanilla.perf.average.sort");
     }
@@ -143,7 +133,6 @@ public class ToolsInfoTest {
      */
     @Test
     public void info_list_windgate() {
-        checkInfo();
         framework.withLaunch(CMD, "list", "windgate");
     }
 
@@ -152,7 +141,6 @@ public class ToolsInfoTest {
      */
     @Test
     public void info_list_windgate_input() {
-        checkInfo();
         framework.withLaunch(CMD, "list", "windgate", "input", "-v",
                 "vanilla.wg.perf.average.sort");
     }
@@ -162,7 +150,6 @@ public class ToolsInfoTest {
      */
     @Test
     public void info_list_windgate_output() {
-        checkInfo();
         framework.withLaunch(CMD, "list", "windgate", "output", "-v",
                 "vanilla.wg.perf.average.sort");
     }
@@ -172,7 +159,6 @@ public class ToolsInfoTest {
      */
     @Test
     public void info_draw() {
-        checkInfo();
         framework.withLaunch(CMD, "draw");
     }
 
@@ -181,7 +167,6 @@ public class ToolsInfoTest {
      */
     @Test
     public void info_draw_jobflow() {
-        checkInfo();
         framework.withLaunch(CMD, "draw", "jobflow", "-v",
                 "vanilla.perf.average.sort");
     }
@@ -191,7 +176,6 @@ public class ToolsInfoTest {
      */
     @Test
     public void info_draw_plan() {
-        checkInfo();
         framework.withLaunch(CMD, "draw", "plan", "-v",
                 "vanilla.perf.average.sort");
     }
@@ -201,14 +185,7 @@ public class ToolsInfoTest {
      */
     @Test
     public void info_draw_operator() {
-        checkInfo();
         framework.withLaunch(CMD, "draw", "operator", "-v",
                 "vanilla.perf.average.sort");
-    }
-
-    private static void checkInfo() {
-        Assume.assumeThat(
-                framework.find("batchapps/vanilla.perf.average.sort/etc/batch-info.json"),
-                is(not(Optional.empty())));
     }
 }
