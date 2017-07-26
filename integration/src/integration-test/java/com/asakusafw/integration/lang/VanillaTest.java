@@ -25,9 +25,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import org.junit.Assume;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -151,6 +149,15 @@ public class VanillaTest {
     }
 
     /**
+     * {@code runTest} - test w/ test-tools.
+     */
+    @Test
+    public void test_tools() {
+        AsakusaProject project = provider.newInstance("prj");
+        project.gradle("attachVanillaBatchapps", "installAsakusafw", "runTest");
+    }
+
+    /**
      * {@code yaess-batch.sh}.
      */
     @Test
@@ -211,7 +218,7 @@ public class VanillaTest {
     }
 
     /**
-     * {@code workflow.sh run}.
+     * {@code asakusafw.sh run}.
      */
     @Test
     public void workflow() {
@@ -227,7 +234,9 @@ public class VanillaTest {
             Files.write(f, Arrays.asList(csv), StandardCharsets.UTF_8);
         });
 
-        workflow(project, "vanilla.perf.average.sort", "-Ainput=input", "-Aoutput=output");
+        project.getFramework().withLaunch(
+                "bin/asakusafw.sh", "run", "vanilla.perf.average.sort",
+                "-Ainput=input", "-Aoutput=output");
 
         project.getContents().get("var/data/output", dir -> {
             List<String> results = Files.list(dir)
@@ -239,7 +248,7 @@ public class VanillaTest {
     }
 
     /**
-     * {@code workflow.sh run}.
+     * {@code asakusafw.sh run}.
      */
     @Test
     public void workflow_windgate() {
@@ -257,23 +266,14 @@ public class VanillaTest {
             Files.write(f, Arrays.asList(csv), StandardCharsets.UTF_8);
         });
 
-        workflow(project, "vanilla.wg.perf.average.sort", "-Ainput=input.csv", "-Aoutput=output.csv");
+        project.getFramework().withLaunch(
+                "bin/asakusafw.sh", "run", "vanilla.wg.perf.average.sort",
+                "-Ainput=input.csv", "-Aoutput=output.csv");
 
         project.getContents().get("var/windgate/output.csv", file -> {
             List<String> results = lines(file)
                 .collect(Collectors.toList());
             assertThat(results, containsInAnyOrder(csv));
         });
-    }
-
-    private static void workflow(AsakusaProject project, String batchId, String... arguments) {
-        Bundle framework = project.getFramework();
-        Assume.assumeThat(
-                framework.find(String.format("batchapps/%s/etc/workflow.json", batchId)),
-                is(not(Optional.empty())));
-        framework.withLaunch(
-                "tools/bin/workflow.sh",
-                Stream.concat(Stream.of("run", batchId), Arrays.stream(arguments))
-                        .toArray(String[]::new));
     }
 }

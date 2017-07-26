@@ -58,3 +58,15 @@ test {
         exceptionFormat 'full'
     }
 }
+
+task runTest(type: com.asakusafw.gradle.tasks.TestToolTask) {
+    batchArguments += [input : 'input']
+    batchArguments += [output : 'output']
+    clean description: 'com.example.KsvSortBatch'
+    prepare importer: 'com.example.KsvInputDescription',
+        data: '/com/example/simple.xls#data'
+    run batch: 'vanilla.perf.average.sort'
+    verify exporter: 'com.example.KsvOutputDescription',
+        data: '/com/example/simple.xls#data',
+        rule: '/com/example/simple.xls#rule'
+}
