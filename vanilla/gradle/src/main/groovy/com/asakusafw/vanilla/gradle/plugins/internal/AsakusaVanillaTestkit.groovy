@@ -39,11 +39,7 @@ class AsakusaVanillaTestkit implements AsakusaTestkit {
 
     @Override
     int getPriority() {
-        if (features.incubating) {
-            return 1000
-        } else {
-            return 10
-        }
+        return 200
     }
 
     @Override
