@@ -23,6 +23,9 @@ import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,10 +40,13 @@ import com.asakusafw.lang.compiler.api.reference.TaskReference;
 import com.asakusafw.lang.compiler.common.Location;
 import com.asakusafw.lang.compiler.hadoop.HadoopCommandRequired;
 import com.asakusafw.lang.compiler.hadoop.HadoopTaskReference;
+import com.asakusafw.lang.compiler.parameter.ImplicitParameterList;
 import com.asakusafw.workflow.model.BatchInfo;
 import com.asakusafw.workflow.model.CommandToken;
 import com.asakusafw.workflow.model.DeleteTaskInfo;
 import com.asakusafw.workflow.model.TaskInfo;
+import com.asakusafw.workflow.model.attribute.ParameterInfo;
+import com.asakusafw.workflow.model.attribute.ParameterListAttribute;
 import com.asakusafw.workflow.model.basic.AbstractGraphElement;
 import com.asakusafw.workflow.model.basic.BasicBatchInfo;
 import com.asakusafw.workflow.model.basic.BasicCommandTaskInfo;
@@ -66,7 +72,7 @@ public class WorkflowBatchProcessor implements BatchProcessor {
     @Override
     public void process(Context context, BatchReference source) throws IOException {
         LOG.debug("analyzing batch structure for workflow information");
-        BatchInfo workflow = new ReferenceResolver(context.getOptions()).resolve(source);
+        BatchInfo workflow = new ReferenceResolver(context).resolve(source);
         write(context, workflow, Location.of(PATH));
     }
 
@@ -92,10 +98,13 @@ public class WorkflowBatchProcessor implements BatchProcessor {
             PHASE_MAPPING = map;
         }
 
+        private final Context context;
+
         private final CompilerOptions options;
 
-        ReferenceResolver(CompilerOptions options) {
-            this.options = options;
+        ReferenceResolver(Context context) {
+            this.context = context;
+            this.options = context.getOptions();
         }
 
         BatchInfo resolve(BatchReference source) {
@@ -106,8 +115,27 @@ public class WorkflowBatchProcessor implements BatchProcessor {
                 result.addElement(resolved);
                 mapping.put(jobflow, resolved);
             }
+            result.addAttribute(collectParameterList(source));
             resolveDependencies(mapping);
             return result;
+        }
+
+        private ParameterListAttribute collectParameterList(BatchReference source) {
+            return new ParameterListAttribute(
+                    Optional
+                        .ofNullable(context.getExtension(ImplicitParameterList.class))
+                        .map(it -> it.merge(source.getParameters()))
+                        .orElseGet(source::getParameters).stream()
+                        .map(p -> new ParameterInfo(
+                                p.getKey(),
+                                p.getComment(),
+                                p.isMandatory(),
+                                Optional.ofNullable(p.getPattern())
+                                    .map(Pattern::pattern)
+                                    .orElse(null)))
+                        .collect(Collectors.toList()),
+                    source.getAttributes().contains(
+                            com.asakusafw.lang.compiler.model.info.BatchInfo.Attribute.STRICT_PARAMETERS));
         }
 
         private BasicJobflowInfo resolve(JobflowReference reference) {

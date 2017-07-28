@@ -110,6 +110,11 @@ class AttributeCollectorContextAdapter implements AttributeCollector.Context {
         }
     }
 
+    @Override
+    public <T> T getExtension(Class<T> extension) {
+        return delegate.getExtension(extension);
+    }
+
     /**
      * Returns the batch attributes.
      * @return the batch attributes

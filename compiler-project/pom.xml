@@ -37,6 +37,7 @@
     <module>inspection</module>
     <module>redirector</module>
     <module>info</module>
+    <module>parameter</module>
 
     <!-- extensions -->
     <module>extension-externalio</module>
