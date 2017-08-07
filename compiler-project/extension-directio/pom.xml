@@ -33,13 +33,8 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.asakusafw.lang.info</groupId>
-      <artifactId>asakusa-info-api</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.asakusafw.lang.info</groupId>
-      <artifactId>asakusa-info-directio</artifactId>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>asakusa-compiler-info</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -53,6 +48,14 @@
     <dependency>
       <groupId>com.asakusafw</groupId>
       <artifactId>asakusa-runtime</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.asakusafw.info</groupId>
+      <artifactId>asakusa-info-model</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.asakusafw.info</groupId>
+      <artifactId>asakusa-info-directio</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.hadoop</groupId>
@@ -106,8 +109,8 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>com.asakusafw.lang.info</groupId>
-      <artifactId>asakusa-info-api</artifactId>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>asakusa-compiler-info</artifactId>
       <version>${project.version}</version>
       <classifier>tests</classifier>
       <scope>test</scope>

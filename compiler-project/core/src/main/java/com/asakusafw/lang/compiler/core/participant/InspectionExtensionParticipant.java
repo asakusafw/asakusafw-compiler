@@ -77,10 +77,10 @@ public class InspectionExtensionParticipant extends AbstractCompilerParticipant 
 
     @Override
     public void afterBatch(BatchCompiler.Context context, Batch batch, BatchReference reference) {
-        if (isEnabled(context, KEY_DSL, true)) {
+        if (isEnabled(context, KEY_DSL, false)) {
             inspect(context, OUTPUT_DSL, batch);
         }
-        if (isEnabled(context, KEY_TASK, true)) {
+        if (isEnabled(context, KEY_TASK, false)) {
             inspect(context, OUTPUT_TASK, reference);
         }
         cleanUp(context);

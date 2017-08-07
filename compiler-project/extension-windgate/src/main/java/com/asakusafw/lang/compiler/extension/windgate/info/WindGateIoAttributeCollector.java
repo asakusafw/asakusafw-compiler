@@ -26,18 +26,18 @@ import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.asakusafw.info.windgate.WindGateInputInfo;
+import com.asakusafw.info.windgate.WindGateIoAttribute;
+import com.asakusafw.info.windgate.WindGateOutputInfo;
+import com.asakusafw.info.windgate.WindGatePortInfo;
 import com.asakusafw.lang.compiler.extension.windgate.DescriptionModel;
 import com.asakusafw.lang.compiler.extension.windgate.WindGateConstants;
+import com.asakusafw.lang.compiler.info.AttributeCollector;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.graph.ExternalPort;
 import com.asakusafw.lang.compiler.model.graph.Jobflow;
 import com.asakusafw.lang.compiler.model.graph.OperatorGraph;
 import com.asakusafw.lang.compiler.model.info.ExternalPortInfo;
-import com.asakusafw.lang.info.api.AttributeCollector;
-import com.asakusafw.lang.info.windgate.WindGateInputInfo;
-import com.asakusafw.lang.info.windgate.WindGateIoAttribute;
-import com.asakusafw.lang.info.windgate.WindGateOutputInfo;
-import com.asakusafw.lang.info.windgate.WindGatePortInfo;
 import com.asakusafw.windgate.core.DriverScript;
 
 /**

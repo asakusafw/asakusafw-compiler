@@ -24,9 +24,10 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.asakusafw.directio.hive.info.InputInfo;
-import com.asakusafw.directio.hive.info.OutputInfo;
-import com.asakusafw.directio.hive.info.TableInfo;
+import com.asakusafw.info.hive.HiveIoAttribute;
+import com.asakusafw.info.hive.HiveInputInfo;
+import com.asakusafw.info.hive.HiveOutputInfo;
+import com.asakusafw.info.hive.TableInfo;
 import com.asakusafw.lang.compiler.api.BatchProcessor;
 import com.asakusafw.lang.compiler.api.reference.BatchReference;
 import com.asakusafw.lang.compiler.api.reference.JobflowReference;
@@ -58,34 +59,63 @@ public class HiveSchemaAggregatorProcessor implements BatchProcessor {
             return;
         }
         LOG.debug("aggregating hive schema information: {}", source.getBatchId());
-        List<InputInfo> inputs = new ArrayList<>();
-        List<OutputInfo> outputs = new ArrayList<>();
+        List<HiveInputInfo> inputs = new ArrayList<>();
+        List<HiveOutputInfo> outputs = new ArrayList<>();
         for (JobflowReference jobflow : source.getJobflows()) {
-            inputs.addAll(collect(context, jobflow, InputInfo.class, HiveSchemaCollectorProcessor.PATH_INPUT));
-            outputs.addAll(collect(context, jobflow, OutputInfo.class, HiveSchemaCollectorProcessor.PATH_OUTPUT));
+            HiveIoAttribute attr = load(location -> context.findResourceFile(jobflow, location));
+            inputs.addAll(attr.getInputs());
+            outputs.addAll(attr.getOutputs());
         }
         inputs = Util.normalize(inputs);
         outputs = Util.normalize(outputs);
         LOG.debug("generating Hive input table schema: {} entries", inputs.size());
         try (OutputStream stream = context.addResourceFile(PATH_INPUT)) {
-            Persistent.write(InputInfo.class, inputs, stream);
+            Persistent.write(HiveInputInfo.class, inputs, stream);
         }
         LOG.debug("generating Hive output table schema: {} entries", outputs.size());
         try (OutputStream stream = context.addResourceFile(PATH_OUTPUT)) {
-            Persistent.write(OutputInfo.class, outputs, stream);
+            Persistent.write(HiveOutputInfo.class, outputs, stream);
         }
     }
 
-    private <T extends TableInfo.Provider> List<T> collect(
-            Context context, JobflowReference jobflow,
+    /**
+     * Collects the saved Hive I/O information.
+     * @param provider the resource provider
+     * @return Hive I/O information
+     * @throws IOException if I/O error was occurred while loading information
+     */
+    public static HiveIoAttribute load(ResourceProvider provider) throws IOException {
+        List<HiveInputInfo> inputs = collect(provider,
+                HiveInputInfo.class, HiveSchemaCollectorProcessor.PATH_INPUT);
+        List<HiveOutputInfo> outputs = collect(provider,
+                HiveOutputInfo.class, HiveSchemaCollectorProcessor.PATH_OUTPUT);
+        return new HiveIoAttribute(inputs, outputs);
+    }
+
+    private static <T extends TableInfo.Provider> List<T> collect(
+            ResourceProvider provider,
             Class<T> type, Location location) throws IOException {
-        LOG.debug("collecting hive schema information: {}!{}", jobflow.getFlowId(), location);
-        try (InputStream input = context.findResourceFile(jobflow, location)) {
+        try (InputStream input = provider.find(location)) {
             if (input == null) {
-                LOG.debug("missing hive schema information: {} ({})", jobflow.getFlowId(), location);
                 return null;
             }
             return Persistent.read(type, input);
         }
+    }
+
+    /**
+     * Provides resources.
+     * @since 0.5.0
+     */
+    @FunctionalInterface
+    public interface ResourceProvider {
+
+        /**
+         * Returns a resource on the given location.
+         * @param location the target location
+         * @return the resource contents, or {@code null} if it is not found
+         * @throws IOException if failed to open the resource
+         */
+        InputStream find(Location location) throws IOException;
     }
 }

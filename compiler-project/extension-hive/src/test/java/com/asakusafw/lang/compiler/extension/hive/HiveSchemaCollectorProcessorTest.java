@@ -28,10 +28,10 @@ import java.util.zip.ZipFile;
 import org.junit.Rule;
 import org.junit.Test;
 
-import com.asakusafw.directio.hive.info.InputInfo;
-import com.asakusafw.directio.hive.info.LocationInfo;
-import com.asakusafw.directio.hive.info.OutputInfo;
-import com.asakusafw.directio.hive.info.TableInfo;
+import com.asakusafw.info.hive.HiveInputInfo;
+import com.asakusafw.info.hive.HiveOutputInfo;
+import com.asakusafw.info.hive.LocationInfo;
+import com.asakusafw.info.hive.TableInfo;
 import com.asakusafw.lang.compiler.common.Location;
 import com.asakusafw.lang.compiler.extension.hive.testing.DirectInput;
 import com.asakusafw.lang.compiler.extension.hive.testing.DirectOutput;
@@ -62,11 +62,15 @@ public class HiveSchemaCollectorProcessorTest {
                 DirectInput.of("in", "*.bin", MockDataFormat.A.class),
                 DirectOutput.of("out", "*.bin", MockDataFormat.A.class))
             .compile();
-        check(new InputInfo[] {
-                new InputInfo(new LocationInfo("in", "*.bin"), new MockDataFormat.A().getSchema()),
+        check(new HiveInputInfo[] {
+                new HiveInputInfo(
+                        "i1", DirectInput.class.getName(),
+                        new LocationInfo("in", "*.bin"), new MockDataFormat.A().getSchema()),
         });
-        check(new OutputInfo[] {
-                new OutputInfo(new LocationInfo("out", "*.bin"), new MockDataFormat.A().getSchema()),
+        check(new HiveOutputInfo[] {
+                new HiveOutputInfo(
+                        "o1", DirectOutput.class.getName(),
+                        new LocationInfo("out", "*.bin"), new MockDataFormat.A().getSchema()),
         });
     }
 
@@ -84,13 +88,21 @@ public class HiveSchemaCollectorProcessorTest {
                 DirectInput.of("c", "*.bin", MockDataFormat.C.class),
                 DirectOutput.of("d", "*.bin", MockDataFormat.D.class))
             .compile();
-        check(new InputInfo[] {
-                new InputInfo(new LocationInfo("a", "*.bin"), new MockDataFormat.A().getSchema()),
-                new InputInfo(new LocationInfo("c", "*.bin"), new MockDataFormat.C().getSchema()),
+        check(new HiveInputInfo[] {
+                new HiveInputInfo(
+                        "i1", DirectInput.class.getName(),
+                        new LocationInfo("a", "*.bin"), new MockDataFormat.A().getSchema()),
+                new HiveInputInfo(
+                        "i2", DirectInput.class.getName(),
+                        new LocationInfo("c", "*.bin"), new MockDataFormat.C().getSchema()),
         });
-        check(new OutputInfo[] {
-                new OutputInfo(new LocationInfo("b", "*.bin"), new MockDataFormat.B().getSchema()),
-                new OutputInfo(new LocationInfo("d", "*.bin"), new MockDataFormat.D().getSchema()),
+        check(new HiveOutputInfo[] {
+                new HiveOutputInfo(
+                        "o1", DirectOutput.class.getName(),
+                        new LocationInfo("b", "*.bin"), new MockDataFormat.B().getSchema()),
+                new HiveOutputInfo(
+                        "o2", DirectOutput.class.getName(),
+                        new LocationInfo("d", "*.bin"), new MockDataFormat.D().getSchema()),
         });
     }
 
@@ -105,17 +117,17 @@ public class HiveSchemaCollectorProcessorTest {
                 InternalOutput.of(MockDataModel.class, "out-*"))
             .compile();
         try (ZipFile dir = new ZipFile(tester.getJobflow())) {
-            check(new InputInfo[0]);
-            check(new OutputInfo[0]);
+            check(new HiveInputInfo[0]);
+            check(new HiveOutputInfo[0]);
         }
     }
 
-    private void check(InputInfo[] elements) throws IOException {
-        check(HiveSchemaCollectorProcessor.PATH_INPUT, InputInfo.class, Arrays.asList(elements));
+    private void check(HiveInputInfo[] elements) throws IOException {
+        check(HiveSchemaCollectorProcessor.PATH_INPUT, HiveInputInfo.class, Arrays.asList(elements));
     }
 
-    private void check(OutputInfo[] elements) throws IOException {
-        check(HiveSchemaCollectorProcessor.PATH_OUTPUT, OutputInfo.class, Arrays.asList(elements));
+    private void check(HiveOutputInfo[] elements) throws IOException {
+        check(HiveSchemaCollectorProcessor.PATH_OUTPUT, HiveOutputInfo.class, Arrays.asList(elements));
     }
 
     private <T extends TableInfo.Provider> void check(

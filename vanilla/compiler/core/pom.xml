@@ -65,6 +65,10 @@
       <artifactId>simple-graph</artifactId>
     </dependency>
     <dependency>
+      <groupId>com.asakusafw.info</groupId>
+      <artifactId>asakusa-info-model</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>
@@ -98,7 +102,6 @@
     <dependency>
       <groupId>com.asakusafw</groupId>
       <artifactId>asakusa-runtime</artifactId>
-      <version>${asakusafw.version}</version>
       <classifier>tests</classifier>
       <scope>test</scope>
     </dependency>

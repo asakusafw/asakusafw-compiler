@@ -16,11 +16,7 @@
 package com.asakusafw.integration.lang;
 
 import static com.asakusafw.integration.lang.Util.*;
-import static org.hamcrest.Matchers.*;
 
-import java.util.Optional;
-
-import org.junit.Assume;
 import org.junit.ClassRule;
 import org.junit.Test;
 
@@ -33,6 +29,8 @@ import com.asakusafw.utils.gradle.ContentsConfigurator;
  * Test for {@code tools/bin/info.sh}.
  */
 public class ToolsInfoTest {
+
+    private static final String CMD = "tools/bin/info.sh";
 
     /**
      * project provider.
@@ -58,7 +56,15 @@ public class ToolsInfoTest {
      */
     @Test
     public void info() {
-        framework.withLaunch("tools/bin/info.sh");
+        framework.withLaunch(CMD);
+    }
+
+    /**
+     * {@code info.sh list}.
+     */
+    @Test
+    public void info_list() {
+        framework.withLaunch(CMD, "list");
     }
 
     /**
@@ -66,26 +72,24 @@ public class ToolsInfoTest {
      */
     @Test
     public void info_list_batch() {
-        framework.withLaunch("tools/bin/info.sh", "list", "batch", "-v");
+        framework.withLaunch(CMD, "list", "batch", "-v");
     }
 
     /**
-     * {@code info.sh list batch}.
+     * {@code info.sh list jobflow}.
      */
     @Test
     public void info_list_jobflow() {
-        checkInfo();
-        framework.withLaunch("tools/bin/info.sh", "list", "jobflow", "-v",
+        framework.withLaunch(CMD, "list", "jobflow", "-v",
                 "vanilla.perf.average.sort");
     }
 
     /**
-     * {@code info.sh list batch}.
+     * {@code info.sh list plan}.
      */
     @Test
     public void info_list_plan() {
-        checkInfo();
-        framework.withLaunch("tools/bin/info.sh", "list", "plan", "-v",
+        framework.withLaunch(CMD, "list", "plan", "-v",
                 "vanilla.perf.average.sort");
     }
 
@@ -94,48 +98,85 @@ public class ToolsInfoTest {
      */
     @Test
     public void info_list_operator() {
-        checkInfo();
-        framework.withLaunch("tools/bin/info.sh", "list", "operator", "-v",
+        framework.withLaunch(CMD, "list", "operator", "-v",
                 "vanilla.perf.average.sort");
     }
 
     /**
-     * {@code info.sh list directio-*}.
+     * {@code info.sh list directio}.
      */
     @Test
     public void info_list_directio() {
-        checkInfo();
-        framework.withLaunch("tools/bin/info.sh", "list", "directio-input", "-v",
+        framework.withLaunch(CMD, "list", "directio");
+    }
+
+    /**
+     * {@code info.sh list directio input}.
+     */
+    @Test
+    public void info_list_directio_input() {
+        framework.withLaunch(CMD, "list", "directio", "input", "-v",
                 "vanilla.perf.average.sort");
     }
 
     /**
-     * {@code info.sh list windgate-*}.
+     * {@code info.sh list directio output}.
+     */
+    @Test
+    public void info_list_directio_output() {
+        framework.withLaunch(CMD, "list", "directio", "output", "-v",
+                "vanilla.perf.average.sort");
+    }
+
+    /**
+     * {@code info.sh list windgate}.
      */
     @Test
     public void info_list_windgate() {
-        checkInfo();
-        framework.withLaunch("tools/bin/info.sh", "list", "windgate-output", "-v",
+        framework.withLaunch(CMD, "list", "windgate");
+    }
+
+    /**
+     * {@code info.sh list windgate input}.
+     */
+    @Test
+    public void info_list_windgate_input() {
+        framework.withLaunch(CMD, "list", "windgate", "input", "-v",
                 "vanilla.wg.perf.average.sort");
     }
 
     /**
-     * {@code info.sh draw batch}.
+     * {@code info.sh list windgate output}.
+     */
+    @Test
+    public void info_list_windgate_output() {
+        framework.withLaunch(CMD, "list", "windgate", "output", "-v",
+                "vanilla.wg.perf.average.sort");
+    }
+
+    /**
+     * {@code info.sh draw}.
+     */
+    @Test
+    public void info_draw() {
+        framework.withLaunch(CMD, "draw");
+    }
+
+    /**
+     * {@code info.sh draw jobflow}.
      */
     @Test
     public void info_draw_jobflow() {
-        checkInfo();
-        framework.withLaunch("tools/bin/info.sh", "draw", "jobflow", "-a",
+        framework.withLaunch(CMD, "draw", "jobflow", "-v",
                 "vanilla.perf.average.sort");
     }
 
     /**
-     * {@code info.sh draw batch}.
+     * {@code info.sh draw plan}.
      */
     @Test
     public void info_draw_plan() {
-        checkInfo();
-        framework.withLaunch("tools/bin/info.sh", "draw", "plan", "-a",
+        framework.withLaunch(CMD, "draw", "plan", "-v",
                 "vanilla.perf.average.sort");
     }
 
@@ -144,14 +185,7 @@ public class ToolsInfoTest {
      */
     @Test
     public void info_draw_operator() {
-        checkInfo();
-        framework.withLaunch("tools/bin/info.sh", "draw", "operator", "-a",
+        framework.withLaunch(CMD, "draw", "operator", "-v",
                 "vanilla.perf.average.sort");
-    }
-
-    private static void checkInfo() {
-        Assume.assumeThat(
-                framework.find("batchapps/vanilla.perf.average.sort/etc/batch-info.json"),
-                is(not(Optional.empty())));
     }
 }

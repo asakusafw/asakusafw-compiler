@@ -22,9 +22,13 @@ import java.util.Arrays;
 
 import org.junit.Test;
 
+import com.asakusafw.info.directio.DirectFileInputInfo;
+import com.asakusafw.info.directio.DirectFileIoAttribute;
+import com.asakusafw.info.directio.DirectFileOutputInfo;
 import com.asakusafw.lang.compiler.extension.directio.DirectFileInputModel;
 import com.asakusafw.lang.compiler.extension.directio.DirectFileIoConstants;
 import com.asakusafw.lang.compiler.extension.directio.DirectFileOutputModel;
+import com.asakusafw.lang.compiler.info.MockAttributeCollectorContext;
 import com.asakusafw.lang.compiler.mapreduce.testing.mock.MockData;
 import com.asakusafw.lang.compiler.mapreduce.testing.mock.MockDataFormat;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
@@ -35,10 +39,6 @@ import com.asakusafw.lang.compiler.model.graph.Jobflow;
 import com.asakusafw.lang.compiler.model.graph.OperatorGraph;
 import com.asakusafw.lang.compiler.model.info.ExternalInputInfo;
 import com.asakusafw.lang.compiler.model.info.ExternalOutputInfo;
-import com.asakusafw.lang.info.api.MockAttributeCollectorContext;
-import com.asakusafw.lang.info.directio.DirectFileInputInfo;
-import com.asakusafw.lang.info.directio.DirectFileIoAttribute;
-import com.asakusafw.lang.info.directio.DirectFileOutputInfo;
 import com.asakusafw.runtime.directio.DataFormat;
 import com.asakusafw.vocabulary.directio.DirectFileInputDescription;
 import com.asakusafw.vocabulary.directio.DirectFileOutputDescription;

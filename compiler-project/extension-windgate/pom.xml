@@ -18,14 +18,17 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.asakusafw.lang.info</groupId>
-      <artifactId>asakusa-info-api</artifactId>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>asakusa-compiler-info</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.asakusafw.lang.info</groupId>
+      <groupId>com.asakusafw.info</groupId>
+      <artifactId>asakusa-info-model</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.asakusafw.info</groupId>
       <artifactId>asakusa-info-windgate</artifactId>
-      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>com.asakusafw</groupId>

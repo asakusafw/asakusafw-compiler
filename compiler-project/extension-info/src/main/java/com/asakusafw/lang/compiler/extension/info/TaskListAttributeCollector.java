@@ -20,12 +20,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.asakusafw.info.task.TaskInfo;
+import com.asakusafw.info.task.TaskListAttribute;
 import com.asakusafw.lang.compiler.api.reference.CommandTaskReference;
 import com.asakusafw.lang.compiler.api.reference.JobflowReference;
 import com.asakusafw.lang.compiler.api.reference.TaskReference;
-import com.asakusafw.lang.info.api.AttributeCollector;
-import com.asakusafw.lang.info.task.TaskInfo;
-import com.asakusafw.lang.info.task.TaskListAttribute;
+import com.asakusafw.lang.compiler.info.AttributeCollector;
 
 /**
  * Collects {@link TaskListAttribute}.

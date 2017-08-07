@@ -31,8 +31,13 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>com.asakusafw</groupId>
-      <artifactId>asakusa-hive-info</artifactId>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>asakusa-compiler-info</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.asakusafw.info</groupId>
+      <artifactId>asakusa-info-hive</artifactId>
     </dependency>
     <dependency>
       <groupId>com.asakusafw</groupId>

@@ -24,12 +24,12 @@ import java.util.regex.Pattern;
 
 import org.junit.Test;
 
+import com.asakusafw.info.ParameterInfo;
+import com.asakusafw.info.ParameterListAttribute;
+import com.asakusafw.lang.compiler.info.MockAttributeCollectorContext;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.graph.Batch;
 import com.asakusafw.lang.compiler.model.info.BatchInfo;
-import com.asakusafw.lang.info.ParameterInfo;
-import com.asakusafw.lang.info.ParameterListAttribute;
-import com.asakusafw.lang.info.api.MockAttributeCollectorContext;
 
 /**
  * Test for {@link ParameterListAttributeCollector}.

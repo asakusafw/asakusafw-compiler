@@ -23,8 +23,6 @@ import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
 
-import com.asakusafw.gradle.plugins.AsakusafwOrganizerPluginConvention
-
 /**
  * Test for {@link AsakusaLangOrganizerPlugin}.
  */
@@ -51,20 +49,5 @@ class AsakusaLangOrganizerPluginTest {
     void base() {
         assert project.plugins.hasPlugin('asakusafw-organizer') != null
         assert project.plugins.hasPlugin(AsakusaLangBasePlugin) != null
-    }
-
-    /**
-     * test for {@code tasks.attachComponentLang_*}.
-     */
-    @Test
-    void tasks_attachComponentLang() {
-        assert project.tasks.findByName('attachComponentLangTools_dev') != null
-        assert project.tasks.findByName('attachComponentLangTools_prod') != null
-
-        assert project.tasks.findByName('attachComponentLangTools_testing') == null
-        project.asakusafwOrganizer.profiles.testing {
-            // ok
-        }
-        assert project.tasks.findByName('attachComponentLangTools_testing') != null
     }
 }

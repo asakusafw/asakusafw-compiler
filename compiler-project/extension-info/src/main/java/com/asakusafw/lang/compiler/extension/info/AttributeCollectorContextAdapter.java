@@ -25,17 +25,17 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import com.asakusafw.info.Attribute;
 import com.asakusafw.lang.compiler.api.CompilerOptions;
 import com.asakusafw.lang.compiler.common.Location;
 import com.asakusafw.lang.compiler.core.BatchCompiler;
 import com.asakusafw.lang.compiler.core.basic.JobflowPackager;
+import com.asakusafw.lang.compiler.info.AttributeCollector;
 import com.asakusafw.lang.compiler.model.info.JobflowInfo;
 import com.asakusafw.lang.compiler.packaging.FileContainer;
-import com.asakusafw.lang.info.Attribute;
-import com.asakusafw.lang.info.api.AttributeCollector;
 
 /**
- * An adapter of {@link com.asakusafw.lang.info.api.AttributeCollector.Context}.
+ * An adapter of {@link com.asakusafw.lang.compiler.info.AttributeCollector.Context}.
  * @since 0.4.1
  */
 class AttributeCollectorContextAdapter implements AttributeCollector.Context {

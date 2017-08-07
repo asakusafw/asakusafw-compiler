@@ -15,8 +15,8 @@
  */
 package com.asakusafw.lang.compiler.extension.hive.testing;
 
-import com.asakusafw.directio.hive.info.FieldType.TypeName;
-import com.asakusafw.directio.hive.info.TableInfo;
+import com.asakusafw.info.hive.TableInfo;
+import com.asakusafw.info.hive.FieldType.TypeName;
 import com.asakusafw.runtime.directio.DataFormat;
 
 @SuppressWarnings("javadoc")

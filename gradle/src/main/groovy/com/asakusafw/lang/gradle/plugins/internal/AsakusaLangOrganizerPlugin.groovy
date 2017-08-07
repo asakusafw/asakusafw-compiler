@@ -68,9 +68,7 @@ class AsakusaLangOrganizerPlugin implements Plugin<Project> {
     }
 
     private void configureTasks() {
-        defineFacadeTasks([
-            attachComponentLangTools : 'Attaches Asakusa Language tools to assemblies.',
-        ])
+        // no tasks
     }
 
     private void defineFacadeTasks(Map<String, String> taskMap) {
