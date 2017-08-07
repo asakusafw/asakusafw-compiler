@@ -14,7 +14,21 @@
 # limitations under the License.
 #
 
-_CLASSPATH+=("$ASAKUSA_BATCHAPPS_HOME/$_OPT_BATCH_ID/lib/jobflow-${_OPT_FLOW_ID}.jar")
+_JOBFLOW_LIB="$ASAKUSA_BATCHAPPS_HOME/${_OPT_BATCH_ID:-__MISSING__}/lib/jobflow-${_OPT_FLOW_ID}.jar"
+_BATCH_USER_LIBS="$ASAKUSA_BATCHAPPS_HOME/${_OPT_BATCH_ID:-__MISSING__}/usr/lib"
+
+if [ -e "$_JOBFLOW_LIB" ]
+then
+    _CLASSPATH+=("$_JOBFLOW_LIB")
+fi
+
+if [ -d "$_BATCH_USER_LIBS" ]
+then
+    for f in $(ls "$_BATCH_USER_LIBS")
+    do
+        _CLASSPATH+=("$_BATCH_USER_LIBS/$f")
+    done
+fi
 
 if [ -d "$_ROOT/conf" ]
 then
@@ -29,11 +43,11 @@ then
     done
 fi
 
-if [ -d "$_ROOT/lib/hadoop" ]
+if [ -d "$ASAKUSA_HOME/ext/lib" ]
 then
-    for f in $(ls "$_ROOT/lib/hadoop")
+    for f in $(ls "$ASAKUSA_HOME/ext/lib")
     do
-        _CLASSPATH+=("$_ROOT/lib/hadoop/$f")
+        _CLASSPATH+=("$ASAKUSA_HOME/ext/lib/$f")
     done
 fi
 
@@ -42,22 +56,5 @@ then
     for f in $(ls "$ASAKUSA_HOME/core/lib")
     do
         _CLASSPATH+=("$ASAKUSA_HOME/core/lib/$f")
-    done
-fi
-
-if [ "$_OPT_BATCH_ID" != "" -a -d "$ASAKUSA_BATCHAPPS_HOME/$_OPT_BATCH_ID/usr/lib" ]
-then
-    _OPT_LIBRARIES_PATH="$ASAKUSA_BATCHAPPS_HOME/$_OPT_BATCH_ID/usr/lib"
-    for f in $(ls "$_OPT_LIBRARIES_PATH")
-    do
-        _CLASSPATH+=("$_OPT_LIBRARIES_PATH/$f")
-    done
-fi
-
-if [ -d "$ASAKUSA_HOME/ext/lib" ]
-then
-    for f in $(ls "$ASAKUSA_HOME/ext/lib")
-    do
-        _CLASSPATH+=("$ASAKUSA_HOME/ext/lib/$f")
     done
 fi

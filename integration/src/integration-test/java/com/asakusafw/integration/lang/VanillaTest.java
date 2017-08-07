@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.junit.Assume;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -176,12 +175,6 @@ public class VanillaTest {
     @Test
     public void yaess_windgate() {
         AsakusaProject project = provider.newInstance("prj");
-
-        // FIXME: WindGate always requires hadoop command
-        Assume.assumeThat(
-                "WindGate always requires hadoop command",
-                project.environment("HADOOP_CMD"),
-                is(notNullValue()));
 
         project.gradle("attachVanillaBatchapps", "installAsakusafw");
 
