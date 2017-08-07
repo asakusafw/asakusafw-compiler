@@ -87,6 +87,10 @@ class AsakusaLangSdkPlugin implements Plugin<Project> {
                         asakusaLangCommon "com.asakusafw.lang.compiler:asakusa-compiler-extension-hive:${base.featureVersion}"
                         asakusaLangCommon "com.asakusafw.info:asakusa-info-hive:${base.coreVersion}"
                     }
+                    if (features.incubating) {
+                        asakusaLangCommon "com.asakusafw.lang.compiler:asakusa-compiler-extension-workflow:${base.featureVersion}"
+                        asakusaLangCommon "com.asakusafw.workflow:asakusa-workflow-model:${base.coreVersion}"
+                    }
                 }
             }
         }

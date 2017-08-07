@@ -13,18 +13,18 @@
 
   <dependencies>
     <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>asakusa-vanilla-test-common</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>com.asakusafw.vanilla.runtime</groupId>
       <artifactId>asakusa-vanilla-client</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.asakusafw.vanilla.compiler</groupId>
-      <artifactId>asakusa-vanilla-compiler-common</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.asakusafw</groupId>
-      <artifactId>asakusa-test-inprocess</artifactId>
+      <groupId>com.asakusafw.workflow</groupId>
+      <artifactId>asakusa-workflow-executor</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.hadoop</groupId>
@@ -47,6 +47,11 @@
       <artifactId>asakusa-runtime-configuration</artifactId>
       <version>${asakusafw.version}</version>
       <classifier>tests</classifier>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.asakusafw</groupId>
+      <artifactId>simple-graph</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>

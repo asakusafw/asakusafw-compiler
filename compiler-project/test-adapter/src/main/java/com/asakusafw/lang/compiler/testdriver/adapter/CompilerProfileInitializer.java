@@ -25,7 +25,7 @@ import com.asakusafw.testdriver.compiler.CompilerConfiguration;
 /**
  * Initializes {@link CompilerProfile} for Asakusa DSL TestKit.
  * @since 0.8.0
- * @since 0.9.0
+ * @since 0.10.0
  */
 @FunctionalInterface
 public interface CompilerProfileInitializer {
@@ -37,6 +37,15 @@ public interface CompilerProfileInitializer {
      */
     default Collection<Location> getLauncherPaths() {
         return Collections.emptySet();
+    }
+
+    /**
+     * Returns a collector of task attributes.
+     * @return task attribute collector, or {@code null} if it is not defined
+     * @since 0.10.0
+     */
+    default TaskAttributeCollector getTaskAttributeCollector() {
+        return (jobflow, task) -> Collections.emptySet();
     }
 
     /**

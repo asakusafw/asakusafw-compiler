@@ -20,6 +20,7 @@ import java.util.Collection;
 
 import com.asakusafw.lang.compiler.common.Location;
 import com.asakusafw.lang.compiler.testdriver.adapter.CompilerProfileInitializer;
+import com.asakusafw.lang.compiler.testdriver.adapter.TaskAttributeCollector;
 import com.asakusafw.lang.compiler.tester.CompilerProfile;
 import com.asakusafw.testdriver.compiler.CompilerConfiguration;
 import com.asakusafw.vanilla.compiler.common.VanillaTask;
@@ -33,6 +34,11 @@ public class VanillaCompilerProfileInitializer implements CompilerProfileInitial
     @Override
     public Collection<Location> getLauncherPaths() {
         return Arrays.asList(VanillaTask.PATH_COMMAND);
+    }
+
+    @Override
+    public TaskAttributeCollector getTaskAttributeCollector() {
+        return new VanillaTaskAttributeCollector();
     }
 
     @Override

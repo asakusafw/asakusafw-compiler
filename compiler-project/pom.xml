@@ -50,6 +50,7 @@
     <module>extension-test-moderator</module>
     <module>extension-trace</module>
     <module>extension-info</module>
+    <module>extension-workflow</module>
 
     <!-- testing utilities -->
     <module>common-testing</module>

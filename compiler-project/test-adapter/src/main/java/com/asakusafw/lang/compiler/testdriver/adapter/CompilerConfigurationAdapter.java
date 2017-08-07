@@ -25,23 +25,29 @@ import java.util.ServiceLoader;
 import java.util.Set;
 
 import com.asakusafw.lang.compiler.analyzer.builtin.LoggingOperatorRemover;
+import com.asakusafw.lang.compiler.api.reference.TaskReference;
 import com.asakusafw.lang.compiler.common.Location;
 import com.asakusafw.lang.compiler.core.basic.JobflowPackager;
 import com.asakusafw.lang.compiler.extension.trace.TraceOperatorWeaver;
 import com.asakusafw.lang.compiler.packaging.ResourceUtil;
 import com.asakusafw.lang.compiler.tester.CompilerProfile;
 import com.asakusafw.lang.compiler.tester.CompilerTester;
+import com.asakusafw.lang.compiler.tester.JobflowArtifact;
+import com.asakusafw.lang.utils.common.Optionals;
 import com.asakusafw.testdriver.compiler.basic.BasicCompilerConfiguration;
 import com.asakusafw.trace.io.TraceSettingSerializer;
 import com.asakusafw.trace.model.TraceSetting;
 import com.asakusafw.trace.model.TraceSettingList;
 import com.asakusafw.vocabulary.operator.Logging;
+import com.asakusafw.workflow.model.basic.BasicTaskInfo;
 
 class CompilerConfigurationAdapter extends BasicCompilerConfiguration {
 
     private final List<CompilerProfile.Edit> edits = new ArrayList<>();
 
     private final Set<Location> asakusaLauncherPaths = new HashSet<>();
+
+    private final List<TaskAttributeCollector> taskAttributeCollectors = new ArrayList<>();
 
     public void withDefaults() {
         withClassLoader(getClass().getClassLoader());
@@ -57,6 +63,12 @@ class CompilerConfigurationAdapter extends BasicCompilerConfiguration {
 
     public boolean isAsakusaLauncher(Location path) {
         return asakusaLauncherPaths.contains(path);
+    }
+
+    public void addTaskAttributes(JobflowArtifact jobflow, TaskReference task, BasicTaskInfo target) {
+        taskAttributeCollectors.stream()
+                .flatMap(it -> it.collect(jobflow, task).stream())
+                .forEach(target::addAttribute);
     }
 
     public CompilerTester start(Class<?> target) throws IOException {
@@ -100,6 +112,7 @@ class CompilerConfigurationAdapter extends BasicCompilerConfiguration {
         for (CompilerProfileInitializer initializer : ServiceLoader.load(CompilerProfileInitializer.class, cl)) {
             initializer.initialize(profile, this);
             asakusaLauncherPaths.addAll(initializer.getLauncherPaths());
+            Optionals.of(initializer.getTaskAttributeCollector()).ifPresent(taskAttributeCollectors::add);
         }
 
         return profile.build();
