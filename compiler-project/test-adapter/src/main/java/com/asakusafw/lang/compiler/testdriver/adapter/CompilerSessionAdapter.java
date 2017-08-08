@@ -25,7 +25,10 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import com.asakusafw.lang.compiler.api.reference.CommandTaskReference;
 import com.asakusafw.lang.compiler.api.reference.JobflowReference;
@@ -44,6 +47,7 @@ import com.asakusafw.lang.compiler.model.info.BatchInfo;
 import com.asakusafw.lang.compiler.model.info.ExternalInputInfo;
 import com.asakusafw.lang.compiler.model.info.ExternalOutputInfo;
 import com.asakusafw.lang.compiler.model.info.JobflowInfo;
+import com.asakusafw.lang.compiler.parameter.ImplicitParameterList;
 import com.asakusafw.lang.compiler.tester.BatchArtifact;
 import com.asakusafw.lang.compiler.tester.CompilerTester;
 import com.asakusafw.lang.compiler.tester.ExternalPortMap;
@@ -69,6 +73,8 @@ import com.asakusafw.workflow.model.CommandTaskInfo.ConfigurationResolver;
 import com.asakusafw.workflow.model.CommandToken;
 import com.asakusafw.workflow.model.DeleteTaskInfo;
 import com.asakusafw.workflow.model.TaskInfo;
+import com.asakusafw.workflow.model.attribute.ParameterInfo;
+import com.asakusafw.workflow.model.attribute.ParameterListAttribute;
 import com.asakusafw.workflow.model.basic.BasicCommandTaskInfo;
 import com.asakusafw.workflow.model.basic.BasicDeleteTaskInfo;
 import com.asakusafw.workflow.model.basic.BasicHadoopTaskInfo;
@@ -98,7 +104,7 @@ class CompilerSessionAdapter implements CompilerSession {
         try (CompilerTester tester = configuration.start(batchClass)) {
             Batch batch = tester.analyzeBatch(batchClass);
             BatchArtifact artifact = tester.compile(batch);
-            return convert(artifact, escape(tester, artifact.getReference()));
+            return convert(artifact, batch, escape(tester, artifact.getReference()));
         } catch (DiagnosticException e) {
             throw new IOException(e);
         }
@@ -109,7 +115,7 @@ class CompilerSessionAdapter implements CompilerSession {
         try (CompilerTester tester = configuration.start(jobflowClass)) {
             Jobflow jobflow = tester.analyzeJobflow(jobflowClass);
             JobflowArtifact artifact = tester.compile(jobflow);
-            return convert(artifact, escape(tester, artifact.getBatch()));
+            return convert(artifact, jobflow, escape(tester, artifact.getBatch()));
         } catch (DiagnosticException e) {
             throw new IOException(e);
         }
@@ -129,7 +135,7 @@ class CompilerSessionAdapter implements CompilerSession {
             Jobflow jobflow = new Jobflow(info, analyzed);
             JobflowArtifact artifact = tester.compile(jobflow);
             artifact.getReference().putAttribute(FlowGraph.class, graph);
-            return convert(artifact, escape(tester, artifact.getBatch()));
+            return convert(artifact, jobflow, escape(tester, artifact.getBatch()));
         } catch (DiagnosticException e) {
             throw new IOException(e);
         }
@@ -143,7 +149,10 @@ class CompilerSessionAdapter implements CompilerSession {
         return destination;
     }
 
-    private ArtifactMirror convert(BatchArtifact artifact, File outputDirectory) throws IOException {
+    private ArtifactMirror convert(
+            BatchArtifact artifact,
+            Batch dsl,
+            File outputDirectory) throws IOException {
         Map<JobflowReference, BasicJobflowMirror> elements = new LinkedHashMap<>();
         for (JobflowArtifact a : artifact.getJobflows()) {
             BasicJobflowMirror jobflow = toJobflowMirror(a);
@@ -157,14 +166,41 @@ class CompilerSessionAdapter implements CompilerSession {
                 jobflow.addBlocker(elements.get(blocker));
             }
         }
+        batch.addAttribute(convert(dsl, ImplicitParameterList.of(dsl)));
         return new BasicArtifactMirror(batch, outputDirectory);
     }
 
-    private ArtifactMirror convert(JobflowArtifact artifact, File outputDirectory) throws IOException {
+    private ArtifactMirror convert(
+            JobflowArtifact artifact,
+            Jobflow dsl,
+            File outputDirectory) throws IOException {
         BasicJobflowMirror jobflow = toJobflowMirror(artifact);
         BasicBatchMirror batch = new BasicBatchMirror(artifact.getBatch().getBatchId());
         batch.addElement(jobflow);
+        batch.addAttribute(new ParameterListAttribute(
+                ImplicitParameterList.of(dsl).getParameters().stream()
+                    .map(CompilerSessionAdapter::convert)
+                    .collect(Collectors.toList()),
+                false));
         return new BasicArtifactMirror(batch, outputDirectory);
+    }
+
+    private static ParameterListAttribute convert(BatchInfo info, ImplicitParameterList parameters) {
+        return new ParameterListAttribute(
+                parameters.merge(info.getParameters()).stream()
+                        .map(CompilerSessionAdapter::convert)
+                        .collect(Collectors.toList()),
+                info.getAttributes().contains(BatchInfo.Attribute.STRICT_PARAMETERS));
+    }
+
+    private static ParameterInfo convert(BatchInfo.Parameter p) {
+        return new ParameterInfo(
+                p.getKey(),
+                p.getComment(),
+                p.isMandatory(),
+                Optional.ofNullable(p.getPattern())
+                    .map(Pattern::pattern)
+                    .orElse(null));
     }
 
     private BasicJobflowMirror toJobflowMirror(JobflowArtifact artifact) throws IOException {

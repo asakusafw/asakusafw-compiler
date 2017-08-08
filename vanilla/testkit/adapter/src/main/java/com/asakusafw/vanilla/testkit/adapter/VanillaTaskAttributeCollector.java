@@ -59,6 +59,7 @@ class VanillaTaskAttributeCollector implements TaskAttributeCollector {
     private static boolean isSupported(TaskReference task) {
         return task instanceof CommandTaskReference
                 && Objects.equal(task.getModuleName(), VanillaTask.MODULE_NAME)
+                && Objects.equal(((CommandTaskReference) task).getProfileName(), VanillaTask.PROFILE_NAME)
                 && Objects.equal(((CommandTaskReference) task).getCommand(), VanillaTask.PATH_COMMAND);
     }
 

@@ -22,6 +22,7 @@ import com.asakusafw.info.Attribute;
 import com.asakusafw.lang.compiler.api.CompilerOptions;
 import com.asakusafw.lang.compiler.api.reference.BatchReference;
 import com.asakusafw.lang.compiler.api.reference.JobflowReference;
+import com.asakusafw.lang.compiler.common.ExtensionContainer;
 import com.asakusafw.lang.compiler.common.Location;
 import com.asakusafw.lang.compiler.model.graph.Batch;
 import com.asakusafw.lang.compiler.model.graph.Jobflow;
@@ -74,9 +75,9 @@ public interface AttributeCollector {
     /**
      * Represents a context object for {@link AttributeCollector}.
      * @since 0.4.1
-     * @version 0.4.2
+     * @version 0.5.0
      */
-    public interface Context {
+    public interface Context extends ExtensionContainer {
 
         /**
          * Returns the compiler options.
@@ -104,5 +105,10 @@ public interface AttributeCollector {
          * @since 0.4.2
          */
         InputStream findResourceFile(Location location) throws IOException;
+
+        @Override
+        default <T> T getExtension(Class<T> extension) {
+            return null;
+        }
     }
 }

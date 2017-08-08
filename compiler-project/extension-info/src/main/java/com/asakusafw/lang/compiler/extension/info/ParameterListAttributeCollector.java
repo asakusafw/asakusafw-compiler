@@ -15,6 +15,7 @@
  */
 package com.asakusafw.lang.compiler.extension.info;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -24,17 +25,24 @@ import com.asakusafw.info.ParameterListAttribute;
 import com.asakusafw.lang.compiler.info.AttributeCollector;
 import com.asakusafw.lang.compiler.model.graph.Batch;
 import com.asakusafw.lang.compiler.model.info.BatchInfo;
+import com.asakusafw.lang.compiler.parameter.ImplicitParameterList;
 
 /**
  * Collects {@link ParameterListAttribute}.
  * @since 0.4.1
+ * @version 0.5.0
  */
 public class ParameterListAttributeCollector implements AttributeCollector {
 
     @Override
     public void process(Context context, Batch batch) {
+        Collection<BatchInfo.Parameter> parameters = Optional
+                .ofNullable(context.getExtension(ImplicitParameterList.class))
+                .map(it -> it.merge(batch.getParameters()))
+                .orElseGet(batch::getParameters);
+
         context.putAttribute(new ParameterListAttribute(
-                batch.getParameters().stream()
+                parameters.stream()
                     .map(p -> new ParameterInfo(
                             p.getKey(),
                             p.getComment(),

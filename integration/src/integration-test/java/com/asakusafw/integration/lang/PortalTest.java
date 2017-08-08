@@ -26,11 +26,11 @@ import com.asakusafw.utils.gradle.Bundle;
 import com.asakusafw.utils.gradle.ContentsConfigurator;
 
 /**
- * Test for {@code tools/bin/info.sh}.
+ * Test for {@code bin/asakusafw.sh}.
  */
-public class ToolsInfoTest {
+public class PortalTest {
 
-    private static final String CMD = "tools/bin/info.sh";
+    private static final String CMD = "bin/asakusafw.sh";
 
     /**
      * project provider.
@@ -52,7 +52,7 @@ public class ToolsInfoTest {
     static Bundle framework;
 
     /**
-     * {@code info.sh}.
+     * {@code asakusafw.sh}.
      */
     @Test
     public void info() {
@@ -60,7 +60,7 @@ public class ToolsInfoTest {
     }
 
     /**
-     * {@code info.sh list}.
+     * {@code asakusafw.sh list}.
      */
     @Test
     public void info_list() {
@@ -68,7 +68,7 @@ public class ToolsInfoTest {
     }
 
     /**
-     * {@code info.sh list batch}.
+     * {@code asakusafw.sh list batch}.
      */
     @Test
     public void info_list_batch() {
@@ -76,7 +76,7 @@ public class ToolsInfoTest {
     }
 
     /**
-     * {@code info.sh list jobflow}.
+     * {@code asakusafw.sh list jobflow}.
      */
     @Test
     public void info_list_jobflow() {
@@ -85,7 +85,7 @@ public class ToolsInfoTest {
     }
 
     /**
-     * {@code info.sh list plan}.
+     * {@code asakusafw.sh list plan}.
      */
     @Test
     public void info_list_plan() {
@@ -94,7 +94,7 @@ public class ToolsInfoTest {
     }
 
     /**
-     * {@code info.sh list operator}.
+     * {@code asakusafw.sh list operator}.
      */
     @Test
     public void info_list_operator() {
@@ -103,7 +103,7 @@ public class ToolsInfoTest {
     }
 
     /**
-     * {@code info.sh list directio}.
+     * {@code asakusafw.sh list directio}.
      */
     @Test
     public void info_list_directio() {
@@ -111,7 +111,7 @@ public class ToolsInfoTest {
     }
 
     /**
-     * {@code info.sh list directio input}.
+     * {@code asakusafw.sh list directio input}.
      */
     @Test
     public void info_list_directio_input() {
@@ -120,7 +120,7 @@ public class ToolsInfoTest {
     }
 
     /**
-     * {@code info.sh list directio output}.
+     * {@code asakusafw.sh list directio output}.
      */
     @Test
     public void info_list_directio_output() {
@@ -129,7 +129,7 @@ public class ToolsInfoTest {
     }
 
     /**
-     * {@code info.sh list windgate}.
+     * {@code asakusafw.sh list windgate}.
      */
     @Test
     public void info_list_windgate() {
@@ -137,7 +137,7 @@ public class ToolsInfoTest {
     }
 
     /**
-     * {@code info.sh list windgate input}.
+     * {@code asakusafw.sh list windgate input}.
      */
     @Test
     public void info_list_windgate_input() {
@@ -146,7 +146,7 @@ public class ToolsInfoTest {
     }
 
     /**
-     * {@code info.sh list windgate output}.
+     * {@code asakusafw.sh list windgate output}.
      */
     @Test
     public void info_list_windgate_output() {
@@ -155,7 +155,7 @@ public class ToolsInfoTest {
     }
 
     /**
-     * {@code info.sh draw}.
+     * {@code asakusafw.sh draw}.
      */
     @Test
     public void info_draw() {
@@ -163,7 +163,7 @@ public class ToolsInfoTest {
     }
 
     /**
-     * {@code info.sh draw jobflow}.
+     * {@code asakusafw.sh draw jobflow}.
      */
     @Test
     public void info_draw_jobflow() {
@@ -172,7 +172,7 @@ public class ToolsInfoTest {
     }
 
     /**
-     * {@code info.sh draw plan}.
+     * {@code asakusafw.sh draw plan}.
      */
     @Test
     public void info_draw_plan() {
@@ -181,7 +181,7 @@ public class ToolsInfoTest {
     }
 
     /**
-     * {@code info.sh draw operator}.
+     * {@code asakusafw.sh draw operator}.
      */
     @Test
     public void info_draw_operator() {

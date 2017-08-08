@@ -64,15 +64,19 @@ class AsakusaLangSdkPlugin implements Plugin<Project> {
                     asakusaLangCommon "com.asakusafw.lang.compiler:asakusa-compiler-cli:${base.featureVersion}"
                     asakusaLangCommon "com.asakusafw.lang.compiler:asakusa-compiler-extension-cleanup:${base.featureVersion}"
                     asakusaLangCommon "com.asakusafw.lang.compiler:asakusa-compiler-extension-redirector:${base.featureVersion}"
-                    asakusaLangCommon "com.asakusafw.lang.compiler:asakusa-compiler-extension-yaess:${base.featureVersion}"
                     asakusaLangCommon "com.asakusafw.lang.compiler:asakusa-compiler-extension-info:${base.featureVersion}"
+                    asakusaLangCommon "com.asakusafw.lang.compiler:asakusa-compiler-extension-workflow:${base.featureVersion}"
                     asakusaLangCommon "com.asakusafw:simple-graph:${base.coreVersion}"
                     asakusaLangCommon "com.asakusafw:java-dom:${base.coreVersion}"
-                    asakusaLangCommon "com.asakusafw:asakusa-yaess-core:${base.coreVersion}"
                     asakusaLangCommon "com.asakusafw.info:asakusa-info-model:${base.coreVersion}"
+                    asakusaLangCommon "com.asakusafw.workflow:asakusa-workflow-model:${base.coreVersion}"
                     asakusaLangCompiler "com.asakusafw:asakusa-dsl-vocabulary:${base.coreVersion}"
                     asakusaLangCompiler "com.asakusafw:asakusa-runtime:${base.coreVersion}"
 
+                    if (features.yaess) {
+                        asakusaLangCommon "com.asakusafw.lang.compiler:asakusa-compiler-extension-yaess:${base.featureVersion}"
+                        asakusaLangCommon "com.asakusafw:asakusa-yaess-core:${base.coreVersion}"
+                    }
                     if (features.directio) {
                         asakusaLangCommon "com.asakusafw.lang.compiler:asakusa-compiler-extension-directio:${base.featureVersion}"
                         asakusaLangCommon "com.asakusafw.info:asakusa-info-directio:${base.coreVersion}"
@@ -86,10 +90,6 @@ class AsakusaLangSdkPlugin implements Plugin<Project> {
                     if (features.hive) {
                         asakusaLangCommon "com.asakusafw.lang.compiler:asakusa-compiler-extension-hive:${base.featureVersion}"
                         asakusaLangCommon "com.asakusafw.info:asakusa-info-hive:${base.coreVersion}"
-                    }
-                    if (features.incubating) {
-                        asakusaLangCommon "com.asakusafw.lang.compiler:asakusa-compiler-extension-workflow:${base.featureVersion}"
-                        asakusaLangCommon "com.asakusafw.workflow:asakusa-workflow-model:${base.coreVersion}"
                     }
                 }
             }

@@ -22,6 +22,11 @@
       <artifactId>asakusa-compiler-info</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>asakusa-compiler-parameter</artifactId>
+      <version>${project.version}</version>
+    </dependency>
     <dependency> <!-- default implementation -->
       <groupId>${project.groupId}</groupId>
       <artifactId>asakusa-compiler-extension-operator</artifactId>

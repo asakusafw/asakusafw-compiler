@@ -21,6 +21,7 @@ import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -34,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.asakusafw.bridge.launch.LaunchConfigurationException;
+import com.asakusafw.lang.compiler.common.Location;
 import com.asakusafw.vanilla.client.VanillaLauncher;
 import com.asakusafw.vanilla.compiler.common.VanillaTask;
 import com.asakusafw.vanilla.testkit.common.VanillaTaskInfo;
@@ -81,7 +83,7 @@ public class InProcessVanillaTaskExecutor implements TaskExecutor {
 
     @Override
     public boolean isSupported(TaskExecutionContext context, TaskInfo task) {
-        VanillaTaskInfo info = task.findAttribute(VanillaTaskInfo.class).orElse(null);
+        VanillaTaskInfo info = getVanillaTaskInfo(task);
         if (info == null) {
             return false;
         }
@@ -164,6 +166,19 @@ public class InProcessVanillaTaskExecutor implements TaskExecutor {
         // add rest arguments
         results.addAll(rest);
         return results;
+    }
+
+    private static VanillaTaskInfo getVanillaTaskInfo(TaskInfo task) {
+        if ((task instanceof CommandTaskInfo) == false) {
+            return null;
+        }
+        return task.findAttribute(VanillaTaskInfo.class).orElseGet(() -> Optional.of(task)
+                .map(it -> (CommandTaskInfo) it)
+                .filter(it -> Objects.equals(it.getModuleName(), VanillaTask.MODULE_NAME))
+                .filter(it -> Objects.equals(it.getProfileName(), VanillaTask.PROFILE_NAME))
+                .filter(it -> Objects.equals(Location.of(it.getCommand()), VanillaTask.PATH_COMMAND))
+                .map(it -> new VanillaTaskInfo(EnumSet.allOf(VanillaTaskInfo.Requiremnt.class)))
+                .orElse(null));
     }
 
     private static List<String> toKeyValueOptions(String prefix, Map<String, String> pairs) {
