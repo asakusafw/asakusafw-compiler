@@ -21,16 +21,15 @@ import org.junit.ClassRule;
 import org.junit.Test;
 
 import com.asakusafw.integration.AsakusaConfigurator;
+import com.asakusafw.integration.AsakusaConstants;
 import com.asakusafw.integration.AsakusaProjectProvider;
 import com.asakusafw.utils.gradle.Bundle;
 import com.asakusafw.utils.gradle.ContentsConfigurator;
 
 /**
- * Test for {@code bin/asakusafw.sh}.
+ * Test for the portal command.
  */
 public class PortalTest {
-
-    private static final String CMD = "bin/asakusafw.sh";
 
     /**
      * project provider.
@@ -52,140 +51,148 @@ public class PortalTest {
     static Bundle framework;
 
     /**
-     * {@code asakusafw.sh}.
+     * bare portal command.
      */
     @Test
-    public void info() {
-        framework.withLaunch(CMD);
+    public void command() {
+        framework.withLaunch(AsakusaConstants.CMD_PORTAL);
     }
 
     /**
-     * {@code asakusafw.sh list}.
+     * {@code list}.
      */
     @Test
-    public void info_list() {
-        framework.withLaunch(CMD, "list");
+    public void list() {
+        framework.withLaunch(AsakusaConstants.CMD_PORTAL, "list");
     }
 
     /**
-     * {@code asakusafw.sh list batch}.
+     * {@code list batch}.
      */
     @Test
-    public void info_list_batch() {
-        framework.withLaunch(CMD, "list", "batch", "-v");
+    public void list_batch() {
+        framework.withLaunch(AsakusaConstants.CMD_PORTAL, "list", "batch", "-v");
     }
 
     /**
-     * {@code asakusafw.sh list jobflow}.
+     * {@code list jobflow}.
      */
     @Test
-    public void info_list_jobflow() {
-        framework.withLaunch(CMD, "list", "jobflow", "-v",
+    public void list_jobflow() {
+        framework.withLaunch(AsakusaConstants.CMD_PORTAL, "list", "jobflow", "-v",
                 "vanilla.perf.average.sort");
     }
 
     /**
-     * {@code asakusafw.sh list plan}.
+     * {@code list plan}.
      */
     @Test
-    public void info_list_plan() {
-        framework.withLaunch(CMD, "list", "plan", "-v",
+    public void list_plan() {
+        framework.withLaunch(AsakusaConstants.CMD_PORTAL, "list", "plan", "-v",
                 "vanilla.perf.average.sort");
     }
 
     /**
-     * {@code asakusafw.sh list operator}.
+     * {@code list operator}.
      */
     @Test
-    public void info_list_operator() {
-        framework.withLaunch(CMD, "list", "operator", "-v",
+    public void list_operator() {
+        framework.withLaunch(AsakusaConstants.CMD_PORTAL, "list", "operator", "-v",
                 "vanilla.perf.average.sort");
     }
 
     /**
-     * {@code asakusafw.sh list directio}.
+     * {@code list directio}.
      */
     @Test
-    public void info_list_directio() {
-        framework.withLaunch(CMD, "list", "directio");
+    public void list_directio() {
+        framework.withLaunch(AsakusaConstants.CMD_PORTAL, "list", "directio");
     }
 
     /**
-     * {@code asakusafw.sh list directio input}.
+     * {@code list directio input}.
      */
     @Test
-    public void info_list_directio_input() {
-        framework.withLaunch(CMD, "list", "directio", "input", "-v",
+    public void list_directio_input() {
+        framework.withLaunch(AsakusaConstants.CMD_PORTAL, "list", "directio", "input", "-v",
                 "vanilla.perf.average.sort");
     }
 
     /**
-     * {@code asakusafw.sh list directio output}.
+     * {@code list directio output}.
      */
     @Test
-    public void info_list_directio_output() {
-        framework.withLaunch(CMD, "list", "directio", "output", "-v",
+    public void list_directio_output() {
+        framework.withLaunch(AsakusaConstants.CMD_PORTAL, "list", "directio", "output", "-v",
                 "vanilla.perf.average.sort");
     }
 
     /**
-     * {@code asakusafw.sh list windgate}.
+     * {@code list windgate}.
      */
     @Test
-    public void info_list_windgate() {
-        framework.withLaunch(CMD, "list", "windgate");
+    public void list_windgate() {
+        framework.withLaunch(AsakusaConstants.CMD_PORTAL, "list", "windgate");
     }
 
     /**
-     * {@code asakusafw.sh list windgate input}.
+     * {@code list windgate input}.
      */
     @Test
-    public void info_list_windgate_input() {
-        framework.withLaunch(CMD, "list", "windgate", "input", "-v",
+    public void list_windgate_input() {
+        framework.withLaunch(AsakusaConstants.CMD_PORTAL, "list", "windgate", "input", "-v",
                 "vanilla.wg.perf.average.sort");
     }
 
     /**
-     * {@code asakusafw.sh list windgate output}.
+     * {@code list windgate output}.
      */
     @Test
-    public void info_list_windgate_output() {
-        framework.withLaunch(CMD, "list", "windgate", "output", "-v",
+    public void list_windgate_output() {
+        framework.withLaunch(AsakusaConstants.CMD_PORTAL, "list", "windgate", "output", "-v",
                 "vanilla.wg.perf.average.sort");
     }
 
     /**
-     * {@code asakusafw.sh draw}.
+     * {@code list hive}.
      */
     @Test
-    public void info_draw() {
-        framework.withLaunch(CMD, "draw");
+    public void list_hive() {
+        framework.withLaunch(AsakusaConstants.CMD_PORTAL, "hive");
     }
 
     /**
-     * {@code asakusafw.sh draw jobflow}.
+     * {@code draw}.
      */
     @Test
-    public void info_draw_jobflow() {
-        framework.withLaunch(CMD, "draw", "jobflow", "-v",
+    public void draw() {
+        framework.withLaunch(AsakusaConstants.CMD_PORTAL, "draw");
+    }
+
+    /**
+     * {@code draw jobflow}.
+     */
+    @Test
+    public void draw_jobflow() {
+        framework.withLaunch(AsakusaConstants.CMD_PORTAL, "draw", "jobflow", "-v",
                 "vanilla.perf.average.sort");
     }
 
     /**
-     * {@code asakusafw.sh draw plan}.
+     * {@code draw plan}.
      */
     @Test
-    public void info_draw_plan() {
-        framework.withLaunch(CMD, "draw", "plan", "-v",
+    public void draw_plan() {
+        framework.withLaunch(AsakusaConstants.CMD_PORTAL, "draw", "plan", "-v",
                 "vanilla.perf.average.sort");
     }
 
     /**
-     * {@code asakusafw.sh draw operator}.
+     * {@code draw operator}.
      */
     @Test
-    public void info_draw_operator() {
-        framework.withLaunch(CMD, "draw", "operator", "-v",
+    public void draw_operator() {
+        framework.withLaunch(AsakusaConstants.CMD_PORTAL, "draw", "operator", "-v",
                 "vanilla.perf.average.sort");
     }
 }
