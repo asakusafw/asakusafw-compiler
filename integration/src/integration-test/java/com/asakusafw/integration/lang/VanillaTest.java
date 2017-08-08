@@ -33,6 +33,7 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 import com.asakusafw.integration.AsakusaConfigurator;
+import com.asakusafw.integration.AsakusaConstants;
 import com.asakusafw.integration.AsakusaProject;
 import com.asakusafw.integration.AsakusaProjectProvider;
 import com.asakusafw.utils.gradle.Bundle;
@@ -158,7 +159,7 @@ public class VanillaTest {
     }
 
     /**
-     * {@code yaess-batch.sh}.
+     * YAESS.
      */
     @Test
     public void yaess() {
@@ -175,7 +176,7 @@ public class VanillaTest {
         });
 
         project.getFramework().withLaunch(
-                "yaess/bin/yaess-batch.sh", "vanilla.perf.average.sort",
+                AsakusaConstants.CMD_YAESS, "vanilla.perf.average.sort",
                 "-A", "input=input", "-A", "output=output");
 
         project.getContents().get("var/data/output", dir -> {
@@ -188,7 +189,7 @@ public class VanillaTest {
     }
 
     /**
-     * {@code yaess-batch.sh}.
+     * YAESS w/ WindGate tasks.
      */
     @Test
     public void yaess_windgate() {
@@ -207,7 +208,7 @@ public class VanillaTest {
         });
 
         project.getFramework().withLaunch(
-                "yaess/bin/yaess-batch.sh", "vanilla.wg.perf.average.sort",
+                AsakusaConstants.CMD_YAESS, "vanilla.wg.perf.average.sort",
                 "-A", "input=input.csv", "-A", "output=output.csv");
 
         project.getContents().get("var/windgate/output.csv", file -> {
@@ -218,10 +219,10 @@ public class VanillaTest {
     }
 
     /**
-     * {@code asakusafw.sh run}.
+     * {@code run}.
      */
     @Test
-    public void workflow() {
+    public void run() {
         AsakusaProject project = provider.newInstance("prj");
         project.gradle("attachVanillaBatchapps", "installAsakusafw");
 
@@ -235,7 +236,7 @@ public class VanillaTest {
         });
 
         project.getFramework().withLaunch(
-                "bin/asakusafw.sh", "run", "vanilla.perf.average.sort",
+                AsakusaConstants.CMD_PORTAL, "run", "vanilla.perf.average.sort",
                 "-Ainput=input", "-Aoutput=output");
 
         project.getContents().get("var/data/output", dir -> {
@@ -248,10 +249,10 @@ public class VanillaTest {
     }
 
     /**
-     * {@code asakusafw.sh run}.
+     * {@code run} w/ WindGate tasks.
      */
     @Test
-    public void workflow_windgate() {
+    public void run_windgate() {
         AsakusaProject project = provider.newInstance("prj");
 
         project.gradle("attachVanillaBatchapps", "installAsakusafw");
@@ -267,7 +268,7 @@ public class VanillaTest {
         });
 
         project.getFramework().withLaunch(
-                "bin/asakusafw.sh", "run", "vanilla.wg.perf.average.sort",
+                AsakusaConstants.CMD_PORTAL, "run", "vanilla.wg.perf.average.sort",
                 "-Ainput=input.csv", "-Aoutput=output.csv");
 
         project.getContents().get("var/windgate/output.csv", file -> {
