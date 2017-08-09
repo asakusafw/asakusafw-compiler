@@ -19,6 +19,7 @@ import org.gradle.api.InvalidUserDataException
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.artifacts.Configuration
+import org.gradle.api.file.FileCopyDetails
 
 import com.asakusafw.gradle.plugins.AsakusafwBaseExtension
 import com.asakusafw.gradle.plugins.AsakusafwBasePlugin
@@ -80,10 +81,12 @@ class AsakusaVanillaOrganizer extends AbstractOrganizer {
             AsakusaVanillaBaseExtension vanilla = AsakusaVanillaBasePlugin.get(project)
             createDependencies('asakusafw', [
                 VanillaDist : [
-                    "com.asakusafw.vanilla.runtime:asakusa-vanilla-assembly:${vanilla.featureVersion}:dist@jar"
+                    "com.asakusafw.vanilla.runtime:asakusa-vanilla-assembly:${vanilla.featureVersion}:dist@jar",
+                    "com.asakusafw.vanilla.runtime:asakusa-vanilla-bootstrap:${vanilla.featureVersion}:dist@jar",
                 ],
                 VanillaLib : [
                     "com.asakusafw.vanilla.runtime:asakusa-vanilla-assembly:${vanilla.featureVersion}:lib@jar",
+                    "com.asakusafw.vanilla.runtime:asakusa-vanilla-bootstrap:${vanilla.featureVersion}:exec@jar",
                     "ch.qos.logback:logback-classic:${base.logbackVersion}",
                 ],
                 VanillaHadoopLib : [
@@ -107,9 +110,17 @@ class AsakusaVanillaOrganizer extends AbstractOrganizer {
             Vanilla : {
                 into('.') {
                     extract configuration('asakusafwVanillaDist')
+                    process {
+                        filesMatching('**/vanilla/bin/execute') { FileCopyDetails f ->
+                            f.setMode(0755)
+                        }
+                    }
                 }
                 into('vanilla/lib') {
                     put configuration('asakusafwVanillaLib')
+                    process {
+                        rename(/(asakusa-vanilla-bootstrap)-.*-exec\.jar/, '$1.jar')
+                    }
                 }
             },
             VanillaHadoop : {

@@ -16,5 +16,6 @@
     <module>core</module>
     <module>client</module>
     <module>assembly</module>
+    <module>bootstrap</module>
   </modules>
 </project>

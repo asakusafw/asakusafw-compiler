@@ -19,7 +19,7 @@ import com.asakusafw.lang.compiler.common.Location;
 
 /**
  * Constants about Asakusa Vanilla tasks.
- * @since 0.4.0
+ * @since 0.5.0
  */
 public final class VanillaTask {
 
@@ -31,7 +31,13 @@ public final class VanillaTask {
     /**
      * The Vanilla bootstrap command path (relative from the Asakusa framework installation).
      */
-    public static final Location PATH_COMMAND = PATH_ASSEMBLY.append(Location.of("bin/execute.sh")); //$NON-NLS-1$
+    public static final Location PATH_COMMAND = PATH_ASSEMBLY.append(Location.of("bin/execute")); //$NON-NLS-1$
+
+    /**
+     * The Vanilla bootstrap command path for Windows platform (relative from the Asakusa framework installation).
+     * @since 0.5.0
+     */
+    public static final Location PATH_COMMAND_WINDOWS = PATH_ASSEMBLY.append(Location.of("bin/execute.cmd")); //$NON-NLS-1$
 
     /**
      * The Vanilla configuration directory path (relative from the Asakusa framework installation).

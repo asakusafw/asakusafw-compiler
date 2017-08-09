@@ -27,5 +27,6 @@
     <module>extension/counter</module>
     <module>extension/trace</module>
     <module>extension/wait</module>
+    <module>extension/windows</module>
   </modules>
 </project>
