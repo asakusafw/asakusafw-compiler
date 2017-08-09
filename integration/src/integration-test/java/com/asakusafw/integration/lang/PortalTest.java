@@ -158,7 +158,7 @@ public class PortalTest {
      */
     @Test
     public void list_hive() {
-        framework.withLaunch(AsakusaConstants.CMD_PORTAL, "hive");
+        framework.withLaunch(AsakusaConstants.CMD_PORTAL, "list", "hive");
     }
 
     /**
