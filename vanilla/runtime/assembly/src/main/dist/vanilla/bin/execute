@@ -170,7 +170,6 @@ then
     echo "        System Options: ${_APP_OPTIONS[@]}" 1>&2
     echo "  ASAKUSA_VANILLA_OPTS: $ASAKUSA_VANILLA_OPTS" 1>&2
     echo "          User Options: $@" 1>&2
-    echo "           Librarypath: ${_LIBRARYPATH[@]}" 1>&2
     echo "             Classpath: ${_CLASSPATH[@]}" 1>&2
     exit $_RET
 fi

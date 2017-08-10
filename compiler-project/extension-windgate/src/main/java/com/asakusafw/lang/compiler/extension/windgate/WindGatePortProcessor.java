@@ -69,9 +69,9 @@ public class WindGatePortProcessor
 
     static final Logger LOG = LoggerFactory.getLogger(WindGatePortProcessor.class);
 
-    static final Location CMD_PROCESS = Location.of("windgate/bin/process.sh"); //$NON-NLS-1$
+    static final Location CMD_PROCESS = Location.of("windgate/bin/process"); //$NON-NLS-1$
 
-    static final Location CMD_FINALIZE = Location.of("windgate/bin/finalize.sh"); //$NON-NLS-1$
+    static final Location CMD_FINALIZE = Location.of("windgate/bin/finalize"); //$NON-NLS-1$
 
     static final String OPT_IMPORT = "import"; //$NON-NLS-1$
 

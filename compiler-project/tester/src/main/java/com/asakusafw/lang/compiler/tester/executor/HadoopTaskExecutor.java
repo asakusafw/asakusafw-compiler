@@ -31,6 +31,7 @@ import com.asakusafw.lang.compiler.hadoop.HadoopTaskReference;
  */
 public class HadoopTaskExecutor implements TaskExecutor {
 
+    // FIXME replace with workflow
     private static final Location PATH_YAESS_HADOOP =
             Location.of("yaess-hadoop/libexec/hadoop-execute.sh"); //$NON-NLS-1$
 
