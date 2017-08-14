@@ -36,6 +36,7 @@ import com.asakusafw.integration.AsakusaConfigurator;
 import com.asakusafw.integration.AsakusaConstants;
 import com.asakusafw.integration.AsakusaProject;
 import com.asakusafw.integration.AsakusaProjectProvider;
+import com.asakusafw.integration.PlatformUtil;
 import com.asakusafw.utils.gradle.Bundle;
 import com.asakusafw.utils.gradle.ContentsConfigurator;
 
@@ -163,6 +164,8 @@ public class VanillaTest {
      */
     @Test
     public void yaess() {
+        PlatformUtil.skipIfWindows();
+
         AsakusaProject project = provider.newInstance("prj");
         project.gradle("attachVanillaBatchapps", "installAsakusafw");
 
@@ -193,6 +196,8 @@ public class VanillaTest {
      */
     @Test
     public void yaess_windgate() {
+        PlatformUtil.skipIfWindows();
+
         AsakusaProject project = provider.newInstance("prj");
 
         project.gradle("attachVanillaBatchapps", "installAsakusafw");
