@@ -117,17 +117,6 @@ fi
 import "$_ROOT/libexec/configure-classpath.sh"
 import "$_ROOT/libexec/configure-options.sh"
 
-echo "Starting Asakusa Vanilla:"
-echo "              Launcher: ${_EXEC[@]}"
-echo "              Batch ID: $_OPT_BATCH_ID"
-echo "               Flow ID: $_OPT_FLOW_ID"
-echo "       Batch Arguments: $_OPT_BATCH_ARGUMENTS"
-echo "          Execution ID: $_OPT_EXECUTION_ID"
-echo "           Application: $_OPT_APPLICATION"
-echo "  ASAKUSA_VANILLA_OPTS: $ASAKUSA_VANILLA_OPTS"
-echo "        System Options: ${_APP_OPTIONS[@]}"
-echo "          User Options: $@"
-
 if [ $_USE_HADOOP_CMD -eq 1 ]
 then
     export HADOOP_CLIENT_OPTS="$HADOOP_CLIENT_OPTS $ASAKUSA_VANILLA_OPTS"

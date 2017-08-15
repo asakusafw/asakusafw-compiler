@@ -18,6 +18,7 @@ package com.asakusafw.vanilla.client;
 /**
  * Constants of Asakusa Vanilla.
  * @since 0.4.0
+ * @version 0.5.0
  */
 public final class VanillaConstants {
 
@@ -30,6 +31,24 @@ public final class VanillaConstants {
      * The configuration key prefix of Hadoop settings ({@value}).
      */
     public static final String KEY_HADOOP_PREFIX = "hadoop.";
+
+    /**
+     * The environment variable name of Java launch options for Vanilla.
+     * @since 0.5.0
+     */
+    public static final String ENV_VANILLA_OPTIONS = "ASAKUSA_VANILLA_OPTS";
+
+    /**
+     * The environment variable name of engine launch options for Vanilla.
+     * @since 0.5.0
+     */
+    public static final String ENV_VANILLA_ARGUMENTS = "ASAKUSA_VANILLA_ARGS";
+
+    /**
+     * The environment variable name of Vanilla command launcher.
+     * @since 0.5.0
+     */
+    public static final String ENV_VANILLA_LAUNCHER = "ASAKUSA_VANILLA_LAUNCHER";
 
     private VanillaConstants() {
         return;
