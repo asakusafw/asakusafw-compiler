@@ -51,6 +51,14 @@ class AsakusaUpgradeTest {
     }
 
     /**
+     * Test for {@code 4.1} (Asakusa Vanilla {@code 0.5.0}).
+     */
+    @Test
+    void 'v4.1'() {
+        doUpgradeFromTestName()
+    }
+
+    /**
      * Test for {@code 3.4.1} (Asakusa Vanilla {@code 0.1.1}).
      */
     @Test
