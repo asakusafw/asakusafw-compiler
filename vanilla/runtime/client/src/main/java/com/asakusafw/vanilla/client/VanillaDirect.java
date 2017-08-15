@@ -44,6 +44,7 @@ public final class VanillaDirect {
      * @throws LaunchConfigurationException if launching configuration is something wrong
      */
     public static void main(String... args) throws LaunchConfigurationException {
+        VanillaLauncher.showEnvironment();
         ClassLoader loader = VanillaDirect.class.getClassLoader();
         RuntimeContext.set(RuntimeContext.DEFAULT.apply(System.getenv()));
         RuntimeContext.get().verifyApplication(loader);

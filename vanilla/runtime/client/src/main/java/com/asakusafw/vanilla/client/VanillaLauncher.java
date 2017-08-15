@@ -18,6 +18,7 @@ package com.asakusafw.vanilla.client;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.Arrays;
+import java.util.Optional;
 
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
@@ -139,6 +140,7 @@ public class VanillaLauncher {
      * @throws LaunchConfigurationException if launching configuration is something wrong
      */
     public static void main(String... args) throws LaunchConfigurationException {
+        showEnvironment();
         int status = exec(VanillaLauncher.class.getClassLoader(), args);
         if (status != 0) {
             System.exit(status);
@@ -231,5 +233,17 @@ public class VanillaLauncher {
                         configuration.getNumberOfThreads()).run();
             }
         }
+    }
+
+    static void showEnvironment() {
+        if (LOG.isDebugEnabled()) {
+            showEnvironment(VanillaConstants.ENV_VANILLA_LAUNCHER);
+            showEnvironment(VanillaConstants.ENV_VANILLA_OPTIONS);
+            showEnvironment(VanillaConstants.ENV_VANILLA_ARGUMENTS);
+        }
+    }
+
+    private static void showEnvironment(String name) {
+        LOG.debug("{}: {}", name, Optional.ofNullable(System.getenv(name)).orElse(""));
     }
 }
