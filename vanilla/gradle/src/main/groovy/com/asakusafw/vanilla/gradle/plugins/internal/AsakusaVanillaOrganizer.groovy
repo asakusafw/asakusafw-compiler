@@ -15,15 +15,12 @@
  */
 package com.asakusafw.vanilla.gradle.plugins.internal
 
-import org.gradle.api.InvalidUserDataException
 import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.api.artifacts.Configuration
 import org.gradle.api.file.FileCopyDetails
 
 import com.asakusafw.gradle.plugins.AsakusafwBaseExtension
 import com.asakusafw.gradle.plugins.AsakusafwBasePlugin
-import com.asakusafw.gradle.plugins.AsakusafwOrganizerPlugin
 import com.asakusafw.gradle.plugins.AsakusafwOrganizerProfile
 import com.asakusafw.gradle.plugins.internal.AbstractOrganizer
 import com.asakusafw.gradle.plugins.internal.PluginUtils
@@ -64,15 +61,7 @@ class AsakusaVanillaOrganizer extends AbstractOrganizer {
         createConfigurations('asakusafw', [
             VanillaDist : "Contents of Asakusa Vanilla modules (${profile.name}).",
             VanillaLib : "Libraries of Asakusa Vanilla modules (${profile.name}).",
-            VanillaHadoopLib : "Hadoop Libraries of Asakusa Vanilla modules (${profile.name}).",
         ])
-        configuration('asakusafwVanillaHadoopLib').with { Configuration conf ->
-            conf.transitive = true
-            // use snappy-java is provided in asakusa-runtime-all
-            conf.exclude group: 'org.xerial.snappy', module: 'snappy-java'
-            conf.exclude group: 'org.slf4j', module: 'slf4j-log4j12'
-            conf.exclude group: 'ch.qos.logback', module: 'logback-classic'
-        }
     }
 
     private void configureDependencies() {
@@ -89,15 +78,7 @@ class AsakusaVanillaOrganizer extends AbstractOrganizer {
                     "com.asakusafw.vanilla.runtime:asakusa-vanilla-bootstrap:${vanilla.featureVersion}:exec@jar",
                     "ch.qos.logback:logback-classic:${base.logbackVersion}",
                 ],
-                VanillaHadoopLib : [
-                    "org.apache.hadoop:hadoop-common:${vanilla.hadoopVersion}",
-                    "org.apache.hadoop:hadoop-mapreduce-client-core:${vanilla.hadoopVersion}",
-                ],
             ])
-            configuration('asakusafwVanillaHadoopLib').resolutionStrategy.dependencySubstitution {
-                substitute module('log4j:log4j') with module("org.slf4j:log4j-over-slf4j:${base.slf4jVersion}")
-                substitute module('commons-logging:commons-logging') with module("org.slf4j:jcl-over-slf4j:${base.slf4jVersion}")
-            }
         }
     }
 
@@ -123,11 +104,6 @@ class AsakusaVanillaOrganizer extends AbstractOrganizer {
                     }
                 }
             },
-            VanillaHadoop : {
-                into('vanilla/lib/hadoop') {
-                    put configuration('asakusafwVanillaHadoopLib')
-                }
-            },
         ]
         createAttachComponentTasks 'attach', [
             VanillaBatchapps : {
@@ -143,17 +119,6 @@ class AsakusaVanillaOrganizer extends AbstractOrganizer {
             if (extension.isEnabled()) {
                 project.logger.info "Enabling Asakusa Vanilla (${profile.name})"
                 task('attachAssemble').dependsOn task('attachComponentVanilla')
-                if (!extension.isUseSystemHadoop() && !profile.hadoop.isEmbed()) {
-                    project.logger.info "Enabling Asakusa Vanilla Hadoop bundle (${profile.name})"
-                    task('attachAssemble').dependsOn task('attachComponentVanillaHadoop')
-                }
-                if (extension.isUseSystemHadoop()
-                        && profile.hadoop.isEmbed()
-                        && profile.name != AsakusafwOrganizerPlugin.PROFILE_NAME_DEVELOPMENT) {
-                    throw new InvalidUserDataException(
-                        "'${profile.name}' profile in 'asakusafwOrganizer' defines both 'vanilla.useSystemHadoop = true'"
-                        + " and 'hadoop.embed = true'. Please set 'hadoop.embed = false' to use system Hadoop installation")
-                }
                 PluginUtils.afterTaskEnabled(project, AsakusaVanillaSdkPlugin.TASK_COMPILE) { Task compiler ->
                     task('attachVanillaBatchapps').dependsOn compiler
                     if (profile.batchapps.isEnabled()) {

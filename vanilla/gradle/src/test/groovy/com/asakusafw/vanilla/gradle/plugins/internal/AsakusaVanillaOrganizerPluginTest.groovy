@@ -66,7 +66,6 @@ class AsakusaVanillaOrganizerPluginTest {
         assert extension != null
 
         assert extension.enabled == false
-        assert extension.useSystemHadoop == false
 
         assert root.profiles.dev.vanilla.enabled == false
         assert root.profiles.prod.vanilla.enabled == false

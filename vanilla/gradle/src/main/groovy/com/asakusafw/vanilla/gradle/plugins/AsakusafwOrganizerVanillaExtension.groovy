@@ -18,6 +18,7 @@ package com.asakusafw.vanilla.gradle.plugins
 /**
  * An extension object for {@code asakusafwOrgnizer.vanilla}.
  * @since 0.4.0
+ * @version 0.5.0
  */
 class AsakusafwOrganizerVanillaExtension {
 
@@ -30,15 +31,4 @@ class AsakusafwOrganizerVanillaExtension {
      * </dl>
      */
     boolean enabled
-
-    /**
-     * Configuration whether {@code 'Asakusa Vanilla'} uses the system Hadoop installation.
-     * If this is {@code true}, Asakusa Vanilla will require a Hadoop installation for the environment.
-     * Otherwise, the minimal Hadoop libraries will be bundled into the deployment archives.
-     * <dl>
-     *   <dt> Default value: </dt>
-     *     <dd> {@code false} </dd>
-     * </dl>
-     */
-    boolean useSystemHadoop
 }

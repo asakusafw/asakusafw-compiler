@@ -64,7 +64,6 @@ class AsakusaVanillaOrganizerPlugin implements Plugin<Project> {
         AsakusafwOrganizerVanillaExtension extension = convention.extensions.create('vanilla', AsakusafwOrganizerVanillaExtension)
         extension.conventionMapping.with {
             enabled = { false }
-            useSystemHadoop = { false }
         }
         PluginUtils.injectVersionProperty(extension, { base.featureVersion })
     }
@@ -82,7 +81,6 @@ class AsakusaVanillaOrganizerPlugin implements Plugin<Project> {
         AsakusafwOrganizerVanillaExtension parent = project.asakusafwOrganizer.vanilla
         extension.conventionMapping.with {
             enabled = { parent.enabled }
-            useSystemHadoop = { parent.useSystemHadoop }
         }
         PluginUtils.injectVersionProperty(extension, { base.featureVersion })
         AsakusaVanillaOrganizer organizer = new AsakusaVanillaOrganizer(project, profile, extension)

@@ -97,28 +97,18 @@ _EXEC=()
 _CLASSPATH=()
 _APP_OPTIONS=()
 
-import "$_ROOT/libexec/configure-hadoop.sh"
+import "$ASAKUSA_HOME/hadoop/libexec/configure-hadoop.sh"
+import "$_ROOT/libexec/configure-classpath.sh"
+import "$_ROOT/libexec/configure-options.sh"
 
 if [ "$ASAKUSA_VANILLA_LAUNCHER" != "" ]
 then
     _EXEC+=($ASAKUSA_VANILLA_LAUNCHER)
 fi
 
-if [ "$_HADOOP_CMD" = "" ]
+if [ "$_HADOOP_CMD" != "" ]
 then
-    _USE_HADOOP_CMD=0
-    import "$ASAKUSA_HOME/core/libexec/configure-java.sh"
-    _EXEC+=("$_JAVA_CMD")
-else
-    _USE_HADOOP_CMD=1
     _EXEC+=("$_HADOOP_CMD")
-fi
-
-import "$_ROOT/libexec/configure-classpath.sh"
-import "$_ROOT/libexec/configure-options.sh"
-
-if [ $_USE_HADOOP_CMD -eq 1 ]
-then
     export HADOOP_CLIENT_OPTS="$HADOOP_CLIENT_OPTS $ASAKUSA_VANILLA_OPTS"
     export HADOOP_CLASSPATH="$HADOOP_CLASSPATH:$(IFS=:; echo "${_CLASSPATH[*]}")"
     "${_EXEC[@]}" \
@@ -132,6 +122,8 @@ then
         "$@"
     _RET=$?
 else
+    import "$ASAKUSA_HOME/core/libexec/configure-java.sh"
+    _EXEC+=("$_JAVA_CMD")
     _CLASSPATH+=("${_HADOOP_EMBED_CLASSPATH[@]}")
     "${_EXEC[@]}" \
         $ASAKUSA_VANILLA_OPTS \

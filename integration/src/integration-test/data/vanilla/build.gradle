@@ -36,7 +36,6 @@ asakusafwOrganizer {
     }
     vanilla{
         enabled true
-        useSystemHadoop System.getenv('HADOOP_CMD') as boolean
     }
     profiles.dev {
         assembly.into('.') {
