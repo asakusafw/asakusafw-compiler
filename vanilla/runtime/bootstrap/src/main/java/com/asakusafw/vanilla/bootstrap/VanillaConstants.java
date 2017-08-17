@@ -80,11 +80,6 @@ public final class VanillaConstants {
     public static final String PATH_VANILLA_LIB_DIR = PATH_VANILLA_BASE + "/lib";
 
     /**
-     * The path of the Vanilla embedded Hadoop libraries directory.
-     */
-    public static final String PATH_VANILLA_EMBEDDED_HADOOP_LIB_DIR = PATH_VANILLA_BASE + "/lib/hadoop";
-
-    /**
      * The class name of Vanilla launcher class.
      */
     public static final String CLASS_VANILLA_LAUNCHER = "com.asakusafw.vanilla.client.VanillaLauncher";

@@ -76,12 +76,7 @@ public class VanillaBootstrap {
         cp.addEntries(home.resolve(PATH_EXTENSION_LIB_DIR), false);
         cp.addEntries(home.resolve(PATH_CORE_LIB_DIR), true);
 
-        Path hadoop = home.resolve(PATH_VANILLA_EMBEDDED_HADOOP_LIB_DIR);
-        if (Files.isDirectory(hadoop)) {
-            cp.addEntries(hadoop, false);
-        } else {
-            cp.addEntries(home.resolve(PATH_HADOOP_EMBEDDED_LIB_DIR), true);
-        }
+        cp.addEntries(home.resolve(PATH_HADOOP_EMBEDDED_LIB_DIR), true);
 
         return cp;
     }
