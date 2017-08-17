@@ -18,6 +18,8 @@ package com.asakusafw.lang.compiler.extension.windgate;
 import java.io.Serializable;
 import java.text.MessageFormat;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.asakusafw.vocabulary.windgate.WindGateProcessDescription;
 import com.asakusafw.windgate.core.DriverScript;
@@ -34,6 +36,8 @@ public class DescriptionModel implements Serializable {
     private String resourceName;
 
     private HashMap<String, String> configuration;
+
+    private Set<String> parameterNames;
 
     /**
      * for serializers.
@@ -68,6 +72,7 @@ public class DescriptionModel implements Serializable {
         }
         this.resourceName = script.getResourceName();
         this.configuration = new HashMap<>(script.getConfiguration());
+        this.parameterNames = new HashSet<>(script.getParameterNames());
     }
 
     /**
@@ -83,6 +88,6 @@ public class DescriptionModel implements Serializable {
      * @return the driver script
      */
     public DriverScript getDriverScript() {
-        return new DriverScript(resourceName, configuration);
+        return new DriverScript(resourceName, configuration, parameterNames);
     }
 }
