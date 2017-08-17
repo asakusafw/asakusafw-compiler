@@ -126,6 +126,40 @@ public class WindGatePortProcessorTest {
     }
 
     /**
+     * input parameters.
+     */
+    @Test
+    public void input_parameters() {
+        DriverScript script = script("r", "k0", "v0");
+        InputDesc desc = new InputDesc(String.class, "p", new DriverScript(
+                script.getResourceName(),
+                script.getConfiguration(),
+                Collections.singleton("testing")));
+        MockExternalPortProcessorContext context = context();
+        WindGatePortProcessor proc = new WindGatePortProcessor();
+
+        ExternalInputInfo info = proc.analyzeInput(context, "t", desc);
+        assertThat(info.getParameterNames(), contains("testing"));
+    }
+
+    /**
+     * output parameters.
+     */
+    @Test
+    public void output_parameters() {
+        DriverScript script = script("r", "k0", "v0");
+        OutputDesc desc = new OutputDesc(String.class, "p", new DriverScript(
+                script.getResourceName(),
+                script.getConfiguration(),
+                Collections.singleton("testing")));
+        MockExternalPortProcessorContext context = context();
+        WindGatePortProcessor proc = new WindGatePortProcessor();
+
+        ExternalOutputInfo info = proc.analyzeOutput(context, "t", desc);
+        assertThat(info.getParameterNames(), contains("testing"));
+    }
+
+    /**
      * invalid input.
      */
     @Test(expected = DiagnosticException.class)
