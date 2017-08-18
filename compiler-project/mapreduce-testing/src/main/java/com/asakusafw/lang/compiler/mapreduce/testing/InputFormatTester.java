@@ -87,32 +87,12 @@ public class InputFormatTester {
         }
     }
 
-    private InputSplit restore(InputSplit split) throws IOException {
+    private static InputSplit restore(InputSplit split) throws IOException {
         if (split instanceof Writable) {
             DataBuffer buffer = new DataBuffer();
             ((Writable) split).write(buffer);
             ((Writable) split).readFields(buffer);
         }
         return split;
-    }
-
-    /**
-     * Collects values from {@code InputFormat}.
-     * @param <T> the value type
-     * @deprecated Use {@link Consumer} instead
-     */
-    @Deprecated
-    public interface Collector<T> extends Consumer<T> {
-
-        /**
-         * Handles an object.
-         * @param object the target
-         */
-        void handle(T object);
-
-        @Override
-        default void accept(T t) {
-            handle(t);
-        }
     }
 }
