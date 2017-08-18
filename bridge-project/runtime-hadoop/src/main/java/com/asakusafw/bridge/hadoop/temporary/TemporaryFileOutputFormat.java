@@ -53,7 +53,7 @@ public final class TemporaryFileOutputFormat<T> extends FileOutputFormat<NullWri
     public static final String DEFAULT_FILE_NAME = PART;
 
     /**
-     * Sets the output directory
+     * Sets the output directory.
      * @param conf the current configuration
      * @param directory the target directory
      * @throws IOException if I/O error was occurred
