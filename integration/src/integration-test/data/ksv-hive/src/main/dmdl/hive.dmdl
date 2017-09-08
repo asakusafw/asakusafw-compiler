@@ -1,0 +1,9 @@
+@directio.hive.orc
+@directio.hive.parquet
+ksv_hive = {
+    key : LONG;
+    @directio.hive.decimal(precision=18, scale=2)
+    sort : DECIMAL;
+    @directio.hive.varchar(length=64)
+    value : TEXT;
+};

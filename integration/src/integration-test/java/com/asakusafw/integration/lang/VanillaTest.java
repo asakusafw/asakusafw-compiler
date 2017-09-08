@@ -39,6 +39,7 @@ import com.asakusafw.integration.AsakusaProjectProvider;
 import com.asakusafw.integration.PlatformUtil;
 import com.asakusafw.utils.gradle.Bundle;
 import com.asakusafw.utils.gradle.ContentsConfigurator;
+import com.asakusafw.utils.gradle.PropertyConfigurator;
 
 /**
  * Test for {@code vanilla}.
@@ -66,6 +67,7 @@ public class VanillaTest {
             .withProject(ContentsConfigurator.copy(data("vanilla")))
             .withProject(ContentsConfigurator.copy(data("ksv")))
             .withProject(ContentsConfigurator.copy(data("logback-test")))
+            .withProject(PropertyConfigurator.of("hive.version", (String) null))
             .withProject(AsakusaConfigurator.projectHome());
 
     /**
