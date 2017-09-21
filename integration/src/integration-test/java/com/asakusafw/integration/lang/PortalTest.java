@@ -25,6 +25,7 @@ import com.asakusafw.integration.AsakusaConstants;
 import com.asakusafw.integration.AsakusaProjectProvider;
 import com.asakusafw.utils.gradle.Bundle;
 import com.asakusafw.utils.gradle.ContentsConfigurator;
+import com.asakusafw.utils.gradle.PropertyConfigurator;
 
 /**
  * Test for the portal command.
@@ -38,9 +39,11 @@ public class PortalTest {
     public static final AsakusaProjectProvider PROVIDER = new AsakusaProjectProvider()
             .withProject(ContentsConfigurator.copy(data("vanilla")))
             .withProject(ContentsConfigurator.copy(data("ksv")))
+            .withProject(ContentsConfigurator.copy(data("ksv-hive")))
             .withProject(ContentsConfigurator.copy(data("logback-test")))
             .withProject(AsakusaConfigurator.projectHome())
             .withProject(AsakusaConfigurator.hadoop(AsakusaConfigurator.Action.UNSET_ALWAYS))
+            .withProject(PropertyConfigurator.of("hive.version", "*"))
             .withProvider(provider -> {
                 // install framework only once
                 framework = provider.newInstance("inf")
@@ -162,37 +165,85 @@ public class PortalTest {
     }
 
     /**
-     * {@code draw}.
+     * {@code list hive input}.
      */
     @Test
-    public void draw() {
-        framework.withLaunch(AsakusaConstants.CMD_PORTAL, "draw");
+    public void list_hive_input() {
+        framework.withLaunch(AsakusaConstants.CMD_PORTAL, "list", "hive", "input", "-v",
+                "vanilla.perf.parquet.sort");
     }
 
     /**
-     * {@code draw jobflow}.
+     * {@code list hive output}.
      */
     @Test
-    public void draw_jobflow() {
-        framework.withLaunch(AsakusaConstants.CMD_PORTAL, "draw", "jobflow", "-v",
+    public void list_hive_output() {
+        framework.withLaunch(AsakusaConstants.CMD_PORTAL, "list", "hive", "output", "-v",
+                "vanilla.perf.orc.sort");
+    }
+
+    /**
+     * {@code generate}.
+     */
+    @Test
+    public void generate() {
+        framework.withLaunch(AsakusaConstants.CMD_PORTAL, "generate");
+    }
+
+    /**
+     * {@code generate dot}.
+     */
+    @Test
+    public void generate_dot() {
+        framework.withLaunch(AsakusaConstants.CMD_PORTAL, "generate", "dot");
+    }
+
+    /**
+     * {@code generate dot jobflow}.
+     */
+    @Test
+    public void generate_dot_jobflow() {
+        framework.withLaunch(AsakusaConstants.CMD_PORTAL, "generate", "dot", "jobflow", "-v",
                 "vanilla.perf.average.sort");
     }
 
     /**
-     * {@code draw plan}.
+     * {@code generate dot plan}.
      */
     @Test
-    public void draw_plan() {
-        framework.withLaunch(AsakusaConstants.CMD_PORTAL, "draw", "plan", "-v",
+    public void generate_dot_plan() {
+        framework.withLaunch(AsakusaConstants.CMD_PORTAL, "generate", "dot", "plan", "-v",
                 "vanilla.perf.average.sort");
     }
 
     /**
-     * {@code draw operator}.
+     * {@code generate dot operator}.
      */
     @Test
-    public void draw_operator() {
-        framework.withLaunch(AsakusaConstants.CMD_PORTAL, "draw", "operator", "-v",
+    public void generate_dot_operator() {
+        framework.withLaunch(AsakusaConstants.CMD_PORTAL, "generate", "dot", "operator", "-v",
                 "vanilla.perf.average.sort");
+    }
+
+    /**
+     * {@code generate ddl}.
+     */
+    @Test
+    public void generate_ddl() {
+        framework.withLaunch(AsakusaConstants.CMD_PORTAL, "generate", "ddl");
+    }
+
+    /**
+     * {@code generate ddl hive}.
+     */
+    @Test
+    public void generate_ddl_hive() {
+        framework.withLaunch(AsakusaConstants.CMD_PORTAL, "generate", "ddl", "hive",
+                "--database", "testing",
+                "--direction", "input",
+                "--external",
+                "--if-not-exists",
+                "-L${input}=file:/path/to/input",
+                "vanilla.perf.parquet.sort");
     }
 }
