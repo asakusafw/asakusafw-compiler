@@ -76,11 +76,15 @@ if (System.getProperty('hive.version')) {
     }
     asakusafwOrganizer {
         hive.enabled true
-        hive.libraries = ["org.apache.hive:hive-exec:${System.getProperty('hive.version')}"]
     }
-    configurations.all {
-        resolutionStrategy {
-            force "org.apache.hive:hive-exec:${System.getProperty('hive.version')}"
+    if (System.getProperty('hive.version') != '*') {
+        asakusafwOrganizer {
+            hive.libraries = ["org.apache.hive:hive-exec:${System.getProperty('hive.version')}"]
+        }
+        configurations.all {
+            resolutionStrategy {
+                force "org.apache.hive:hive-exec:${System.getProperty('hive.version')}"
+            }
         }
     }
 }
