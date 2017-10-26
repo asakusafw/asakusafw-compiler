@@ -63,7 +63,7 @@ class AsakusaVanillaOrganizerPlugin implements Plugin<Project> {
         AsakusafwOrganizerPluginConvention convention = project.asakusafwOrganizer
         AsakusafwOrganizerVanillaExtension extension = convention.extensions.create('vanilla', AsakusafwOrganizerVanillaExtension)
         extension.conventionMapping.with {
-            enabled = { false }
+            enabled = { true }
         }
         PluginUtils.injectVersionProperty(extension, { base.featureVersion })
     }
