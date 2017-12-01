@@ -45,6 +45,8 @@ import com.asakusafw.vocabulary.external.ExporterDescription;
 import com.asakusafw.vocabulary.external.ImporterDescription;
 import com.asakusafw.vocabulary.flow.In;
 import com.asakusafw.vocabulary.flow.Out;
+import com.asakusafw.vocabulary.flow.testing.MockIn;
+import com.asakusafw.vocabulary.flow.testing.MockOut;
 
 /**
  * Test for {@link CompilerToolkitAdapter}.
@@ -85,6 +87,42 @@ public class CompilerToolkitAdapterTest {
             PortMirror<? extends ExporterDescription> o0 = single.findOutput("out");
             assertThat(o0, is(notNullValue()));
             assertThat(o0.getDescription(), is(instanceOf(InternalExporterDescription.class)));
+        }
+    }
+
+    /**
+     * flow-part w/ invalid inputs.
+     * @throws Exception if failed
+     */
+    @Test(expected = UnsupportedOperationException.class)
+    public void flowpart_invalid_input() throws Exception {
+        CompilerToolkitAdapter tk = new CompilerToolkitAdapter();
+
+        FlowPortMap ports = tk.newFlowPortMap();
+        In<MockData> in = new MockIn<>(MockData.class, "in");
+        Out<MockData> out = ports.addOutput("out", MockData.class);
+        SimpleJobflow flow = new SimpleJobflow(in, out);
+
+        try (CompilerSession session = tk.newSession(getConf(tk))) {
+            session.compileFlow(flow, ports);
+        }
+    }
+
+    /**
+     * flow-part w/ invalid outputs.
+     * @throws Exception if failed
+     */
+    @Test(expected = UnsupportedOperationException.class)
+    public void flowpart_invalid_output() throws Exception {
+        CompilerToolkitAdapter tk = new CompilerToolkitAdapter();
+
+        FlowPortMap ports = tk.newFlowPortMap();
+        In<MockData> in = ports.addInput("in", MockData.class);
+        Out<MockData> out = new MockOut<>(MockData.class, "out");
+        SimpleJobflow flow = new SimpleJobflow(in, out);
+
+        try (CompilerSession session = tk.newSession(getConf(tk))) {
+            session.compileFlow(flow, ports);
         }
     }
 
