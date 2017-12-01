@@ -128,9 +128,7 @@ class CompilerSessionAdapter implements CompilerSession {
         }
         try (CompilerTester tester = configuration.start(flow.getClass())) {
             FlowGraph graph = ((FlowPortMapAdapter) portMap).resolve(flow);
-            OperatorGraph analyzed = new BasicClassAnalyzer()
-                    .analyzeFlow(new ClassAnalyzer.Context(tester.getCompilerContext()), graph);
-
+            OperatorGraph analyzed = analyzeFlow(tester, flow, graph);
             JobflowInfo info = new JobflowInfo.Basic("flowpart", Descriptions.classOf(flow.getClass())); //$NON-NLS-1$
             Jobflow jobflow = new Jobflow(info, analyzed);
             JobflowArtifact artifact = tester.compile(jobflow);
@@ -139,6 +137,28 @@ class CompilerSessionAdapter implements CompilerSession {
         } catch (DiagnosticException e) {
             throw new IOException(e);
         }
+    }
+
+    private static OperatorGraph analyzeFlow(CompilerTester tester, FlowDescription flow, FlowGraph graph) {
+        OperatorGraph results = new BasicClassAnalyzer()
+                .analyzeFlow(new ClassAnalyzer.Context(tester.getCompilerContext()), graph);
+        results.getInputs().values().stream()
+                .filter(it -> it.isExternal() == false)
+                .forEach(it -> {
+                    throw new UnsupportedOperationException(MessageFormat.format(
+                            "input \"{1}\" (in {0}) is unsupported (not managed by test driver)",
+                            flow.getClass().getName(),
+                            it.getName()));
+                });
+        results.getOutputs().values().stream()
+                .filter(it -> it.isExternal() == false)
+                .forEach(it -> {
+                    throw new UnsupportedOperationException(MessageFormat.format(
+                            "output \"{1}\" (in {0}) is unsupported (not managed by test driver)",
+                            flow.getClass().getName(),
+                            it.getName()));
+                });
+        return results;
     }
 
     private File escape(CompilerTester tester, BatchInfo batch) throws IOException {
