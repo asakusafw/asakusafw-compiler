@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -32,9 +33,9 @@ import com.asakusafw.utils.graph.Graph;
 import com.asakusafw.utils.graph.Graphs;
 import com.asakusafw.vocabulary.flow.graph.Connectivity;
 import com.asakusafw.vocabulary.flow.graph.FlowElement;
-import com.asakusafw.vocabulary.flow.graph.FlowElementInput;
+import com.asakusafw.vocabulary.flow.graph.FlowElementAttribute;
 import com.asakusafw.vocabulary.flow.graph.FlowElementKind;
-import com.asakusafw.vocabulary.flow.graph.FlowElementOutput;
+import com.asakusafw.vocabulary.flow.graph.FlowElementPort;
 import com.asakusafw.vocabulary.flow.graph.FlowGraph;
 import com.asakusafw.vocabulary.flow.graph.FlowPartDescription;
 
@@ -89,26 +90,26 @@ public final class FlowGraphVerifier {
         if (connectivity == null) {
             connectivity = Connectivity.getDefault();
         }
-        for (FlowElementInput port : element.getInputPorts()) {
-            if (port.getConnected().isEmpty() == false) {
-                continue;
-            }
-            context.error(MessageFormat.format(
-                    "input port \"{1}\" of \"{0}\" is not connected from the other output port nor jobflow input",
-                    element.getDescription(),
-                    port.getDescription().getName()));
-        }
-        if (connectivity == Connectivity.MANDATORY) {
-            for (FlowElementOutput port : element.getOutputPorts()) {
-                if (port.getConnected().isEmpty() == false) {
-                    continue;
-                }
-                context.error(MessageFormat.format(
+        element.getInputPorts().stream()
+                .filter(it -> it.getConnected().isEmpty())
+                .forEach(it -> context.error(MessageFormat.format(
+                        "input port \"{1}\" of \"{0}\" is not connected from the other output port nor jobflow input",
+                        element.getDescription(),
+                        it.getDescription().getName())));
+        element.getOutputPorts().stream()
+                .filter(it -> it.getConnected().isEmpty())
+                .filter(it -> get(it, Connectivity.MANDATORY) == Connectivity.MANDATORY)
+                .forEach(it -> context.error(MessageFormat.format(
                         "output port \"{1}\" of \"{0}\" is not connected to the other input port nor jobflow output",
                         element.getDescription(),
-                        port.getDescription().getName()));
-            }
-        }
+                        it.getDescription().getName())));
+    }
+
+    private static <T extends Enum<T> & FlowElementAttribute> T get(FlowElementPort port, T defaultValue) {
+        Class<T> type = defaultValue.getDeclaringClass();
+        return Optional.ofNullable(port.getAttribute(type))
+                .orElseGet(() -> Optional.ofNullable(port.getOwner().getAttribute(type))
+                        .orElse(defaultValue));
     }
 
     private static final class Context {
