@@ -86,10 +86,6 @@ public final class FlowGraphVerifier {
     }
 
     private void verifyElement(FlowElement element) {
-        Connectivity connectivity = element.getAttribute(Connectivity.class);
-        if (connectivity == null) {
-            connectivity = Connectivity.getDefault();
-        }
         element.getInputPorts().stream()
                 .filter(it -> it.getConnected().isEmpty())
                 .forEach(it -> context.error(MessageFormat.format(
