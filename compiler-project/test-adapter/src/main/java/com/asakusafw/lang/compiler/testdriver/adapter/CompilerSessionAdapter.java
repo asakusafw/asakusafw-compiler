@@ -30,6 +30,7 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import com.asakusafw.lang.compiler.analyzer.FlowGraphVerifier;
 import com.asakusafw.lang.compiler.api.reference.CommandTaskReference;
 import com.asakusafw.lang.compiler.api.reference.JobflowReference;
 import com.asakusafw.lang.compiler.api.reference.TaskReference;
@@ -128,6 +129,7 @@ class CompilerSessionAdapter implements CompilerSession {
         }
         try (CompilerTester tester = configuration.start(flow.getClass())) {
             FlowGraph graph = ((FlowPortMapAdapter) portMap).resolve(flow);
+            FlowGraphVerifier.verify(graph);
             OperatorGraph analyzed = analyzeFlow(tester, flow, graph);
             JobflowInfo info = new JobflowInfo.Basic("flowpart", Descriptions.classOf(flow.getClass())); //$NON-NLS-1$
             Jobflow jobflow = new Jobflow(info, analyzed);
