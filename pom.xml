@@ -363,6 +363,8 @@ encoding/<project>=UTF-8
               <include>src/**/*.sh</include>
               <include>src/**/*.hpp</include>
               <include>src/**/*.cpp</include>
+              <include>src/**/*.sh.template</include>
+              <include>src/main/dist/**/bin/*</include>
             </includes>
             <encoding>UTF-8</encoding>
             <mapping>
@@ -370,6 +372,8 @@ encoding/<project>=UTF-8
               <jj>JAVADOC_STYLE</jj>
               <hpp>SLASHSTAR_STYLE</hpp>
               <cpp>SLASHSTAR_STYLE</cpp>
+              <sh.template>SCRIPT_STYLE</sh.template>
+              <execute>SCRIPT_STYLE</execute>
             </mapping>
           </configuration>
         </plugin>
