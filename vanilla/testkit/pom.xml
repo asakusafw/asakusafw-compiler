@@ -7,7 +7,7 @@
   <parent>
     <artifactId>project</artifactId>
     <groupId>com.asakusafw.vanilla</groupId>
-    <version>0.5.1-SNAPSHOT</version>
+    <version>0.5.1-RC1</version>
   </parent>
   <packaging>pom</packaging>
 
