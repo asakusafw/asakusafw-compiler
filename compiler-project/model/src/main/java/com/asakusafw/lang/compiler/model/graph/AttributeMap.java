@@ -51,7 +51,7 @@ public final class AttributeMap {
     }
 
     AttributeMap(Builder builder) {
-        this(builder.entries);
+        this(builder.entries());
     }
 
     /**
@@ -85,7 +85,7 @@ public final class AttributeMap {
     }
 
     void copyTo(AttributeMap.Builder builder) {
-        copyTo(entries, builder.entries);
+        copyTo(entries, builder.entries());
     }
 
     static void copyTo(Map<Class<?>, Object> from, Map<Class<?>, Object> to) {
@@ -120,7 +120,14 @@ public final class AttributeMap {
      */
     public static class Builder {
 
-        Map<Class<?>, Object> entries;
+        private Map<Class<?>, Object> entries;
+
+        Map<Class<?>, Object> entries() {
+            if (entries == null) {
+                entries = new LinkedHashMap<>();
+            }
+            return entries;
+        }
 
         /**
          * Adds an attribute.
@@ -129,10 +136,7 @@ public final class AttributeMap {
          */
         public Builder add(AttributeEntry<?> entry) {
             Objects.requireNonNull(entry);
-            if (entries == null) {
-                entries = new LinkedHashMap<>();
-            }
-            entries.put(entry.getType(), entry.getValue());
+            entries().put(entry.getType(), entry.getValue());
             return this;
         }
 
@@ -143,10 +147,7 @@ public final class AttributeMap {
          */
         public Builder add(Enum<?> value) {
             Objects.requireNonNull(value);
-            if (entries == null) {
-                entries = new LinkedHashMap<>();
-            }
-            entries.put(value.getDeclaringClass(), value);
+            entries().put(value.getDeclaringClass(), value);
             return this;
         }
 
@@ -160,10 +161,7 @@ public final class AttributeMap {
         public <T> Builder add(Class<T> type, T object) {
             Objects.requireNonNull(type);
             Objects.requireNonNull(object);
-            if (entries == null) {
-                entries = new LinkedHashMap<>();
-            }
-            entries.put(type, object);
+            entries().put(type, object);
             return this;
         }
 
