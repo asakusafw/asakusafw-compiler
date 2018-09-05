@@ -18,6 +18,7 @@ package com.asakusafw.lang.compiler.inspection;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
+import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.Test;
@@ -47,6 +48,10 @@ public class InspectionExtensionTest {
                 assertThat(location, is(Location.of("testing")));
                 assertThat(ref.compareAndSet(null, element), is(true));
             }
+            @Override
+            public void inspect(Path path, Object element) {
+                throw new AssertionError();
+            }
         });
         Object object = new Object();
         InspectionExtension.inspect(container, Location.of("testing"), object);
@@ -65,6 +70,10 @@ public class InspectionExtensionTest {
             }
             @Override
             public void inspect(Location location, Object element) {
+                throw new AssertionError();
+            }
+            @Override
+            public void inspect(Path path, Object element) {
                 throw new AssertionError();
             }
         });

@@ -19,8 +19,10 @@ import java.io.Serializable;
 
 /**
  * Represents a diagnostic information.
+ * @since 0.1.0
+ * @version 0.5.2
  */
-public interface Diagnostic extends Serializable {
+public interface Diagnostic extends Serializable, Adaptable {
 
     /**
      * Returns the severity of this.

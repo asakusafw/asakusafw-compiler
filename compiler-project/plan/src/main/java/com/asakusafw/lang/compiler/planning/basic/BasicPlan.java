@@ -141,8 +141,8 @@ public class BasicPlan extends BasicAttributeContainer implements Plan {
             List<Diagnostic> diagnostics = new ArrayList<>();
             for (Set<BasicSubPlan> loop : circuits) {
                 diagnostics.add(new BasicDiagnostic(Diagnostic.Level.ERROR, MessageFormat.format(
-                        "plan must by acyclic: {0}",
-                        loop)));
+                        "plan must be acyclic: {0}",
+                        loop)).with(this));
             }
             throw new DiagnosticException(diagnostics);
         }

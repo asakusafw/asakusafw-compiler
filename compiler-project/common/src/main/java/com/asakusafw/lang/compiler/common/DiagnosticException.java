@@ -20,12 +20,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Represents an exception with {@link Diagnostic}s.
  * The compiler may throw this exception from anywhere.
  */
-public class DiagnosticException extends RuntimeException {
+public class DiagnosticException extends RuntimeException implements Adaptable {
 
     private static final long serialVersionUID = 1L;
 
@@ -121,5 +122,10 @@ public class DiagnosticException extends RuntimeException {
             }
         }
         return null;
+    }
+
+    @Override
+    public <T> Optional<T> findAdapter(Class<T> type) {
+        return Adaptables.find(type, this, Arrays.stream(diagnostics));
     }
 }

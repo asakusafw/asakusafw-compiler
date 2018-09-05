@@ -15,6 +15,7 @@
  */
 package com.asakusafw.lang.compiler.inspection;
 
+import java.nio.file.Path;
 import java.text.MessageFormat;
 
 import org.slf4j.Logger;
@@ -26,10 +27,12 @@ import com.asakusafw.lang.compiler.common.Location;
 
 /**
  * A compiler extension for inspecting support.
+ * @since 0.1.0
+ * @version 0.5.2
  */
 public abstract class InspectionExtension {
 
-    static final Logger LOG = LoggerFactory.getLogger(InspectionExtension.class);
+    private static final Logger LOG = LoggerFactory.getLogger(InspectionExtension.class);
 
     /**
      * Inspects the target element only if inspection is supported in this session.
@@ -54,6 +57,28 @@ public abstract class InspectionExtension {
     }
 
     /**
+     * Inspects the target element only if inspection is supported in this session.
+     * @param extensions the extension container
+     * @param path the output path of inspection information
+     * @param element the target element
+     * @throws DiagnosticException if failed to inspect the target element
+     */
+    public static void inspect(ExtensionContainer extensions, Path path, Object element) {
+        InspectionExtension extension = extensions.getExtension(InspectionExtension.class);
+        if (extension == null) {
+            LOG.warn("inspection support is not enabled");
+            return;
+        }
+        if (extension.isSupported(element) == false) {
+            LOG.warn(MessageFormat.format(
+                    "this session does not support inspection: {0}",
+                    element.getClass().getName()));
+            return;
+        }
+        extension.inspect(path, element);
+    }
+
+    /**
      * Returns whether this supports to inspect the target element.
      * @param element the target element
      * @return {@code true} if this supports the target element, otherwise {@code false}
@@ -67,4 +92,13 @@ public abstract class InspectionExtension {
      * @throws DiagnosticException if failed to inspect the target element
      */
     public abstract void inspect(Location location, Object element);
+
+    /**
+     * Inspects the target element.
+     * @param path the output path of inspection information
+     * @param element the target element
+     * @throws DiagnosticException if failed to inspect the target element
+     * @since 0.5.2
+     */
+    public abstract void inspect(Path path, Object element);
 }

@@ -16,9 +16,12 @@
 package com.asakusafw.dag.compiler.planner;
 
 import java.text.MessageFormat;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.Deque;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -31,6 +34,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +46,9 @@ import com.asakusafw.dag.compiler.planner.PlanningContext.Option;
 import com.asakusafw.lang.compiler.api.CompilerOptions;
 import com.asakusafw.lang.compiler.api.JobflowProcessor;
 import com.asakusafw.lang.compiler.common.AttributeContainer;
+import com.asakusafw.lang.compiler.common.BasicDiagnostic;
+import com.asakusafw.lang.compiler.common.Diagnostic;
+import com.asakusafw.lang.compiler.common.DiagnosticException;
 import com.asakusafw.lang.compiler.model.description.TypeDescription;
 import com.asakusafw.lang.compiler.model.graph.CoreOperator;
 import com.asakusafw.lang.compiler.model.graph.CoreOperator.CoreOperatorKind;
@@ -78,6 +85,7 @@ import com.asakusafw.lang.compiler.planning.SubPlan;
 import com.asakusafw.lang.compiler.planning.util.GraphStatistics;
 import com.asakusafw.lang.utils.common.Optionals;
 import com.asakusafw.utils.graph.Graph;
+import com.asakusafw.utils.graph.Graphs;
 
 /**
  * Utilities for execution planning on Asakusa DAG compiler.
@@ -100,13 +108,17 @@ public final class DagPlanning {
 
     static final Logger LOG = LoggerFactory.getLogger(DagPlanning.class);
 
-    private static final int OPTIMIZATION_STEP_LIMIT = 1_000;
+    private static final int REDUCTION_STEP_LIMIT = 1_000;
 
     /**
      * The compiler property key prefix of planning options.
      * @see Option
      */
     public static final String KEY_OPTION_PREFIX = "dag.planning.option."; //$NON-NLS-1$
+
+    static final Comparator<Operator> OPERATOR_ORDER = Comparator
+            .comparingLong(Operator::getOriginalSerialNumber)
+            .thenComparingLong(Operator::getSerialNumber);
 
     private DagPlanning() {
         return;
@@ -208,6 +220,21 @@ public final class DagPlanning {
         fixOperatorGraph(context, graph);
         insertPlanMarkers(context, graph);
         Planning.simplifyTerminators(graph);
+        validate(graph);
+    }
+
+    private static void validate(OperatorGraph graph) {
+        Graph<Operator> dependencies = Planning.toDependencyGraph(graph);
+        Set<Set<Operator>> circuits = Graphs.findCircuit(dependencies);
+        if (circuits.isEmpty() == false) {
+            List<Diagnostic> diagnostics = new ArrayList<>();
+            for (Set<Operator> loop : circuits) {
+                diagnostics.add(new BasicDiagnostic(Diagnostic.Level.ERROR, MessageFormat.format(
+                        "operator graph must be acyclic: {0}",
+                        loop)).with(graph));
+            }
+            throw new DiagnosticException(diagnostics);
+        }
     }
 
     private static void fixOperatorGraph(PlanningContext context, OperatorGraph graph) {
@@ -216,18 +243,18 @@ public final class DagPlanning {
                 context.getEstimator(),
                 context.getClassifier(),
                 graph.getOperators(false));
-        for (Operator operator : graph.getOperators(true)) {
-            if (operator.getOperatorKind() != OperatorKind.USER) {
-                continue;
-            }
-            OperatorClass info = characteristics.get(operator);
-            if (isFixTarget(info)) {
-                Operator replacement = fixOperator(info);
-                Operators.replace(operator, replacement);
-                graph.add(replacement);
-                graph.remove(operator);
-            }
-        }
+        graph.getOperators(false).stream()
+                .filter(it -> it.getOperatorKind() == OperatorKind.USER)
+                .sorted(OPERATOR_ORDER)
+                .map(characteristics::get)
+                .filter(it -> isFixTarget(it))
+                .forEach(info -> {
+                    LOG.debug("fixing operator: {}", info.getOperator());
+                    Operator replacement = fixOperator(info);
+                    Operators.replace(info.getOperator(), replacement);
+                    graph.add(replacement);
+                    graph.remove(info.getOperator());
+                });
         graph.rebuild();
     }
 
@@ -286,10 +313,10 @@ public final class DagPlanning {
             step++;
             LOG.debug("optimize step#{}", step);
             Planning.removeDeadFlow(graph);
-            if (step > OPTIMIZATION_STEP_LIMIT) {
+            if (step > REDUCTION_STEP_LIMIT) {
                 LOG.warn(MessageFormat.format(
                         "the number of optimization steps exceeded limit: {0}",
-                        OPTIMIZATION_STEP_LIMIT));
+                        REDUCTION_STEP_LIMIT));
                 break;
             }
             OperatorGraph.Snapshot before = graph.getSnapshot();
@@ -317,6 +344,9 @@ public final class DagPlanning {
                 insertPlanMarkerForEnsuringExternalInput(info);
             }
             insertPlanMarkerForPreparingExternalOutput(info);
+        }
+        if (context.getOptions().contains(Option.REMOVE_CYCLIC_BROADCASTS)) {
+            removeCyclicBroadcast(graph);
         }
         graph.rebuild();
     }
@@ -392,13 +422,110 @@ public final class DagPlanning {
         PlanMarkers.insert(PlanMarker.CHECKPOINT, output.getOperatorPort());
     }
 
+    private static void removeCyclicBroadcast(OperatorGraph graph) {
+        int step = 0;
+        boolean changed;
+        do {
+            step++;
+            if (step > REDUCTION_STEP_LIMIT) {
+                LOG.warn(MessageFormat.format(
+                        "removing cyclic broadcast step was exceeded: {0}",
+                        REDUCTION_STEP_LIMIT));
+                break;
+            }
+            changed = removeCyclicBroadcast0(graph);
+        } while (changed);
+    }
+
+    private static boolean removeCyclicBroadcast0(OperatorGraph graph) {
+        graph.rebuild();
+        List<MarkerOperator> primaries = graph.getOperators(false).stream()
+                .filter(it -> it instanceof MarkerOperator)
+                .map(it -> (MarkerOperator) it)
+                .filter(it -> PlanMarkers.get(it) != PlanMarker.BROADCAST)
+                .filter(it -> PlanMarkers.get(it) != PlanMarker.END)
+                .collect(Collectors.toList());
+
+        Graph<MarkerOperator> dependencies = Graphs.newInstance();
+        for (MarkerOperator primary : primaries) {
+            Set<Operator> downstreams = Operators.findNearestReachableSuccessors(
+                    primary.getOutputs(), PlanMarkers::exists);
+            Operators.findNearestReachablePredecessors(
+                    downstreams.stream().flatMap(it -> it.getInputs().stream()).collect(Collectors.toList()),
+                    PlanMarkers::exists).stream()
+                    .filter(it -> PlanMarkers.get(it) == PlanMarker.BROADCAST)
+                    .map(it -> (MarkerOperator) it)
+                    .forEach(upstream -> downstreams.stream()
+                            .filter(it -> PlanMarkers.get(it) == PlanMarker.BROADCAST)
+                            .map(it -> (MarkerOperator) it)
+                            .forEach(downstream -> dependencies.addEdge(upstream, downstream)));
+        }
+
+        // pick up a cyclic element
+        MarkerOperator candidate = Graphs.findCircuit(dependencies).stream()
+                // NOTE: self cyclic dependency will remove another phase
+                .filter(it -> it.size() >= 2)
+                .flatMap(it -> it.stream())
+                // require at least one non-primary operator in the successors
+                .filter(op -> Operators.getSuccessors(op).stream()
+                        .anyMatch(it -> isPrimaryOperator(it) == false))
+                .min(Comparator
+                        .comparingLong((MarkerOperator op) -> Operators.getSuccessors(op).stream()
+                                .filter(it -> isPrimaryOperator(it) == false)
+                                .count())
+                        .thenComparing((Comparator<MarkerOperator>) (a, b) -> {
+                            Operator as = Operators.getSuccessors(a).stream().min(OPERATOR_ORDER).orElse(a);
+                            Operator bs = Operators.getSuccessors(b).stream().min(OPERATOR_ORDER).orElse(a);
+                            return OPERATOR_ORDER.compare(as, bs);
+                        }))
+                .orElse(null);
+        if (candidate == null) {
+            return false;
+        }
+
+        // insert plan markers to the inputs of cyclic broadcast consumer
+        List<OperatorInput> targets = Operators.getSuccessors(candidate).stream()
+                .flatMap(it -> it.getInputs().stream())
+                .filter(it -> Operators.getPredecessors(Collections.singleton(it)).stream()
+                        .noneMatch(PlanMarkers::exists))
+                .collect(Collectors.toList());
+
+        assert targets.isEmpty() == false;
+        LOG.debug("resolving cyclic broadcast dependencies: {}", targets);
+        targets.forEach(it -> PlanMarkers.insert(PlanMarker.CHECKPOINT, it));
+        return true;
+    }
+
+    private static boolean isPrimaryOperator(Operator operator) {
+        return Operators.getPredecessors(operator).stream()
+                .filter(op -> PlanMarkers.get(op) != PlanMarker.BROADCAST)
+                .anyMatch(PlanMarkers::exists);
+    }
+
     static PlanDetail createPlan(PlanningContext context, OperatorGraph normalized) {
         PlanDetail primitive = createPrimitivePlan(context, normalized);
+        validate(primitive);
+
         PlanDetail unified = unifySubPlans(context, primitive);
+        validate(unified);
 
         SubPlanAnalyzer analyzer = SubPlanAnalyzer.newInstance(context, unified, normalized);
         decoratePlan(context, unified.getPlan(), analyzer);
         return unified;
+    }
+
+    private static void validate(PlanDetail detail) {
+        Graph<SubPlan> dependencies = Planning.toDependencyGraph(detail.getPlan());
+        Set<Set<SubPlan>> circuits = Graphs.findCircuit(dependencies);
+        if (circuits.isEmpty() == false) {
+            List<Diagnostic> diagnostics = new ArrayList<>();
+            for (Set<SubPlan> loop : circuits) {
+                diagnostics.add(new BasicDiagnostic(Diagnostic.Level.ERROR, MessageFormat.format(
+                        "plan must be acyclic: {0}",
+                        loop)).with(dependencies));
+            }
+            throw new DiagnosticException(diagnostics);
+        }
     }
 
     private static PlanDetail createPrimitivePlan(PlanningContext context, OperatorGraph graph) {
@@ -497,7 +624,7 @@ public final class DagPlanning {
 
     private static Set<SubPlan> computeBlockers(Graph<SubPlan> dependencies, SubPlanGroup group) {
         Set<SubPlan> saw = new HashSet<>();
-        LinkedList<SubPlan> work = new LinkedList<>(group.elements);
+        Deque<SubPlan> work = new ArrayDeque<>(group.elements);
         while (work.isEmpty() == false) {
             SubPlan first = work.removeFirst();
             for (SubPlan blocker : dependencies.getConnected(first)) {

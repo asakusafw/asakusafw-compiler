@@ -635,6 +635,57 @@ public class VanillaJobflowProcessorTest extends VanillaCompilerTesterRoot {
     }
 
     /**
+     * join each other.
+     * @throws Exception if failed
+     */
+    @Test
+    public void join_cross() throws Exception {
+        testio.input("in0", MockDataModel.class, o -> {
+            o.write(new MockDataModel(0, "Hello0"));
+        });
+        testio.input("in1", MockDataModel.class, o -> {
+            o.write(new MockDataModel(0, "Hello1"));
+        });
+        testio.output("out0", MockDataModel.class, o -> {
+            assertThat(o, hasSize(2));
+        });
+        testio.output("out1", MockDataModel.class, o -> {
+            assertThat(o, hasSize(0));
+        });
+        /*
+         * [In0] --\-/--> [Join0] --\
+         *          X                +--> [Out0,1]
+         * [In1] --/-\--> [Join1] --/
+         *
+         */
+        run(profile, executor, g -> g
+                .input("in0", TestInput.of("in0", MockDataModel.class, DataSize.TINY))
+                .input("in1", TestInput.of("in1", MockDataModel.class, DataSize.TINY))
+                .operator("op0", Ops.class, "join_self", b -> b
+                        .input("mst", typeOf(MockDataModel.class), group("key"))
+                        .input("tx", typeOf(MockDataModel.class), group("key"))
+                        .output("joined", typeOf(MockDataModel.class))
+                        .output("missed", typeOf(MockDataModel.class))
+                        .build())
+                .operator("op1", Ops.class, "join_self", b -> b
+                        .input("mst", typeOf(MockDataModel.class), group("key"))
+                        .input("tx", typeOf(MockDataModel.class), group("key"))
+                        .output("joined", typeOf(MockDataModel.class))
+                        .output("missed", typeOf(MockDataModel.class))
+                        .build())
+                .output("out0", TestOutput.of("out0", MockDataModel.class))
+                .output("out1", TestOutput.of("out1", MockDataModel.class))
+                .connect("in0", "op0.tx")
+                .connect("in0", "op1.mst")
+                .connect("in1", "op1.tx")
+                .connect("in1", "op0.mst")
+                .connect("op0.joined", "out0")
+                .connect("op0.missed", "out1")
+                .connect("op1.joined", "out0")
+                .connect("op1.missed", "out1"));
+    }
+
+    /**
      * join w/ orphaned tx port.
      * @throws Exception if failed
      */

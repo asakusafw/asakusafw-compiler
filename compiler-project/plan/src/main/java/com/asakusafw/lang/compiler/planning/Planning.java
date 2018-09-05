@@ -42,6 +42,8 @@ import com.asakusafw.utils.graph.Graphs;
  * Utilities for execution planning.
  * @see Operators
  * @see PlanMarkers
+ * @since 0.1.0
+ * @version 0.5.2
  */
 public final class Planning {
 
@@ -507,6 +509,23 @@ public final class Planning {
      */
     public static PlanAssembler startAssemblePlan(PlanDetail detail) {
         return new PlanAssembler(detail);
+    }
+
+    /**
+     * Returns a sub-plan dependency graph for the specified operator graph.
+     * @param operators the target operator graph
+     * @return a operator dependency graph ({@code operator -> its predecessors})
+     * @since 0.5.2
+     */
+    public static Graph<Operator> toDependencyGraph(OperatorGraph operators) {
+        Graph<Operator> results = Graphs.newInstance();
+        for (Operator element : operators.getOperators(false)) {
+            results.addNode(element);
+            for (Operator pred : Operators.getPredecessors(element)) {
+                results.addEdge(element, pred);
+            }
+        }
+        return results;
     }
 
     /**

@@ -20,14 +20,16 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
+import com.asakusafw.lang.compiler.common.Adaptable;
 import com.asakusafw.lang.compiler.model.graph.Operator;
 
 /**
  * Detail information for {@link Plan} for re-organizing execution plans.
  */
-public class PlanDetail {
+public class PlanDetail implements Adaptable {
 
     private final Plan plan;
 
@@ -159,6 +161,14 @@ public class PlanDetail {
             return null;
         }
         return mapping.owner;
+    }
+
+    @Override
+    public <T> Optional<T> findAdapter(Class<T> type) {
+        if (type.isInstance(plan)) {
+            return Optional.of(type.cast(plan));
+        }
+        return Adaptable.super.findAdapter(type);
     }
 
     private static final class Mapping {

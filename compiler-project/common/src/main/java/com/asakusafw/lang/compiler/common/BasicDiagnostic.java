@@ -16,6 +16,9 @@
 package com.asakusafw.lang.compiler.common;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * A basic implementation of {@link Diagnostic}.
@@ -30,6 +33,8 @@ public final class BasicDiagnostic implements Diagnostic {
 
     private Exception cause;
 
+    private transient List<Object> adapters;
+
     /**
      * Creates a new instance for serializer.
      */
@@ -43,8 +48,7 @@ public final class BasicDiagnostic implements Diagnostic {
      * @param message the diagnostic message
      */
     public BasicDiagnostic(Level level, String message) {
-        this.level = level;
-        this.message = message;
+        this(level, message, null);
     }
 
     /**
@@ -72,6 +76,24 @@ public final class BasicDiagnostic implements Diagnostic {
     @Override
     public Exception getException() {
         return cause;
+    }
+
+    /**
+     * Adds an adapter object.
+     * @param adapter adapter object
+     * @return this
+     */
+    public BasicDiagnostic with(Object adapter) {
+        if (adapters == null) {
+            adapters = new ArrayList<>();
+        }
+        adapters.add(adapter);
+        return this;
+    }
+
+    @Override
+    public <T> Optional<T> findAdapter(Class<T> type) {
+        return Adaptables.find(type, this, adapters.stream());
     }
 
     @Override
