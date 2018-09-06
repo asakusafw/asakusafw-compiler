@@ -17,10 +17,13 @@ package com.asakusafw.lang.compiler.planning;
 
 import java.text.MessageFormat;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import com.asakusafw.lang.compiler.model.graph.ExternalInput;
 import com.asakusafw.lang.compiler.model.graph.ExternalOutput;
@@ -51,6 +54,14 @@ public final class Planning {
      * A predicate only accepts plan markers.
      */
     public static final Predicate<Operator> PLAN_MARKERS = PlanMarkers::exists;
+
+    /**
+     * A basic operator comparator.
+     * @since 0.5.2
+     */
+    public static final Comparator<Operator> OPERATOR_ORDER = Comparator
+            .comparingLong(Operator::getOriginalSerialNumber)
+            .thenComparingLong(Operator::getSerialNumber);
 
     private Planning() {
         return;
@@ -293,6 +304,62 @@ public final class Planning {
         }
         results.addAll(Operators.getTransitivePredecessors(edges));
         return results;
+    }
+
+    /**
+     * Collects potentially cyclic broadcast operators.
+     * @param operators the source operators
+     * @return a broadcast marker operator which potentially organizes cyclic dependencies
+     * @since 0.5.2
+     */
+    public static MarkerOperator findPotentiallyCyclicBroadcast(Collection<Operator> operators) {
+        List<MarkerOperator> primaries = operators.stream()
+                .filter(it -> it instanceof MarkerOperator)
+                .map(it -> (MarkerOperator) it)
+                .filter(it -> PlanMarkers.get(it) != PlanMarker.BROADCAST)
+                .filter(it -> PlanMarkers.get(it) != PlanMarker.END)
+                .collect(Collectors.toList());
+
+        Graph<MarkerOperator> dependencies = Graphs.newInstance();
+        for (MarkerOperator primary : primaries) {
+            Set<Operator> downstreams = Operators.findNearestReachableSuccessors(
+                    primary.getOutputs(), PlanMarkers::exists);
+            Operators.findNearestReachablePredecessors(
+                    downstreams.stream().flatMap(it -> it.getInputs().stream()).collect(Collectors.toList()),
+                    PlanMarkers::exists).stream()
+                    .filter(it -> PlanMarkers.get(it) == PlanMarker.BROADCAST)
+                    .map(it -> (MarkerOperator) it)
+                    .forEach(upstream -> downstreams.stream()
+                            .filter(it -> PlanMarkers.get(it) == PlanMarker.BROADCAST)
+                            .map(it -> (MarkerOperator) it)
+                            .forEach(downstream -> dependencies.addEdge(upstream, downstream)));
+        }
+
+        // pick up a cyclic element
+        return Graphs.findCircuit(dependencies).stream()
+                // NOTE: self cyclic dependency will remove another phase
+                .filter(it -> it.size() >= 2)
+                .flatMap(it -> it.stream())
+                .distinct()
+                // require at least one non-primary operator in the successors
+                .filter(op -> Operators.getSuccessors(op).stream()
+                        .anyMatch(it -> isPrimaryOperator(it) == false))
+                .min(Comparator
+                        .comparingLong((MarkerOperator op) -> Operators.getSuccessors(op).stream()
+                                .filter(it -> isPrimaryOperator(it) == false)
+                                .count())
+                        .thenComparing((Comparator<MarkerOperator>) (a, b) -> {
+                            Operator as = Operators.getSuccessors(a).stream().min(Planning.OPERATOR_ORDER).orElse(a);
+                            Operator bs = Operators.getSuccessors(b).stream().min(Planning.OPERATOR_ORDER).orElse(a);
+                            return Planning.OPERATOR_ORDER.compare(as, bs);
+                        }))
+                .orElse(null);
+    }
+
+    private static boolean isPrimaryOperator(Operator operator) {
+        return Operators.getPredecessors(operator).stream()
+                .filter(op -> PlanMarkers.get(op) != PlanMarker.BROADCAST)
+                .anyMatch(PlanMarkers::exists);
     }
 
     /**
