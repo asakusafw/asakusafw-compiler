@@ -124,6 +124,8 @@ public class PlanningContext {
 
     /**
      * Represents an option for planning.
+     * @since 0.4.0
+     * @version 0.5.2
      */
     public enum Option {
 
@@ -136,6 +138,12 @@ public class PlanningContext {
          * Inserts {@code CHECKPOINT} after external inputs.
          */
         CHECKPOINT_AFTER_EXTERNAL_INPUTS(false),
+
+        /**
+         * Removes cyclic broadcast operations.
+         * @since 0.5.2
+         */
+        REMOVE_CYCLIC_BROADCASTS(true),
 
         /**
          * Enables {@link GraphStatistics}.

@@ -15,9 +15,10 @@
  */
 package com.asakusafw.lang.compiler.model.graph;
 
+import java.util.ArrayDeque;
 import java.util.Collection;
+import java.util.Deque;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -146,7 +147,7 @@ public final class Operators {
      */
     public static Set<Operator> getTransitiveSuccessors(Collection<OperatorOutput> ports) {
         Set<Operator> results = new HashSet<>();
-        LinkedList<Operator> work = new LinkedList<>(getSuccessors(ports));
+        Deque<Operator> work = new ArrayDeque<>(getSuccessors(ports));
         while (work.isEmpty() == false) {
             Operator operator = work.removeFirst();
             if (results.contains(operator)) {
@@ -171,7 +172,7 @@ public final class Operators {
      */
     public static Set<Operator> getTransitivePredecessors(Collection<OperatorInput> ports) {
         Set<Operator> results = new HashSet<>();
-        LinkedList<Operator> work = new LinkedList<>(getPredecessors(ports));
+        Deque<Operator> work = new ArrayDeque<>(getPredecessors(ports));
         while (work.isEmpty() == false) {
             Operator operator = work.removeFirst();
             if (results.contains(operator)) {
@@ -196,7 +197,7 @@ public final class Operators {
      */
     public static Set<Operator> getTransitiveConnected(Collection<? extends Operator> operators) {
         Set<Operator> results = new HashSet<>(operators);
-        LinkedList<Operator> work = new LinkedList<>(operators);
+        Deque<Operator> work = new ArrayDeque<>(operators);
         while (work.isEmpty() == false) {
             Operator current = work.removeFirst();
             for (OperatorPort port : current.getInputs()) {
@@ -234,7 +235,7 @@ public final class Operators {
             Predicate<? super Operator> predicate) {
         Set<Operator> results = new HashSet<>();
         Set<Operator> saw = new HashSet<>();
-        LinkedList<Operator> work = new LinkedList<>(getSuccessors(ports));
+        Deque<Operator> work = new ArrayDeque<>(getSuccessors(ports));
         while (work.isEmpty() == false) {
             Operator operator = work.removeFirst();
             if (saw.contains(operator)) {
@@ -262,7 +263,7 @@ public final class Operators {
             Predicate<? super Operator> predicate) {
         Set<Operator> results = new HashSet<>();
         Set<Operator> saw = new HashSet<>();
-        LinkedList<Operator> work = new LinkedList<>(getPredecessors(ports));
+        Deque<Operator> work = new ArrayDeque<>(getPredecessors(ports));
         while (work.isEmpty() == false) {
             Operator operator = work.removeFirst();
             if (saw.contains(operator)) {
@@ -292,7 +293,7 @@ public final class Operators {
             boolean inclusive) {
         Set<Operator> results = new HashSet<>();
         Set<Operator> saw = new HashSet<>();
-        LinkedList<Operator> work = new LinkedList<>(getSuccessors(ports));
+        Deque<Operator> work = new ArrayDeque<>(getSuccessors(ports));
         while (work.isEmpty() == false) {
             Operator operator = work.removeFirst();
             if (saw.contains(operator)) {
@@ -325,7 +326,7 @@ public final class Operators {
             boolean inclusive) {
         Set<Operator> results = new HashSet<>();
         Set<Operator> saw = new HashSet<>();
-        LinkedList<Operator> work = new LinkedList<>(getPredecessors(ports));
+        Deque<Operator> work = new ArrayDeque<>(getPredecessors(ports));
         while (work.isEmpty() == false) {
             Operator operator = work.removeFirst();
             if (saw.contains(operator)) {

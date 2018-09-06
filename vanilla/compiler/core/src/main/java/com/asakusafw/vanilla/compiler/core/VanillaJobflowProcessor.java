@@ -17,8 +17,10 @@ package com.asakusafw.vanilla.compiler.core;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.Arrays;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +44,7 @@ import com.asakusafw.lang.compiler.hadoop.HadoopCommandRequired;
 import com.asakusafw.lang.compiler.inspection.InspectionExtension;
 import com.asakusafw.lang.compiler.model.description.ClassDescription;
 import com.asakusafw.lang.compiler.model.graph.Jobflow;
+import com.asakusafw.lang.compiler.model.graph.OperatorGraph;
 import com.asakusafw.lang.compiler.model.info.JobflowInfo;
 import com.asakusafw.lang.compiler.planning.Plan;
 import com.asakusafw.lang.compiler.planning.PlanDetail;
@@ -62,6 +65,10 @@ public class VanillaJobflowProcessor implements JobflowProcessor {
      * The compiler option key prefix.
      */
     public static final String KEY_PREFIX = "vanilla."; //$NON-NLS-1$
+
+    static final String KEY_SAVE_ERRONEOUS_OPERATOR_GRAPH = KEY_PREFIX + "error.operator";
+
+    static final String KEY_SAVE_ERRONEOUS_PLAN = KEY_PREFIX + "error.plan";
 
     static final String KEY_CODEGEN = KEY_PREFIX + "codegen"; //$NON-NLS-1$
 
@@ -88,8 +95,34 @@ public class VanillaJobflowProcessor implements JobflowProcessor {
     }
 
     private static Plan plan(Context context, Jobflow source) {
-        PlanDetail detail = DagPlanning.plan(context, source);
-        return detail.getPlan();
+        try {
+            PlanDetail detail = DagPlanning.plan(context, source);
+            return detail.getPlan();
+        } catch (DiagnosticException e) {
+            try {
+                e.findAdapter(OperatorGraph.class).ifPresent(it -> {
+                    LOG.debug("erroneous operator graph was found, -D{}=/path/to/file to save its info",
+                            KEY_SAVE_ERRONEOUS_OPERATOR_GRAPH);
+                    Optional.ofNullable(System.getProperty(KEY_SAVE_ERRONEOUS_OPERATOR_GRAPH)).ifPresent(s -> {
+                        InspectionExtension.inspect(context, Paths.get(s), it);
+                    });
+                });
+            } catch (RuntimeException inner) {
+                e.addSuppressed(inner);
+            }
+            try {
+                e.findAdapter(Plan.class).ifPresent(it -> {
+                    LOG.debug("erroneous plan graph was found, -D{}=/path/to/file to save its info",
+                            KEY_SAVE_ERRONEOUS_PLAN);
+                    Optional.ofNullable(System.getProperty(KEY_SAVE_ERRONEOUS_PLAN)).ifPresent(s -> {
+                        InspectionExtension.inspect(context, Paths.get(s), it);
+                    });
+                });
+            } catch (RuntimeException inner) {
+                e.addSuppressed(inner);
+            }
+            throw e;
+        }
     }
 
     private static GraphInfo generateGraph(JobflowProcessor.Context context, JobflowInfo info, Plan plan) {

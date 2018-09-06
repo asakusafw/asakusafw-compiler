@@ -17,7 +17,12 @@ package com.asakusafw.lang.compiler.inspection;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.MessageFormat;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.asakusafw.lang.compiler.common.Diagnostic;
 import com.asakusafw.lang.compiler.common.DiagnosticException;
@@ -31,6 +36,8 @@ import com.asakusafw.lang.inspection.json.JsonInspectionNodeRepository;
  * An abstract implementation of {@link InspectionExtension}.
  */
 public abstract class AbstractInspectionExtension extends InspectionExtension implements ResourceContainer {
+
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractInspectionExtension.class);
 
     private final ObjectInspector inspector;
 
@@ -60,8 +67,22 @@ public abstract class AbstractInspectionExtension extends InspectionExtension im
 
     @Override
     public void inspect(Location location, Object element) {
+        LOG.debug("saving inspection info to package: {}", location); //$NON-NLS-1$
         InspectionNode node = inspector.inspect(element);
         try (OutputStream output = addResource(location)) {
+            repository.store(output, node);
+        } catch (IOException e) {
+            throw new DiagnosticException(Diagnostic.Level.ERROR, MessageFormat.format(
+                    "failed to save inspection object: {0}",
+                    node), e);
+        }
+    }
+
+    @Override
+    public void inspect(Path path, Object element) {
+        LOG.debug("saving inspection info to path: {}", path); //$NON-NLS-1$
+        InspectionNode node = inspector.inspect(element);
+        try (OutputStream output = Files.newOutputStream(path)) {
             repository.store(output, node);
         } catch (IOException e) {
             throw new DiagnosticException(Diagnostic.Level.ERROR, MessageFormat.format(
