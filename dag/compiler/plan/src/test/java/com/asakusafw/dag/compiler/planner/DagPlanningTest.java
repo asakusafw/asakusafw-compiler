@@ -515,6 +515,68 @@ in0 +-- *C [C0]
     }
 
     /**
+     * avoiding cyclic dependencies with broadcast.
+<pre>{@code
+in +------------+ x1 --- out
+    \          /
+     +-- x0 --+
+==>
+
+in ----- *C ------------------+ x1 --- *C --- out
+    \                        /
+     +-- *G --- x0 --- *B --+
+}</pre>
+     */
+    @Test
+    public void broadcast_dag_complex() {
+        MockOperators m = new MockOperators();
+        PlanDetail detail = DagPlanning.plan(context(), m
+            .input("in", DataSize.TINY)
+            .bless("x0", op(CoGroup.class, "cogroup")
+                    .input("in", m.getCommonDataType(), group("=a"))
+                    .output("out", m.getCommonDataType()))
+                .connect("in", "x0")
+            .bless("x1", op(Extract.class, "extract")
+                    .input("t", m.getCommonDataType())
+                    .input("m", m.getCommonDataType(), c -> c
+                            .unit(InputUnit.WHOLE)
+                            .group(group())
+                            .attribute(ViewInfo.class, ViewInfo.flat()))
+                    .output("out", m.getCommonDataType()))
+                .connect("in", "x1.t")
+                .connect("x0", "x1.m")
+            .output("out").connect("x1", "out")
+            .toGraph());
+        MockOperators mock = restore(detail);
+        Plan plan = detail.getPlan();
+        assertThat(plan.getElements(), hasSize(4));
+
+        SubPlan s0 = ownerOf(detail, mock.get("in"));
+        SubPlan s1 = ownerOf(detail, mock.get("x0"));
+        SubPlan s2 = ownerOf(detail, mock.get("x1"));
+        SubPlan s3 = ownerOf(detail, mock.get("out"));
+
+        assertThat(pred(s0), is(empty()));
+        assertThat(pred(s1), containsInAnyOrder(s0));
+        assertThat(pred(s2), containsInAnyOrder(s0, s1));
+        assertThat(pred(s3), containsInAnyOrder(s2));
+
+        assertThat(s0.getOutputs(), containsInAnyOrder(Arrays.asList(
+                outputType(is(OutputType.VALUE)),
+                outputType(is(OutputType.KEY_VALUE)))));
+
+        assertThat(s1.getInputs(), contains(inputType(is(InputType.CO_GROUP))));
+        assertThat(s1.getOutputs(), contains(outputType(is(OutputType.BROADCAST))));
+
+        assertThat(s2.getInputs(), containsInAnyOrder(Arrays.asList(
+                inputType(is(InputType.EXTRACT)),
+                inputType(is(InputType.BROADCAST)))));
+        assertThat(s2.getOutputs(), contains(outputType(is(OutputType.VALUE))));
+
+        assertThat(s3.getInputs(), contains(inputType(is(InputType.EXTRACT))));
+    }
+
+    /**
      * multiple broadcast inputs.
 <pre>{@code
 in0 --+ o0 --+ o1 --+ o2 --- out
