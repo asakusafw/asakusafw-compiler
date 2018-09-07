@@ -324,20 +324,20 @@ public final class Planning {
         for (MarkerOperator primary : primaries) {
             Set<Operator> downstreams = Operators.findNearestReachableSuccessors(
                     primary.getOutputs(), PlanMarkers::exists);
-            Operators.findNearestReachablePredecessors(
+            Set<Operator> upstreams = Operators.findNearestReachablePredecessors(
                     downstreams.stream().flatMap(it -> it.getInputs().stream()).collect(Collectors.toList()),
-                    PlanMarkers::exists).stream()
-                    .filter(it -> PlanMarkers.get(it) == PlanMarker.BROADCAST)
-                    .map(it -> (MarkerOperator) it)
-                    .forEach(upstream -> downstreams.stream()
-                            .filter(it -> PlanMarkers.get(it) == PlanMarker.BROADCAST)
-                            .map(it -> (MarkerOperator) it)
-                            .forEach(downstream -> dependencies.addEdge(upstream, downstream)));
+                    PlanMarkers::exists);
+            upstreams.stream()
+                .map(it -> (MarkerOperator) it)
+                .forEach(upstream -> downstreams.stream()
+                        .map(it -> (MarkerOperator) it)
+                        .forEach(downstream -> dependencies.addEdge(upstream, downstream)));
         }
-
         // pick up a cyclic element
-        return Graphs.findCircuit(dependencies).stream()
+        Set<Set<MarkerOperator>> circuits = Graphs.findCircuit(dependencies);
+        return circuits.stream()
                 .flatMap(it -> it.stream())
+                .filter(it -> PlanMarkers.get(it) == PlanMarker.BROADCAST)
                 .distinct()
                 // require at least one non-primary operator in the successors
                 .filter(op -> Operators.getSuccessors(op).stream()
