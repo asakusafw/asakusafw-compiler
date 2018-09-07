@@ -337,8 +337,6 @@ public final class Planning {
 
         // pick up a cyclic element
         return Graphs.findCircuit(dependencies).stream()
-                // NOTE: self cyclic dependency will remove another phase
-                .filter(it -> it.size() >= 2)
                 .flatMap(it -> it.stream())
                 .distinct()
                 // require at least one non-primary operator in the successors
