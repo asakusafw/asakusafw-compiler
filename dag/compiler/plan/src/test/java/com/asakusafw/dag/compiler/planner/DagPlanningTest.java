@@ -512,9 +512,6 @@ in0 +-- *C [C0]
         assertThat(si1.getOutputs(), containsInAnyOrder(Arrays.asList(
                 outputType(is(OutputType.VALUE)),
                 outputType(is(OutputType.BROADCAST)))));
-
-        assertThat(sx0.getInputs(), hasItem(inputType(is(InputType.BROADCAST))));
-        assertThat(sx1.getInputs(), hasItem(inputType(is(InputType.BROADCAST))));
     }
 
     /**
