@@ -30,10 +30,14 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.asakusafw.lang.compiler.analyzer.FlowGraphVerifier;
 import com.asakusafw.lang.compiler.api.reference.CommandTaskReference;
 import com.asakusafw.lang.compiler.api.reference.JobflowReference;
 import com.asakusafw.lang.compiler.api.reference.TaskReference;
+import com.asakusafw.lang.compiler.common.Diagnostic;
 import com.asakusafw.lang.compiler.common.DiagnosticException;
 import com.asakusafw.lang.compiler.common.Location;
 import com.asakusafw.lang.compiler.core.ClassAnalyzer;
@@ -83,6 +87,8 @@ import com.asakusafw.workflow.model.basic.BasicTaskInfo;
 
 class CompilerSessionAdapter implements CompilerSession {
 
+    static final Logger LOG = LoggerFactory.getLogger(CompilerSessionAdapter.class);
+
     private static final Map<TaskReference.Phase, TaskInfo.Phase> PHASE_MAPPING;
     static {
         Map<TaskReference.Phase, TaskInfo.Phase> map = new EnumMap<>(TaskReference.Phase.class);
@@ -107,7 +113,7 @@ class CompilerSessionAdapter implements CompilerSession {
             BatchArtifact artifact = tester.compile(batch);
             return convert(artifact, batch, escape(tester, artifact.getReference()));
         } catch (DiagnosticException e) {
-            throw new IOException(e);
+            throw translateException(e);
         }
     }
 
@@ -118,7 +124,7 @@ class CompilerSessionAdapter implements CompilerSession {
             JobflowArtifact artifact = tester.compile(jobflow);
             return convert(artifact, jobflow, escape(tester, artifact.getBatch()));
         } catch (DiagnosticException e) {
-            throw new IOException(e);
+            throw translateException(e);
         }
     }
 
@@ -137,7 +143,7 @@ class CompilerSessionAdapter implements CompilerSession {
             artifact.getReference().putAttribute(FlowGraph.class, graph);
             return convert(artifact, jobflow, escape(tester, artifact.getBatch()));
         } catch (DiagnosticException e) {
-            throw new IOException(e);
+            throw translateException(e);
         }
     }
 
@@ -385,6 +391,37 @@ class CompilerSessionAdapter implements CompilerSession {
         } else {
             return null;
         }
+    }
+
+    private static IOException translateException(DiagnosticException exception) {
+        for (Diagnostic diagnostic : exception.getDiagnostics()) {
+            switch (diagnostic.getLevel()) {
+            case ERROR:
+                if (diagnostic.getException() == null) {
+                    LOG.error(diagnostic.getMessage());
+                } else {
+                    LOG.error(diagnostic.getMessage(), diagnostic.getException());
+                }
+                break;
+            case WARN:
+                if (diagnostic.getException() == null) {
+                    LOG.warn(diagnostic.getMessage());
+                } else {
+                    LOG.warn(diagnostic.getMessage(), diagnostic.getException());
+                }
+                break;
+            case INFO:
+                if (diagnostic.getException() == null) {
+                    LOG.info(diagnostic.getMessage());
+                } else {
+                    LOG.info(diagnostic.getMessage(), diagnostic.getException());
+                }
+                break;
+            default:
+                throw new AssertionError(diagnostic);
+            }
+        }
+        return new IOException(exception);
     }
 
     @Override
