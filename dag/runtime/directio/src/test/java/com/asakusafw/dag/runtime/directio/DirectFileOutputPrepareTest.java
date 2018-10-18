@@ -93,6 +93,17 @@ public class DirectFileOutputPrepareTest {
         assertThat(results, hasEntry(100, "Hello, world!"));
     }
 
+    /**
+     * flat - no sources.
+     */
+    @Test
+    public void flat_empty() {
+        flat(p -> p.bind("a", "out", "*.bin", MockDataFormat.class));
+        Map<Integer, String> results = collect("out", "", ".bin");
+        assertThat(results.keySet(), hasSize(0));
+        assertThat(directio.file("out").exists(), is(false));
+    }
+
     private Map<Integer, String> collect(String path) {
         try (ModelInput<MockData> in = WritableModelInput.open(directio.file(path))) {
             return MockData.collect(in);
