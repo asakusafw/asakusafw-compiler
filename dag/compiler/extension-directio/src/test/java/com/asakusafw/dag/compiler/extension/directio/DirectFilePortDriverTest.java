@@ -244,6 +244,53 @@ public class DirectFilePortDriverTest extends VanillaCompilerTesterRoot {
         });
     }
 
+    /**
+     * flat output w/o inputs.
+     * @throws Exception if failed
+     */
+    @Test
+    public void output_flat_empty() throws Exception {
+        testio.input("t", MockDataModel.class, o -> {
+            // no input
+        });
+        enableDirectIo();
+        run(profile, executor, g -> g
+                .input("in", TestInput.of("t", MockDataModel.class))
+                .output("out", DirectFileOutput.of("output", "*.bin", MockDataFormat.class))
+                .connect("in", "out"));
+        helper.output("output", "*.bin", MockDataFormat.class, o -> {
+            assertThat(o, is(empty()));
+        });
+
+        File output = helper.getContext().file("output");
+        assertThat(output.exists(), is(false));
+    }
+
+    /**
+     * group output w/o inputs.
+     * @throws Exception if failed
+     */
+    @Test
+    public void output_group_empty() throws Exception {
+        testio.input("t", MockDataModel.class, o -> {
+            // no input
+        });
+        enableDirectIo();
+        run(profile, executor, g -> g
+                .input("in", TestInput.of("t", MockDataModel.class))
+                .output("out", DirectFileOutput.of("output", "{key}.bin", MockDataFormat.class).withOrder("-value"))
+                .connect("in", "out"));
+        helper.output("output", "0.bin", MockDataFormat.class, o -> {
+            assertThat(o, is(empty()));
+        });
+        helper.output("output", "1.bin", MockDataFormat.class, o -> {
+            assertThat(o, is(empty()));
+        });
+
+        File output = helper.getContext().file("output");
+        assertThat(output.exists(), is(false));
+    }
+
     private void enableDirectIo() {
         Configuration configuration = helper.getContext().newConfiguration();
         profile.forFrameworkInstallation().add(LOCATION_CORE_CONFIGURATION, o -> configuration.writeXml(o));

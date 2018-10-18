@@ -113,7 +113,7 @@ public class DirectFileOutputPrepare implements VertexProcessor {
                         .append(d.getContext().getAttemptId())
                         .append(outputPattern, phAt + 1, outputPattern.length())
                         .toString();
-                return new FlatTask(d, d.newInstance(resolvedPath));
+                return new FlatTask(d, resolvedPath);
             };
         } else {
             lazy = () -> new GroupTask(resolve(conf, stage, vertexId, counters));
@@ -185,22 +185,33 @@ public class DirectFileOutputPrepare implements VertexProcessor {
 
         private final DirectFileOutputDriver driver;
 
-        private final ModelOutput<Object> output;
+        private final String path;
 
-        FlatTask(DirectFileOutputDriver driver, ModelOutput<Object> output) {
+        private volatile ModelOutput<Object> output;
+
+        FlatTask(DirectFileOutputDriver driver, String path) {
             assert driver != null;
             this.driver = driver;
-            this.output = output;
+            this.path = path;
         }
 
         @Override
         public void run(TaskProcessorContext context) throws IOException, InterruptedException {
             try (ObjectReader reader = (ObjectReader) context.getInput(INPUT_NAME)) {
-                long count = 0;
-                while (reader.nextObject()) {
-                    count++;
-                    output.write(reader.getObject());
+                if (reader.nextObject() == false) {
+                    return;
                 }
+                // initialize target output file only if the first object exists
+                ModelOutput<Object> out = output;
+                if (out == null) {
+                    out = driver.newInstance(path);
+                    output = out;
+                }
+                long count = 0;
+                do {
+                    count++;
+                    out.write(reader.getObject());
+                } while (reader.nextObject());
                 driver.getRecordCounter().add(count);
             } catch (Throwable t) {
                 driver.error(t);
@@ -211,7 +222,10 @@ public class DirectFileOutputPrepare implements VertexProcessor {
         @Override
         public void close() throws IOException, InterruptedException {
             try {
-                output.close();
+                if (output != null) {
+                    output.close();
+                    output = null;
+                }
             } catch (Throwable t) {
                 driver.error(t);
             } finally {
