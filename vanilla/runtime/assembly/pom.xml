@@ -89,6 +89,16 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
+      <groupId>com.asakusafw.dag.runtime</groupId>
+      <artifactId>asakusa-dag-extension-trace</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.asakusafw.dag.runtime</groupId>
+      <artifactId>asakusa-dag-extension-wait</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>com.asakusafw.bridge</groupId>
       <artifactId>asakusa-bridge-runtime-directio</artifactId>
       <version>${project.version}</version>
