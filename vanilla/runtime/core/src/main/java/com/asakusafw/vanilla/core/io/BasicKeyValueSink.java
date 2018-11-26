@@ -73,7 +73,7 @@ public final class BasicKeyValueSink implements KeyValueSink {
         Arguments.requireNonNull(channel);
         return (recordCount, keySize, valueSize) -> {
             long total = 0;
-            total += recordCount * Integer.BYTES * 3; // record_buffer.records[].{{key, values[]}.size, EOR}
+            total += (long) recordCount * Integer.BYTES * 3; // record_buffer.records[].{{key, values[]}.size, EOR}
             total += keySize;
             total += valueSize;
             total += Integer.BYTES; // EOF

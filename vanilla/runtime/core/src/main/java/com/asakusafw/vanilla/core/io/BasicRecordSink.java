@@ -67,7 +67,7 @@ public final class BasicRecordSink implements RecordSink {
         Arguments.requireNonNull(channel);
         return (recordCount, contentSize) -> {
             long total = 0;
-            total += recordCount * Integer.BYTES; // size fields
+            total += (long) recordCount * Integer.BYTES; // size fields
             total += contentSize;
             total += Integer.BYTES; // EOF
             Arguments.require(total <= Integer.MAX_VALUE);
