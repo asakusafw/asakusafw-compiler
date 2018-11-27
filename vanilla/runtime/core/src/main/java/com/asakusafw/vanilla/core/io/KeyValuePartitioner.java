@@ -71,7 +71,7 @@ public class KeyValuePartitioner implements KeyValueSink {
         }
         return (recordCount, keySize, valueSize) -> {
             long total = 0;
-            total += recordCount * Integer.BYTES * 3; // record_buffer.records[].{{key, values[]}.size, EOR}
+            total += (long) recordCount * Integer.BYTES * 3; // record_buffer.records[].{{key, values[]}.size, EOR}
             total += keySize;
             total += valueSize;
             total += Integer.BYTES; // EOF
