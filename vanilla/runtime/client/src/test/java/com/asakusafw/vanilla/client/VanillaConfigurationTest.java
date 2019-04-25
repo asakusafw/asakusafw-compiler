@@ -46,6 +46,8 @@ public class VanillaConfigurationTest {
         assertThat(conf.getOutputBufferSize(), is(DEFAULT_OUTPUT_BUFFER_SIZE));
         assertThat(conf.getOutputBufferFlush(), closeTo(DEFAULT_OUTPUT_BUFFER_FLUSH, 0.01));
         assertThat(conf.getOutputRecordSize(), is(DEFAULT_OUTPUT_RECORD_SIZE));
+        assertThat(conf.getMergeThreshold(), is(DEFAULT_MERGE_THRESHOLD));
+        assertThat(conf.getMergeFactor(), is(DEFAULT_MERGE_FACTOR));
     }
 
     /**
@@ -64,6 +66,8 @@ public class VanillaConfigurationTest {
         pairs.put(KEY_OUTPUT_RECORD_SIZE, 7);
         pairs.put(KEY_SWAP_DIVISION, 8);
         pairs.put(KEY_SWAP_DIRECTORY, f);
+        pairs.put(KEY_MERGE_THRESHOLD, 9);
+        pairs.put(KEY_MERGE_FACTOR, 10);
 
         VanillaConfiguration conf = VanillaConfiguration.extract(key -> Optionals.get(pairs, key)
                 .map(String::valueOf));
@@ -76,6 +80,8 @@ public class VanillaConfigurationTest {
         assertThat(conf.getOutputRecordSize(), is(7));
         assertThat(conf.getSwapDivision(), is(8));
         assertThat(conf.getSwapDirectory().getCanonicalFile(), is(f));
+        assertThat(conf.getMergeThreshold(), is(9));
+        assertThat(conf.getMergeFactor(), is(10d));
     }
 
     /**

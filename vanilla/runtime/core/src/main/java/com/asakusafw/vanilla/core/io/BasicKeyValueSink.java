@@ -20,6 +20,7 @@ import java.nio.ByteBuffer;
 
 import com.asakusafw.lang.utils.common.Arguments;
 import com.asakusafw.lang.utils.common.Invariants;
+import com.asakusafw.vanilla.core.util.Buffers;
 
 /**
  * A basic implementation of {@link KeyValueSink}.
@@ -40,6 +41,7 @@ struct record_buffer {
 };
 </code></pre>
  * @since 0.4.0
+ * @version 0.5.3
  */
 public final class BasicKeyValueSink implements KeyValueSink {
 
@@ -48,8 +50,6 @@ public final class BasicKeyValueSink implements KeyValueSink {
     private DataWriter writer;
 
     private boolean sawKey = false;
-
-    private boolean written = false;
 
     /**
      * Creates a new instance.
@@ -62,6 +62,12 @@ public final class BasicKeyValueSink implements KeyValueSink {
         Arguments.requireNonNull(channel);
         this.channel = channel;
         this.writer = channel.acquire(size);
+    }
+
+    private BasicKeyValueSink(DataWriter writer) {
+        Arguments.requireNonNull(writer);
+        this.channel = null;
+        this.writer = writer;
     }
 
     /**
@@ -84,15 +90,12 @@ public final class BasicKeyValueSink implements KeyValueSink {
 
     @Override
     public void accept(ByteBuffer key, ByteBuffer value) throws IOException, InterruptedException {
-        keyBreak();
         DataWriter w = writer;
         Invariants.requireNonNull(w);
-        w.writeInt(key.remaining());
-        w.writeFully(key);
-        w.writeInt(value.remaining());
-        w.writeFully(value);
+        keyBreak(w);
+        addItem(w, key);
+        addItem(w, value);
         sawKey = true;
-        written = true;
     }
 
     @Override
@@ -100,35 +103,110 @@ public final class BasicKeyValueSink implements KeyValueSink {
         if (sawKey) {
             DataWriter w = writer;
             Invariants.requireNonNull(w);
-            w.writeInt(value.remaining());
-            w.writeFully(value);
+            addItem(w, value);
             return true;
         } else {
             return false;
         }
     }
 
-    private void keyBreak() throws IOException, InterruptedException {
+    private void keyBreak(DataWriter w) throws IOException, InterruptedException {
         if (sawKey) {
-            DataWriter w = writer;
-            Invariants.requireNonNull(w);
-            w.writeInt(-1);
+            addDelim(w);
             sawKey = false;
         }
     }
 
     @Override
     public void close() throws IOException, InterruptedException {
-        try (DataWriter w = writer) {
+        try (DataWriter w = release()) {
             if (w == null) {
                 return;
             }
-            keyBreak();
-            writer = null;
-            if (written) {
-                w.writeInt(-1);
+            if (channel != null) {
                 channel.commit(w);
             }
         }
+    }
+
+    /**
+     * Releases the target {@link DataWriter}.
+     * @return the target data writer, or {@code null} if it does not exist
+     * @throws IOException if I/O error was occurred while finalizing the sink
+     * @throws InterruptedException if interrupted while finalizing the sink
+     * @since 0.5.3
+     */
+    public DataWriter release() throws IOException, InterruptedException {
+        DataWriter w = writer;
+        if (w == null) {
+            return null;
+        }
+
+        // add EOF mark of the last group, only if it exists
+        keyBreak(w);
+
+        // add EOF mark of file
+        addDelim(w);
+
+        writer = null;
+        return w;
+    }
+
+    private static void addItem(DataWriter writer, ByteBuffer buffer) throws IOException, InterruptedException {
+        writer.writeInt(buffer.remaining());
+        writer.writeFully(buffer);
+    }
+
+    private static void addDelim(DataWriter writer) throws IOException, InterruptedException {
+        writer.writeInt(-1);
+    }
+
+    static final int BUFFER_PADDING = 64;
+
+    /**
+     * Copies key value pairs into the destination writer.
+     * @param source the source cursor
+     * @param destination the destination writer
+     * @return the written size in bytes
+     * @throws IOException if I/O error was occurred while copying contents
+     * @throws InterruptedException if interrupted while copying contents
+     */
+    public static long copy(KeyValueCursor source, DataWriter destination) throws IOException, InterruptedException {
+        @SuppressWarnings("resource")
+        BasicKeyValueSink sink = new BasicKeyValueSink(destination);
+        long size = 0;
+        ByteBuffer lastKey = null;
+        while (source.next()) {
+            ByteBuffer key = source.getKey();
+            ByteBuffer value = source.getValue();
+            if (!key.equals(lastKey)) {
+                // next group
+                if (lastKey == null || lastKey.capacity() < key.remaining()) {
+                    lastKey = Buffers.allocate(key.remaining() + BUFFER_PADDING);
+                }
+                int position = key.position();
+                lastKey.clear();
+                lastKey.put(key);
+                lastKey.flip();
+                key.position(position);
+
+                // note: temporary count EOF of the last group, even if this is first group
+                size += Integer.BYTES; // the last group EOF
+                size += Integer.BYTES + key.remaining(); // key item
+                size += Integer.BYTES + value.remaining(); // value item
+
+                sink.accept(key, value);
+            } else {
+                size += Integer.BYTES + value.remaining(); // value item
+
+                // continue group
+                sink.accept(value);
+            }
+        }
+
+        // note: don't count EOF of the last group, because we've already considered extra EOF in first group
+        sink.release();
+        size += Integer.BYTES; // file EOF
+        return size;
     }
 }

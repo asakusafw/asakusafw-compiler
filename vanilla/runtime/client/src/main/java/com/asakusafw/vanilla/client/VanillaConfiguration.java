@@ -39,7 +39,7 @@ import com.asakusafw.vanilla.core.util.SystemProperty;
 /**
  * A configuration of Asakusa Vanilla runtime.
  * @since 0.4.0
- * @version 0.4.1
+ * @version 0.5.3
  */
 public class VanillaConfiguration {
 
@@ -89,6 +89,21 @@ public class VanillaConfiguration {
     public static final String KEY_OUTPUT_RECORD_SIZE = KEY_ENGINE_PREFIX + "output.record.size"; //$NON-NLS-1$
 
     /**
+     * The configuration key of the maximum number of merging scatter/gather input chunks at one time,
+     * or {@code 0} as unlimited.
+     * If the limit was exceeded, the engine will merge into single chunk before using them.
+     * @since 0.5.3
+     */
+    public static final String KEY_MERGE_THRESHOLD = KEY_ENGINE_PREFIX + "merge.threshold"; //$NON-NLS-1$
+
+    /**
+     * The configuration key of the fraction of the number of merging scatter/gather input chunks,
+     * it the {@link #KEY_MERGE_THRESHOLD} was exceeded.
+     * @since 0.5.3
+     */
+    public static final String KEY_MERGE_FACTOR = KEY_ENGINE_PREFIX + "merge.factor"; //$NON-NLS-1$
+
+    /**
      * The default value of {@link #KEY_THREAD_COUNT}.
      */
     public static final int DEFAULT_THREAD_COUNT = 1;
@@ -124,6 +139,18 @@ public class VanillaConfiguration {
      */
     public static final double DEFAULT_OUTPUT_BUFFER_FLUSH = 0.90;
 
+    /**
+     * The default value of {@link #KEY_MERGE_THRESHOLD}.
+     * @since 0.5.3
+     */
+    public static final int DEFAULT_MERGE_THRESHOLD = 0;
+
+    /**
+     * The default value of {@link #KEY_MERGE_FACTOR}.
+     * @since 0.5.3
+     */
+    public static final double DEFAULT_MERGE_FACTOR = 1.0;
+
     static final Logger LOG = LoggerFactory.getLogger(VanillaConfiguration.class);
 
     private OptionalInt numberOfThreads = OptionalInt.empty();
@@ -141,6 +168,10 @@ public class VanillaConfiguration {
     private OptionalDouble outputBufferFlush = OptionalDouble.empty();
 
     private OptionalInt outputRecordSize = OptionalInt.empty();
+
+    private OptionalInt mergeThreshold = OptionalInt.empty();
+
+    private OptionalDouble mergeFactor = OptionalDouble.empty();
 
     /**
      * Returns the number of worker threads.
@@ -291,6 +322,42 @@ public class VanillaConfiguration {
     }
 
     /**
+     * Sets the max number of merging scatter/gather input chunks at one time.
+     * @param newValue the new value
+     * @since 0.5.3
+     */
+    public void setMergeThreshold(int newValue) {
+        this.mergeThreshold = OptionalInt.of(newValue);
+    }
+
+    /**
+     * Returns the max number of merging scatter/gather input chunks at one time.
+     * @return the max number of merging scatter/gather input chunks, or {@code 0} to disabled
+     * @since 0.5.3
+     */
+    public int getMergeThreshold() {
+        return mergeThreshold.orElse(DEFAULT_MERGE_THRESHOLD);
+    }
+
+    /**
+     * Sets the factor of the number of merging scatter/gather input chunks if its limit was exceeded.
+     * @param newValue the number of merging scatter/gather input chunks
+     * @since 0.5.3
+     */
+    public void setMergeFactor(double newValue) {
+        this.mergeFactor = OptionalDouble.of(newValue);
+    }
+
+    /**
+     * Returns the factor of the number of merging scatter/gather input chunks if its limit was exceeded.
+     * @return the factor of the number of merging scatter/gather input chunks
+     * @since 0.5.3
+     */
+    public double getMergeFactor() {
+        return mergeFactor.orElse(DEFAULT_MERGE_FACTOR);
+    }
+
+    /**
      * Extracts configurations from the given options.
      * @param options the options
      * @return the extracted configuration
@@ -306,6 +373,8 @@ public class VanillaConfiguration {
         configureInt(conf::setOutputBufferSize, options, KEY_OUTPUT_BUFFER_SIZE);
         configureDouble(conf::setOutputBufferFlush, options, KEY_OUTPUT_BUFFER_FLUSH);
         configureInt(conf::setOutputRecordSize, options, KEY_OUTPUT_RECORD_SIZE);
+        configureInt(conf::setMergeThreshold, options, KEY_MERGE_THRESHOLD);
+        configureDouble(conf::setMergeFactor, options, KEY_MERGE_FACTOR);
         if (LOG.isDebugEnabled()) {
             LOG.debug(MessageFormat.format("{0}: {1}", //$NON-NLS-1$
                     KEY_THREAD_COUNT, conf.getNumberOfThreads()));
@@ -325,6 +394,10 @@ public class VanillaConfiguration {
                         .orElse("N/A"))); //$NON-NLS-1$
             LOG.debug(MessageFormat.format("{0}: {1}", //$NON-NLS-1$
                     KEY_SWAP_DIVISION, conf.getSwapDivision()));
+            LOG.debug(MessageFormat.format("{0}: {1}", //$NON-NLS-1$
+                    KEY_MERGE_THRESHOLD, conf.getMergeThreshold()));
+            LOG.debug(MessageFormat.format("{0}: {1}", //$NON-NLS-1$
+                    KEY_MERGE_FACTOR, conf.getMergeFactor()));
         }
         return conf;
     }

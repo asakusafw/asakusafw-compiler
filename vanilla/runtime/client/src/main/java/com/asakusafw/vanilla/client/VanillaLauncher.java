@@ -222,10 +222,13 @@ public class VanillaLauncher {
                         context.getClassLoader(),
                         mirror,
                         new BasicBufferPool(configuration.getBufferPoolSize(), store),
+                        store.getBlobStore(),
                         configuration.getNumberOfPartitions(),
                         configuration.getOutputBufferSize(),
                         configuration.getOutputBufferFlush(),
-                        configuration.getNumberOfOutputRecords());
+                        configuration.getNumberOfOutputRecords(),
+                        configuration.getMergeThreshold(),
+                        configuration.getMergeFactor());
                 ResourceSession session = LaunchUtil.attachSession(context, ResourceBroker.Scope.VM)) {
             if (RuntimeContext.get().isSimulation() == false) {
                 new GraphExecutor(context, mirror,

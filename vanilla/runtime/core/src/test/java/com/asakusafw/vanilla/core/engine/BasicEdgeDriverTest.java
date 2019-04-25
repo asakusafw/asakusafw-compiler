@@ -90,6 +90,10 @@ public class BasicEdgeDriverTest {
 
     private final int recordCount = 10_000;
 
+    private int mergeThreshold = 0;
+
+    private final double mergeFactor = 1.0;
+
     /**
      * nothing - trivial case.
      * @throws Exception if failed
@@ -528,6 +532,56 @@ public class BasicEdgeDriverTest {
     }
 
     /**
+     * scatter-gather - w/ multiple upstreams.
+     * @throws Exception if failed
+     */
+    @Test
+    public void scatter_merge_multistage() throws Exception {
+        GraphInfo info = new GraphInfo();
+        VertexInfo v0 = info.addVertex("v0", vertex(VoidVertexProcessor.class));
+        VertexInfo v1 = info.addVertex("v1", vertex(VoidVertexProcessor.class));
+        PortId u0 = v0.addOutputPort("p0").getId();
+        PortId u1 = v0.addOutputPort("p1").getId();
+        PortId u2 = v0.addOutputPort("p2").getId();
+        PortId d0 = v1.addInputPort("p").getId();
+        info.addEdge(u0, d0, scatterGather(KvSerDe1.class, KvSerDe1.class));
+        info.addEdge(u1, d0, scatterGather(KvSerDe1.class, KvSerDe1.class));
+        info.addEdge(u2, d0, scatterGather(KvSerDe1.class, KvSerDe1.class));
+
+        mergeThreshold = 2;
+
+        GraphMirror graph = GraphMirror.of(info);
+        try (EdgeDriver driver = driver(graph)) {
+            try (ObjectWriter writer = (ObjectWriter) driver.acquireOutput(u0)) {
+                writer.putObject(object(0, 0, "Hello0"));
+            }
+            complete(driver, u0);
+            try (ObjectWriter writer = (ObjectWriter) driver.acquireOutput(u1)) {
+                writer.putObject(object(1, 0, "Hello1"));
+                writer.putObject(object(1, 0, "Hello2"));
+            }
+            complete(driver, u1);
+            try (ObjectWriter writer = (ObjectWriter) driver.acquireOutput(u2)) {
+                writer.putObject(object(2, 0, "Hello3"));
+                writer.putObject(object(2, 0, "Hello4"));
+                writer.putObject(object(2, 0, "Hello5"));
+            }
+            complete(driver, u2);
+            try (GroupReader reader = (GroupReader) driver.acquireInput(d0, 0, 1)) {
+                check(reader,
+                        object(0, 0, "Hello0"),
+                        object(1, 0, "Hello1"),
+                        object(1, 0, "Hello2"),
+                        object(2, 0, "Hello3"),
+                        object(2, 0, "Hello4"),
+                        object(2, 0, "Hello5"));
+            }
+            complete(driver, d0);
+        }
+        assertThat(pool.getSize(), is(0L));
+    }
+
+    /**
      * scatter-gather - w/ multiple upstreams + striping.
      * @throws Exception if failed
      */
@@ -768,7 +822,10 @@ public class BasicEdgeDriverTest {
         return new BasicEdgeDriver(
                 getClass().getClassLoader(),
                 graph,
-                pool, partitions, bufferSize, flushFactor, recordCount);
+                pool, store.getBlobStore(),
+                partitions,
+                bufferSize, flushFactor, recordCount,
+                mergeThreshold, mergeFactor);
     }
 
     private BitSet keys(List<MockDataModel> objects) {

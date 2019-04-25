@@ -99,4 +99,31 @@ public class BasicBufferStoreTest {
         }
         assertThat(directory.exists(), is(false));
     }
+
+    /**
+     * using BlobStore.
+     * @throws Exception if failed
+     */
+    @Test
+    public void blob() throws Exception {
+        File directory;
+        try (BasicBufferStore store = new BasicBufferStore()) {
+            directory = store.getDirectory();
+            BlobStore blobs = store.getBlobStore();
+            DataReader.Provider provider;
+            try (DataWriter writer = blobs.create()) {
+                writer.writeInt(100);
+                writer.writeInt(200);
+                writer.writeInt(300);
+                provider = blobs.commit(writer);
+            }
+            try (DataReader.Provider p = provider;
+                    DataReader reader = p.open()) {
+                assertThat(reader.readInt(), is(100));
+                assertThat(reader.readInt(), is(200));
+                assertThat(reader.readInt(), is(300));
+            }
+        }
+        assertThat(directory.exists(), is(false));
+    }
 }

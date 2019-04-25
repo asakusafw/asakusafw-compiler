@@ -42,6 +42,7 @@ public class MockDataChannel implements DataWriter.Channel {
         ByteBuffer buffer = Buffers.duplicate(w.getBuffer());
         buffer.flip();
         committed.add(buffer);
+        written.close();
     }
 
     /**

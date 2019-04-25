@@ -30,6 +30,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.asakusafw.lang.utils.common.Arguments;
 import com.asakusafw.lang.utils.common.InterruptibleIo;
 import com.asakusafw.vanilla.core.util.SystemProperty;
 
@@ -106,7 +107,15 @@ public class BasicBufferStore implements BufferStore, InterruptibleIo {
         return new FileEntry(file);
     }
 
-    private File prepare() throws IOException {
+    /**
+     * returns a BLOB store which shares the storage area with this buffer store.
+     * @return a BLOB store
+     */
+    public BlobStore getBlobStore() {
+        return new FileBlobStore();
+    }
+
+    File prepare() throws IOException {
         int id = counter.getAndIncrement();
         File dir;
         if (division == 0) {
@@ -188,9 +197,79 @@ public class BasicBufferStore implements BufferStore, InterruptibleIo {
         }
     }
 
+    private class FileBlobStore implements BlobStore {
+
+        FileBlobStore() {
+            return;
+        }
+
+        @Override
+        public DataWriter create() throws IOException, InterruptedException {
+            File file = prepare();
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("prepare BLOB: {}", file);
+            }
+            return new FileWriter(file, ByteChannelWriter.open(file.toPath()));
+        }
+
+        @Override
+        public DataReader.Provider commit(DataWriter writer) throws IOException, InterruptedException {
+            Arguments.requireNonNull(writer);
+            Arguments.require(writer instanceof FileWriter);
+            FileEntry entry = ((FileWriter) writer).release();
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("commit BLOB: {} ({}bytes)", entry.file, entry.file.length());
+            }
+            return entry;
+        }
+
+    }
+
+    private static final class FileWriter implements DataWriter {
+
+        private File file;
+
+        private final DataWriter writer;
+
+        FileWriter(File file, DataWriter writer) {
+            this.file = file;
+            this.writer = writer;
+        }
+
+        @Override
+        public ByteBuffer getBuffer() {
+            return writer.getBuffer();
+        }
+
+        @Override
+        public void writeInt(int value) throws IOException, InterruptedException {
+            writer.writeInt(value);
+        }
+
+        @Override
+        public void writeFully(ByteBuffer source) throws IOException, InterruptedException {
+            writer.writeFully(source);
+        }
+
+        @Override
+        public void close() throws IOException, InterruptedException {
+            writer.close();
+            if (file != null) {
+                delete(file);
+            }
+        }
+
+        FileEntry release() throws IOException, InterruptedException {
+            writer.close();
+            File f = file;
+            file = null;
+            return new FileEntry(f);
+        }
+    }
+
     private static final class FileEntry implements DataReader.Provider {
 
-        private final File file;
+        final File file;
 
         FileEntry(File file) {
             this.file = file;

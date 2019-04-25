@@ -17,9 +17,10 @@ package com.asakusafw.vanilla.core.engine;
 
 import java.io.IOException;
 import java.text.MessageFormat;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
+import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -177,7 +178,7 @@ public class VertexExecutor implements InterruptibleIo.IoRunnable {
                     numberOfThreads);
         }
         BlockingQueue<TaskProcessorContext> queue = new LinkedBlockingQueue<>(tasks);
-        LinkedList<Future<?>> futures = Lang.let(new LinkedList<>(), it -> Lang.repeat(concurrency, () -> {
+        Deque<Future<?>> futures = Lang.let(new ArrayDeque<>(), it -> Lang.repeat(concurrency, () -> {
             TaskExecutor child = new TaskExecutor(vertex, processor, queue);
             it.add(executor.submit(() -> {
                 // this block must be a callable to throw exceptions
