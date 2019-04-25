@@ -35,7 +35,6 @@ import com.asakusafw.dag.api.processor.basic.BasicProcessorContext;
 import com.asakusafw.dag.api.processor.extension.ProcessorContextExtension;
 import com.asakusafw.lang.utils.common.Arguments;
 import com.asakusafw.lang.utils.common.InterruptibleIo;
-import com.asakusafw.lang.utils.common.Optionals;
 import com.asakusafw.runtime.core.context.RuntimeContext;
 import com.asakusafw.vanilla.core.engine.BasicEdgeDriver;
 import com.asakusafw.vanilla.core.engine.BasicVertexScheduler;
@@ -48,7 +47,7 @@ import com.asakusafw.vanilla.core.mirror.GraphMirror;
 /**
  * Asakusa Vanilla application entry.
  * @since 0.4.0
- * @version 0.4.2
+ * @version 0.5.3
  */
 public class VanillaLauncher {
 
@@ -212,8 +211,10 @@ public class VanillaLauncher {
         Arguments.requireNonNull(context);
         Arguments.requireNonNull(configuration);
         Arguments.requireNonNull(graph);
-        BasicBufferStore.Builder storeBuilder = BasicBufferStore.builder();
-        Optionals.of(configuration.getSwapDirectory()).ifPresent(storeBuilder::withDirectory);
+        BasicBufferStore.Builder storeBuilder = BasicBufferStore.builder()
+                .withDirectory(configuration.getSwapDirectory())
+                .withDivision(configuration.getSwapDivision())
+                .withDecorator(configuration.getSwapDecorator(context.getClassLoader()));
 
         GraphMirror mirror = GraphMirror.of(graph);
         VertexScheduler scheduler = new BasicVertexScheduler();

@@ -15,15 +15,10 @@
  */
 package com.asakusafw.vanilla.core.io;
 
-import static java.nio.file.StandardOpenOption.*;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.WritableByteChannel;
-import java.nio.file.Files;
 import java.text.MessageFormat;
-import java.util.EnumSet;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -37,7 +32,7 @@ import com.asakusafw.vanilla.core.util.SystemProperty;
 /**
  * A basic implementation of {@link BufferStore}.
  * @since 0.4.0
- * @version 0.4.1
+ * @version 0.5.3
  */
 public class BasicBufferStore implements BufferStore, InterruptibleIo {
 
@@ -51,11 +46,13 @@ public class BasicBufferStore implements BufferStore, InterruptibleIo {
 
     private final int division;
 
+    final ByteChannelDecorator decorator;
+
     /**
      * Creates a new instance.
      */
     public BasicBufferStore() {
-        this(null, DEFAULT_PARTITION);
+        this(null, DEFAULT_PARTITION, ByteChannelDecorator.THROUGH);
     }
 
     /**
@@ -63,7 +60,7 @@ public class BasicBufferStore implements BufferStore, InterruptibleIo {
      * @param base the base directory
      */
     public BasicBufferStore(File base) {
-        this(base, DEFAULT_PARTITION);
+        this(base, DEFAULT_PARTITION, ByteChannelDecorator.THROUGH);
     }
 
     /**
@@ -73,10 +70,22 @@ public class BasicBufferStore implements BufferStore, InterruptibleIo {
      * @since 0.4.1
      */
     public BasicBufferStore(File base, int division) {
+        this(base, division, ByteChannelDecorator.THROUGH);
+    }
+
+    /**
+     * Creates a new instance.
+     * @param base the base directory
+     * @param division the maximum number of files in each sub-directory, or {@code 0} to disabled
+     * @param decorator the decorator for load/store operation
+     * @since 0.5.3
+     */
+    public BasicBufferStore(File base, int division, ByteChannelDecorator decorator) {
         this.directory = new File(
                 base != null ? base : SystemProperty.getTemporaryDirectory(),
                 String.format("asakusa-%s.tmp", UUID.randomUUID()));
         this.division = division;
+        this.decorator = decorator;
     }
 
     /**
@@ -98,13 +107,13 @@ public class BasicBufferStore implements BufferStore, InterruptibleIo {
     @Override
     public DataReader.Provider store(ByteBuffer buffer) throws IOException, InterruptedException {
         File file = prepare();
-        try (WritableByteChannel channel = Files.newByteChannel(file.toPath(), EnumSet.of(WRITE, CREATE_NEW))) {
-            channel.write(buffer);
+        try (DataWriter writer = ByteChannelWriter.open(file.toPath(), decorator)) {
+            writer.writeFully(buffer);
         }
         if (LOG.isTraceEnabled()) {
             LOG.trace("saving buffer: {}bytes -> {}", buffer.remaining(), file);
         }
-        return new FileEntry(file);
+        return new FileEntry(file, decorator);
     }
 
     /**
@@ -161,12 +170,15 @@ public class BasicBufferStore implements BufferStore, InterruptibleIo {
     /**
      * A builder for {@link BasicBufferStore}.
      * @since 0.4.1
+     * @version 0.5.3
      */
     public static final class Builder {
 
         private File directory;
 
         private int division = DEFAULT_PARTITION;
+
+        private ByteChannelDecorator decorator = ByteChannelDecorator.THROUGH;
 
         /**
          * Sets the directory.
@@ -189,11 +201,22 @@ public class BasicBufferStore implements BufferStore, InterruptibleIo {
         }
 
         /**
+         * Sets the decorator.
+         * @param newValue the decorator
+         * @return this
+         * @since 0.5.3
+         */
+        public Builder withDecorator(ByteChannelDecorator newValue) {
+            this.decorator = newValue;
+            return this;
+        }
+
+        /**
          * Builds a {@link BasicBufferStore}.
          * @return the created instance
          */
         public BasicBufferStore build() {
-            return new BasicBufferStore(directory, division);
+            return new BasicBufferStore(directory, division, decorator);
         }
     }
 
@@ -209,18 +232,18 @@ public class BasicBufferStore implements BufferStore, InterruptibleIo {
             if (LOG.isTraceEnabled()) {
                 LOG.trace("prepare BLOB: {}", file);
             }
-            return new FileWriter(file, ByteChannelWriter.open(file.toPath()));
+            return new FileWriter(file, ByteChannelWriter.open(file.toPath(), decorator));
         }
 
         @Override
         public DataReader.Provider commit(DataWriter writer) throws IOException, InterruptedException {
             Arguments.requireNonNull(writer);
             Arguments.require(writer instanceof FileWriter);
-            FileEntry entry = ((FileWriter) writer).release();
+            File file = ((FileWriter) writer).release();
             if (LOG.isTraceEnabled()) {
-                LOG.trace("commit BLOB: {} ({}bytes)", entry.file, entry.file.length());
+                LOG.trace("commit BLOB: {} ({}bytes)", file, file.length());
             }
-            return entry;
+            return new FileEntry(file, decorator);
         }
 
     }
@@ -259,11 +282,11 @@ public class BasicBufferStore implements BufferStore, InterruptibleIo {
             }
         }
 
-        FileEntry release() throws IOException, InterruptedException {
-            writer.close();
+        File release() throws IOException, InterruptedException {
             File f = file;
+            writer.close();
             file = null;
-            return new FileEntry(f);
+            return f;
         }
     }
 
@@ -271,13 +294,16 @@ public class BasicBufferStore implements BufferStore, InterruptibleIo {
 
         final File file;
 
-        FileEntry(File file) {
+        private final ByteChannelDecorator decorator;
+
+        FileEntry(File file, ByteChannelDecorator decorator) {
             this.file = file;
+            this.decorator = decorator;
         }
 
         @Override
-        public DataReader open() throws IOException {
-            return ByteChannelReader.open(file.toPath());
+        public DataReader open() throws IOException, InterruptedException {
+            return ByteChannelReader.open(file.toPath(), decorator);
         }
 
         @Override

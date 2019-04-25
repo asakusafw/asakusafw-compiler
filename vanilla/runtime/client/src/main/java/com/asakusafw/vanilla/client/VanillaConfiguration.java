@@ -28,12 +28,15 @@ import java.util.function.DoubleConsumer;
 import java.util.function.Function;
 import java.util.function.IntConsumer;
 import java.util.function.LongConsumer;
+import java.util.function.Supplier;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.asakusafw.dag.api.common.SupplierInfo;
 import com.asakusafw.lang.utils.common.Arguments;
 import com.asakusafw.lang.utils.common.Optionals;
+import com.asakusafw.vanilla.core.io.ByteChannelDecorator;
 import com.asakusafw.vanilla.core.util.SystemProperty;
 
 /**
@@ -70,6 +73,13 @@ public class VanillaConfiguration {
      * @since 0.4.1
      */
     public static final String KEY_SWAP_DIVISION = KEY_ENGINE_PREFIX + "pool.division"; //$NON-NLS-1$
+
+    /**
+     * The configuration key of codec class name of buffer pool swap files.
+     * This must be a sub-class of {@link ByteChannelDecorator}.
+     * @since 0.5.3
+     */
+    public static final String KEY_SWAP_DECORATOR = KEY_ENGINE_PREFIX + "pool.compression"; //$NON-NLS-1$
 
     /**
      * The configuration key of output buffer size in bytes({@value}: {@value #DEFAULT_OUTPUT_BUFFER_SIZE}).
@@ -125,6 +135,14 @@ public class VanillaConfiguration {
     public static final int DEFAULT_SWAP_DIVISION = 0;
 
     /**
+     * The default value of {@link #KEY_SWAP_DECORATOR} (uncompressed).
+     * @since 0.5.3
+     * @see ByteChannelDecorator#THROUGH
+     */
+    public static final SupplierInfo DEFAULT_SWAP_DECORATOR =
+            SupplierInfo.of(ByteChannelDecorator.Through.class.getName());
+
+    /**
      * The default value of {@link #KEY_OUTPUT_BUFFER_SIZE}.
      */
     public static final int DEFAULT_OUTPUT_BUFFER_SIZE = 4 * 1024 * 1024;
@@ -162,6 +180,8 @@ public class VanillaConfiguration {
     private Optional<File> swapDirectory = Optional.empty();
 
     private OptionalInt swapDivision = OptionalInt.empty();
+
+    private Optional<SupplierInfo> swapDecorator = Optional.empty();
 
     private OptionalInt outputBufferSize = OptionalInt.empty();
 
@@ -257,6 +277,40 @@ public class VanillaConfiguration {
      */
     public void setSwapDivision(int newValue) {
         this.swapDivision = OptionalInt.of(newValue);
+    }
+
+    /**
+     * Sets the swap file decorator.
+     * @param newValue the decorator class name
+     */
+    public void setSwapDecorator(String newValue) {
+        setSwapDecorator(SupplierInfo.of(newValue));
+    }
+
+    /**
+     * Sets the swap file decorator.
+     * @param newValue the decorator class supplier
+     */
+    public void setSwapDecorator(SupplierInfo newValue) {
+        this.swapDecorator = Optional.of(newValue);
+    }
+
+    /**
+     * Returns the swap file decorator.
+     * @return the swap file decorator class information
+     */
+    public SupplierInfo getSwapDecorator() {
+        return swapDecorator.orElse(DEFAULT_SWAP_DECORATOR);
+    }
+
+    /**
+     * Returns the swap file decorator.
+     * @param loader the class loader
+     * @return the swap file decorator
+     */
+    public ByteChannelDecorator getSwapDecorator(ClassLoader loader) {
+        Supplier<?> supplier = getSwapDecorator().newInstance(loader);
+        return (ByteChannelDecorator) supplier.get();
     }
 
     /**
@@ -370,6 +424,7 @@ public class VanillaConfiguration {
         configureLong(conf::setBufferPoolSize, options, KEY_BUFFER_POOL_SIZE);
         configureFile(conf::setSwapDirectory, options, KEY_SWAP_DIRECTORY);
         configureInt(conf::setSwapDivision, options, KEY_SWAP_DIVISION);
+        configureString(conf::setSwapDecorator, options, KEY_SWAP_DECORATOR);
         configureInt(conf::setOutputBufferSize, options, KEY_OUTPUT_BUFFER_SIZE);
         configureDouble(conf::setOutputBufferFlush, options, KEY_OUTPUT_BUFFER_FLUSH);
         configureInt(conf::setOutputRecordSize, options, KEY_OUTPUT_RECORD_SIZE);
@@ -395,6 +450,8 @@ public class VanillaConfiguration {
             LOG.debug(MessageFormat.format("{0}: {1}", //$NON-NLS-1$
                     KEY_SWAP_DIVISION, conf.getSwapDivision()));
             LOG.debug(MessageFormat.format("{0}: {1}", //$NON-NLS-1$
+                    KEY_SWAP_DECORATOR, conf.getSwapDecorator()));
+            LOG.debug(MessageFormat.format("{0}: {1}", //$NON-NLS-1$
                     KEY_MERGE_THRESHOLD, conf.getMergeThreshold()));
             LOG.debug(MessageFormat.format("{0}: {1}", //$NON-NLS-1$
                     KEY_MERGE_FACTOR, conf.getMergeFactor()));
@@ -404,6 +461,8 @@ public class VanillaConfiguration {
 
     private static void configureInt(IntConsumer target, Function<String, Optional<String>> opts, String key) {
         opts.apply(key)
+                .map(String::trim)
+                .filter(it -> !it.isEmpty())
                 .map(value -> Arguments.safe(() -> Integer.parseInt(value), () -> MessageFormat.format(
                         "{0} must be an integer: {1}",
                         key, value)))
@@ -412,6 +471,8 @@ public class VanillaConfiguration {
 
     private static void configureLong(LongConsumer target, Function<String, Optional<String>> opts, String key) {
         opts.apply(key)
+                .map(String::trim)
+                .filter(it -> !it.isEmpty())
                 .map(value -> Arguments.safe(() -> Long.parseLong(value), () -> MessageFormat.format(
                         "{0} must be an integer: {1}",
                         key, value)))
@@ -420,6 +481,8 @@ public class VanillaConfiguration {
 
     private static void configureDouble(DoubleConsumer target, Function<String, Optional<String>> opts, String key) {
         opts.apply(key)
+                .map(String::trim)
+                .filter(it -> !it.isEmpty())
                 .map(value -> Arguments.safe(() -> Double.parseDouble(value), () -> MessageFormat.format(
                         "{0} must be an number: {1}",
                         key, value)))
@@ -428,7 +491,16 @@ public class VanillaConfiguration {
 
     private static void configureFile(Consumer<File> target, Function<String, Optional<String>> opts, String key) {
         opts.apply(key)
+                .map(String::trim)
+                .filter(it -> !it.isEmpty())
                 .map(File::new)
+                .ifPresent(target::accept);
+    }
+
+    private static void configureString(Consumer<String> target, Function<String, Optional<String>> opts, String key) {
+        opts.apply(key)
+                .map(String::trim)
+                .filter(it -> !it.isEmpty())
                 .ifPresent(target::accept);
     }
 }

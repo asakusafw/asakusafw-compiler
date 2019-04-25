@@ -30,6 +30,7 @@ import com.asakusafw.vanilla.core.util.Buffers;
 /**
  * An implementation of {@link DataWriter} which just wraps {@link WritableByteChannel}.
  * @since 0.4.0
+ * @version 0.5.3
  */
 public class ByteChannelWriter implements DataWriter {
 
@@ -54,7 +55,25 @@ public class ByteChannelWriter implements DataWriter {
      */
     public static DataWriter open(Path path) throws IOException {
         Arguments.requireNonNull(path);
-        return new ByteChannelWriter(Files.newByteChannel(path, EnumSet.of(WRITE, CREATE, TRUNCATE_EXISTING)));
+        return new ByteChannelWriter(open0(path));
+    }
+
+    /**
+     * Opens a file on the given path.
+     * @param path the target path
+     * @param decorator the decorator
+     * @return the related writer
+     * @throws IOException if I/O error was occurred while opening the file
+     * @throws InterruptedException if interrupted while opening the file
+     * @since 0.5.3
+     */
+    public static DataWriter open(Path path, ByteChannelDecorator decorator) throws IOException, InterruptedException {
+        Arguments.requireNonNull(path);
+        return new ByteChannelWriter(decorator.decorate(open0(path)));
+    }
+
+    private static WritableByteChannel open0(Path path) throws IOException {
+        return Files.newByteChannel(path, EnumSet.of(WRITE, CREATE, TRUNCATE_EXISTING));
     }
 
     @Override

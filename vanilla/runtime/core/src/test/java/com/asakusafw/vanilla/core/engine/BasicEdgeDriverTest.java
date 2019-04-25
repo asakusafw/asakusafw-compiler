@@ -67,7 +67,8 @@ public class BasicEdgeDriverTest {
     public final ExternalResource lifecycle = new ExternalResource() {
         @Override
         protected void before() throws Throwable {
-            store = new BasicBufferStore();
+            store = BasicBufferStore.builder()
+                    .build();
             pool = new BasicBufferPool(1_000_000, store);
         }
         @Override

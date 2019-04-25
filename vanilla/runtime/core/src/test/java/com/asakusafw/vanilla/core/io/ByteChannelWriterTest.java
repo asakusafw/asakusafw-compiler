@@ -52,4 +52,22 @@ public class ByteChannelWriterTest {
             assertThat(read(reader), is(value));
         }
     }
+
+    /**
+     * w/ decorator.
+     * @throws Exception if failed
+     */
+    @Test
+    public void decorate() throws Exception {
+        String value = "Hello, world!";
+        File file = folder.newFile();
+        ByteChannelDecorator  decorator = new MockByteChannelDecorator();
+        try (DataWriter writer = ByteChannelWriter.open(file.toPath(), decorator)) {
+            assertThat(writer.getBuffer(), is(nullValue()));
+            write(writer, value);
+        }
+        try (DataReader reader = ByteChannelReader.open(file.toPath(), decorator)) {
+            assertThat(read(reader), is(value));
+        }
+    }
 }
