@@ -106,12 +106,13 @@ public class BasicBufferStore implements BufferStore, InterruptibleIo {
 
     @Override
     public DataReader.Provider store(ByteBuffer buffer) throws IOException, InterruptedException {
+        long rawSize = buffer.remaining();
         File file = prepare();
         try (DataWriter writer = ByteChannelWriter.open(file.toPath(), decorator)) {
             writer.writeFully(buffer);
         }
         if (LOG.isTraceEnabled()) {
-            LOG.trace("saving buffer: {}bytes -> {}", buffer.remaining(), file);
+            LOG.trace("saving buffer: {}bytes -> {} ({}bytes)", rawSize, file, file.length());
         }
         return new FileEntry(file, decorator);
     }

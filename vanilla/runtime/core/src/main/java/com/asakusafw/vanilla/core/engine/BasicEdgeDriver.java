@@ -361,15 +361,22 @@ public class BasicEdgeDriver extends EdgeDriver.Abstract {
         public KeyValueCursor openScatterGather(DataComparator comparator) throws IOException, InterruptedException {
             // only once per fragment
             List<KeyValueCursor> cursors = new ArrayList<>();
+            long size = 0;
             try (Closer closer = new Closer()) {
                 while (true) {
                     Fragment fragment = store.poll();
                     if (fragment == null) {
                         break;
                     }
+                    size += fragment.size;
                     cursors.add(closer.add(new InternalKeyValueCursor(fragment.source)));
                 }
                 closer.keep();
+            }
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("opening scatter/gather {} input fragments: {}bytes",
+                        cursors.size(),
+                        size);
             }
             switch (cursors.size()) {
             case 0:
@@ -520,8 +527,8 @@ public class BasicEdgeDriver extends EdgeDriver.Abstract {
                 }
                 closer.keep();
             }
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("start merging scatter/gather input chunks: count={}, size={}",
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("start merging scatter/gather input chunks: count={}, size={}",
                         fragments.size(),
                         fragments.stream().mapToLong(it -> it.size).sum());
             }
@@ -529,7 +536,7 @@ public class BasicEdgeDriver extends EdgeDriver.Abstract {
                     DataWriter writer = blobs.create()) {
                 long size = BasicKeyValueSink.copy(merger, writer);
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("finish merging scatter/gather input chunks: count={}->1, size={}->{}",
+                    LOG.debug("merged scatter/gather {} input fragments: {}bytes->{}bytes",
                             fragments.size(),
                             fragments.stream().mapToLong(it -> it.size).sum(),
                             size);

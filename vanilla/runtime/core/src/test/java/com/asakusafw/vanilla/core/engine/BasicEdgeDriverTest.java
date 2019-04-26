@@ -776,7 +776,7 @@ public class BasicEdgeDriverTest {
     }
 
     private static void complete(EdgeDriver edges, PortId id) throws IOException, InterruptedException {
-        LOG.debug("complete {} ({})", id, edges.toString());
+        LOG.debug("complete {} ({})", id, edges);
         edges.complete(id);
     }
 

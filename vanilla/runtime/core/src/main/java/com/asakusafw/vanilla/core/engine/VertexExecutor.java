@@ -34,6 +34,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -115,7 +116,6 @@ public class VertexExecutor implements InterruptibleIo.IoRunnable {
             label = processor.toString();
             List<TaskProcessorContext> tasks = doInitialize(processor);
             doRun(processor, tasks);
-            LOG.debug("finalize vertex: {} ({})", label, vertex.getId().getName());
         } catch (Exception e) {
             LOG.error(MessageFormat.format(
                     "vertex execution failed: {1} ({0})",
@@ -123,7 +123,9 @@ public class VertexExecutor implements InterruptibleIo.IoRunnable {
                     label), e);
             throw e;
         }
-        context.complete();
+
+        doFinalize(label);
+
         if (LOG.isInfoEnabled()) {
             LOG.info(MessageFormat.format(
                     "finish vertex: {2} ({1}) in {0}ms",
@@ -137,7 +139,11 @@ public class VertexExecutor implements InterruptibleIo.IoRunnable {
             VertexProcessor processor) throws IOException, InterruptedException {
         VertexProcessorContext vContext = decorator.bless(new VertexContext(context, vertex));
 
-        LOG.debug("initialize vertex: {} ({})", processor, vertex.getId().getName());
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("initialize vertex: processor={}, vertex={}",
+                    processor,
+                    vertex.getId().getName());
+        }
         Optional<? extends TaskSchedule> schedule = processor.initialize(vContext);
 
         // broadcast inputs are only available in VertexProcessor.initialize()
@@ -147,7 +153,11 @@ public class VertexExecutor implements InterruptibleIo.IoRunnable {
             }
         }
 
-        LOG.debug("scheduling vertex tasks: {} ({})", processor, vertex.getId().getName());
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("schedule tasks: processor={}, vertex={}",
+                    processor,
+                    vertex.getId().getName());
+        }
         List<TaskProcessorContext> results = new ArrayList<>();
         if (schedule.isPresent()) {
             List<? extends TaskInfo> tasks = schedule.get().getTasks();
@@ -178,14 +188,30 @@ public class VertexExecutor implements InterruptibleIo.IoRunnable {
                     numberOfThreads);
         }
         BlockingQueue<TaskProcessorContext> queue = new LinkedBlockingQueue<>(tasks);
-        Deque<Future<?>> futures = Lang.let(new ArrayDeque<>(), it -> Lang.repeat(concurrency, () -> {
-            TaskExecutor child = new TaskExecutor(vertex, processor, queue);
-            it.add(executor.submit(() -> {
-                // this block must be a callable to throw exceptions
-                child.run();
-                return null;
-            }));
-        }));
+        runTasks(Lang.let(new ArrayList<>(), it -> Lang.repeat(concurrency, () -> {
+            it.add(new TaskExecutor(vertex, processor, queue));
+        })));
+    }
+
+    private void doFinalize(String label) throws InterruptedException, IOException {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("finalize vertex: processor={}, vertex={}",
+                    label,
+                    vertex.getId().getName());
+        }
+        runTasks(Stream.concat(vertex.getInputs().stream(), vertex.getOutputs().stream())
+                .<InterruptibleIo.IoRunnable>map(it -> () -> context.complete(it.getId()))
+                .collect(Collectors.toList()));
+    }
+
+    private void runTasks(List<? extends InterruptibleIo.IoRunnable> tasks) throws InterruptedException, IOException {
+        Deque<Future<?>> futures = tasks.stream()
+                .map(it -> executor.submit(() -> {
+                    it.run();
+                    return null;
+                }))
+                .collect(Collectors.toCollection(ArrayDeque::new));
+
         while (futures.isEmpty() == false) {
             Future<?> first = futures.removeFirst();
             try {
@@ -277,15 +303,6 @@ public class VertexExecutor implements InterruptibleIo.IoRunnable {
 
         void complete(PortId id) throws IOException, InterruptedException {
             driver.complete(id);
-        }
-
-        void complete() throws IOException, InterruptedException {
-            for (PortId id : inputs.values()) {
-                complete(id);
-            }
-            for (PortId id : outputs.values()) {
-                complete(id);
-            }
         }
     }
 
