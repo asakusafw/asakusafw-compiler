@@ -60,7 +60,7 @@ public class StreamObjectWriter implements ObjectWriter {
             Serializer serializer,
             int bufferSizeLimit, int recordCountLimit) {
         this(sinks, serializer,
-                bufferSizeLimit, Util.DEFAULT_BUFFER_FLUSH_FACTOR, recordCountLimit,
+                bufferSizeLimit, Util.DEFAULT_BUFFER_MARGIN_SIZE, recordCountLimit,
                 null);
     }
 
@@ -69,14 +69,14 @@ public class StreamObjectWriter implements ObjectWriter {
      * @param sinks the next sink provider
      * @param serializer the object serializer
      * @param bufferSizeLimit the internal buffer size limit in bytes
-     * @param bufferFlushFactor the internal buffer flush factor in the limit
+     * @param bufferMarginSize the internal buffer margin size in bytes
      * @param recordCountLimit the number of limit records in each page
      * @param resource the attached resource (nullable)
      */
     public StreamObjectWriter(
             RecordSink.Stream sinks,
             Serializer serializer,
-            int bufferSizeLimit, double bufferFlushFactor, int recordCountLimit,
+            int bufferSizeLimit, int bufferMarginSize, int recordCountLimit,
             InterruptibleIo resource) {
         Arguments.requireNonNull(sinks);
         Arguments.requireNonNull(serializer);
@@ -84,7 +84,7 @@ public class StreamObjectWriter implements ObjectWriter {
         Arguments.require(recordCountLimit > 0);
         this.sinks = sinks;
         this.serializer = serializer;
-        this.bufferSizeSoftLimit = Util.getBufferThreshold(bufferSizeLimit, bufferFlushFactor);
+        this.bufferSizeSoftLimit = Util.getBufferThreshold(bufferSizeLimit, bufferMarginSize);
         this.recordCountLimit = recordCountLimit;
         this.buffer = Util.newDataBuffer(bufferSizeLimit);
         this.resource = resource;

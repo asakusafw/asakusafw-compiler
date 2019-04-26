@@ -82,14 +82,17 @@ public class VanillaConfiguration {
     public static final String KEY_SWAP_DECORATOR = KEY_ENGINE_PREFIX + "pool.compression"; //$NON-NLS-1$
 
     /**
-     * The configuration key of output buffer size in bytes({@value}: {@value #DEFAULT_OUTPUT_BUFFER_SIZE}).
+     * The configuration key of output buffer size in bytes ({@value}: {@value #DEFAULT_OUTPUT_BUFFER_SIZE}).
      */
     public static final String KEY_OUTPUT_BUFFER_SIZE = KEY_ENGINE_PREFIX + "output.buffer.size"; //$NON-NLS-1$
 
     /**
-     * The configuration key of output buffer flush factor ({@value}: {@value #DEFAULT_OUTPUT_BUFFER_FLUSH}).
+     * The configuration key of output buffer margin size in bytes ({@value}: {@value #DEFAULT_OUTPUT_BUFFER_MARGIN}).
+     * If {@link #KEY_OUTPUT_BUFFER_SIZE} - {@link #KEY_OUTPUT_BUFFER_MARGIN} was used,
+     * the output buffer will be flushed.
+     * @since 0.5.3
      */
-    public static final String KEY_OUTPUT_BUFFER_FLUSH = KEY_ENGINE_PREFIX + "output.buffer.flush"; //$NON-NLS-1$
+    public static final String KEY_OUTPUT_BUFFER_MARGIN = KEY_ENGINE_PREFIX + "output.buffer.margin"; //$NON-NLS-1$
 
     /**
      * The configuration key of the estimated average output record size
@@ -153,9 +156,9 @@ public class VanillaConfiguration {
     public static final int DEFAULT_OUTPUT_RECORD_SIZE = 64;
 
     /**
-     * The default value of {@link #KEY_OUTPUT_BUFFER_FLUSH}.
+     * The default value of {@link #KEY_OUTPUT_BUFFER_MARGIN}.
      */
-    public static final double DEFAULT_OUTPUT_BUFFER_FLUSH = 0.90;
+    public static final int DEFAULT_OUTPUT_BUFFER_MARGIN = 1 * 1024 * 1024;
 
     /**
      * The default value of {@link #KEY_MERGE_THRESHOLD}.
@@ -185,7 +188,7 @@ public class VanillaConfiguration {
 
     private OptionalInt outputBufferSize = OptionalInt.empty();
 
-    private OptionalDouble outputBufferFlush = OptionalDouble.empty();
+    private OptionalInt outputBufferMargin = OptionalInt.empty();
 
     private OptionalInt outputRecordSize = OptionalInt.empty();
 
@@ -331,20 +334,22 @@ public class VanillaConfiguration {
     }
 
     /**
-     * Returns the individual output buffer size.
-     * @return the output buffer size, in bytes
-     * @see #KEY_OUTPUT_BUFFER_FLUSH
+     * Returns the individual output buffer margin size.
+     * @return the output buffer margin size, in bytes
+     * @see #KEY_OUTPUT_BUFFER_MARGIN
+     * @since 0.5.3
      */
-    public double getOutputBufferFlush() {
-        return outputBufferFlush.orElse(DEFAULT_OUTPUT_BUFFER_FLUSH);
+    public int getOutputBufferMargin() {
+        return outputBufferMargin.orElse(DEFAULT_OUTPUT_BUFFER_MARGIN);
     }
 
     /**
-     * Sets the individual output buffer size.
+     * Sets the individual output buffer margin size.
      * @param newValue the new value
+     * @since 0.5.3
      */
-    public void setOutputBufferFlush(double newValue) {
-        this.outputBufferFlush = OptionalDouble.of(newValue);
+    public void setOutputBufferMargin(int newValue) {
+        this.outputBufferMargin = OptionalInt.of(newValue);
     }
 
     /**
@@ -426,7 +431,7 @@ public class VanillaConfiguration {
         configureInt(conf::setSwapDivision, options, KEY_SWAP_DIVISION);
         configureString(conf::setSwapDecorator, options, KEY_SWAP_DECORATOR);
         configureInt(conf::setOutputBufferSize, options, KEY_OUTPUT_BUFFER_SIZE);
-        configureDouble(conf::setOutputBufferFlush, options, KEY_OUTPUT_BUFFER_FLUSH);
+        configureInt(conf::setOutputBufferMargin, options, KEY_OUTPUT_BUFFER_MARGIN);
         configureInt(conf::setOutputRecordSize, options, KEY_OUTPUT_RECORD_SIZE);
         configureInt(conf::setMergeThreshold, options, KEY_MERGE_THRESHOLD);
         configureDouble(conf::setMergeFactor, options, KEY_MERGE_FACTOR);
@@ -440,7 +445,7 @@ public class VanillaConfiguration {
             LOG.debug(MessageFormat.format("{0}: {1}", //$NON-NLS-1$
                     KEY_OUTPUT_BUFFER_SIZE, conf.getOutputBufferSize()));
             LOG.debug(MessageFormat.format("{0}: {1}", //$NON-NLS-1$
-                    KEY_OUTPUT_BUFFER_FLUSH, conf.getOutputBufferFlush()));
+                    KEY_OUTPUT_BUFFER_MARGIN, conf.getOutputBufferMargin()));
             LOG.debug(MessageFormat.format("{0}: {1}", //$NON-NLS-1$
                     KEY_OUTPUT_RECORD_SIZE, conf.getOutputRecordSize()));
             LOG.debug(MessageFormat.format("{0}: {1}", //$NON-NLS-1$

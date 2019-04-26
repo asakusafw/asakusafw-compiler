@@ -47,7 +47,7 @@ public class VanillaConfigurationTest {
         assertThat(conf.getSwapDivision(), is(DEFAULT_SWAP_DIVISION));
         assertThat(conf.getSwapDecorator(getClass().getClassLoader()), is(instanceOf(ByteChannelDecorator.Through.class)));
         assertThat(conf.getOutputBufferSize(), is(DEFAULT_OUTPUT_BUFFER_SIZE));
-        assertThat(conf.getOutputBufferFlush(), closeTo(DEFAULT_OUTPUT_BUFFER_FLUSH, 0.01));
+        assertThat(conf.getOutputBufferMargin(), is(DEFAULT_OUTPUT_BUFFER_MARGIN));
         assertThat(conf.getOutputRecordSize(), is(DEFAULT_OUTPUT_RECORD_SIZE));
         assertThat(conf.getMergeThreshold(), is(DEFAULT_MERGE_THRESHOLD));
         assertThat(conf.getMergeFactor(), is(DEFAULT_MERGE_FACTOR));
@@ -65,7 +65,7 @@ public class VanillaConfigurationTest {
         pairs.put(KEY_PARTITION_COUNT, 3);
         pairs.put(KEY_BUFFER_POOL_SIZE, 4);
         pairs.put(KEY_OUTPUT_BUFFER_SIZE, 5);
-        pairs.put(KEY_OUTPUT_BUFFER_FLUSH, 6);
+        pairs.put(KEY_OUTPUT_BUFFER_MARGIN, 6);
         pairs.put(KEY_OUTPUT_RECORD_SIZE, 7);
         pairs.put(KEY_SWAP_DIVISION, 8);
         pairs.put(KEY_SWAP_DIRECTORY, f);
@@ -80,7 +80,7 @@ public class VanillaConfigurationTest {
         assertThat(conf.getNumberOfPartitions(), is(3));
         assertThat(conf.getBufferPoolSize(), is(4L));
         assertThat(conf.getOutputBufferSize(), is(5));
-        assertThat(conf.getOutputBufferFlush(), is(6d));
+        assertThat(conf.getOutputBufferMargin(), is(6));
         assertThat(conf.getOutputRecordSize(), is(7));
         assertThat(conf.getSwapDivision(), is(8));
         assertThat(conf.getSwapDirectory().getCanonicalFile(), is(f));

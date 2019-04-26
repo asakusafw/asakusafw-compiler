@@ -21,11 +21,9 @@ final class Util {
 
     static final int MIN_BUFFER_SIZE = 64 * 1024;
 
-    private static final double MIN_BUFFER_FLUSH_FACTOR = 0.10;
+    private static final int MIN_BUFFER_MARGIN_SIZE = 256;
 
-    private static final double MAX_BUFFER_FLUSH_FACTOR = 0.99;
-
-    static final double DEFAULT_BUFFER_FLUSH_FACTOR = 0.90;
+    static final int DEFAULT_BUFFER_MARGIN_SIZE = 256 * 1024;
 
     static int getBufferSize(int limit) {
         return Math.max(limit, MIN_BUFFER_SIZE);
@@ -35,10 +33,9 @@ final class Util {
         return new ExtensibleDataBuffer(MIN_BUFFER_SIZE, getBufferSize(limit));
     }
 
-    static int getBufferThreshold(int limit, double flushFactor) {
-        double factor = Math.min(Math.max(flushFactor, MIN_BUFFER_FLUSH_FACTOR), MAX_BUFFER_FLUSH_FACTOR);
-        int size = getBufferSize(limit);
-        return (int) (size * factor);
+    static int getBufferThreshold(int limit, int marginSize) {
+        int margin = Math.min(Math.max(marginSize, MIN_BUFFER_MARGIN_SIZE), (limit + 1) / 2);
+        return limit - margin;
     }
 
     private Util() {

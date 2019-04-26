@@ -92,7 +92,7 @@ public class BasicEdgeDriver extends EdgeDriver.Abstract {
 
     private final int bufferSizeLimit;
 
-    private final double bufferFlushFactor;
+    private final int bufferMarginSize;
 
     private final int recordCountLimit;
 
@@ -112,7 +112,7 @@ public class BasicEdgeDriver extends EdgeDriver.Abstract {
      * @param blobs the BLOB store
      * @param numberOfPartitions the number of partitions in scatter-gather operations
      * @param bufferSizeLimit each output buffer size threshold in bytes
-     * @param bufferFlushFactor the output buffer flush factor
+     * @param bufferMarginSize the output buffer margin size
      * @param recordCountLimit the number of limit records in each output buffer
      * @param mergeThreshold the maximum number of merging scatter/gather input chunks
      * @param mergeFactor the fraction to merge scatter/gather input with {@code mergeThreshold}
@@ -121,7 +121,7 @@ public class BasicEdgeDriver extends EdgeDriver.Abstract {
             ClassLoader classLoader,
             GraphMirror graph, BufferPool pool, BlobStore blobs,
             int numberOfPartitions,
-            int bufferSizeLimit, double bufferFlushFactor, int recordCountLimit,
+            int bufferSizeLimit, int bufferMarginSize, int recordCountLimit,
             int mergeThreshold, double mergeFactor) {
         Arguments.requireNonNull(classLoader);
         Arguments.requireNonNull(graph);
@@ -134,7 +134,7 @@ public class BasicEdgeDriver extends EdgeDriver.Abstract {
         this.pool = pool;
         this.numberOfPartitions = numberOfPartitions;
         this.bufferSizeLimit = bufferSizeLimit;
-        this.bufferFlushFactor = bufferFlushFactor;
+        this.bufferMarginSize = bufferMarginSize;
         this.recordCountLimit = recordCountLimit;
         int mergeCount = Math.max(2, Math.min(mergeThreshold, (int) (mergeThreshold * mergeFactor)));
         Function<PortMirror, FragmentStore> fstore =
@@ -199,7 +199,7 @@ public class BasicEdgeDriver extends EdgeDriver.Abstract {
         return new StreamObjectWriter(
                 BasicRecordSink.stream(Invariants.requireNonNull(sinks.get(port))),
                 serde,
-                bufferSizeLimit, bufferFlushFactor, recordCountLimit,
+                bufferSizeLimit, bufferMarginSize, recordCountLimit,
                 pool.reserve(bufferSizeLimit));
     }
 
@@ -217,7 +217,7 @@ public class BasicEdgeDriver extends EdgeDriver.Abstract {
         return new StreamObjectWriter(
                 BasicRecordSink.stream(Invariants.requireNonNull(sinks.get(port))),
                 serde,
-                bufferSizeLimit, bufferFlushFactor, recordCountLimit,
+                bufferSizeLimit, bufferMarginSize, recordCountLimit,
                 pool.reserve(bufferSizeLimit));
     }
 
@@ -239,7 +239,7 @@ public class BasicEdgeDriver extends EdgeDriver.Abstract {
         return new StreamGroupWriter(
                 KeyValuePartitioner.stream(Arrays.asList(Invariants.requireNonNull(partSinks.get(port)).partitions)),
                 serde, comparator,
-                bufferSizeLimit, bufferFlushFactor, recordCountLimit,
+                bufferSizeLimit, bufferMarginSize, recordCountLimit,
                 pool.reserve(bufferSizeLimit));
     }
 

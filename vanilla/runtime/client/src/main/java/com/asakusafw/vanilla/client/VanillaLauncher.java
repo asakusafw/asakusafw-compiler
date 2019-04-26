@@ -226,7 +226,7 @@ public class VanillaLauncher {
                         store.getBlobStore(),
                         configuration.getNumberOfPartitions(),
                         configuration.getOutputBufferSize(),
-                        configuration.getOutputBufferFlush(),
+                        configuration.getOutputBufferMargin(),
                         configuration.getNumberOfOutputRecords(),
                         configuration.getMergeThreshold(),
                         configuration.getMergeFactor());

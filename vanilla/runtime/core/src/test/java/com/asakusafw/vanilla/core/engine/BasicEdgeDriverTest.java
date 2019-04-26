@@ -87,7 +87,7 @@ public class BasicEdgeDriverTest {
 
     private final int bufferSize = 10_000;
 
-    private final double flushFactor = 0.9;
+    private final int bufferMargin = 1_000;
 
     private final int recordCount = 10_000;
 
@@ -825,7 +825,7 @@ public class BasicEdgeDriverTest {
                 graph,
                 pool, store.getBlobStore(),
                 partitions,
-                bufferSize, flushFactor, recordCount,
+                bufferSize, bufferMargin, recordCount,
                 mergeThreshold, mergeFactor);
     }
 
