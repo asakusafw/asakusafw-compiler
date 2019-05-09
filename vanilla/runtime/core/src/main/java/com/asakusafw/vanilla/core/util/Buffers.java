@@ -26,6 +26,7 @@ import com.asakusafw.vanilla.core.engine.BasicVertexScheduler;
 /**
  * Utilities about {@link ByteBuffer}.
  * @since 0.4.0
+ * @version 0.5.3
  */
 public final class Buffers {
 
@@ -78,6 +79,32 @@ public final class Buffers {
      */
     public static final int DEFAULT_MIN_SHRINK_CAPACITY = 64 * 1024;
 
+    /**
+     * The system property key of input channel buffer size in bytes
+     * ({@value}: {@value #DEFAULT_INPUT_CHANNEL_BUFFER_SIZE}}).
+     * @since 0.5.3
+     */
+    public static final String KEY_INPUT_CHANNEL_BUFFER_SIZE = KEY_PREFIX + "channel.input.size"; //$NON-NLS-1$
+
+    /**
+     * The default value of {@link #KEY_INPUT_CHANNEL_BUFFER_SIZE}.
+     * @since 0.5.3
+     */
+    public static final int DEFAULT_INPUT_CHANNEL_BUFFER_SIZE = 64 * 1024;
+
+    /**
+     * The system property key of output channel buffer size in bytes
+     * ({@value}: {@value #DEFAULT_OUTPUT_CHANNEL_BUFFER_SIZE}}).
+     * @since 0.5.3
+     */
+    public static final String KEY_OUTPUT_CHANNEL_BUFFER_SIZE = KEY_PREFIX + "channel.output.size"; //$NON-NLS-1$
+
+    /**
+     * The default value of {@link #KEY_OUTPUT_CHANNEL_BUFFER_SIZE}.
+     * @since 0.5.3
+     */
+    public static final int DEFAULT_OUTPUT_CHANNEL_BUFFER_SIZE = 64 * 1024;
+
     static final int MIN_SIZE = 64 * 1024;
 
     static final boolean HEAP = SystemProperty.get(KEY_HEAP, DEFAULT_HEAP);
@@ -88,13 +115,20 @@ public final class Buffers {
 
     static final int MIN_SHRINK_CAPACITY = SystemProperty.get(KEY_MIN_SHRINK_CAPACITY, DEFAULT_MIN_SHRINK_CAPACITY);
 
+    static final int INPUT_CHANNEL_BUFFER_SIZE =
+            SystemProperty.get(KEY_INPUT_CHANNEL_BUFFER_SIZE, DEFAULT_INPUT_CHANNEL_BUFFER_SIZE);
+
+    static final int OUTPUT_CHANNEL_BUFFER_SIZE =
+            SystemProperty.get(KEY_OUTPUT_CHANNEL_BUFFER_SIZE, DEFAULT_OUTPUT_CHANNEL_BUFFER_SIZE);
+
     static {
         if (LOG.isDebugEnabled()) {
             LOG.debug("buffers:");
             LOG.debug("  {}: {}", KEY_HEAP, HEAP);
             LOG.debug("  {}: {}", KEY_EXPANSION_FACTOR, EXPANSION_FACTOR);
             LOG.debug("  {}: {}", KEY_MAX_SHRINK_UTILITY, MAX_SHRINK_UTILITY);
-            LOG.debug("  {}: {}", KEY_MIN_SHRINK_CAPACITY, MIN_SHRINK_CAPACITY);
+            LOG.debug("  {}: {}", KEY_INPUT_CHANNEL_BUFFER_SIZE, INPUT_CHANNEL_BUFFER_SIZE);
+            LOG.debug("  {}: {}", KEY_OUTPUT_CHANNEL_BUFFER_SIZE, OUTPUT_CHANNEL_BUFFER_SIZE);
         }
     }
 
