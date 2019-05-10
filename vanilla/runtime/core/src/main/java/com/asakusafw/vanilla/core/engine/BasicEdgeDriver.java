@@ -464,7 +464,7 @@ public class BasicEdgeDriver extends EdgeDriver.Abstract {
             this(null, null, 0, 0);
         }
 
-        public FragmentStore(BlobStore blobs, DataComparator comparator, int mergeThreshold, int mergeCount) {
+        FragmentStore(BlobStore blobs, DataComparator comparator, int mergeThreshold, int mergeCount) {
             this.blobs = blobs;
             this.comparator = comparator;
             this.mergeThreshold = mergeThreshold;
@@ -493,7 +493,7 @@ public class BasicEdgeDriver extends EdgeDriver.Abstract {
         private void merge() throws IOException, InterruptedException {
             while (mergeThreshold > 1 && count.get() > mergeThreshold) {
                 ArrayList<Fragment> fragments;
-                synchronized (queue) {
+                synchronized (this) {
                     if (queue.size() <= mergeThreshold) {
                         return;
                     }
