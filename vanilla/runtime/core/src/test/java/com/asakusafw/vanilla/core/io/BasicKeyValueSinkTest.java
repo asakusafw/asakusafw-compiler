@@ -101,6 +101,30 @@ public class BasicKeyValueSinkTest {
                 new Tuple<>(1, "Hello3"))));
     }
 
+    /**
+     * copies from {@link KeyValueCursor}.
+     * @throws Exception if failed
+     */
+    @Test
+    public void copy() throws Exception {
+        try (KeyValueSink sink = stream.offer(3, Integer.BYTES * 3, bytes("HelloN").length * 3)) {
+            put(sink, 1, "Hello1");
+            put(sink, 2, "Hello2");
+            put(sink, "Hello3");
+        }
+        ByteBuffer source = channel.getCommitted().get(0);
+        ByteBuffer destination = Buffers.allocate(source.remaining());
+
+        try (KeyValueCursor in = new BasicKeyValueCursor(new ByteBufferReader(Buffers.duplicate(source)));
+                DataWriter out = new ByteBufferWriter(destination)) {
+            long size = BasicKeyValueSink.copy(in, out);
+            assertThat(size, is((long) source.remaining()));
+        }
+
+        destination.flip();
+        assertThat(destination, is(source));
+    }
+
     private static void put(KeyValueSink sink, int key, String value) throws IOException, InterruptedException {
         byte[] bytes = bytes(value);
         ByteBuffer kBuf = Buffers.allocate(Integer.BYTES);

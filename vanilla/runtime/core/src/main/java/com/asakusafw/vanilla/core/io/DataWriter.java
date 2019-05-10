@@ -67,6 +67,8 @@ public interface DataWriter extends InterruptibleIo {
 
         /**
          * Commits the written data.
+         * This operation must be called BEFORE the given writer was closed,
+         * and the writer will be disabled after this operation.
          * @param written the writer
          * @throws IOException if I/O error was occurred while committing the writer
          * @throws InterruptedException if interrupted while committing the writer

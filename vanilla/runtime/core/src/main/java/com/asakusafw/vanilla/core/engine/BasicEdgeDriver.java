@@ -17,14 +17,16 @@ package com.asakusafw.vanilla.core.engine;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.LinkedList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -47,8 +49,10 @@ import com.asakusafw.lang.utils.common.Invariants;
 import com.asakusafw.lang.utils.common.Lang;
 import com.asakusafw.vanilla.core.io.BasicGroupReader;
 import com.asakusafw.vanilla.core.io.BasicKeyValueCursor;
+import com.asakusafw.vanilla.core.io.BasicKeyValueSink;
 import com.asakusafw.vanilla.core.io.BasicRecordCursor;
 import com.asakusafw.vanilla.core.io.BasicRecordSink;
+import com.asakusafw.vanilla.core.io.BlobStore;
 import com.asakusafw.vanilla.core.io.BufferPool;
 import com.asakusafw.vanilla.core.io.DataReader;
 import com.asakusafw.vanilla.core.io.DataReader.Provider;
@@ -72,6 +76,7 @@ import com.asakusafw.vanilla.core.util.Buffers;
 /**
  * A basic implementation of {@link EdgeDriver}.
  * @since 0.4.0
+ * @version 0.5.3
  */
 public class BasicEdgeDriver extends EdgeDriver.Abstract {
 
@@ -87,7 +92,7 @@ public class BasicEdgeDriver extends EdgeDriver.Abstract {
 
     private final int bufferSizeLimit;
 
-    private final double bufferFlushFactor;
+    private final int bufferMarginSize;
 
     private final int recordCountLimit;
 
@@ -104,16 +109,20 @@ public class BasicEdgeDriver extends EdgeDriver.Abstract {
      * @param classLoader the current class loader
      * @param graph the target graph
      * @param pool the buffer pool
+     * @param blobs the BLOB store
      * @param numberOfPartitions the number of partitions in scatter-gather operations
      * @param bufferSizeLimit each output buffer size threshold in bytes
-     * @param bufferFlushFactor the output buffer flush factor
+     * @param bufferMarginSize the output buffer margin size
      * @param recordCountLimit the number of limit records in each output buffer
+     * @param mergeThreshold the maximum number of merging scatter/gather input chunks
+     * @param mergeFactor the fraction to merge scatter/gather input with {@code mergeThreshold}
      */
     public BasicEdgeDriver(
             ClassLoader classLoader,
-            GraphMirror graph, BufferPool pool,
+            GraphMirror graph, BufferPool pool, BlobStore blobs,
             int numberOfPartitions,
-            int bufferSizeLimit, double bufferFlushFactor, int recordCountLimit) {
+            int bufferSizeLimit, int bufferMarginSize, int recordCountLimit,
+            int mergeThreshold, double mergeFactor) {
         Arguments.requireNonNull(classLoader);
         Arguments.requireNonNull(graph);
         Arguments.requireNonNull(pool);
@@ -125,13 +134,19 @@ public class BasicEdgeDriver extends EdgeDriver.Abstract {
         this.pool = pool;
         this.numberOfPartitions = numberOfPartitions;
         this.bufferSizeLimit = bufferSizeLimit;
-        this.bufferFlushFactor = bufferFlushFactor;
+        this.bufferMarginSize = bufferMarginSize;
         this.recordCountLimit = recordCountLimit;
-        this.sources = edges(graph, VertexMirror::getInputs, p -> new FragmentSource());
-        this.sinks = edges(graph, VertexMirror::getOutputs, p -> new FragmentSink(pool, p.getOpposites().size()));
-        this.partSources = parts(graph, VertexMirror::getInputs, p -> new PartitionedSource(numberOfPartitions));
+        int mergeCount = Math.max(2, Math.min(mergeThreshold, (int) (mergeThreshold * mergeFactor)));
+        Function<PortMirror, FragmentStore> fstore =
+                p -> new FragmentStore(blobs, p.newComparator(classLoader), mergeThreshold, mergeCount);
+        this.sources = edges(graph, VertexMirror::getInputs,
+                p -> new FragmentSource());
+        this.sinks = edges(graph, VertexMirror::getOutputs,
+                p -> new FragmentSink(pool, p.getOpposites().size()));
+        this.partSources = parts(graph, VertexMirror::getInputs,
+                p -> new PartitionedSource(numberOfPartitions, fstore.apply(p)));
         this.partSinks = parts(graph, VertexMirror::getOutputs,
-                p -> new PartitionedSink(pool, numberOfPartitions, p.getOpposites().size()));
+                p -> new PartitionedSink(pool, numberOfPartitions, p.getOpposites().size(), fstore.apply(p)));
     }
 
     private static <K extends PortMirror, V> Map<K, V> edges(
@@ -184,7 +199,7 @@ public class BasicEdgeDriver extends EdgeDriver.Abstract {
         return new StreamObjectWriter(
                 BasicRecordSink.stream(Invariants.requireNonNull(sinks.get(port))),
                 serde,
-                bufferSizeLimit, bufferFlushFactor, recordCountLimit,
+                bufferSizeLimit, bufferMarginSize, recordCountLimit,
                 pool.reserve(bufferSizeLimit));
     }
 
@@ -202,7 +217,7 @@ public class BasicEdgeDriver extends EdgeDriver.Abstract {
         return new StreamObjectWriter(
                 BasicRecordSink.stream(Invariants.requireNonNull(sinks.get(port))),
                 serde,
-                bufferSizeLimit, bufferFlushFactor, recordCountLimit,
+                bufferSizeLimit, bufferMarginSize, recordCountLimit,
                 pool.reserve(bufferSizeLimit));
     }
 
@@ -224,7 +239,7 @@ public class BasicEdgeDriver extends EdgeDriver.Abstract {
         return new StreamGroupWriter(
                 KeyValuePartitioner.stream(Arrays.asList(Invariants.requireNonNull(partSinks.get(port)).partitions)),
                 serde, comparator,
-                bufferSizeLimit, bufferFlushFactor, recordCountLimit,
+                bufferSizeLimit, bufferMarginSize, recordCountLimit,
                 pool.reserve(bufferSizeLimit));
     }
 
@@ -305,55 +320,64 @@ public class BasicEdgeDriver extends EdgeDriver.Abstract {
 
     private static final class FragmentSource implements InterruptibleIo {
 
-        private final Queue<DataReader.Provider> queue = new ConcurrentLinkedQueue<>();
+        private final FragmentStore store;
 
         FragmentSource() {
-            return;
+            this(new FragmentStore());
         }
 
-        public void offer(DataReader.Provider contents) {
-            queue.offer(contents);
+        FragmentSource(FragmentStore store) {
+            this.store = store;
+        }
+
+        public void offer(Fragment fragment) throws IOException, InterruptedException {
+            store.offer(fragment);
         }
 
         public RecordCursor.Stream openOneToOne() {
             // share chunks
-            Queue<DataReader.Provider> q = queue;
+            FragmentStore s = store;
             return () -> {
-                DataReader.Provider data = q.poll();
-                if (data == null) {
+                Fragment fragment = s.poll();
+                if (fragment == null) {
                     return null;
                 }
-                return new InternalRecordCursor(data);
+                return new InternalRecordCursor(fragment.source);
             };
         }
 
         public RecordCursor.Stream openBroadcast() {
             // repeatable
-            Queue<DataReader.Provider> q = new LinkedList<>(queue);
+            Queue<Fragment> s = store.entries();
             return () -> {
-                DataReader.Provider data = q.poll();
-                if (data == null) {
+                Fragment fragment = s.poll();
+                if (fragment == null) {
                     return null;
                 }
-                return BasicRecordCursor.newInstance(data.open());
+                return BasicRecordCursor.newInstance(fragment.source.open());
             };
         }
 
         public KeyValueCursor openScatterGather(DataComparator comparator) throws IOException, InterruptedException {
             // only once per fragment
-            List<DataReader.Provider> all = new ArrayList<>();
-            synchronized (this) {
-                all.addAll(queue);
-                queue.clear();
-            }
             List<KeyValueCursor> cursors = new ArrayList<>();
+            long size = 0;
             try (Closer closer = new Closer()) {
-                for (DataReader.Provider data : all) {
-                    cursors.add(closer.add(new InternalKeyValueCursor(data)));
+                while (true) {
+                    Fragment fragment = store.poll();
+                    if (fragment == null) {
+                        break;
+                    }
+                    size += fragment.size;
+                    cursors.add(closer.add(new InternalKeyValueCursor(fragment.source)));
                 }
                 closer.keep();
             }
-            all.clear();
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("opening scatter/gather {} input fragments: {}bytes",
+                        cursors.size(),
+                        size);
+            }
             switch (cursors.size()) {
             case 0:
                 return new VoidKeyValueCursor();
@@ -366,16 +390,7 @@ public class BasicEdgeDriver extends EdgeDriver.Abstract {
 
         @Override
         public void close() throws IOException, InterruptedException {
-            try (Closer closer = new Closer()) {
-                while (true) {
-                    Provider next = queue.poll();
-                    if (next == null) {
-                        break;
-                    } else {
-                        closer.add(next);
-                    }
-                }
-            }
+            store.close();
         }
     }
 
@@ -385,11 +400,16 @@ public class BasicEdgeDriver extends EdgeDriver.Abstract {
 
         private final int priority;
 
-        private final Queue<DataReader.Provider> queue = new ConcurrentLinkedQueue<>();
+        private final FragmentStore store;
 
         FragmentSink(BufferPool pool, int numberOfConsumers) {
+            this(pool, numberOfConsumers, new FragmentStore());
+        }
+
+        FragmentSink(BufferPool pool, int numberOfConsumers, FragmentStore store) {
             this.pool = pool;
             this.priority = numberOfConsumers;
+            this.store = store;
         }
 
         @Override
@@ -403,20 +423,125 @@ public class BasicEdgeDriver extends EdgeDriver.Abstract {
             Arguments.requireNonNull(written);
             Arguments.require(written instanceof InternalWriter);
             InternalWriter writer = (InternalWriter) written;
-            queue.offer(writer.save(pool, priority));
+            store.offer(writer.save(pool, priority));
         }
 
-        public void migrateTo(List<FragmentSource> downstreams) {
+        public void migrateTo(List<FragmentSource> downstreams) throws IOException, InterruptedException {
             while (true) {
-                DataReader.Provider next = queue.poll();
+                Fragment next = store.poll();
                 if (next == null) {
                     break;
                 }
-                List<DataReader.Provider> shared = SharedBuffer.wrap(next, downstreams.size());
+                List<DataReader.Provider> shared = SharedBuffer.wrap(next.source, downstreams.size());
                 int index = 0;
                 for (FragmentSource downstream : downstreams) {
-                    downstream.offer(shared.get(index++));
+                    downstream.offer(new Fragment(shared.get(index++), next.size));
                 }
+            }
+        }
+
+        @Override
+        public void close() throws IOException, InterruptedException {
+            store.close();
+        }
+    }
+
+    private static final class FragmentStore implements InterruptibleIo {
+
+        private final BlobStore blobs;
+
+        private final DataComparator comparator;
+
+        private final int mergeThreshold;
+
+        private final int mergeCount;
+
+        private final Queue<Fragment> queue = new ConcurrentLinkedQueue<>();
+
+        private final AtomicInteger count = new AtomicInteger();
+
+        FragmentStore() {
+            this(null, null, 0, 0);
+        }
+
+        FragmentStore(BlobStore blobs, DataComparator comparator, int mergeThreshold, int mergeCount) {
+            this.blobs = blobs;
+            this.comparator = comparator;
+            this.mergeThreshold = mergeThreshold;
+            this.mergeCount = mergeCount;
+        }
+
+        void offer(Fragment fragment) throws IOException, InterruptedException {
+            queue.offer(fragment);
+            count.incrementAndGet();
+            merge();
+        }
+
+        Fragment poll() {
+            Fragment result = queue.poll();
+            if (result == null) {
+                return null;
+            }
+            count.decrementAndGet();
+            return result;
+        }
+
+        Queue<Fragment> entries() {
+            return new ArrayDeque<>(queue);
+        }
+
+        private void merge() throws IOException, InterruptedException {
+            while (mergeThreshold > 1 && count.get() > mergeThreshold) {
+                ArrayList<Fragment> fragments;
+                synchronized (this) {
+                    if (queue.size() <= mergeThreshold) {
+                        return;
+                    }
+                    fragments = new ArrayList<>();
+                    while (true) {
+                        Fragment fragment = queue.poll();
+                        if (fragment == null) {
+                            break;
+                        }
+                        fragments.add(fragment);
+                        count.decrementAndGet();
+                    }
+                }
+                fragments.sort(Comparator.comparing((Fragment f) -> f.size));
+                int mergeTargets = Math.min(fragments.size(), mergeCount);
+                for (int i = mergeTargets, n = fragments.size(); i < n; i++) {
+                    queue.offer(fragments.remove(fragments.size() - 1));
+                    count.incrementAndGet();
+                }
+                Fragment merged = doMerge(fragments);
+                queue.offer(merged);
+                count.incrementAndGet();
+            }
+        }
+
+        private Fragment doMerge(List<Fragment> fragments) throws IOException, InterruptedException {
+            List<KeyValueCursor> cursors = new ArrayList<>(fragments.size());
+            try (Closer closer = new Closer()) {
+                for (Fragment fragment : fragments) {
+                    cursors.add(closer.add(new InternalKeyValueCursor(fragment.source)));
+                }
+                closer.keep();
+            }
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("start merging scatter/gather input chunks: count={}, size={}",
+                        fragments.size(),
+                        fragments.stream().mapToLong(it -> it.size).sum());
+            }
+            try (KeyValueMerger merger = new KeyValueMerger(cursors, comparator);
+                    DataWriter writer = blobs.create()) {
+                long size = BasicKeyValueSink.copy(merger, writer);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("merged scatter/gather {} input fragments: {}bytes->{}bytes",
+                            fragments.size(),
+                            fragments.stream().mapToLong(it -> it.size).sum(),
+                            size);
+                }
+                return new Fragment(blobs.commit(writer), size);
             }
         }
 
@@ -424,7 +549,7 @@ public class BasicEdgeDriver extends EdgeDriver.Abstract {
         public void close() throws IOException, InterruptedException {
             try (Closer closer = new Closer()) {
                 while (true) {
-                    Provider next = queue.poll();
+                    Fragment next = queue.poll();
                     if (next == null) {
                         break;
                     } else {
@@ -435,17 +560,34 @@ public class BasicEdgeDriver extends EdgeDriver.Abstract {
         }
     }
 
+    private static final class Fragment implements InterruptibleIo {
+
+        final DataReader.Provider source;
+
+        long size;
+
+        Fragment(Provider source, long size) {
+            this.source = source;
+            this.size = size;
+        }
+
+        @Override
+        public void close() throws IOException, InterruptedException {
+            source.close();
+        }
+    }
+
     private static final class PartitionedSource implements InterruptibleIo {
 
         final FragmentSource[] partitions;
 
-        PartitionedSource(int numberOfPartitions) {
-            this.partitions = Stream.generate(FragmentSource::new)
+        PartitionedSource(int numberOfPartitions, FragmentStore store) {
+            this.partitions = Stream.generate(() -> new FragmentSource(store))
                     .limit(numberOfPartitions)
                     .toArray(FragmentSource[]::new);
         }
 
-        public KeyValueCursor openScatterGather(
+        KeyValueCursor openScatterGather(
                 DataComparator comparator, int taskIndex) throws IOException, InterruptedException {
             if (taskIndex >= partitions.length) {
                 return new VoidKeyValueCursor();
@@ -465,14 +607,14 @@ public class BasicEdgeDriver extends EdgeDriver.Abstract {
 
         final FragmentSink[] partitions;
 
-        PartitionedSink(BufferPool pool, int numberOfPartitions, int numerOfConsumers) {
+        PartitionedSink(BufferPool pool, int numberOfPartitions, int numerOfConsumers, FragmentStore store) {
             this.partitions = new FragmentSink[numberOfPartitions];
             for (int i = 0; i < partitions.length; i++) {
-                partitions[i] = new FragmentSink(pool, numerOfConsumers);
+                partitions[i] = new FragmentSink(pool, numerOfConsumers, store);
             }
         }
 
-        public void migrateTo(List<PartitionedSource> destinations) {
+        void migrateTo(List<PartitionedSource> destinations) throws IOException, InterruptedException {
             PartitionedSource[] dests = destinations.toArray(new PartitionedSource[destinations.size()]);
             FragmentSink[] parts = partitions;
             FragmentSource[][] shuffle = new FragmentSource[parts.length][dests.length];
@@ -578,14 +720,15 @@ public class BasicEdgeDriver extends EdgeDriver.Abstract {
             this.buffer = buffer;
         }
 
-        public DataReader.Provider save(BufferPool pool, int priority) throws IOException, InterruptedException {
+        Fragment save(BufferPool pool, int priority) throws IOException, InterruptedException {
             ByteBuffer b = buffer;
             Invariants.requireNonNull(b);
             buffer = null;
             b = Buffers.duplicate(b);
             b.flip();
+            long size = b.remaining();
             DataReader.Provider result = pool.register(ticket.move(), b, priority);
-            return result;
+            return new Fragment(result, size);
         }
 
         @Override

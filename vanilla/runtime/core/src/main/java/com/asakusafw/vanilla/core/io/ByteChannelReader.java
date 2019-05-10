@@ -31,6 +31,7 @@ import com.asakusafw.vanilla.core.util.Buffers;
 /**
  * An implementation of {@link DataReader} which just wraps {@link ReadableByteChannel}.
  * @since 0.4.0
+ * @since 0.5.3
  */
 public class ByteChannelReader implements DataReader {
 
@@ -55,7 +56,25 @@ public class ByteChannelReader implements DataReader {
      */
     public static DataReader open(Path path) throws IOException {
         Arguments.requireNonNull(path);
-        return new ByteChannelReader(Files.newByteChannel(path, EnumSet.of(READ)));
+        return new ByteChannelReader(open0(path));
+    }
+
+    /**
+     * Opens a file on the given path.
+     * @param path the target path
+     * @param decorator the decorator
+     * @return the related writer
+     * @throws IOException if I/O error was occurred while opening the file
+     * @throws InterruptedException if interrupted while opening the file
+     * @since 0.5.3
+     */
+    public static DataReader open(Path path, ByteChannelDecorator decorator) throws IOException, InterruptedException {
+        Arguments.requireNonNull(path);
+        return new ByteChannelReader(decorator.decorate(open0(path)));
+    }
+
+    private static ReadableByteChannel open0(Path path) throws IOException {
+        return Files.newByteChannel(path, EnumSet.of(READ));
     }
 
     @Override
