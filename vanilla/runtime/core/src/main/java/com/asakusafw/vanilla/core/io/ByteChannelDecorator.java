@@ -27,27 +27,6 @@ import java.nio.channels.WritableByteChannel;
 public interface ByteChannelDecorator {
 
     /**
-     * The identity implementation of {@link ByteChannelDecorator}.
-     */
-    class Through implements ByteChannelDecorator {
-
-        @Override
-        public ReadableByteChannel decorate(ReadableByteChannel channel) {
-            return channel;
-        }
-
-        @Override
-        public WritableByteChannel decorate(WritableByteChannel channel) {
-            return channel;
-        }
-    }
-
-    /**
-     * The identity implementation of {@link ByteChannelDecorator}.
-     */
-    ByteChannelDecorator THROUGH = new Through();
-
-    /**
      * Decorates the given channel.
      * @param channel the source channel
      * @return the decorated channel

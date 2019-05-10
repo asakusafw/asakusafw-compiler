@@ -90,7 +90,7 @@ public final class Buffers {
      * The default value of {@link #KEY_INPUT_CHANNEL_BUFFER_SIZE}.
      * @since 0.5.3
      */
-    public static final int DEFAULT_INPUT_CHANNEL_BUFFER_SIZE = 64 * 1024;
+    public static final int DEFAULT_INPUT_CHANNEL_BUFFER_SIZE = 8 * 1024;
 
     /**
      * The system property key of output channel buffer size in bytes
@@ -103,7 +103,7 @@ public final class Buffers {
      * The default value of {@link #KEY_OUTPUT_CHANNEL_BUFFER_SIZE}.
      * @since 0.5.3
      */
-    public static final int DEFAULT_OUTPUT_CHANNEL_BUFFER_SIZE = 64 * 1024;
+    public static final int DEFAULT_OUTPUT_CHANNEL_BUFFER_SIZE = 8 * 1024;
 
     static final int MIN_SIZE = 64 * 1024;
 

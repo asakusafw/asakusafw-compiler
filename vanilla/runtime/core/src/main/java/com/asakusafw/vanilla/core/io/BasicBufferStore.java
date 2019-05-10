@@ -52,7 +52,7 @@ public class BasicBufferStore implements BufferStore, InterruptibleIo {
      * Creates a new instance.
      */
     public BasicBufferStore() {
-        this(null, DEFAULT_PARTITION, ByteChannelDecorator.THROUGH);
+        this(null, DEFAULT_PARTITION, NullByteChannelDecorator.INSTANCE);
     }
 
     /**
@@ -60,7 +60,7 @@ public class BasicBufferStore implements BufferStore, InterruptibleIo {
      * @param base the base directory
      */
     public BasicBufferStore(File base) {
-        this(base, DEFAULT_PARTITION, ByteChannelDecorator.THROUGH);
+        this(base, DEFAULT_PARTITION, NullByteChannelDecorator.INSTANCE);
     }
 
     /**
@@ -70,7 +70,7 @@ public class BasicBufferStore implements BufferStore, InterruptibleIo {
      * @since 0.4.1
      */
     public BasicBufferStore(File base, int division) {
-        this(base, division, ByteChannelDecorator.THROUGH);
+        this(base, division, NullByteChannelDecorator.INSTANCE);
     }
 
     /**
@@ -179,7 +179,7 @@ public class BasicBufferStore implements BufferStore, InterruptibleIo {
 
         private int division = DEFAULT_PARTITION;
 
-        private ByteChannelDecorator decorator = ByteChannelDecorator.THROUGH;
+        private ByteChannelDecorator decorator = NullByteChannelDecorator.INSTANCE;
 
         /**
          * Sets the directory.

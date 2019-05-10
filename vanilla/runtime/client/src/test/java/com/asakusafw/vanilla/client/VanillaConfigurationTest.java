@@ -27,7 +27,7 @@ import org.junit.Test;
 
 import com.asakusafw.lang.utils.common.Optionals;
 import com.asakusafw.vanilla.client.util.SnappyByteChannelDecorator;
-import com.asakusafw.vanilla.core.io.ByteChannelDecorator;
+import com.asakusafw.vanilla.core.io.BufferedByteChannelDecorator;
 
 /**
  * Test for {@link VanillaConfiguration}.
@@ -45,7 +45,7 @@ public class VanillaConfigurationTest {
         assertThat(conf.getBufferPoolSize(), is(DEFAULT_BUFFER_POOL_SIZE));
         assertThat(conf.getSwapDirectory(), is(DEFAULT_SWAP_DIRECTORY));
         assertThat(conf.getSwapDivision(), is(DEFAULT_SWAP_DIVISION));
-        assertThat(conf.getSwapDecorator(getClass().getClassLoader()), is(instanceOf(ByteChannelDecorator.Through.class)));
+        assertThat(conf.getSwapDecorator(getClass().getClassLoader()), is(instanceOf(BufferedByteChannelDecorator.class)));
         assertThat(conf.getOutputBufferSize(), is(DEFAULT_OUTPUT_BUFFER_SIZE));
         assertThat(conf.getOutputBufferMargin(), is(DEFAULT_OUTPUT_BUFFER_MARGIN));
         assertThat(conf.getOutputRecordSize(), is(DEFAULT_OUTPUT_RECORD_SIZE));

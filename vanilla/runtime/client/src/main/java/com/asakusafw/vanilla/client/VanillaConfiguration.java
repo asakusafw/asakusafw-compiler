@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 import com.asakusafw.dag.api.common.SupplierInfo;
 import com.asakusafw.lang.utils.common.Arguments;
 import com.asakusafw.lang.utils.common.Optionals;
+import com.asakusafw.vanilla.core.io.BufferedByteChannelDecorator;
 import com.asakusafw.vanilla.core.io.ByteChannelDecorator;
 import com.asakusafw.vanilla.core.util.SystemProperty;
 
@@ -138,12 +139,12 @@ public class VanillaConfiguration {
     public static final int DEFAULT_SWAP_DIVISION = 0;
 
     /**
-     * The default value of {@link #KEY_SWAP_DECORATOR} (uncompressed).
+     * The default value of {@link #KEY_SWAP_DECORATOR} (only buffered).
      * @since 0.5.3
-     * @see ByteChannelDecorator#THROUGH
+     * @see BufferedByteChannelDecorator
      */
     public static final SupplierInfo DEFAULT_SWAP_DECORATOR =
-            SupplierInfo.of(ByteChannelDecorator.Through.class.getName());
+            SupplierInfo.of(BufferedByteChannelDecorator.class.getName());
 
     /**
      * The default value of {@link #KEY_OUTPUT_BUFFER_SIZE}.
@@ -295,7 +296,7 @@ public class VanillaConfiguration {
      * @param newValue the decorator class supplier
      */
     public void setSwapDecorator(SupplierInfo newValue) {
-        this.swapDecorator = Optional.of(newValue);
+        this.swapDecorator = Optional.ofNullable(newValue);
     }
 
     /**
