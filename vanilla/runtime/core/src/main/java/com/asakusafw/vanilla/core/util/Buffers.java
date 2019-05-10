@@ -195,4 +195,27 @@ public final class Buffers {
         compact.flip();
         return compact;
     }
+
+    /**
+     * Puts source contents into the destination buffer until the destination is full.
+     * @param source the source buffer
+     * @param destination the destination buffer
+     * @return the moved size in bytes
+     * @since 0.5.3
+     */
+    public static int put(ByteBuffer source, ByteBuffer destination) {
+        int srcSize = source.remaining();
+        int dstSize = destination.remaining();
+
+        if (dstSize >= srcSize) {
+            destination.put(source);
+            return srcSize;
+        }
+
+        int limit = source.limit();
+        source.limit(source.position() + dstSize);
+        destination.put(source);
+        source.limit(limit);
+        return dstSize;
+    }
 }
