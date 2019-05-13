@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
@@ -29,6 +30,7 @@ import com.asakusafw.bridge.broker.ResourceSession;
 import com.asakusafw.bridge.launch.LaunchConfiguration;
 import com.asakusafw.bridge.launch.LaunchConfigurationException;
 import com.asakusafw.bridge.launch.LaunchInfo;
+import com.asakusafw.dag.api.common.SupplierInfo;
 import com.asakusafw.dag.api.model.GraphInfo;
 import com.asakusafw.dag.api.processor.ProcessorContext;
 import com.asakusafw.dag.api.processor.basic.BasicProcessorContext;
@@ -42,6 +44,7 @@ import com.asakusafw.vanilla.core.engine.GraphExecutor;
 import com.asakusafw.vanilla.core.engine.VertexScheduler;
 import com.asakusafw.vanilla.core.io.BasicBufferPool;
 import com.asakusafw.vanilla.core.io.BasicBufferStore;
+import com.asakusafw.vanilla.core.io.ByteChannelDecorator;
 import com.asakusafw.vanilla.core.mirror.GraphMirror;
 
 /**
@@ -214,7 +217,7 @@ public class VanillaLauncher {
         BasicBufferStore.Builder storeBuilder = BasicBufferStore.builder()
                 .withDirectory(configuration.getSwapDirectory())
                 .withDivision(configuration.getSwapDivision())
-                .withDecorator(configuration.getSwapDecorator(context.getClassLoader()));
+                .withDecorator(loadByteChannelDecorator(context, configuration.getSwapDecorator()));
 
         GraphMirror mirror = GraphMirror.of(graph);
         VertexScheduler scheduler = new BasicVertexScheduler();
@@ -237,6 +240,14 @@ public class VanillaLauncher {
                         configuration.getNumberOfThreads()).run();
             }
         }
+    }
+
+    private static ByteChannelDecorator loadByteChannelDecorator(
+            ProcessorContext context, SupplierInfo info) throws IOException, InterruptedException {
+        Supplier<?> supplier = info.newInstance(context.getClassLoader());
+        ByteChannelDecorator decorator = (ByteChannelDecorator) supplier.get();
+        decorator.initialize(context);
+        return decorator;
     }
 
     static void showEnvironment() {

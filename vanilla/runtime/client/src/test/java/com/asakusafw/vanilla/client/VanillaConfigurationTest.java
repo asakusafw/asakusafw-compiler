@@ -45,7 +45,9 @@ public class VanillaConfigurationTest {
         assertThat(conf.getBufferPoolSize(), is(DEFAULT_BUFFER_POOL_SIZE));
         assertThat(conf.getSwapDirectory(), is(DEFAULT_SWAP_DIRECTORY));
         assertThat(conf.getSwapDivision(), is(DEFAULT_SWAP_DIVISION));
-        assertThat(conf.getSwapDecorator(getClass().getClassLoader()), is(instanceOf(BufferedByteChannelDecorator.class)));
+        assertThat(
+                conf.getSwapDecorator().newInstance(getClass().getClassLoader()).get(),
+                is(instanceOf(BufferedByteChannelDecorator.class)));
         assertThat(conf.getOutputBufferSize(), is(DEFAULT_OUTPUT_BUFFER_SIZE));
         assertThat(conf.getOutputBufferMargin(), is(DEFAULT_OUTPUT_BUFFER_MARGIN));
         assertThat(conf.getOutputRecordSize(), is(DEFAULT_OUTPUT_RECORD_SIZE));
@@ -86,7 +88,9 @@ public class VanillaConfigurationTest {
         assertThat(conf.getSwapDirectory().getCanonicalFile(), is(f));
         assertThat(conf.getMergeThreshold(), is(9));
         assertThat(conf.getMergeFactor(), is(10d));
-        assertThat(conf.getSwapDecorator(getClass().getClassLoader()), is(instanceOf(SnappyByteChannelDecorator.class)));
+        assertThat(
+                conf.getSwapDecorator().newInstance(getClass().getClassLoader()).get(),
+                is(instanceOf(SnappyByteChannelDecorator.class)));
     }
 
     /**

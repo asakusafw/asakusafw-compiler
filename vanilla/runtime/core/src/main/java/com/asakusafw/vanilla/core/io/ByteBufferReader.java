@@ -21,6 +21,7 @@ import java.nio.ByteBuffer;
 import com.asakusafw.lang.utils.common.Arguments;
 import com.asakusafw.lang.utils.common.InterruptibleIo;
 import com.asakusafw.lang.utils.common.Invariants;
+import com.asakusafw.vanilla.core.util.Buffers;
 
 /**
  * An implementation of {@link DataReader} which just wraps {@link ByteBuffer}.
@@ -66,10 +67,7 @@ public class ByteBufferReader implements DataReader {
     @Override
     public void readFully(ByteBuffer destination) {
         Invariants.requireNonNull(buffer);
-        int limit = buffer.limit();
-        buffer.limit(buffer.position() + destination.remaining());
-        destination.put(buffer);
-        buffer.limit(limit);
+        Buffers.put(buffer, destination);
     }
 
     @Override

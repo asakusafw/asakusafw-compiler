@@ -28,7 +28,6 @@ import java.util.function.DoubleConsumer;
 import java.util.function.Function;
 import java.util.function.IntConsumer;
 import java.util.function.LongConsumer;
-import java.util.function.Supplier;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -286,6 +285,7 @@ public class VanillaConfiguration {
     /**
      * Sets the swap file decorator.
      * @param newValue the decorator class name
+     * @since 0.5.3
      */
     public void setSwapDecorator(String newValue) {
         setSwapDecorator(SupplierInfo.of(newValue));
@@ -294,6 +294,7 @@ public class VanillaConfiguration {
     /**
      * Sets the swap file decorator.
      * @param newValue the decorator class supplier
+     * @since 0.5.3
      */
     public void setSwapDecorator(SupplierInfo newValue) {
         this.swapDecorator = Optional.ofNullable(newValue);
@@ -302,19 +303,10 @@ public class VanillaConfiguration {
     /**
      * Returns the swap file decorator.
      * @return the swap file decorator class information
+     * @since 0.5.3
      */
     public SupplierInfo getSwapDecorator() {
         return swapDecorator.orElse(DEFAULT_SWAP_DECORATOR);
-    }
-
-    /**
-     * Returns the swap file decorator.
-     * @param loader the class loader
-     * @return the swap file decorator
-     */
-    public ByteChannelDecorator getSwapDecorator(ClassLoader loader) {
-        Supplier<?> supplier = getSwapDecorator().newInstance(loader);
-        return (ByteChannelDecorator) supplier.get();
     }
 
     /**

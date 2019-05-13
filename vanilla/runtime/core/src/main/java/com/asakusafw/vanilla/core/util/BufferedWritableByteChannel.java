@@ -51,19 +51,8 @@ public class BufferedWritableByteChannel implements WritableByteChannel, Flushab
 
     @Override
     public int write(ByteBuffer src) throws IOException {
-        if (buffer.remaining() > src.remaining()) {
-            int size = src.remaining();
-            buffer.put(src);
-            return size;
-        }
-
         if (buffer.hasRemaining()) {
-            int size = buffer.remaining();
-            int limit = src.limit();
-            src.limit(src.position() + size);
-            buffer.put(src);
-            src.limit(limit);
-            return size;
+            return Buffers.put(src, buffer);
         }
 
         flush();

@@ -20,11 +20,23 @@ import java.nio.channels.ByteChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 
+import com.asakusafw.dag.api.processor.ProcessorContext;
+
 /**
  * Decorates {@link ByteChannel}s.
  * @since 0.5.3
  */
 public interface ByteChannelDecorator {
+
+    /**
+     * initializes this object.
+     * @param context the current context
+     * @throws IOException if I/O error occurred while initializing the decorator
+     * @throws InterruptedException if interrupted while initializing the decorator
+     */
+    default void initialize(ProcessorContext context) throws IOException, InterruptedException {
+        return;
+    }
 
     /**
      * Decorates the given channel.

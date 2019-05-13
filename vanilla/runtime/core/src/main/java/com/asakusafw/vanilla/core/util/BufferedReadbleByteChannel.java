@@ -54,17 +54,7 @@ public class BufferedReadbleByteChannel implements ReadableByteChannel {
         while (true) {
             // copies buffered contents into the destination buffer if remained
             if (buffer.hasRemaining()) {
-                if (dst.remaining() >= buffer.remaining()) {
-                    int size = buffer.remaining();
-                    dst.put(buffer);
-                    return size;
-                }
-                int size = dst.remaining();
-                int limit = buffer.limit();
-                buffer.limit(buffer.position() + size);
-                dst.put(buffer);
-                buffer.limit(limit);
-                return size;
+                return Buffers.put(buffer, dst);
             }
 
             if (dst.remaining() >= buffer.capacity()) {
