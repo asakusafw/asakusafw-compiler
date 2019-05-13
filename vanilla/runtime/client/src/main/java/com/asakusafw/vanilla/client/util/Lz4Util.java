@@ -61,7 +61,7 @@ public final class Lz4Util {
     /**
      * The default value of {@link #KEY_FRAME_SIZE}.
      */
-    public static final int DEFAULT_FRAME_SIZE = 64 * 1024;
+    public static final int DEFAULT_FRAME_SIZE = 16 * 1024;
 
     /**
      * The minimum value of {@link #KEY_FRAME_SIZE}.
