@@ -67,7 +67,8 @@ public class Lz4FramedReadableByteChannel implements ReadableByteChannel {
         if (!uncompressed.hasRemaining()) {
             // first, obtain compressed frame info
             ByteBuffer compressed = compressedFrameBuffer;
-            Buffers.range(compressed, 0, Integer.BYTES);
+            compressed.clear();
+            compressed.limit(Integer.BYTES);
             do {
                 int read = channel.read(compressed);
                 if (read == -1) {
