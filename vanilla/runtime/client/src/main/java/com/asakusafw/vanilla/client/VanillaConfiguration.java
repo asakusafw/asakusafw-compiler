@@ -170,7 +170,7 @@ public class VanillaConfiguration {
      * The default value of {@link #KEY_MERGE_FACTOR}.
      * @since 0.5.3
      */
-    public static final double DEFAULT_MERGE_FACTOR = 1.0;
+    public static final double DEFAULT_MERGE_FACTOR = 0.75;
 
     static final Logger LOG = LoggerFactory.getLogger(VanillaConfiguration.class);
 
