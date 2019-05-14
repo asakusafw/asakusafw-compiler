@@ -18,6 +18,7 @@ package com.asakusafw.vanilla.client.util;
 import java.io.EOFException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 
@@ -92,6 +93,10 @@ public final class SnappyUtil {
     static final int FRAME_HEADER_SIZE = Integer.BYTES;
 
     static final int COMPRESSED_DATA_SIZE_MASK = 0x00ff_ffff;
+
+    static ByteBuffer allocateBuffer(int size) {
+        return ByteBuffer.allocateDirect(size).order(ByteOrder.nativeOrder());
+    }
 
     static int getMaxCompressedFrameSize(int rawFrameSize) {
         int maxCompressedDataSize = Snappy.maxCompressedLength(rawFrameSize);

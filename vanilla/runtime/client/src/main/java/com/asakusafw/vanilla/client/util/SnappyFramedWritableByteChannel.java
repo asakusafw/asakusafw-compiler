@@ -52,7 +52,8 @@ public class SnappyFramedWritableByteChannel implements WritableByteChannel {
      */
     public SnappyFramedWritableByteChannel(WritableByteChannel channel, int frameSize) {
         this.channel = channel;
-        this.uncompressedFrameBuffer = Buffers.allocate(Math.max(MIN_FRAME_SIZE, Math.min(MAX_FRAME_SIZE, frameSize)));
+        int size = Math.max(MIN_FRAME_SIZE, Math.min(MAX_FRAME_SIZE, frameSize));
+        this.uncompressedFrameBuffer = SnappyUtil.allocateBuffer(size);
     }
 
     @Override
@@ -74,7 +75,7 @@ public class SnappyFramedWritableByteChannel implements WritableByteChannel {
         if (dst == null) {
             int uncompressedFrameSize = uncompressedFrameBuffer.capacity();
             writeFramedChannelHeader(channel, uncompressedFrameSize);
-            dst = Buffers.allocate(getMaxCompressedFrameSize(uncompressedFrameSize));
+            dst = SnappyUtil.allocateBuffer(getMaxCompressedFrameSize(uncompressedFrameSize));
             this.compressedFrameBuffer = dst;
         }
         src.flip();

@@ -59,11 +59,11 @@ public class SnappyFramedReadableByteChannel implements ReadableByteChannel {
         ByteBuffer uncompressed = uncompressedFrameBuffer;
         if (uncompressed == null) {
             int uncompressedFrameSize = readFramedChannelHeader(channel);
-            uncompressed = Buffers.allocate(uncompressedFrameSize);
+            uncompressed = SnappyUtil.allocateBuffer(uncompressedFrameSize);
             uncompressed.flip();
 
             this.uncompressedFrameBuffer = uncompressed;
-            this.compressedFrameBuffer = Buffers.allocate(getMaxCompressedFrameSize(uncompressedFrameSize));
+            this.compressedFrameBuffer = SnappyUtil.allocateBuffer(getMaxCompressedFrameSize(uncompressedFrameSize));
         }
 
         if (!uncompressed.hasRemaining()) {
