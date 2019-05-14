@@ -28,6 +28,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -137,8 +138,8 @@ public class BasicEdgeDriver extends EdgeDriver.Abstract {
         this.bufferMarginSize = bufferMarginSize;
         this.recordCountLimit = recordCountLimit;
         int mergeCount = Math.max(2, Math.min(mergeThreshold, (int) (mergeThreshold * mergeFactor)));
-        Function<PortMirror, FragmentStore> fstore =
-                p -> new FragmentStore(blobs, p.newComparator(classLoader), mergeThreshold, mergeCount);
+        Function<PortMirror, Supplier<FragmentStore>> fstore =
+                p -> () -> new FragmentStore(blobs, p.newComparator(classLoader), mergeThreshold, mergeCount);
         this.sources = edges(graph, VertexMirror::getInputs,
                 p -> new FragmentSource());
         this.sinks = edges(graph, VertexMirror::getOutputs,
@@ -581,8 +582,8 @@ public class BasicEdgeDriver extends EdgeDriver.Abstract {
 
         final FragmentSource[] partitions;
 
-        PartitionedSource(int numberOfPartitions, FragmentStore store) {
-            this.partitions = Stream.generate(() -> new FragmentSource(store))
+        PartitionedSource(int numberOfPartitions, Supplier<? extends FragmentStore> store) {
+            this.partitions = Stream.generate(() -> new FragmentSource(store.get()))
                     .limit(numberOfPartitions)
                     .toArray(FragmentSource[]::new);
         }
@@ -607,25 +608,27 @@ public class BasicEdgeDriver extends EdgeDriver.Abstract {
 
         final FragmentSink[] partitions;
 
-        PartitionedSink(BufferPool pool, int numberOfPartitions, int numerOfConsumers, FragmentStore store) {
+        PartitionedSink(
+                BufferPool pool, int numberOfPartitions,
+                int numerOfConsumers, Supplier<? extends FragmentStore> stores) {
             this.partitions = new FragmentSink[numberOfPartitions];
             for (int i = 0; i < partitions.length; i++) {
-                partitions[i] = new FragmentSink(pool, numerOfConsumers, store);
+                partitions[i] = new FragmentSink(pool, numerOfConsumers, stores.get());
             }
         }
 
         void migrateTo(List<PartitionedSource> destinations) throws IOException, InterruptedException {
-            PartitionedSource[] dests = destinations.toArray(new PartitionedSource[destinations.size()]);
             FragmentSink[] parts = partitions;
-            FragmentSource[][] shuffle = new FragmentSource[parts.length][dests.length];
             for (int pIndex = 0; pIndex < parts.length; pIndex++) {
-                for (int dIndex = 0; dIndex < dests.length; dIndex++) {
-                    shuffle[pIndex][dIndex] = dests[dIndex].partitions[pIndex];
-                }
+                List<FragmentSource> shuffle = collectDestinations(destinations, pIndex);
+                parts[pIndex].migrateTo(shuffle);
             }
-            for (int i = 0; i < parts.length; i++) {
-                parts[i].migrateTo(Arrays.asList(shuffle[i]));
-            }
+        }
+
+        private List<FragmentSource> collectDestinations(List<PartitionedSource> destinations, int partitionId) {
+            return destinations.stream()
+                    .map(it -> it.partitions[partitionId])
+                    .collect(Collectors.toList());
         }
 
         @Override
