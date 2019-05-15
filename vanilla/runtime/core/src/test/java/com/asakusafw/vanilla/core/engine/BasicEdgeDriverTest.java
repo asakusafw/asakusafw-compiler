@@ -742,9 +742,12 @@ public class BasicEdgeDriverTest {
 
         GraphMirror graph = GraphMirror.of(info);
         try (EdgeDriver driver = driver(graph)) {
-            try (ObjectWriter writer = (ObjectWriter) driver.acquireOutput(u0)) {
-                for (MockDataModel object : objects) {
-                    writer.putObject(object);
+            try (ObjectWriter w0 = (ObjectWriter) driver.acquireOutput(u0);
+                    ObjectWriter w1 = (ObjectWriter) driver.acquireOutput(u0);
+                    ObjectWriter w2 = (ObjectWriter) driver.acquireOutput(u0)) {
+                ObjectWriter[] ws = { w0, w1, w2 };
+                for (int i = 0, n = objects.size(); i < n; i++) {
+                    ws[i % ws.length].putObject(objects.get(i));
                 }
             }
             complete(driver, u0);
@@ -760,6 +763,10 @@ public class BasicEdgeDriverTest {
                 o2 = collect(r2);
             }
             complete(driver, d0);
+
+            assertThat(o0.size(), greaterThan(objects.size() / (partitions * 2)));
+            assertThat(o1.size(), greaterThan(objects.size() / (partitions * 2)));
+            assertThat(o2.size(), greaterThan(objects.size() / (partitions * 2)));
 
             assertThat(disjoint(keys(o0), keys(o1)), is(true));
             assertThat(disjoint(keys(o0), keys(o2)), is(true));

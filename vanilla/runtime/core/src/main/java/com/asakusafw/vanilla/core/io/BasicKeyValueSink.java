@@ -51,6 +51,8 @@ public final class BasicKeyValueSink implements KeyValueSink {
 
     private boolean sawKey = false;
 
+    private boolean written = false;
+
     /**
      * Creates a new instance.
      * @param channel the destination channel
@@ -96,6 +98,7 @@ public final class BasicKeyValueSink implements KeyValueSink {
         addItem(w, key);
         addItem(w, value);
         sawKey = true;
+        written = true;
     }
 
     @Override
@@ -123,7 +126,8 @@ public final class BasicKeyValueSink implements KeyValueSink {
             if (w == null) {
                 return;
             }
-            if (channel != null) {
+            // commit only if any entries exist
+            if (written && channel != null) {
                 channel.commit(w);
             }
         }
