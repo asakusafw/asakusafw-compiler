@@ -1,3 +1,4 @@
+@directio.csv
 @directio.hive.orc
 @directio.hive.parquet
 ksv_hive = {

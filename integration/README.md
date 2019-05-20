@@ -13,7 +13,7 @@ This integration test requires both development and runtime environment of Asaku
 * `PATH`
   * no `hadoop` command on the path
 * `JAVA_HOME`
-  * refer to Java SDK `>= 1.8`
+  * refer to Java SDK `= 1.8`
 
 ## How to run tests
 

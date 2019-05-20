@@ -17,20 +17,52 @@ package com.asakusafw.integration.lang;
 
 import static com.asakusafw.integration.lang.Util.*;
 
+import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 
 import com.asakusafw.integration.AsakusaConfigurator;
+import com.asakusafw.integration.AsakusaConstants;
 import com.asakusafw.integration.AsakusaProject;
 import com.asakusafw.integration.AsakusaProjectProvider;
 import com.asakusafw.utils.gradle.ContentsConfigurator;
+import com.asakusafw.utils.gradle.PropertyConfigurator;
 
 /**
- * Test for {@code vanilla}.
+ * Test for Direct I/O Hive.
  */
+@RunWith(Parameterized.class)
 public class HiveTest {
 
     /**
+     * Return the test parameters.
+     * @return the test parameters
+     */
+    @Parameters(name = "version:{0}")
+    public static Object[][] getTestParameters() {
+        return new Object[][] {
+            { "default", },
+            {   "1.1.1", },
+            {   "1.2.1", },
+            {   "1.2.2", },
+            {   "2.3.4", },
+//            {   "3.1.1", },
+        };
+    }
+
+     /**
      * project provider.
      */
     @Rule
@@ -42,32 +74,92 @@ public class HiveTest {
             .withProject(AsakusaConfigurator.projectHome());
 
     /**
-     * run test.
+     * creates a new instance.
+     * @param hiveVersion the hive-exec version
      */
-    @Test
-    public void v1_1_1() {
-        doTest("1.1.1");
+    public HiveTest(String hiveVersion) {
+        provider.withProject(PropertyConfigurator.of("hive.version", String.valueOf(hiveVersion)));
     }
 
     /**
      * run test.
      */
     @Test
-    public void v1_2_1() {
-        doTest("1.2.1");
-    }
-
-    /**
-     * run test.
-     */
-    @Test
-    public void v1_2_2() {
-        doTest("1.2.2");
-    }
-
-    private void doTest(String version) {
-        AsakusaProject project = provider.newInstance("prj")
-                .withProperty("hive.version", version);
+    public void test() {
+        AsakusaProject project = provider.newInstance("prj");
         project.gradle("installAsakusafw", "test");
+    }
+
+    /**
+     * {@code run}.
+     */
+    @Test
+    public void run_orc() {
+        AsakusaProject project = provider.newInstance("prj");
+        project.gradle("attachVanillaBatchapps", "installAsakusafw");
+
+        String[] csv = new String[] {
+                "1,1.0,A",
+                "2,2.0,B",
+                "3,3.0,C",
+        };
+        project.getContents().put("var/data/input/file.csv", f -> {
+            Files.write(f, Arrays.asList(csv), StandardCharsets.UTF_8);
+        });
+
+        project.getFramework().withLaunch(
+                AsakusaConstants.CMD_PORTAL, "run", "vanilla.perf.orc.io",
+                "-Acsv.input=input", "-Acsv.output=output",
+                "-Ainput=tmp", "-Aoutput=tmp");
+
+        project.getContents().get("var/data/output", dir -> {
+            List<String> results = Files.list(dir)
+                .flatMap(Util::lines)
+                .sorted()
+                .map(this::normalize)
+                .collect(Collectors.toList());
+            assertThat(results, containsInAnyOrder(csv));
+        });
+    }
+
+    /**
+     * {@code run}.
+     */
+    @Test
+    public void run_parquet() {
+        AsakusaProject project = provider.newInstance("prj");
+        project.gradle("attachVanillaBatchapps", "installAsakusafw");
+
+        String[] csv = new String[] {
+                "1,1.0,A",
+                "2,2.0,B",
+                "3,3.0,C",
+        };
+        project.getContents().put("var/data/input/file.csv", f -> {
+            Files.write(f, Arrays.asList(csv), StandardCharsets.UTF_8);
+        });
+
+        project.getFramework().withLaunch(
+                AsakusaConstants.CMD_PORTAL, "run", "vanilla.perf.parquet.io",
+                "-Acsv.input=input", "-Acsv.output=output",
+                "-Ainput=tmp", "-Aoutput=tmp");
+
+        project.getContents().get("var/data/output", dir -> {
+            List<String> results = Files.list(dir)
+                .flatMap(Util::lines)
+                .sorted()
+                .map(this::normalize)
+                .collect(Collectors.toList());
+            assertThat(results, containsInAnyOrder(csv));
+        });
+    }
+
+    private String normalize(String line) {
+        String[] segments = line.split(",");
+        assertThat(segments.length, is(3));
+        return String.format("%d,%s,%s",
+                Integer.parseInt(segments[0]),
+                new BigDecimal(segments[1]).setScale(1).toPlainString(),
+                segments[2]);
     }
 }
