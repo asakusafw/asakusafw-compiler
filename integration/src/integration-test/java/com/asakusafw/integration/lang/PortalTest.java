@@ -43,7 +43,7 @@ public class PortalTest {
             .withProject(ContentsConfigurator.copy(data("logback-test")))
             .withProject(AsakusaConfigurator.projectHome())
             .withProject(AsakusaConfigurator.hadoop(AsakusaConfigurator.Action.UNSET_ALWAYS))
-            .withProject(PropertyConfigurator.of("hive.version", "*"))
+            .withProject(PropertyConfigurator.of("hive.version", "default"))
             .withProvider(provider -> {
                 // install framework only once
                 framework = provider.newInstance("inf")
