@@ -50,15 +50,18 @@ public class HiveTest {
      * Return the test parameters.
      * @return the test parameters
      */
-    @Parameters(name = "version:{0}")
+    @Parameters(name = "sdk:{0},assembly:{1}")
     public static Object[][] getTestParameters() {
         return new Object[][] {
-            { "default", },
-            {   "1.1.1", },
-            {   "1.2.1", },
-            {   "1.2.2", },
-            {   "2.3.4", },
-//            {   "3.1.1", },
+            { "default", "default", },
+            { "default",   "1.1.1", },
+            { "default",   "1.2.1", },
+            { "default",   "1.2.2", },
+            { "default",   "2.3.4", },
+            {   "1.2.2",   "1.2.2", },
+            {   "2.3.4",   "1.2.2", },
+            {   "1.2.2",   "2.3.4", },
+            {   "2.3.4",   "2.3.4", },
         };
     }
 
@@ -75,10 +78,12 @@ public class HiveTest {
 
     /**
      * creates a new instance.
-     * @param hiveVersion the hive-exec version
+     * @param sdkHiveVersion  the hive-exec version for SDK
+     * @param assemblyHiveVersion the hive-exec version for assemblies
      */
-    public HiveTest(String hiveVersion) {
-        provider.withProject(PropertyConfigurator.of("hive.version", String.valueOf(hiveVersion)));
+    public HiveTest(String sdkHiveVersion, String assemblyHiveVersion) {
+        provider.withProject(PropertyConfigurator.of("sdk.hive.version", String.valueOf(sdkHiveVersion)));
+        provider.withProject(PropertyConfigurator.of("hive.version", String.valueOf(assemblyHiveVersion)));
     }
 
     /**
