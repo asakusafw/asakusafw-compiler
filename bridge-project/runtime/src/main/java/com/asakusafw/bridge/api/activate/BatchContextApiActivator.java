@@ -23,6 +23,7 @@ import com.asakusafw.runtime.core.api.BatchContextApi;
  * Activates {@link BatchContext}.
  * @since 0.4.0
  */
+@SuppressWarnings("deprecation")
 public class BatchContextApiActivator implements ApiActivator {
 
     private static final BatchContextApi API = new BatchContextApi() {

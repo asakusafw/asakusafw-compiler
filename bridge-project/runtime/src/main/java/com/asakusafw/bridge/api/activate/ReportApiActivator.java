@@ -23,6 +23,7 @@ import com.asakusafw.runtime.core.api.ReportApi;
  * Activates {@link Report}.
  * @since 0.4.0
  */
+@SuppressWarnings("deprecation")
 public class ReportApiActivator implements ApiActivator {
 
     private static final ReportApi API = new ReportApi() {

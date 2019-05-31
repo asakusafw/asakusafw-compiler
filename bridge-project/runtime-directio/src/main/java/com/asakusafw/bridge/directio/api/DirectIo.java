@@ -38,7 +38,10 @@ import com.asakusafw.runtime.io.ModelInput;
  * This API requires that either {@link Configuration a Hadoop configuration} object or
  * {@link ResourceConfiguration Asakusa configuration} object has been registered to {@link ResourceBroker}.
  * </p>
+ * @deprecated this API is not for application developers,
+ *      please use {@link com.asakusafw.runtime.directio.api.DirectIo} instead
  */
+@Deprecated
 public final class DirectIo {
 
     private DirectIo() {
