@@ -36,7 +36,10 @@ import com.asakusafw.runtime.stage.StageConstants;
  * @see com.asakusafw.runtime.core.BatchContext
  * @since 0.1.0
  * @version 0.3.1
+ * @deprecated this API is not for application developers,
+ *      please use {@link com.asakusafw.runtime.core.BatchContext} instead
  */
+@Deprecated
 public final class BatchContext {
 
     private static final ResourceCacheStorage<StageInfo> CACHE = new ResourceCacheStorage<>();

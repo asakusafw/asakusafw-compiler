@@ -31,6 +31,7 @@ import com.asakusafw.runtime.io.ModelInput;
  * Activates {@link DirectIo}.
  * @since 0.4.0
  */
+@SuppressWarnings("deprecation")
 public class DirectIoApiActivator implements ApiActivator {
 
     static final Logger LOG = LoggerFactory.getLogger(DirectIoApiActivator.class);

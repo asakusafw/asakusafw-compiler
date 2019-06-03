@@ -35,7 +35,10 @@ import com.asakusafw.runtime.core.ResourceConfiguration;
  * </p>
  * @since 0.1.0
  * @version 0.1.1
+ * @deprecated this API is not for application developers,
+ *      please use {@link com.asakusafw.runtime.core.Report} instead
  */
+@Deprecated
 public final class Report {
 
     private Report() {
