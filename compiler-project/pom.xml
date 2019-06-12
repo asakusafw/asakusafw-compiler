@@ -7,7 +7,7 @@
   <parent>
     <groupId>com.asakusafw.lang</groupId>
     <artifactId>project</artifactId>
-    <version>0.5.3-SNAPSHOT</version>
+    <version>0.5.4-SNAPSHOT</version>
   </parent>
 
   <packaging>pom</packaging>
