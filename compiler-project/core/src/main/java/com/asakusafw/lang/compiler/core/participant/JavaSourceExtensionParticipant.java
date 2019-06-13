@@ -55,6 +55,8 @@ import com.asakusafw.lang.compiler.packaging.ResourceUtil;
  *   </ul>
  * </li>
  * </ul>
+ * @since 0.1.0
+ * @version 0.5.4
  */
 public class JavaSourceExtensionParticipant extends AbstractCompilerParticipant {
 
@@ -72,10 +74,42 @@ public class JavaSourceExtensionParticipant extends AbstractCompilerParticipant 
      */
     public static final String KEY_BOOT_CLASSPATH = KEY_PREFIX + "bootclasspath"; //$NON-NLS-1$
 
+    /**
+     * The compiler option key of whether or not treat
+     * resolves {@code Class-Path} entries in {@code MANIFEST.MF}.
+     * @since 0.5.4
+     */
+    public static final String KEY_INCLUDE_MANIFEST_CLASSPATH = KEY_PREFIX + "classpath.manifest"; //$NON-NLS-1$
+
+    /**
+     * The compiler option key of whether or not include
+     * Java extension libraries to compiler classpath.
+     * @since 0.5.4
+     */
+    public static final String KEY_INCLUDE_EXTENSION_LIBRARIES = KEY_PREFIX + "classpath.extension"; //$NON-NLS-1$
+
+    /**
+     * the default value of {@link #KEY_INCLUDE_MANIFEST_CLASSPATH}.
+     * @since 0.5.4
+     */
+    public static final boolean DEFAULT_INCLUDE_MANIFEST_CLASSPATH = false;
+
+    /**
+     * the default value of {@link #KEY_INCLUDE_EXTENSION_LIBRARIES}.
+     * @since 0.5.4
+     */
+    public static final boolean DEFAULT_INCLUDE_EXTENSION_LIBRARIES = false;
+
     @Override
     public void beforeJobflow(Context context, BatchInfo batch, Jobflow jobflow) {
         LOG.debug("enabling {}", JavaSourceExtension.class.getName()); //$NON-NLS-1$
-        List<File> classPath = JavaCompilerUtil.getLibraries(context.getProject().getClassLoader());
+        boolean extensionClasspath = context.getOptions()
+                .get(KEY_INCLUDE_EXTENSION_LIBRARIES, DEFAULT_INCLUDE_EXTENSION_LIBRARIES);
+        boolean manifestClasspath = context.getOptions()
+                .get(KEY_INCLUDE_MANIFEST_CLASSPATH, DEFAULT_INCLUDE_MANIFEST_CLASSPATH);
+        List<File> classPath = JavaCompilerUtil.getLibraries(
+                context.getProject().getClassLoader(),
+                extensionClasspath, manifestClasspath);
         File sourcePath = createTemporaryOutput(context, jobflow);
         BasicJavaCompilerSupport extension = new BasicJavaCompilerSupport(
                 sourcePath,
