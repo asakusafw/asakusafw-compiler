@@ -19,6 +19,7 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -28,6 +29,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.jar.Attributes;
+import java.util.jar.JarOutputStream;
+import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -104,6 +108,78 @@ public class JavaCompilerUtilTest {
         List<File> exclude = JavaCompilerUtil.getLibraries(getClass().getClassLoader(), false);
         assertThat(exclude.toString(), find(exclude, getClass().getName()), is(notNullValue()));
         assertThat(new HashSet<>(include).containsAll(exclude), is(true));
+    }
+
+    /**
+     * resolves {@code Class-Path} entry in {@code MANIFEST.MF}.
+     * @throws Exception if failed
+     */
+    @Test
+    public void resolve_manifest_classpath() throws Exception {
+        File lib = deployer.copy("example.jar", "example.jar");
+
+        File paths = deployer.getFile("paths.jar");
+        Manifest manifest = new Manifest();
+        Attributes attrs = manifest.getMainAttributes();
+        attrs.put(Attributes.Name.MANIFEST_VERSION, "1.0");
+        attrs.put(Attributes.Name.CLASS_PATH, lib.toURI().toString());
+
+        try (JarOutputStream out = new JarOutputStream(new FileOutputStream(paths), manifest)) {
+            // no-op
+        }
+
+        try (URLClassLoader loader = loader(Arrays.asList(paths))) {
+            List<File> libraries = JavaCompilerUtil.getLibraries(loader, false, true);
+            assertThat(find(libraries, "com.example.Hello"), is(notNullValue()));
+        }
+    }
+
+    /**
+     * resolves {@code Class-Path} entry in {@code MANIFEST.MF}.
+     * @throws Exception if failed
+     */
+    @Test
+    public void resolve_manifest_classpath_disabled() throws Exception {
+        File lib = deployer.copy("example.jar", "example.jar");
+
+        File paths = deployer.getFile("paths.jar");
+        Manifest manifest = new Manifest();
+        Attributes attrs = manifest.getMainAttributes();
+        attrs.put(Attributes.Name.MANIFEST_VERSION, "1.0");
+        attrs.put(Attributes.Name.CLASS_PATH, lib.toURI().toString());
+
+        try (JarOutputStream out = new JarOutputStream(new FileOutputStream(paths), manifest)) {
+            // no-op
+        }
+
+        try (URLClassLoader loader = loader(Arrays.asList(paths))) {
+            List<File> libraries = JavaCompilerUtil.getLibraries(loader, false, false);
+            assertThat(find(libraries, "com.example.Hello"), is(nullValue()));
+        }
+    }
+
+    /**
+     * resolves {@code Class-Path} entry in {@code MANIFEST.MF}.
+     * @throws Exception if failed
+     */
+    @Test
+    public void resolve_manifest_classpath_relative() throws Exception {
+        deployer.copy("example.jar", "example.jar");
+
+        File paths = deployer.getFile("paths.jar");
+        Manifest manifest = new Manifest();
+        Attributes attrs = manifest.getMainAttributes();
+        attrs.put(Attributes.Name.MANIFEST_VERSION, "1.0");
+        attrs.put(Attributes.Name.CLASS_PATH, "example.jar");
+
+        try (JarOutputStream out = new JarOutputStream(new FileOutputStream(paths), manifest)) {
+            // no-op
+        }
+
+        try (URLClassLoader loader = loader(Arrays.asList(paths))) {
+            List<File> libraries = JavaCompilerUtil.getLibraries(loader, false, true);
+            assertThat(find(libraries, "com.example.Hello"), is(notNullValue()));
+        }
     }
 
     private URLClassLoader loader(List<File> files) {

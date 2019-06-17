@@ -24,8 +24,17 @@ import com.asakusafw.lang.compiler.common.util.StringUtil;
 
 /**
  * Represents a set of Asakusa DSL compiler options.
+ * @since 0.1.0
+ * @version 0.5.4
  */
 public class CompilerOptions {
+
+    /**
+     * the system property key prefix of each compiler options.
+     * each property is only available if the target option was absent.
+     * @since 0.5.4
+     */
+    public static final String PREFIX_SYSTEM_PROPERTY = "asakusafw.lang."; //$NON-NLS-1$
 
     /**
      * Represents a path of the default file system root.
@@ -121,6 +130,19 @@ public class CompilerOptions {
      */
     public Map<String, String> getProperties(String propertyKeyPrefix) {
         Map<String, String> results = new LinkedHashMap<>();
+        String systemPropertyPrefix = PREFIX_SYSTEM_PROPERTY + propertyKeyPrefix;
+        for (Map.Entry<Object, Object> entry : System.getProperties().entrySet()) {
+            if (!(entry.getKey() instanceof String) || !(entry.getValue() instanceof String)) {
+                continue;
+            }
+            String rawKey = (String) entry.getKey();
+            if (!rawKey.startsWith(systemPropertyPrefix)) {
+                continue;
+            }
+            String key = rawKey.substring(PREFIX_SYSTEM_PROPERTY.length());
+            String value = (String) entry.getValue();
+            results.put(key, value);
+        }
         for (Map.Entry<String, String> entry : properties.entrySet()) {
             String key = entry.getKey();
             if (key.startsWith(propertyKeyPrefix)) {
@@ -139,7 +161,7 @@ public class CompilerOptions {
     public String get(String propertyKey, String defaultValue) {
         String value = properties.get(propertyKey);
         if (value == null) {
-            return defaultValue;
+            return System.getProperty(PREFIX_SYSTEM_PROPERTY + propertyKey, defaultValue);
         }
         return value;
     }
