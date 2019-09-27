@@ -88,7 +88,7 @@ public class HeapListBuilder<T> implements ListBuilder<T> {
         public T get(int index) {
             T[] es = elements;
             if (index < 0 || index >= size) {
-                throw new IndexOutOfBoundsException();
+                throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
             }
             return es[index];
         }

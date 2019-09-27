@@ -200,7 +200,7 @@ public class SpillListBuilder<T> implements ListBuilder<T> {
         @Override
         public T get(int index) {
             if (index < 0 || index >= sizeInList) {
-                throw new IndexOutOfBoundsException();
+                throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + sizeInList);
             }
             int windowSize = elements.length;
             int pageIndex = index / windowSize;
