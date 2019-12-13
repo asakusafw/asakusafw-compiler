@@ -6,7 +6,7 @@
   <parent>
     <artifactId>project</artifactId>
     <groupId>com.asakusafw.lang.inspection</groupId>
-    <version>0.5.4-RC1</version>
+    <version>0.5.4-SNAPSHOT</version>
   </parent>
 
   <packaging>jar</packaging>
